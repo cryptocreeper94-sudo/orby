@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ClipboardList, User, Phone, Clock, Check, Save, 
-  Package, Plus, Minus, AlertCircle, X, ChevronDown, ChevronUp
+  Package, Plus, Minus, AlertCircle, X, ChevronDown, ChevronUp, ScanLine
 } from 'lucide-react';
 import {
   Accordion,
@@ -14,6 +14,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { AIScanner } from './AIScanner';
 
 type CountStage = 'PreEvent' | 'PostEvent' | 'DayAfter';
 type CounterRole = 'NPOLead' | 'StandLead' | 'Supervisor' | 'Manager' | 'ManagerAssistant';
@@ -88,6 +89,8 @@ export function CountSheet({
   const [expandedCategories, setExpandedCategories] = useState<string[]>(['Beverage', 'Food']);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [savingItem, setSavingItem] = useState<string | null>(null);
+  const [showAIScanner, setShowAIScanner] = useState(false);
+  const [lastScanResult, setLastScanResult] = useState<{totalCount: number; productsMatched: number} | null>(null);
 
   const categories = Array.from(new Set(items.map((item: Item) => item.category)));
   const itemsByCategory = categories.reduce((acc, cat) => {
@@ -124,6 +127,39 @@ export function CountSheet({
   const totalItemsCounted = Object.keys(counts).length;
   const totalItems = items.length;
   const countProgress = Math.round((totalItemsCounted / totalItems) * 100);
+
+  const handleAIScanComplete = (result: {
+    totalCount: number;
+    products: Array<{ name: string; count: number; shelf?: string }>;
+    confidence: string;
+    notes?: string;
+  }) => {
+    let productsMatched = 0;
+    
+    for (const scannedProduct of result.products) {
+      const productNameLower = scannedProduct.name.toLowerCase();
+      
+      const matchingItem = items.find(item => {
+        const itemNameLower = item.name.toLowerCase();
+        return itemNameLower.includes(productNameLower) || 
+               productNameLower.includes(itemNameLower) ||
+               itemNameLower.split(' ').some(word => productNameLower.includes(word) && word.length > 3);
+      });
+      
+      if (matchingItem) {
+        const currentCount = counts[matchingItem.id] || 0;
+        setCounts(prev => ({ 
+          ...prev, 
+          [matchingItem.id]: currentCount + scannedProduct.count 
+        }));
+        setHasUnsavedChanges(true);
+        productsMatched++;
+      }
+    }
+    
+    setLastScanResult({ totalCount: result.totalCount, productsMatched });
+    setShowAIScanner(false);
+  };
 
   const formatTime = (isoString: string) => {
     return new Date(isoString).toLocaleTimeString('en-US', { 
@@ -186,6 +222,28 @@ export function CountSheet({
             />
           </div>
         </div>
+
+        {!isReadOnly && session.status === 'InProgress' && (
+          <div className="mt-3">
+            <Button
+              onClick={() => setShowAIScanner(true)}
+              variant="outline"
+              className="w-full bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 hover:from-purple-100 hover:to-blue-100"
+              data-testid="button-open-ai-scanner"
+            >
+              <ScanLine className="w-4 h-4 mr-2 text-purple-600" />
+              <span className="text-purple-700">AI Can Counter</span>
+              <Badge variant="secondary" className="ml-2 bg-purple-100 text-purple-700 text-xs">
+                Beta
+              </Badge>
+            </Button>
+            {lastScanResult && (
+              <div className="text-xs text-center text-purple-600 mt-1">
+                Last scan: {lastScanResult.totalCount} items found, {lastScanResult.productsMatched} matched
+              </div>
+            )}
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="flex-1 overflow-auto p-3">
@@ -311,6 +369,14 @@ export function CountSheet({
             </p>
           )}
         </div>
+      )}
+
+      {showAIScanner && (
+        <AIScanner
+          onScanComplete={handleAIScanComplete}
+          onClose={() => setShowAIScanner(false)}
+          standName={standName}
+        />
       )}
     </Card>
   );

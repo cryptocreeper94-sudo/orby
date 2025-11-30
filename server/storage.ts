@@ -25,6 +25,17 @@ import {
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
 
+export interface VarianceReportItem {
+  itemId: string;
+  itemName: string;
+  category: string;
+  preEventCount: number;
+  postEventCount: number;
+  used: number;
+  spoilage: number;
+  adds: number;
+}
+
 export interface IStorage {
   // Users
   getUser(id: string): Promise<User | undefined>;
@@ -46,7 +57,9 @@ export interface IStorage {
   // Inventory Counts
   getInventoryCount(standId: string, itemId: string, eventDate: string): Promise<InventoryCount | undefined>;
   getInventoryCountsByStand(standId: string, eventDate: string): Promise<InventoryCount[]>;
+  getInventoryCountsBySession(sessionId: string): Promise<InventoryCount[]>;
   upsertInventoryCount(count: InsertInventoryCount): Promise<InventoryCount>;
+  getVarianceReport(standId: string, eventDate: string): Promise<VarianceReportItem[]>;
 
   // Items
   getItem(id: string): Promise<Item | undefined>;
@@ -244,6 +257,65 @@ export class DatabaseStorage implements IStorage {
     }
     const [created] = await db.insert(inventoryCounts).values(count).returning();
     return created;
+  }
+
+  async getInventoryCountsBySession(sessionId: string): Promise<InventoryCount[]> {
+    return await db.select().from(inventoryCounts)
+      .where(eq(inventoryCounts.sessionId, sessionId));
+  }
+
+  async getVarianceReport(standId: string, eventDate: string): Promise<VarianceReportItem[]> {
+    const allCounts = await this.getInventoryCountsByStand(standId, eventDate);
+    const allItems = await this.getAllItems();
+    const sessions = await this.getCountSessionsByStand(standId, eventDate);
+    
+    const itemMap = new Map(allItems.map(item => [item.id, item]));
+    
+    const preEventSession = sessions.find(s => s.stage === 'PreEvent' && s.status !== 'InProgress');
+    const postEventSession = sessions.find(s => s.stage === 'PostEvent' && s.status !== 'InProgress');
+    
+    const preEventCounts = allCounts.filter(c => c.sessionId === preEventSession?.id);
+    const postEventCounts = allCounts.filter(c => c.sessionId === postEventSession?.id);
+    
+    const preCountMap = new Map(preEventCounts.map(c => [c.itemId, c]));
+    const postCountMap = new Map(postEventCounts.map(c => [c.itemId, c]));
+    
+    const allItemIds = new Set([
+      ...preEventCounts.map(c => c.itemId),
+      ...postEventCounts.map(c => c.itemId)
+    ]);
+    
+    const report: VarianceReportItem[] = [];
+    
+    for (const itemId of allItemIds) {
+      const item = itemMap.get(itemId);
+      if (!item) continue;
+      
+      const preCount = preCountMap.get(itemId);
+      const postCount = postCountMap.get(itemId);
+      
+      const preEventCount = preCount?.startCount || preCount?.endCount || 0;
+      const adds = postCount?.adds || preCount?.adds || 0;
+      const postEventCount = postCount?.endCount || 0;
+      const spoilage = postCount?.spoilage || 0;
+      
+      const used = preEventSession && postEventSession 
+        ? (preEventCount + adds) - postEventCount - spoilage
+        : 0;
+      
+      report.push({
+        itemId,
+        itemName: item.name,
+        category: item.category,
+        preEventCount,
+        postEventCount,
+        used: Math.max(0, used),
+        spoilage,
+        adds
+      });
+    }
+    
+    return report.sort((a, b) => a.category.localeCompare(b.category) || a.itemName.localeCompare(b.itemName));
   }
 
   // Items

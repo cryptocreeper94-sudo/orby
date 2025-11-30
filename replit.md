@@ -94,7 +94,24 @@ When NPO Worker leaves stand boundary:
 - **A930 Terminals**: Handheld units (e.g., A930 #126, #130)
 - **Hotspot Devices**: Mobile internet devices for stands without wired connection (e.g., "3 hot" = Hotspot #3)
 
-### OCR Scanner (Future)
+### AI Inventory Scanner
+- **GPT-4o Vision**: AI-powered can counting and product identification
+- **API Endpoint**: POST /api/ai-scanner/count for cooler image analysis
+- **Features**:
+  - Top-down cooler shelf scanning
+  - Automatic can/bottle counting
+  - Product identification (Bud Light, Michelob Ultra, Blue Moon, etc.)
+  - Groups counts by shelf/product type
+  - Confidence rating (high/medium/low)
+- **Integration**: Available in CountSheet via "AI Can Counter" button
+
+### Variance Reporting
+- **API Endpoint**: GET /api/inventory/variance/:standId/:eventDate
+- **Shows**: Started, Added, Ended, Used, Spoilage for each item
+- **Calculation**: Used = (PreEvent + Adds) - PostEvent - Spoilage
+- **Export**: CSV download with full breakdown by category
+
+### OCR Scanner (Legacy)
 - **Tesseract.js**: Client-side OCR for inventory counting automation
 - **API Endpoint**: POST /api/ocr/scan for image processing
 - **Text Extraction**: Returns text, confidence scores, and word positions

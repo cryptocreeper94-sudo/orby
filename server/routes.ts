@@ -10,7 +10,15 @@ import {
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 import { createWorker } from "tesseract.js";
+import OpenAI from "openai";
+
+// the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+const openai = new OpenAI({
+  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY
+});
 
 // Configure multer for file uploads
 const incidentStorage = multer.diskStorage({
@@ -274,6 +282,18 @@ export async function registerRoutes(
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to save inventory count" });
+    }
+  });
+
+  app.get("/api/inventory/variance/:standId/:eventDate", async (req: Request, res: Response) => {
+    try {
+      const report = await storage.getVarianceReport(
+        req.params.standId,
+        decodeURIComponent(req.params.eventDate)
+      );
+      res.json(report);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to generate variance report" });
     }
   });
 
@@ -649,6 +669,108 @@ export async function registerRoutes(
     } catch (error) {
       console.error("OCR error:", error);
       res.status(500).json({ error: "Failed to process OCR" });
+    }
+  });
+
+  // ============ AI INVENTORY SCANNER ============
+  // Upload image for AI-powered can counting and product identification
+  app.post("/api/ai-scanner/count", uploadOcr.single('image'), async (req: Request, res: Response) => {
+    let filePath: string | null = null;
+    
+    try {
+      const file = req.file as Express.Multer.File;
+      if (!file) {
+        return res.status(400).json({ error: "No image uploaded" });
+      }
+      
+      filePath = file.path;
+
+      // Read the image and convert to base64
+      const imageBuffer = fs.readFileSync(file.path);
+      const base64Image = imageBuffer.toString('base64');
+      const mimeType = file.mimetype || 'image/jpeg';
+
+      // Call GPT-4o Vision to analyze the cooler/shelf image
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o", // Using gpt-4o for vision capabilities
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert inventory counting assistant for a stadium concessions operation. 
+Your task is to analyze images of cooler shelves and count beverage cans accurately.
+
+When analyzing an image:
+1. Count the TOTAL number of visible cans/bottles on each shelf or section
+2. Identify the PRODUCT (Bud Light, Michelob Ultra, Blue Moon, Corona, Heineken, Modelo, White Claw, Truly, etc.)
+3. Group counts by product type
+4. Be precise - only count what you can clearly see
+
+Return your response as a JSON object with this exact structure:
+{
+  "totalCount": <number>,
+  "products": [
+    {
+      "name": "<product name>",
+      "count": <number>,
+      "shelf": "<optional shelf identifier like 'top', 'middle', 'bottom', or row number>"
+    }
+  ],
+  "confidence": "<high|medium|low>",
+  "notes": "<any observations about image quality, partial visibility, etc.>"
+}`
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Please count all the cans/bottles visible in this cooler image and identify each product. Return the results as JSON."
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType};base64,${base64Image}`,
+                  detail: "high"
+                }
+              }
+            ]
+          }
+        ],
+        max_tokens: 1024,
+        response_format: { type: "json_object" }
+      });
+
+      const aiResponse = response.choices[0]?.message?.content;
+      if (!aiResponse) {
+        throw new Error("No response from AI");
+      }
+
+      const countResult = JSON.parse(aiResponse);
+      
+      // Clean up temp file after successful processing
+      if (filePath && fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+
+      res.json({
+        success: true,
+        result: countResult
+      });
+    } catch (error) {
+      // Clean up temp file on error
+      if (filePath && fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+        } catch (cleanupError) {
+          console.error("Failed to cleanup temp file:", cleanupError);
+        }
+      }
+      
+      console.error("AI Scanner error:", error);
+      res.status(500).json({ 
+        error: "Failed to analyze image", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
   });
 
