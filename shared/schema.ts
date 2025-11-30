@@ -12,6 +12,9 @@ export const conversationTargetEnum = pgEnum('conversation_target', ['Warehouse'
 export const conversationStatusEnum = pgEnum('conversation_status', ['Active', 'Closed']);
 export const incidentSeverityEnum = pgEnum('incident_severity', ['Low', 'Medium', 'High', 'Critical']);
 export const incidentStatusEnum = pgEnum('incident_status', ['Open', 'In Progress', 'Resolved', 'Closed']);
+export const countStageEnum = pgEnum('count_stage', ['PreEvent', 'PostEvent', 'DayAfter']);
+export const countSessionStatusEnum = pgEnum('count_session_status', ['InProgress', 'Completed', 'Verified']);
+export const counterRoleEnum = pgEnum('counter_role', ['NPOLead', 'Supervisor', 'Manager', 'ManagerAssistant']);
 
 // Users table
 export const users = pgTable("users", {
@@ -35,12 +38,29 @@ export const stands = pgTable("stands", {
   a930Ids: text("a930_ids").array().default(sql`ARRAY[]::text[]`),
 });
 
+// Count Sessions - tracks WHO is doing WHICH count at WHAT stage
+export const countSessions = pgTable("count_sessions", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id).notNull(),
+  eventDate: text("event_date").notNull(),
+  stage: countStageEnum("stage").notNull(),
+  counterName: text("counter_name").notNull(),
+  counterRole: counterRoleEnum("counter_role").notNull(),
+  counterPhoneLast4: varchar("counter_phone_last4", { length: 4 }).notNull(),
+  status: countSessionStatusEnum("status").notNull().default('InProgress'),
+  startedAt: timestamp("started_at").defaultNow(),
+  completedAt: timestamp("completed_at"),
+  verifiedById: varchar("verified_by_id", { length: 36 }).references(() => users.id),
+  notes: text("notes"),
+});
+
 // Inventory count entries
 export const inventoryCounts = pgTable("inventory_counts", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   standId: varchar("stand_id", { length: 20 }).references(() => stands.id).notNull(),
   itemId: varchar("item_id", { length: 36 }).notNull(),
   eventDate: text("event_date").notNull(),
+  sessionId: varchar("session_id", { length: 36 }).references(() => countSessions.id),
   startCount: integer("start_count").default(0),
   adds: integer("adds").default(0),
   endCount: integer("end_count").default(0),
@@ -176,7 +196,31 @@ export const standsRelations = relations(stands, ({ one, many }) => ({
     references: [users.id],
   }),
   inventoryCounts: many(inventoryCounts),
+  countSessions: many(countSessions),
   signatures: many(docSignatures),
+}));
+
+export const countSessionsRelations = relations(countSessions, ({ one, many }) => ({
+  stand: one(stands, {
+    fields: [countSessions.standId],
+    references: [stands.id],
+  }),
+  verifiedBy: one(users, {
+    fields: [countSessions.verifiedById],
+    references: [users.id],
+  }),
+  inventoryCounts: many(inventoryCounts),
+}));
+
+export const inventoryCountsRelations = relations(inventoryCounts, ({ one }) => ({
+  stand: one(stands, {
+    fields: [inventoryCounts.standId],
+    references: [stands.id],
+  }),
+  session: one(countSessions, {
+    fields: [inventoryCounts.sessionId],
+    references: [countSessions.id],
+  }),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -265,6 +309,7 @@ export const incidentNotificationsRelations = relations(incidentNotifications, (
 // Insert Schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertStandSchema = createInsertSchema(stands);
+export const insertCountSessionSchema = createInsertSchema(countSessions).omit({ id: true, startedAt: true, completedAt: true });
 export const insertInventoryCountSchema = createInsertSchema(inventoryCounts).omit({ id: true, createdAt: true });
 export const insertItemSchema = createInsertSchema(items).omit({ id: true });
 export const insertMessageSchema = createInsertSchema(messages).omit({ id: true, createdAt: true });
@@ -283,6 +328,8 @@ export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Stand = typeof stands.$inferSelect;
 export type InsertStand = z.infer<typeof insertStandSchema>;
+export type CountSession = typeof countSessions.$inferSelect;
+export type InsertCountSession = z.infer<typeof insertCountSessionSchema>;
 export type InventoryCount = typeof inventoryCounts.$inferSelect;
 export type InsertInventoryCount = z.infer<typeof insertInventoryCountSchema>;
 export type Item = typeof items.$inferSelect;

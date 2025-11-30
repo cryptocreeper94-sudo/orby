@@ -1,6 +1,6 @@
 import { 
   users, stands, inventoryCounts, items, messages, npos, staffingGroups, supervisorDocs, docSignatures,
-  quickMessages, conversations, conversationMessages, incidents, incidentNotifications,
+  quickMessages, conversations, conversationMessages, incidents, incidentNotifications, countSessions,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -14,7 +14,8 @@ import {
   type Conversation, type InsertConversation,
   type ConversationMessage, type InsertConversationMessage,
   type Incident, type InsertIncident,
-  type IncidentNotification, type InsertIncidentNotification
+  type IncidentNotification, type InsertIncidentNotification,
+  type CountSession, type InsertCountSession
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
@@ -104,6 +105,16 @@ export interface IStorage {
   getUnreadIncidentNotifications(userId: string): Promise<IncidentNotification[]>;
   markIncidentNotificationRead(id: string): Promise<void>;
   createIncidentNotificationsForManagers(incidentId: string): Promise<void>;
+
+  // Count Sessions
+  getCountSession(id: string): Promise<CountSession | undefined>;
+  getCountSessionByStand(standId: string, eventDate: string, stage: CountSession['stage']): Promise<CountSession | undefined>;
+  getCountSessionsByStand(standId: string, eventDate: string): Promise<CountSession[]>;
+  getActiveCountSession(standId: string, eventDate: string): Promise<CountSession | undefined>;
+  createCountSession(session: InsertCountSession): Promise<CountSession>;
+  completeCountSession(id: string): Promise<void>;
+  verifyCountSession(id: string, verifiedById: string): Promise<void>;
+  addCountSessionNote(id: string, note: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -456,6 +467,68 @@ export class DatabaseStorage implements IStorage {
     
     if (notifications.length > 0) {
       await db.insert(incidentNotifications).values(notifications);
+    }
+  }
+
+  // Count Sessions
+  async getCountSession(id: string): Promise<CountSession | undefined> {
+    const [session] = await db.select().from(countSessions).where(eq(countSessions.id, id));
+    return session || undefined;
+  }
+
+  async getCountSessionByStand(standId: string, eventDate: string, stage: CountSession['stage']): Promise<CountSession | undefined> {
+    const [session] = await db.select().from(countSessions)
+      .where(and(
+        eq(countSessions.standId, standId),
+        eq(countSessions.eventDate, eventDate),
+        eq(countSessions.stage, stage)
+      ));
+    return session || undefined;
+  }
+
+  async getCountSessionsByStand(standId: string, eventDate: string): Promise<CountSession[]> {
+    return await db.select().from(countSessions)
+      .where(and(
+        eq(countSessions.standId, standId),
+        eq(countSessions.eventDate, eventDate)
+      ))
+      .orderBy(asc(countSessions.startedAt));
+  }
+
+  async getActiveCountSession(standId: string, eventDate: string): Promise<CountSession | undefined> {
+    const [session] = await db.select().from(countSessions)
+      .where(and(
+        eq(countSessions.standId, standId),
+        eq(countSessions.eventDate, eventDate),
+        eq(countSessions.status, 'InProgress')
+      ));
+    return session || undefined;
+  }
+
+  async createCountSession(insertSession: InsertCountSession): Promise<CountSession> {
+    const [session] = await db.insert(countSessions).values(insertSession).returning();
+    return session;
+  }
+
+  async completeCountSession(id: string): Promise<void> {
+    await db.update(countSessions)
+      .set({ status: 'Completed', completedAt: new Date() })
+      .where(eq(countSessions.id, id));
+  }
+
+  async verifyCountSession(id: string, verifiedById: string): Promise<void> {
+    await db.update(countSessions)
+      .set({ status: 'Verified', verifiedById })
+      .where(eq(countSessions.id, id));
+  }
+
+  async addCountSessionNote(id: string, note: string): Promise<void> {
+    const session = await this.getCountSession(id);
+    if (session) {
+      const existingNotes = session.notes || '';
+      const timestamp = new Date().toISOString();
+      const updatedNotes = existingNotes + `\n[${timestamp}] ${note}`;
+      await db.update(countSessions).set({ notes: updatedNotes.trim() }).where(eq(countSessions.id, id));
     }
   }
 }
