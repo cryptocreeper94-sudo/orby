@@ -5,7 +5,7 @@ import {
   insertUserSchema, insertStandSchema, insertItemSchema, insertMessageSchema,
   insertNpoSchema, insertStaffingGroupSchema, insertSupervisorDocSchema, insertDocSignatureSchema,
   insertInventoryCountSchema, insertQuickMessageSchema, insertConversationSchema, insertConversationMessageSchema,
-  insertIncidentSchema
+  insertIncidentSchema, insertCountSessionSchema
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -611,25 +611,184 @@ export async function registerRoutes(
       const worker = await createWorker('eng');
       
       // Perform OCR
-      const { data: { text, confidence, words } } = await worker.recognize(file.path);
+      const result = await worker.recognize(file.path);
       
       // Terminate worker
       await worker.terminate();
 
       // Return OCR results
       res.json({
-        text: text.trim(),
-        confidence,
-        words: words?.map(w => ({
-          text: w.text,
-          confidence: w.confidence,
-          bbox: w.bbox
-        })),
+        text: result.data.text.trim(),
+        confidence: result.data.confidence,
         imagePath: `/uploads/ocr/${file.filename}`
       });
     } catch (error) {
       console.error("OCR error:", error);
       res.status(500).json({ error: "Failed to process OCR" });
+    }
+  });
+
+  // ============ COUNT SESSIONS ============
+  // Start a new count session (with last 4 phone verification)
+  app.post("/api/count-sessions", async (req: Request, res: Response) => {
+    try {
+      const parsed = insertCountSessionSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid count session data", details: parsed.error });
+      }
+      
+      // Check if there's already an active session for this stand/event/stage
+      const existingSession = await storage.getCountSessionByStand(
+        parsed.data.standId,
+        parsed.data.eventDate,
+        parsed.data.stage
+      );
+      
+      if (existingSession && existingSession.status === 'InProgress') {
+        return res.status(409).json({ 
+          error: "Active count session already exists", 
+          session: existingSession 
+        });
+      }
+      
+      // Check if this stage is allowed (PostEvent requires PreEvent complete, DayAfter requires PostEvent complete)
+      if (parsed.data.stage === 'PostEvent') {
+        const preEventSession = await storage.getCountSessionByStand(
+          parsed.data.standId, 
+          parsed.data.eventDate, 
+          'PreEvent'
+        );
+        if (!preEventSession || preEventSession.status === 'InProgress') {
+          return res.status(400).json({ 
+            error: "Pre-event count must be completed before starting post-event count" 
+          });
+        }
+      }
+      
+      if (parsed.data.stage === 'DayAfter') {
+        const postEventSession = await storage.getCountSessionByStand(
+          parsed.data.standId, 
+          parsed.data.eventDate, 
+          'PostEvent'
+        );
+        if (!postEventSession || postEventSession.status === 'InProgress') {
+          return res.status(400).json({ 
+            error: "Post-event count must be completed before starting day-after recount" 
+          });
+        }
+      }
+      
+      const session = await storage.createCountSession(parsed.data);
+      res.status(201).json(session);
+    } catch (error) {
+      console.error("Count session error:", error);
+      res.status(500).json({ error: "Failed to create count session" });
+    }
+  });
+
+  // Get count sessions for a stand/event
+  app.get("/api/count-sessions", async (req: Request, res: Response) => {
+    try {
+      const { standId, eventDate } = req.query;
+      if (!standId || !eventDate) {
+        return res.status(400).json({ error: "standId and eventDate are required" });
+      }
+      const sessions = await storage.getCountSessionsByStand(
+        standId as string, 
+        eventDate as string
+      );
+      res.json(sessions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch count sessions" });
+    }
+  });
+
+  // Get a single count session
+  app.get("/api/count-sessions/:id", async (req: Request, res: Response) => {
+    try {
+      const session = await storage.getCountSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Count session not found" });
+      }
+      res.json(session);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch count session" });
+    }
+  });
+
+  // Complete a count session
+  app.patch("/api/count-sessions/:id/complete", async (req: Request, res: Response) => {
+    try {
+      const session = await storage.getCountSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Count session not found" });
+      }
+      if (session.status !== 'InProgress') {
+        return res.status(400).json({ error: "Session is not in progress" });
+      }
+      await storage.completeCountSession(req.params.id);
+      const updatedSession = await storage.getCountSession(req.params.id);
+      res.json(updatedSession);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to complete count session" });
+    }
+  });
+
+  // Verify a count session (manager approval)
+  app.patch("/api/count-sessions/:id/verify", async (req: Request, res: Response) => {
+    try {
+      const { verifiedById } = req.body;
+      if (!verifiedById) {
+        return res.status(400).json({ error: "verifiedById is required" });
+      }
+      const session = await storage.getCountSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Count session not found" });
+      }
+      if (session.status !== 'Completed') {
+        return res.status(400).json({ error: "Session must be completed before verification" });
+      }
+      await storage.verifyCountSession(req.params.id, verifiedById);
+      const updatedSession = await storage.getCountSession(req.params.id);
+      res.json(updatedSession);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to verify count session" });
+    }
+  });
+
+  // Add note to a count session
+  app.patch("/api/count-sessions/:id/note", async (req: Request, res: Response) => {
+    try {
+      const { note } = req.body;
+      if (!note) {
+        return res.status(400).json({ error: "Note is required" });
+      }
+      const session = await storage.getCountSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Count session not found" });
+      }
+      await storage.addCountSessionNote(req.params.id, note);
+      const updatedSession = await storage.getCountSession(req.params.id);
+      res.json(updatedSession);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to add note to count session" });
+    }
+  });
+
+  // Get active count session for a stand
+  app.get("/api/count-sessions/active", async (req: Request, res: Response) => {
+    try {
+      const { standId, eventDate } = req.query;
+      if (!standId || !eventDate) {
+        return res.status(400).json({ error: "standId and eventDate are required" });
+      }
+      const session = await storage.getActiveCountSession(
+        standId as string, 
+        eventDate as string
+      );
+      res.json(session || null);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch active count session" });
     }
   });
 
