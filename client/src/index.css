@@ -42,10 +42,10 @@
   --color-sidebar-ring: hsl(var(--sidebar-ring));
 }
 
-/* LIGHT MODE - Industrial Productivity Theme */
+/* LIGHT MODE - Industrial Productivity Theme (Updated to Pastel Blue) */
 :root {
-  --background: 210 20% 98%; /* Very light blue-grey */
-  --foreground: 222 47% 11%; /* Deep navy, almost black */
+  --background: 210 60% 98%; /* Pastel Blue Background */
+  --foreground: 222 47% 11%;
 
   --card: 0 0% 100%;
   --card-foreground: 222 47% 11%;
@@ -53,16 +53,16 @@
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
 
-  --primary: 221 83% 53%; /* Strong Blue */
+  --primary: 221 83% 53%;
   --primary-foreground: 210 40% 98%;
 
-  --secondary: 210 40% 96%;
+  --secondary: 210 60% 94%; /* Pastel Blue Secondary */
   --secondary-foreground: 222 47% 11%;
 
   --muted: 210 40% 96%;
   --muted-foreground: 215 16% 47%;
 
-  --accent: 210 40% 96%;
+  --accent: 210 60% 94%;
   --accent-foreground: 222 47% 11%;
 
   --destructive: 0 84% 60%;
@@ -145,4 +145,18 @@
   h1, h2, h3, h4, h5, h6, .font-mono {
     font-family: 'JetBrains Mono', monospace;
   }
+}
+
+/* Custom Utility Classes for 3D Buttons & Glow */
+.btn-3d {
+  @apply transition-all duration-150 ease-out transform border-b-4 active:border-b-0 active:translate-y-1;
+}
+
+.btn-glow {
+  @apply shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:shadow-[0_0_25px_rgba(59,130,246,0.7)];
+}
+
+/* Floating effect */
+.float-effect {
+  @apply shadow-lg hover:-translate-y-1 transition-transform duration-200;
 }

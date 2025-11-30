@@ -91,12 +91,12 @@ export function StaffingGrid() {
                     <TableRow className="hover:bg-transparent">
                       <TableHead className="w-[80px] font-bold text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-900 z-10 border-r">Section</TableHead>
                       <TableHead className="w-[80px] font-bold text-slate-900 dark:text-slate-100 sticky left-[80px] bg-white dark:bg-slate-900 z-10 border-r">ID</TableHead>
-                      <TableHead className="w-[200px] font-bold text-slate-900 dark:text-slate-100 sticky left-[160px] bg-white dark:bg-slate-900 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Stand Name</TableHead>
+                      <TableHead className="w-[200px] font-bold text-slate-900 dark:text-slate-100 sticky left-[160px] bg-blue-50 dark:bg-slate-900 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Stand Name</TableHead>
                       {/* Device Columns based on PAX models */}
-                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50 text-xs font-black text-slate-500">E700</TableHead>
-                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50 text-xs font-black text-slate-500">A930</TableHead>
-                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50 text-xs font-black text-slate-500">Spare</TableHead>
-                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50 text-xs font-black text-slate-500">Rear</TableHead>
+                      <TableHead className="text-center min-w-[80px] bg-blue-50/50 dark:bg-slate-800/50 text-xs font-black text-blue-900 dark:text-blue-200">E700</TableHead>
+                      <TableHead className="text-center min-w-[80px] bg-blue-50/50 dark:bg-slate-800/50 text-xs font-black text-blue-900 dark:text-blue-200">A930</TableHead>
+                      <TableHead className="text-center w-[60px] bg-blue-50/50 dark:bg-slate-800/50 text-xs font-black text-slate-500">Spare</TableHead>
+                      <TableHead className="text-center w-[60px] bg-blue-50/50 dark:bg-slate-800/50 text-xs font-black text-slate-500">Rear</TableHead>
                       <TableHead className="text-center w-[100px]">Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -110,15 +110,27 @@ export function StaffingGrid() {
                         </TableCell>
                         
                         {/* Render Staffing/POS Data */}
-                        <TableCell className="text-center border-r border-dashed p-1">
-                           <div className="bg-slate-100 dark:bg-slate-800 rounded py-1 text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
-                             {stand.e700 || '-'}
-                           </div>
+                        <TableCell className="text-center border-r border-blue-100 dark:border-slate-800 border-dashed p-2">
+                           {stand.e700Ids && stand.e700Ids.length > 0 ? (
+                             <div className="flex flex-wrap gap-1 justify-center">
+                               {stand.e700Ids.map(id => (
+                                 <span key={id} className="bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300 rounded px-1.5 py-0.5 text-[10px] font-mono font-bold shadow-sm">
+                                   {id}
+                                 </span>
+                               ))}
+                             </div>
+                           ) : <span className="text-slate-300">-</span>}
                         </TableCell>
-                        <TableCell className="text-center border-r border-dashed p-1">
-                           <div className="bg-slate-100 dark:bg-slate-800 rounded py-1 text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
-                             {stand.a930 || '-'}
-                           </div>
+                        <TableCell className="text-center border-r border-blue-100 dark:border-slate-800 border-dashed p-2">
+                           {stand.a930Ids && stand.a930Ids.length > 0 ? (
+                             <div className="flex flex-wrap gap-1 justify-center">
+                               {stand.a930Ids.map(id => (
+                                 <span key={id} className="bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300 rounded px-1.5 py-0.5 text-[10px] font-mono font-bold shadow-sm">
+                                   {id}
+                                 </span>
+                               ))}
+                             </div>
+                           ) : <span className="text-slate-300">-</span>}
                         </TableCell>
                          <TableCell className="text-center border-r border-dashed p-1">
                            {/* Empty cell example */}
