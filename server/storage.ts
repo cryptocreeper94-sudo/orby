@@ -1,6 +1,7 @@
 import { 
   users, stands, inventoryCounts, items, messages, npos, staffingGroups, supervisorDocs, docSignatures,
   quickMessages, conversations, conversationMessages, incidents, incidentNotifications, countSessions,
+  standIssues, standIssueNotifications, ISSUE_ROUTING_RULES,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -15,7 +16,9 @@ import {
   type ConversationMessage, type InsertConversationMessage,
   type Incident, type InsertIncident,
   type IncidentNotification, type InsertIncidentNotification,
-  type CountSession, type InsertCountSession
+  type CountSession, type InsertCountSession,
+  type StandIssue, type InsertStandIssue,
+  type StandIssueNotification, type InsertStandIssueNotification
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
@@ -115,6 +118,23 @@ export interface IStorage {
   completeCountSession(id: string): Promise<void>;
   verifyCountSession(id: string, verifiedById: string): Promise<void>;
   addCountSessionNote(id: string, note: string): Promise<void>;
+
+  // Stand Issues
+  getStandIssue(id: string): Promise<StandIssue | undefined>;
+  getAllStandIssues(): Promise<StandIssue[]>;
+  getStandIssuesByStand(standId: string): Promise<StandIssue[]>;
+  getOpenStandIssues(): Promise<StandIssue[]>;
+  getEmergencyStandIssues(): Promise<StandIssue[]>;
+  getStandIssuesByRouting(routedTo: User['role']): Promise<StandIssue[]>;
+  createStandIssue(issue: InsertStandIssue): Promise<StandIssue>;
+  acknowledgeStandIssue(id: string, userId: string): Promise<void>;
+  resolveStandIssue(id: string, userId: string, notes?: string): Promise<void>;
+  updateStandIssueStatus(id: string, status: StandIssue['status']): Promise<void>;
+
+  // Stand Issue Notifications
+  getUnreadStandIssueNotifications(userId: string): Promise<StandIssueNotification[]>;
+  markStandIssueNotificationRead(id: string): Promise<void>;
+  createStandIssueNotifications(issueId: string, category: string, isEmergency: boolean): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -529,6 +549,130 @@ export class DatabaseStorage implements IStorage {
       const timestamp = new Date().toISOString();
       const updatedNotes = existingNotes + `\n[${timestamp}] ${note}`;
       await db.update(countSessions).set({ notes: updatedNotes.trim() }).where(eq(countSessions.id, id));
+    }
+  }
+
+  // Stand Issues
+  async getStandIssue(id: string): Promise<StandIssue | undefined> {
+    const [issue] = await db.select().from(standIssues).where(eq(standIssues.id, id));
+    return issue || undefined;
+  }
+
+  async getAllStandIssues(): Promise<StandIssue[]> {
+    return await db.select().from(standIssues).orderBy(desc(standIssues.createdAt));
+  }
+
+  async getStandIssuesByStand(standId: string): Promise<StandIssue[]> {
+    return await db.select().from(standIssues)
+      .where(eq(standIssues.standId, standId))
+      .orderBy(desc(standIssues.createdAt));
+  }
+
+  async getOpenStandIssues(): Promise<StandIssue[]> {
+    return await db.select().from(standIssues)
+      .where(or(
+        eq(standIssues.status, 'Open'),
+        eq(standIssues.status, 'Acknowledged'),
+        eq(standIssues.status, 'InProgress')
+      ))
+      .orderBy(desc(standIssues.createdAt));
+  }
+
+  async getEmergencyStandIssues(): Promise<StandIssue[]> {
+    return await db.select().from(standIssues)
+      .where(and(
+        eq(standIssues.severity, 'Emergency'),
+        or(
+          eq(standIssues.status, 'Open'),
+          eq(standIssues.status, 'Acknowledged'),
+          eq(standIssues.status, 'InProgress')
+        )
+      ))
+      .orderBy(desc(standIssues.createdAt));
+  }
+
+  async getStandIssuesByRouting(routedTo: User['role']): Promise<StandIssue[]> {
+    return await db.select().from(standIssues)
+      .where(eq(standIssues.routedTo, routedTo))
+      .orderBy(desc(standIssues.createdAt));
+  }
+
+  async createStandIssue(insertIssue: InsertStandIssue): Promise<StandIssue> {
+    // Determine routing based on category
+    const routingRoles = ISSUE_ROUTING_RULES[insertIssue.category] || ['OperationsManager'];
+    const primaryRoute = routingRoles[0] as User['role'];
+    
+    const [issue] = await db.insert(standIssues).values({
+      ...insertIssue,
+      routedTo: primaryRoute
+    }).returning();
+    return issue;
+  }
+
+  async acknowledgeStandIssue(id: string, userId: string): Promise<void> {
+    await db.update(standIssues)
+      .set({ 
+        status: 'Acknowledged', 
+        acknowledgedAt: new Date(),
+        acknowledgedBy: userId 
+      })
+      .where(eq(standIssues.id, id));
+  }
+
+  async resolveStandIssue(id: string, userId: string, notes?: string): Promise<void> {
+    await db.update(standIssues)
+      .set({ 
+        status: 'Resolved', 
+        resolvedAt: new Date(),
+        resolvedBy: userId,
+        resolutionNotes: notes 
+      })
+      .where(eq(standIssues.id, id));
+  }
+
+  async updateStandIssueStatus(id: string, status: StandIssue['status']): Promise<void> {
+    await db.update(standIssues).set({ status }).where(eq(standIssues.id, id));
+  }
+
+  // Stand Issue Notifications
+  async getUnreadStandIssueNotifications(userId: string): Promise<StandIssueNotification[]> {
+    return await db.select().from(standIssueNotifications)
+      .where(and(
+        eq(standIssueNotifications.userId, userId),
+        eq(standIssueNotifications.isRead, false)
+      ))
+      .orderBy(desc(standIssueNotifications.createdAt));
+  }
+
+  async markStandIssueNotificationRead(id: string): Promise<void> {
+    await db.update(standIssueNotifications)
+      .set({ isRead: true, readAt: new Date() })
+      .where(eq(standIssueNotifications.id, id));
+  }
+
+  async createStandIssueNotifications(issueId: string, category: string, isEmergency: boolean): Promise<void> {
+    // Get routing roles for this category
+    const routingRoles = ISSUE_ROUTING_RULES[category] || ['OperationsManager', 'GeneralManager'];
+    
+    // For emergencies, also notify General Manager and Regional VP
+    const rolesToNotify: User['role'][] = routingRoles as User['role'][];
+    if (isEmergency) {
+      if (!rolesToNotify.includes('GeneralManager')) rolesToNotify.push('GeneralManager');
+      if (!rolesToNotify.includes('RegionalVP')) rolesToNotify.push('RegionalVP');
+    }
+
+    // Get all users with matching roles
+    const usersToNotify = await this.getUsersByRoles(rolesToNotify);
+    
+    // Create notifications for each user
+    const notifications = usersToNotify.map(user => ({
+      issueId,
+      userId: user.id,
+      isRead: false
+    }));
+    
+    if (notifications.length > 0) {
+      await db.insert(standIssueNotifications).values(notifications);
     }
   }
 }

@@ -4,17 +4,25 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Enums
-export const userRoleEnum = pgEnum('user_role', ['Admin', 'Supervisor', 'Worker', 'IT', 'Warehouse', 'Kitchen', 'NPO', 'TempStaff']);
+export const userRoleEnum = pgEnum('user_role', [
+  'Admin', 'Supervisor', 'Worker', 'IT', 'Warehouse', 'Kitchen', 'NPO', 'TempStaff',
+  'StandLead', 'WarehouseManager', 'WarehouseWorker', 'KitchenManager', 'KitchenWorker',
+  'OperationsManager', 'OperationsAssistant', 'GeneralManager', 'RegionalVP'
+]);
 export const standStatusEnum = pgEnum('stand_status', ['Open', 'Closed', 'Needs Power', 'Spare', 'Hot Spot']);
 export const messageTypeEnum = pgEnum('message_type', ['Global', 'Urgent', 'Request']);
 export const docCategoryEnum = pgEnum('doc_category', ['Compliance', 'Checklist', 'Reference', 'Contact']);
-export const conversationTargetEnum = pgEnum('conversation_target', ['Warehouse', 'Kitchen', 'Manager', 'Bar Manager', 'HR Manager']);
+export const conversationTargetEnum = pgEnum('conversation_target', ['Warehouse', 'Kitchen', 'Manager', 'Bar Manager', 'HR Manager', 'Operations']);
 export const conversationStatusEnum = pgEnum('conversation_status', ['Active', 'Closed']);
 export const incidentSeverityEnum = pgEnum('incident_severity', ['Low', 'Medium', 'High', 'Critical']);
 export const incidentStatusEnum = pgEnum('incident_status', ['Open', 'In Progress', 'Resolved', 'Closed']);
 export const countStageEnum = pgEnum('count_stage', ['PreEvent', 'PostEvent', 'DayAfter']);
 export const countSessionStatusEnum = pgEnum('count_session_status', ['InProgress', 'Completed', 'Verified']);
-export const counterRoleEnum = pgEnum('counter_role', ['NPOLead', 'Supervisor', 'Manager', 'ManagerAssistant']);
+export const counterRoleEnum = pgEnum('counter_role', ['NPOLead', 'StandLead', 'Supervisor', 'Manager', 'ManagerAssistant']);
+export const employmentAffiliationEnum = pgEnum('employment_affiliation', ['Legends', 'NPO', 'Temp', 'Other']);
+export const issueCategoryEnum = pgEnum('issue_category', ['Cooling', 'Beverage', 'Power', 'AV', 'Menu', 'FoodSafety', 'Equipment', 'Staffing', 'Other']);
+export const issueSeverityEnum = pgEnum('issue_severity', ['Emergency', 'High', 'Normal', 'Low']);
+export const issueStatusEnum = pgEnum('issue_status', ['Open', 'Acknowledged', 'InProgress', 'Resolved', 'Closed']);
 
 // Users table
 export const users = pgTable("users", {
@@ -36,6 +44,7 @@ export const stands = pgTable("stands", {
   status: standStatusEnum("status").notNull().default('Closed'),
   e700Ids: text("e700_ids").array().default(sql`ARRAY[]::text[]`),
   a930Ids: text("a930_ids").array().default(sql`ARRAY[]::text[]`),
+  hotspotId: varchar("hotspot_id", { length: 10 }),
 });
 
 // Count Sessions - tracks WHO is doing WHICH count at WHAT stage
@@ -47,6 +56,10 @@ export const countSessions = pgTable("count_sessions", {
   counterName: text("counter_name").notNull(),
   counterRole: counterRoleEnum("counter_role").notNull(),
   counterPhoneLast4: varchar("counter_phone_last4", { length: 4 }).notNull(),
+  counterAffiliation: employmentAffiliationEnum("counter_affiliation").notNull().default('Legends'),
+  assistingCounterName: text("assisting_counter_name"),
+  assistingCounterPhone4: varchar("assisting_counter_phone4", { length: 4 }),
+  assistingCounterAffiliation: employmentAffiliationEnum("assisting_counter_affiliation"),
   status: countSessionStatusEnum("status").notNull().default('InProgress'),
   startedAt: timestamp("started_at").defaultNow(),
   completedAt: timestamp("completed_at"),
@@ -182,6 +195,37 @@ export const incidentNotifications = pgTable("incident_notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Stand Issues - equipment/operational issues reported by supervisors and stand leads
+export const standIssues = pgTable("stand_issues", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  reporterId: varchar("reporter_id", { length: 36 }).references(() => users.id).notNull(),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  category: issueCategoryEnum("category").notNull(),
+  severity: issueSeverityEnum("severity").notNull().default('Normal'),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  status: issueStatusEnum("status").notNull().default('Open'),
+  routedTo: userRoleEnum("routed_to"),
+  location: text("location"),
+  mediaUrls: text("media_urls").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  acknowledgedBy: varchar("acknowledged_by", { length: 36 }).references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedBy: varchar("resolved_by", { length: 36 }).references(() => users.id),
+  resolutionNotes: text("resolution_notes"),
+});
+
+// Stand Issue Notifications - tracks who gets notified based on routing rules
+export const standIssueNotifications = pgTable("stand_issue_notifications", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  issueId: varchar("issue_id", { length: 36 }).references(() => standIssues.id).notNull(),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id).notNull(),
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   stands: many(stands),
@@ -306,6 +350,37 @@ export const incidentNotificationsRelations = relations(incidentNotifications, (
   }),
 }));
 
+export const standIssuesRelations = relations(standIssues, ({ one, many }) => ({
+  reporter: one(users, {
+    fields: [standIssues.reporterId],
+    references: [users.id],
+  }),
+  stand: one(stands, {
+    fields: [standIssues.standId],
+    references: [stands.id],
+  }),
+  acknowledger: one(users, {
+    fields: [standIssues.acknowledgedBy],
+    references: [users.id],
+  }),
+  resolver: one(users, {
+    fields: [standIssues.resolvedBy],
+    references: [users.id],
+  }),
+  notifications: many(standIssueNotifications),
+}));
+
+export const standIssueNotificationsRelations = relations(standIssueNotifications, ({ one }) => ({
+  issue: one(standIssues, {
+    fields: [standIssueNotifications.issueId],
+    references: [standIssues.id],
+  }),
+  user: one(users, {
+    fields: [standIssueNotifications.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert Schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertStandSchema = createInsertSchema(stands);
@@ -322,6 +397,8 @@ export const insertConversationSchema = createInsertSchema(conversations).omit({
 export const insertConversationMessageSchema = createInsertSchema(conversationMessages).omit({ id: true, createdAt: true });
 export const insertIncidentSchema = createInsertSchema(incidents).omit({ id: true, createdAt: true, resolvedAt: true });
 export const insertIncidentNotificationSchema = createInsertSchema(incidentNotifications).omit({ id: true, createdAt: true, readAt: true });
+export const insertStandIssueSchema = createInsertSchema(standIssues).omit({ id: true, createdAt: true, acknowledgedAt: true, resolvedAt: true });
+export const insertStandIssueNotificationSchema = createInsertSchema(standIssueNotifications).omit({ id: true, createdAt: true, readAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -354,3 +431,20 @@ export type Incident = typeof incidents.$inferSelect;
 export type InsertIncident = z.infer<typeof insertIncidentSchema>;
 export type IncidentNotification = typeof incidentNotifications.$inferSelect;
 export type InsertIncidentNotification = z.infer<typeof insertIncidentNotificationSchema>;
+export type StandIssue = typeof standIssues.$inferSelect;
+export type InsertStandIssue = z.infer<typeof insertStandIssueSchema>;
+export type StandIssueNotification = typeof standIssueNotifications.$inferSelect;
+export type InsertStandIssueNotification = z.infer<typeof insertStandIssueNotificationSchema>;
+
+// Routing rules for issue categories
+export const ISSUE_ROUTING_RULES: Record<string, string[]> = {
+  Cooling: ['WarehouseManager', 'Warehouse'],
+  Beverage: ['WarehouseManager', 'Warehouse'],
+  Power: ['OperationsManager', 'OperationsAssistant'],
+  AV: ['OperationsManager', 'OperationsAssistant'],
+  Menu: ['OperationsManager', 'OperationsAssistant'],
+  FoodSafety: ['KitchenManager', 'Kitchen'],
+  Equipment: ['WarehouseManager', 'OperationsManager'],
+  Staffing: ['GeneralManager', 'OperationsManager'],
+  Other: ['OperationsManager', 'GeneralManager'],
+};

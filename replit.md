@@ -15,8 +15,16 @@ StadiumOps is a comprehensive digital inventory and staffing management system f
 | Admin | 1234 | /admin |
 | Supervisor | 5678 | /supervisor |
 | IT | 9999 | /it |
-| Warehouse | 1111 | /warehouse |
-| Kitchen | 2222 | /kitchen |
+| Warehouse Worker | 1111 | /warehouse |
+| Kitchen Worker | 2222 | /kitchen |
+| NPO Staff | 3333 | /npo |
+| Temp Worker | 4444 | /temp |
+| Stand Lead | 5555 | /standlead |
+| Warehouse Manager | 6666 | /warehouse-manager |
+| Kitchen Manager | 7777 | /kitchen-manager |
+| Operations Manager | 8888 | /operations |
+| General Manager | 1010 | /manager |
+| Regional VP | 2020 | /executive |
 | Developer | 0424 | /dev |
 
 ## Key Features
@@ -36,6 +44,23 @@ StadiumOps is a comprehensive digital inventory and staffing management system f
 - **Media Upload**: Photo/video attachment support (up to 5 files, 50MB limit)
 - **Auto-Notification**: All supervisors and admins notified immediately on new incidents
 - **Status Tracking**: Open → In Progress → Resolved → Closed
+
+### Stand Issue Reporting (Equipment/Operations)
+- **Issue Categories**: Cooling, Beverage, Power, AV, Menu, FoodSafety, Equipment, Staffing, Other
+- **Auto-Routing by Category**:
+  - Cooling/Beverage → Warehouse Manager
+  - Power/AV/Menu → Operations Manager
+  - FoodSafety → Kitchen Manager
+  - Equipment → Warehouse + Operations
+  - Staffing → General Manager + Operations
+- **Severity Levels**: Emergency (immediate notification), High, Normal, Low
+- **Emergency Escalation**: Emergency issues also notify General Manager and Regional VP
+- **Status Flow**: Open → Acknowledged → InProgress → Resolved → Closed
+
+### POS Hardware Tracking
+- **E700 Terminals**: Full-featured POS units (e.g., E700 #201, #202)
+- **A930 Terminals**: Handheld units (e.g., A930 #126, #130)
+- **Hotspot Devices**: Mobile internet devices for stands without wired connection (e.g., "3 hot" = Hotspot #3)
 
 ### OCR Scanner (Future)
 - **Tesseract.js**: Client-side OCR for inventory counting automation
@@ -74,6 +99,10 @@ StadiumOps is a comprehensive digital inventory and staffing management system f
 - Workflow rule: Jason approves all changes
 
 ## Recent Changes
+- 2024-11-30: Three-stage inventory count workflow (Pre-event, Post-event, Day-after) with counter identity tracking
+- 2024-11-30: CounterLogin component for counter authentication via last 4 phone digits
+- 2024-11-30: CountSheet component with category accordion, session tracking, and progress display
+- 2024-11-30: NPO Dashboard Pre-Event Count button with session creation and item counting
 - 2024-11-30: Added threaded conversation system with target selection and quick messages
 - 2024-11-30: Added unified incident reporting with photo/video upload
 - 2024-11-30: Added OCR scanner foundation with Tesseract.js

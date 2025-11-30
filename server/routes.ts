@@ -5,7 +5,7 @@ import {
   insertUserSchema, insertStandSchema, insertItemSchema, insertMessageSchema,
   insertNpoSchema, insertStaffingGroupSchema, insertSupervisorDocSchema, insertDocSignatureSchema,
   insertInventoryCountSchema, insertQuickMessageSchema, insertConversationSchema, insertConversationMessageSchema,
-  insertIncidentSchema, insertCountSessionSchema
+  insertIncidentSchema, insertCountSessionSchema, insertStandIssueSchema
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -792,6 +792,155 @@ export async function registerRoutes(
     }
   });
 
+  // ============ STAND ISSUES ============
+  // Get all stand issues
+  app.get("/api/stand-issues", async (_req: Request, res: Response) => {
+    try {
+      const issues = await storage.getAllStandIssues();
+      res.json(issues);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stand issues" });
+    }
+  });
+
+  // Get open stand issues
+  app.get("/api/stand-issues/open", async (_req: Request, res: Response) => {
+    try {
+      const issues = await storage.getOpenStandIssues();
+      res.json(issues);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch open issues" });
+    }
+  });
+
+  // Get emergency issues
+  app.get("/api/stand-issues/emergency", async (_req: Request, res: Response) => {
+    try {
+      const issues = await storage.getEmergencyStandIssues();
+      res.json(issues);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch emergency issues" });
+    }
+  });
+
+  // Get issues by stand
+  app.get("/api/stand-issues/stand/:standId", async (req: Request, res: Response) => {
+    try {
+      const issues = await storage.getStandIssuesByStand(req.params.standId);
+      res.json(issues);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stand issues" });
+    }
+  });
+
+  // Get issues routed to a specific role
+  app.get("/api/stand-issues/routed/:role", async (req: Request, res: Response) => {
+    try {
+      const issues = await storage.getStandIssuesByRouting(req.params.role as any);
+      res.json(issues);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch routed issues" });
+    }
+  });
+
+  // Get single issue
+  app.get("/api/stand-issues/:id", async (req: Request, res: Response) => {
+    try {
+      const issue = await storage.getStandIssue(req.params.id);
+      if (!issue) {
+        return res.status(404).json({ error: "Issue not found" });
+      }
+      res.json(issue);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch issue" });
+    }
+  });
+
+  // Create new stand issue
+  app.post("/api/stand-issues", async (req: Request, res: Response) => {
+    try {
+      const parsed = insertStandIssueSchema.parse(req.body);
+      const issue = await storage.createStandIssue(parsed);
+      
+      // Create notifications based on routing rules
+      const isEmergency = parsed.severity === 'Emergency';
+      await storage.createStandIssueNotifications(issue.id, parsed.category, isEmergency);
+      
+      res.status(201).json(issue);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create issue" });
+    }
+  });
+
+  // Acknowledge an issue
+  app.patch("/api/stand-issues/:id/acknowledge", async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: "userId required" });
+      }
+      await storage.acknowledgeStandIssue(req.params.id, userId);
+      const issue = await storage.getStandIssue(req.params.id);
+      res.json(issue);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to acknowledge issue" });
+    }
+  });
+
+  // Resolve an issue
+  app.patch("/api/stand-issues/:id/resolve", async (req: Request, res: Response) => {
+    try {
+      const { userId, notes } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: "userId required" });
+      }
+      await storage.resolveStandIssue(req.params.id, userId, notes);
+      const issue = await storage.getStandIssue(req.params.id);
+      res.json(issue);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to resolve issue" });
+    }
+  });
+
+  // Update issue status
+  app.patch("/api/stand-issues/:id/status", async (req: Request, res: Response) => {
+    try {
+      const { status } = req.body;
+      if (!status) {
+        return res.status(400).json({ error: "status required" });
+      }
+      await storage.updateStandIssueStatus(req.params.id, status);
+      const issue = await storage.getStandIssue(req.params.id);
+      res.json(issue);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update issue status" });
+    }
+  });
+
+  // ============ STAND ISSUE NOTIFICATIONS ============
+  // Get unread issue notifications for user
+  app.get("/api/stand-issue-notifications/:userId", async (req: Request, res: Response) => {
+    try {
+      const notifications = await storage.getUnreadStandIssueNotifications(req.params.userId);
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+  });
+
+  // Mark notification as read
+  app.patch("/api/stand-issue-notifications/:id/read", async (req: Request, res: Response) => {
+    try {
+      await storage.markStandIssueNotificationRead(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark notification as read" });
+    }
+  });
+
   // ============ SEED DATA ============
   app.post("/api/seed", async (_req: Request, res: Response) => {
     try {
@@ -808,10 +957,16 @@ export async function registerRoutes(
         { name: 'Sup. Mike', pin: '9012', role: 'Supervisor' as const, isOnline: false },
         { name: 'IT Support', pin: '9999', role: 'IT' as const, isOnline: false },
         { name: 'Developer', pin: '0424', role: 'Admin' as const, isOnline: false },
-        { name: 'Warehouse', pin: '1111', role: 'Warehouse' as const, isOnline: false },
-        { name: 'Kitchen', pin: '2222', role: 'Kitchen' as const, isOnline: false },
+        { name: 'Warehouse Worker', pin: '1111', role: 'Warehouse' as const, isOnline: false },
+        { name: 'Kitchen Worker', pin: '2222', role: 'Kitchen' as const, isOnline: false },
         { name: 'NPO Staff', pin: '3333', role: 'NPO' as const, isOnline: false },
         { name: 'Temp Worker', pin: '4444', role: 'TempStaff' as const, isOnline: false },
+        { name: 'Stand Lead', pin: '5555', role: 'StandLead' as const, isOnline: false },
+        { name: 'Warehouse Manager', pin: '6666', role: 'WarehouseManager' as const, isOnline: false },
+        { name: 'Kitchen Manager', pin: '7777', role: 'KitchenManager' as const, isOnline: false },
+        { name: 'Operations Manager', pin: '8888', role: 'OperationsManager' as const, isOnline: false },
+        { name: 'General Manager', pin: '1010', role: 'GeneralManager' as const, isOnline: false },
+        { name: 'Regional VP', pin: '2020', role: 'RegionalVP' as const, isOnline: false },
       ];
 
       const createdUsers: Record<string, string> = {};
