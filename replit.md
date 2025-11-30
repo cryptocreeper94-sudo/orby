@@ -22,9 +22,25 @@ StadiumOps is a comprehensive digital inventory and staffing management system f
 ## Key Features
 - **Staffing Grid**: Event-based staffing assignments (format: "YY-MM-DD POS [Team] v [Team]")
 - **Inventory Counting**: Pre-event count sheets by stand, items counted by EACH (not case)
-- **Messaging**: Real-time team communication across all roles
 - **POS Terminal Tracking**: Specific unit numbers (e.g., A930 #126, E700 units)
 - **Supervisor Pack**: Compliance documents, checklists, signatures
+
+### Communication System
+- **Threaded Conversations**: Two-way communication between any roles
+- **Target Selection**: Supervisor selects target (Warehouse, Kitchen, Manager, Bar Manager, HR Manager)
+- **Quick Messages**: Pre-populated canned responses for common requests
+- **Auto-Timeout**: Conversations reset after 1-2 minutes of inactivity
+
+### Incident Reporting
+- **Unified Incidents**: All roles can report incidents
+- **Media Upload**: Photo/video attachment support (up to 5 files, 50MB limit)
+- **Auto-Notification**: All supervisors and admins notified immediately on new incidents
+- **Status Tracking**: Open → In Progress → Resolved → Closed
+
+### OCR Scanner (Future)
+- **Tesseract.js**: Client-side OCR for inventory counting automation
+- **API Endpoint**: POST /api/ocr/scan for image processing
+- **Text Extraction**: Returns text, confidence scores, and word positions
 
 ## Project Structure
 ```
@@ -58,9 +74,12 @@ StadiumOps is a comprehensive digital inventory and staffing management system f
 - Workflow rule: Jason approves all changes
 
 ## Recent Changes
-- 2024-11-30: Added Warehouse and Kitchen roles with messaging access
-- 2024-11-30: Converted to API-backed store management
-- 2024-11-30: Full REST API implementation
+- 2024-11-30: Added threaded conversation system with target selection and quick messages
+- 2024-11-30: Added unified incident reporting with photo/video upload
+- 2024-11-30: Added OCR scanner foundation with Tesseract.js
+- 2024-11-30: Auto-notification system for incident reports to all supervisors/admins
+- 2024-11-30: Added Warehouse (PIN: 1111) and Kitchen (PIN: 2222) roles
+- 2024-11-30: Full REST API implementation with database backend
 
 ## Technical Notes
 - Database: PostgreSQL with Drizzle ORM

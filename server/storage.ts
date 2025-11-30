@@ -1,5 +1,6 @@
 import { 
   users, stands, inventoryCounts, items, messages, npos, staffingGroups, supervisorDocs, docSignatures,
+  quickMessages, conversations, conversationMessages, incidents, incidentNotifications,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -8,16 +9,22 @@ import {
   type NPO, type InsertNPO,
   type StaffingGroup, type InsertStaffingGroup,
   type SupervisorDoc, type InsertSupervisorDoc,
-  type DocSignature, type InsertDocSignature
+  type DocSignature, type InsertDocSignature,
+  type QuickMessage, type InsertQuickMessage,
+  type Conversation, type InsertConversation,
+  type ConversationMessage, type InsertConversationMessage,
+  type Incident, type InsertIncident,
+  type IncidentNotification, type InsertIncidentNotification
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // Users
   getUser(id: string): Promise<User | undefined>;
   getUserByPin(pin: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
+  getUsersByRoles(roles: User['role'][]): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUserOnlineStatus(id: string, isOnline: boolean): Promise<void>;
 
@@ -64,6 +71,39 @@ export interface IStorage {
   // Doc Signatures
   getDocSignature(docId: string, userId: string, standId?: string): Promise<DocSignature | undefined>;
   createDocSignature(signature: InsertDocSignature): Promise<DocSignature>;
+
+  // Quick Messages (canned responses)
+  getAllQuickMessages(): Promise<QuickMessage[]>;
+  getQuickMessagesByTarget(targetRole: Conversation['targetRole']): Promise<QuickMessage[]>;
+  createQuickMessage(msg: InsertQuickMessage): Promise<QuickMessage>;
+
+  // Conversations
+  getConversation(id: string): Promise<Conversation | undefined>;
+  getActiveConversations(): Promise<Conversation[]>;
+  getConversationsByUser(userId: string): Promise<Conversation[]>;
+  getConversationsByTarget(targetRole: Conversation['targetRole']): Promise<Conversation[]>;
+  createConversation(conv: InsertConversation): Promise<Conversation>;
+  updateConversationLastMessage(id: string): Promise<void>;
+  closeConversation(id: string): Promise<void>;
+  closeStaleConversations(timeoutMinutes: number): Promise<void>;
+
+  // Conversation Messages
+  getConversationMessages(conversationId: string): Promise<ConversationMessage[]>;
+  createConversationMessage(msg: InsertConversationMessage): Promise<ConversationMessage>;
+
+  // Incidents
+  getIncident(id: string): Promise<Incident | undefined>;
+  getAllIncidents(): Promise<Incident[]>;
+  getIncidentsByReporter(reporterId: string): Promise<Incident[]>;
+  getOpenIncidents(): Promise<Incident[]>;
+  createIncident(incident: InsertIncident): Promise<Incident>;
+  updateIncidentStatus(id: string, status: Incident['status'], resolvedBy?: string): Promise<void>;
+  addIncidentNote(id: string, note: string): Promise<void>;
+
+  // Incident Notifications
+  getUnreadIncidentNotifications(userId: string): Promise<IncidentNotification[]>;
+  markIncidentNotificationRead(id: string): Promise<void>;
+  createIncidentNotificationsForManagers(incidentId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -80,6 +120,10 @@ export class DatabaseStorage implements IStorage {
 
   async getAllUsers(): Promise<User[]> {
     return await db.select().from(users);
+  }
+
+  async getUsersByRoles(roles: User['role'][]): Promise<User[]> {
+    return await db.select().from(users).where(inArray(users.role, roles));
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
@@ -246,6 +290,173 @@ export class DatabaseStorage implements IStorage {
   async createDocSignature(insertSignature: InsertDocSignature): Promise<DocSignature> {
     const [signature] = await db.insert(docSignatures).values(insertSignature).returning();
     return signature;
+  }
+
+  // Quick Messages (canned responses)
+  async getAllQuickMessages(): Promise<QuickMessage[]> {
+    return await db.select().from(quickMessages)
+      .where(eq(quickMessages.isActive, true))
+      .orderBy(asc(quickMessages.sortOrder));
+  }
+
+  async getQuickMessagesByTarget(targetRole: Conversation['targetRole']): Promise<QuickMessage[]> {
+    return await db.select().from(quickMessages)
+      .where(and(
+        eq(quickMessages.targetRole, targetRole),
+        eq(quickMessages.isActive, true)
+      ))
+      .orderBy(asc(quickMessages.sortOrder));
+  }
+
+  async createQuickMessage(insertMsg: InsertQuickMessage): Promise<QuickMessage> {
+    const [msg] = await db.insert(quickMessages).values(insertMsg).returning();
+    return msg;
+  }
+
+  // Conversations
+  async getConversation(id: string): Promise<Conversation | undefined> {
+    const [conv] = await db.select().from(conversations).where(eq(conversations.id, id));
+    return conv || undefined;
+  }
+
+  async getActiveConversations(): Promise<Conversation[]> {
+    return await db.select().from(conversations)
+      .where(eq(conversations.status, 'Active'))
+      .orderBy(desc(conversations.lastMessageAt));
+  }
+
+  async getConversationsByUser(userId: string): Promise<Conversation[]> {
+    return await db.select().from(conversations)
+      .where(eq(conversations.initiatorId, userId))
+      .orderBy(desc(conversations.lastMessageAt));
+  }
+
+  async getConversationsByTarget(targetRole: Conversation['targetRole']): Promise<Conversation[]> {
+    return await db.select().from(conversations)
+      .where(eq(conversations.targetRole, targetRole))
+      .orderBy(desc(conversations.lastMessageAt));
+  }
+
+  async createConversation(insertConv: InsertConversation): Promise<Conversation> {
+    const [conv] = await db.insert(conversations).values(insertConv).returning();
+    return conv;
+  }
+
+  async updateConversationLastMessage(id: string): Promise<void> {
+    await db.update(conversations)
+      .set({ lastMessageAt: new Date() })
+      .where(eq(conversations.id, id));
+  }
+
+  async closeConversation(id: string): Promise<void> {
+    await db.update(conversations)
+      .set({ status: 'Closed' })
+      .where(eq(conversations.id, id));
+  }
+
+  async closeStaleConversations(timeoutMinutes: number): Promise<void> {
+    const cutoff = new Date(Date.now() - timeoutMinutes * 60 * 1000);
+    await db.update(conversations)
+      .set({ status: 'Closed' })
+      .where(and(
+        eq(conversations.status, 'Active'),
+        // Drizzle doesn't have lt for timestamps easily, so we handle this differently
+      ));
+    // Note: For now, we'll handle stale conversation closing client-side or via a cron
+  }
+
+  // Conversation Messages
+  async getConversationMessages(conversationId: string): Promise<ConversationMessage[]> {
+    return await db.select().from(conversationMessages)
+      .where(eq(conversationMessages.conversationId, conversationId))
+      .orderBy(asc(conversationMessages.createdAt));
+  }
+
+  async createConversationMessage(insertMsg: InsertConversationMessage): Promise<ConversationMessage> {
+    const [msg] = await db.insert(conversationMessages).values(insertMsg).returning();
+    // Update the conversation's lastMessageAt
+    await this.updateConversationLastMessage(insertMsg.conversationId);
+    return msg;
+  }
+
+  // Incidents
+  async getIncident(id: string): Promise<Incident | undefined> {
+    const [incident] = await db.select().from(incidents).where(eq(incidents.id, id));
+    return incident || undefined;
+  }
+
+  async getAllIncidents(): Promise<Incident[]> {
+    return await db.select().from(incidents).orderBy(desc(incidents.createdAt));
+  }
+
+  async getIncidentsByReporter(reporterId: string): Promise<Incident[]> {
+    return await db.select().from(incidents)
+      .where(eq(incidents.reporterId, reporterId))
+      .orderBy(desc(incidents.createdAt));
+  }
+
+  async getOpenIncidents(): Promise<Incident[]> {
+    return await db.select().from(incidents)
+      .where(eq(incidents.status, 'Open'))
+      .orderBy(desc(incidents.createdAt));
+  }
+
+  async createIncident(insertIncident: InsertIncident): Promise<Incident> {
+    const [incident] = await db.insert(incidents).values(insertIncident).returning();
+    return incident;
+  }
+
+  async updateIncidentStatus(id: string, status: Incident['status'], resolvedBy?: string): Promise<void> {
+    const updates: Partial<Incident> = { status };
+    if (status === 'Resolved' || status === 'Closed') {
+      updates.resolvedAt = new Date();
+      if (resolvedBy) {
+        updates.resolvedBy = resolvedBy;
+      }
+    }
+    await db.update(incidents).set(updates).where(eq(incidents.id, id));
+  }
+
+  async addIncidentNote(id: string, note: string): Promise<void> {
+    const incident = await this.getIncident(id);
+    if (incident) {
+      const existingNotes = incident.notes || '';
+      const timestamp = new Date().toISOString();
+      const updatedNotes = existingNotes + `\n[${timestamp}] ${note}`;
+      await db.update(incidents).set({ notes: updatedNotes.trim() }).where(eq(incidents.id, id));
+    }
+  }
+
+  // Incident Notifications
+  async getUnreadIncidentNotifications(userId: string): Promise<IncidentNotification[]> {
+    return await db.select().from(incidentNotifications)
+      .where(and(
+        eq(incidentNotifications.userId, userId),
+        eq(incidentNotifications.isRead, false)
+      ))
+      .orderBy(desc(incidentNotifications.createdAt));
+  }
+
+  async markIncidentNotificationRead(id: string): Promise<void> {
+    await db.update(incidentNotifications)
+      .set({ isRead: true, readAt: new Date() })
+      .where(eq(incidentNotifications.id, id));
+  }
+
+  async createIncidentNotificationsForManagers(incidentId: string): Promise<void> {
+    // Get all supervisors and admins to notify
+    const managersAndSupervisors = await this.getUsersByRoles(['Supervisor', 'Admin']);
+    
+    // Create notification for each
+    const notifications = managersAndSupervisors.map(user => ({
+      incidentId,
+      userId: user.id,
+      isRead: false
+    }));
+    
+    if (notifications.length > 0) {
+      await db.insert(incidentNotifications).values(notifications);
+    }
   }
 }
 

@@ -4,9 +4,62 @@ import { storage } from "./storage";
 import { 
   insertUserSchema, insertStandSchema, insertItemSchema, insertMessageSchema,
   insertNpoSchema, insertStaffingGroupSchema, insertSupervisorDocSchema, insertDocSignatureSchema,
-  insertInventoryCountSchema
+  insertInventoryCountSchema, insertQuickMessageSchema, insertConversationSchema, insertConversationMessageSchema,
+  insertIncidentSchema
 } from "@shared/schema";
 import { z } from "zod";
+import multer from "multer";
+import path from "path";
+import { createWorker } from "tesseract.js";
+
+// Configure multer for file uploads
+const incidentStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, 'uploads/incidents');
+  },
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const ocrStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    cb(null, 'uploads/ocr');
+  },
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const uploadIncident = multer({ 
+  storage: incidentStorage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB limit
+  fileFilter: (_req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|mp4|mov|avi|webm/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error('Only images and videos are allowed'));
+  }
+});
+
+const uploadOcr = multer({ 
+  storage: ocrStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (_req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif|bmp|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (extname && mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error('Only images are allowed for OCR'));
+  }
+});
 
 export async function registerRoutes(
   httpServer: Server,
@@ -315,6 +368,271 @@ export async function registerRoutes(
     }
   });
 
+  // ============ QUICK MESSAGES (canned responses) ============
+  app.get("/api/quick-messages", async (_req: Request, res: Response) => {
+    try {
+      const messages = await storage.getAllQuickMessages();
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch quick messages" });
+    }
+  });
+
+  app.get("/api/quick-messages/target/:target", async (req: Request, res: Response) => {
+    try {
+      const target = decodeURIComponent(req.params.target) as any;
+      const messages = await storage.getQuickMessagesByTarget(target);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch quick messages by target" });
+    }
+  });
+
+  app.post("/api/quick-messages", async (req: Request, res: Response) => {
+    try {
+      const parsed = insertQuickMessageSchema.parse(req.body);
+      const message = await storage.createQuickMessage(parsed);
+      res.status(201).json(message);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create quick message" });
+    }
+  });
+
+  // ============ CONVERSATIONS ============
+  app.get("/api/conversations", async (_req: Request, res: Response) => {
+    try {
+      const conversations = await storage.getActiveConversations();
+      res.json(conversations);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch conversations" });
+    }
+  });
+
+  app.get("/api/conversations/user/:userId", async (req: Request, res: Response) => {
+    try {
+      const conversations = await storage.getConversationsByUser(req.params.userId);
+      res.json(conversations);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch user conversations" });
+    }
+  });
+
+  app.get("/api/conversations/target/:target", async (req: Request, res: Response) => {
+    try {
+      const target = decodeURIComponent(req.params.target) as any;
+      const conversations = await storage.getConversationsByTarget(target);
+      res.json(conversations);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch conversations by target" });
+    }
+  });
+
+  app.get("/api/conversations/:id", async (req: Request, res: Response) => {
+    try {
+      const conversation = await storage.getConversation(req.params.id);
+      if (!conversation) {
+        return res.status(404).json({ error: "Conversation not found" });
+      }
+      res.json(conversation);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch conversation" });
+    }
+  });
+
+  app.get("/api/conversations/:id/messages", async (req: Request, res: Response) => {
+    try {
+      const messages = await storage.getConversationMessages(req.params.id);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch conversation messages" });
+    }
+  });
+
+  app.post("/api/conversations", async (req: Request, res: Response) => {
+    try {
+      const parsed = insertConversationSchema.parse(req.body);
+      const conversation = await storage.createConversation(parsed);
+      res.status(201).json(conversation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create conversation" });
+    }
+  });
+
+  app.post("/api/conversations/:id/messages", async (req: Request, res: Response) => {
+    try {
+      const parsed = insertConversationMessageSchema.parse({
+        ...req.body,
+        conversationId: req.params.id
+      });
+      const message = await storage.createConversationMessage(parsed);
+      res.status(201).json(message);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to send message" });
+    }
+  });
+
+  app.patch("/api/conversations/:id/close", async (req: Request, res: Response) => {
+    try {
+      await storage.closeConversation(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to close conversation" });
+    }
+  });
+
+  // ============ INCIDENTS ============
+  app.get("/api/incidents", async (_req: Request, res: Response) => {
+    try {
+      const incidents = await storage.getAllIncidents();
+      res.json(incidents);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch incidents" });
+    }
+  });
+
+  app.get("/api/incidents/open", async (_req: Request, res: Response) => {
+    try {
+      const incidents = await storage.getOpenIncidents();
+      res.json(incidents);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch open incidents" });
+    }
+  });
+
+  app.get("/api/incidents/reporter/:reporterId", async (req: Request, res: Response) => {
+    try {
+      const incidents = await storage.getIncidentsByReporter(req.params.reporterId);
+      res.json(incidents);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch reporter incidents" });
+    }
+  });
+
+  app.get("/api/incidents/:id", async (req: Request, res: Response) => {
+    try {
+      const incident = await storage.getIncident(req.params.id);
+      if (!incident) {
+        return res.status(404).json({ error: "Incident not found" });
+      }
+      res.json(incident);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch incident" });
+    }
+  });
+
+  app.post("/api/incidents", async (req: Request, res: Response) => {
+    try {
+      const parsed = insertIncidentSchema.parse(req.body);
+      const incident = await storage.createIncident(parsed);
+      // Automatically notify all supervisors and admins
+      await storage.createIncidentNotificationsForManagers(incident.id);
+      res.status(201).json(incident);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create incident" });
+    }
+  });
+
+  app.patch("/api/incidents/:id/status", async (req: Request, res: Response) => {
+    try {
+      const { status, resolvedBy } = req.body;
+      await storage.updateIncidentStatus(req.params.id, status, resolvedBy);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update incident status" });
+    }
+  });
+
+  app.patch("/api/incidents/:id/note", async (req: Request, res: Response) => {
+    try {
+      const { note } = req.body;
+      await storage.addIncidentNote(req.params.id, note);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to add incident note" });
+    }
+  });
+
+  // ============ INCIDENT NOTIFICATIONS ============
+  app.get("/api/incident-notifications/user/:userId", async (req: Request, res: Response) => {
+    try {
+      const notifications = await storage.getUnreadIncidentNotifications(req.params.userId);
+      res.json(notifications);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch incident notifications" });
+    }
+  });
+
+  app.patch("/api/incident-notifications/:id/read", async (req: Request, res: Response) => {
+    try {
+      await storage.markIncidentNotificationRead(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark notification as read" });
+    }
+  });
+
+  // ============ FILE UPLOADS ============
+  // Upload incident media (photos/videos)
+  app.post("/api/upload/incident", uploadIncident.array('media', 5), async (req: Request, res: Response) => {
+    try {
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ error: "No files uploaded" });
+      }
+      const urls = files.map(file => `/uploads/incidents/${file.filename}`);
+      res.json({ urls });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to upload files" });
+    }
+  });
+
+  // ============ OCR SCANNER ============
+  // Upload image for OCR processing
+  app.post("/api/ocr/scan", uploadOcr.single('image'), async (req: Request, res: Response) => {
+    try {
+      const file = req.file as Express.Multer.File;
+      if (!file) {
+        return res.status(400).json({ error: "No image uploaded" });
+      }
+
+      // Create Tesseract worker
+      const worker = await createWorker('eng');
+      
+      // Perform OCR
+      const { data: { text, confidence, words } } = await worker.recognize(file.path);
+      
+      // Terminate worker
+      await worker.terminate();
+
+      // Return OCR results
+      res.json({
+        text: text.trim(),
+        confidence,
+        words: words?.map(w => ({
+          text: w.text,
+          confidence: w.confidence,
+          bbox: w.bbox
+        })),
+        imagePath: `/uploads/ocr/${file.filename}`
+      });
+    } catch (error) {
+      console.error("OCR error:", error);
+      res.status(500).json({ error: "Failed to process OCR" });
+    }
+  });
+
   // ============ SEED DATA ============
   app.post("/api/seed", async (_req: Request, res: Response) => {
     try {
@@ -331,6 +649,8 @@ export async function registerRoutes(
         { name: 'Sup. Mike', pin: '9012', role: 'Supervisor' as const, isOnline: false },
         { name: 'IT Support', pin: '9999', role: 'IT' as const, isOnline: false },
         { name: 'Developer', pin: '0424', role: 'Admin' as const, isOnline: false },
+        { name: 'Warehouse', pin: '1111', role: 'Warehouse' as const, isOnline: false },
+        { name: 'Kitchen', pin: '2222', role: 'Kitchen' as const, isOnline: false },
       ];
 
       const createdUsers: Record<string, string> = {};
@@ -363,6 +683,42 @@ export async function registerRoutes(
 
       for (const npo of npos) {
         await storage.createNpo(npo);
+      }
+
+      // Seed Quick Messages
+      const quickMessages = [
+        // Warehouse messages
+        { category: 'Supply Request', label: 'Need more cups', targetRole: 'Warehouse' as const, sortOrder: 1 },
+        { category: 'Supply Request', label: 'Need more napkins', targetRole: 'Warehouse' as const, sortOrder: 2 },
+        { category: 'Supply Request', label: 'Need ice delivery', targetRole: 'Warehouse' as const, sortOrder: 3 },
+        { category: 'Supply Request', label: 'Low on beer - need restock', targetRole: 'Warehouse' as const, sortOrder: 4 },
+        { category: 'Supply Request', label: 'Need condiments', targetRole: 'Warehouse' as const, sortOrder: 5 },
+        { category: 'Equipment', label: 'POS not working', targetRole: 'Warehouse' as const, sortOrder: 6 },
+        { category: 'Equipment', label: 'Need cash drawer', targetRole: 'Warehouse' as const, sortOrder: 7 },
+        // Kitchen messages
+        { category: 'Food Request', label: 'Need more hot dogs', targetRole: 'Kitchen' as const, sortOrder: 1 },
+        { category: 'Food Request', label: 'Need more nachos', targetRole: 'Kitchen' as const, sortOrder: 2 },
+        { category: 'Food Request', label: 'Need more pretzels', targetRole: 'Kitchen' as const, sortOrder: 3 },
+        { category: 'Food Request', label: 'Running low on BBQ sauce', targetRole: 'Kitchen' as const, sortOrder: 4 },
+        { category: 'Food Request', label: 'Need popcorn restock', targetRole: 'Kitchen' as const, sortOrder: 5 },
+        { category: 'Temperature', label: 'Food warmer not working', targetRole: 'Kitchen' as const, sortOrder: 6 },
+        // Manager messages
+        { category: 'Staffing', label: 'Need additional staff', targetRole: 'Manager' as const, sortOrder: 1 },
+        { category: 'Staffing', label: 'Staff member left early', targetRole: 'Manager' as const, sortOrder: 2 },
+        { category: 'Issue', label: 'Customer complaint', targetRole: 'Manager' as const, sortOrder: 3 },
+        { category: 'Issue', label: 'Cash discrepancy', targetRole: 'Manager' as const, sortOrder: 4 },
+        // Bar Manager messages
+        { category: 'Alcohol', label: 'Running low on draft beer', targetRole: 'Bar Manager' as const, sortOrder: 1 },
+        { category: 'Alcohol', label: 'Need liquor restock', targetRole: 'Bar Manager' as const, sortOrder: 2 },
+        { category: 'Compliance', label: 'ID scanner issue', targetRole: 'Bar Manager' as const, sortOrder: 3 },
+        // HR Manager messages
+        { category: 'HR', label: 'Employee no-show', targetRole: 'HR Manager' as const, sortOrder: 1 },
+        { category: 'HR', label: 'Injury report', targetRole: 'HR Manager' as const, sortOrder: 2 },
+        { category: 'HR', label: 'Uniform issue', targetRole: 'HR Manager' as const, sortOrder: 3 },
+      ];
+
+      for (const qm of quickMessages) {
+        await storage.createQuickMessage(qm);
       }
 
       // Seed Supervisor Docs

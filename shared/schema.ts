@@ -8,6 +8,10 @@ export const userRoleEnum = pgEnum('user_role', ['Admin', 'Supervisor', 'Worker'
 export const standStatusEnum = pgEnum('stand_status', ['Open', 'Closed', 'Needs Power', 'Spare', 'Hot Spot']);
 export const messageTypeEnum = pgEnum('message_type', ['Global', 'Urgent', 'Request']);
 export const docCategoryEnum = pgEnum('doc_category', ['Compliance', 'Checklist', 'Reference', 'Contact']);
+export const conversationTargetEnum = pgEnum('conversation_target', ['Warehouse', 'Kitchen', 'Manager', 'Bar Manager', 'HR Manager']);
+export const conversationStatusEnum = pgEnum('conversation_status', ['Active', 'Closed']);
+export const incidentSeverityEnum = pgEnum('incident_severity', ['Low', 'Medium', 'High', 'Critical']);
+export const incidentStatusEnum = pgEnum('incident_status', ['Open', 'In Progress', 'Resolved', 'Closed']);
 
 // Users table
 export const users = pgTable("users", {
@@ -100,6 +104,64 @@ export const docSignatures = pgTable("doc_signatures", {
   signedAt: timestamp("signed_at").defaultNow(),
 });
 
+// Quick Message Templates (canned messages for different targets)
+export const quickMessages = pgTable("quick_messages", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  category: text("category").notNull(),
+  label: text("label").notNull(),
+  targetRole: conversationTargetEnum("target_role").notNull(),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+});
+
+// Conversations (threaded communication between supervisor and target)
+export const conversations = pgTable("conversations", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  initiatorId: varchar("initiator_id", { length: 36 }).references(() => users.id).notNull(),
+  targetRole: conversationTargetEnum("target_role").notNull(),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  status: conversationStatusEnum("status").notNull().default('Active'),
+  createdAt: timestamp("created_at").defaultNow(),
+  lastMessageAt: timestamp("last_message_at").defaultNow(),
+});
+
+// Conversation Messages (individual messages within a conversation thread)
+export const conversationMessages = pgTable("conversation_messages", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  conversationId: varchar("conversation_id", { length: 36 }).references(() => conversations.id).notNull(),
+  senderId: varchar("sender_id", { length: 36 }).references(() => users.id).notNull(),
+  content: text("content").notNull(),
+  isQuickMessage: boolean("is_quick_message").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Incidents (unified incident reporting across all roles)
+export const incidents = pgTable("incidents", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  reporterId: varchar("reporter_id", { length: 36 }).references(() => users.id).notNull(),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  severity: incidentSeverityEnum("severity").notNull().default('Medium'),
+  status: incidentStatusEnum("status").notNull().default('Open'),
+  location: text("location"),
+  mediaUrls: text("media_urls").array(),
+  createdAt: timestamp("created_at").defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedBy: varchar("resolved_by", { length: 36 }).references(() => users.id),
+  notes: text("notes"),
+});
+
+// Incident Notifications (tracks who needs to see each incident)
+export const incidentNotifications = pgTable("incident_notifications", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  incidentId: varchar("incident_id", { length: 36 }).references(() => incidents.id).notNull(),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id).notNull(),
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   stands: many(stands),
@@ -154,6 +216,52 @@ export const docSignaturesRelations = relations(docSignatures, ({ one }) => ({
   }),
 }));
 
+export const conversationsRelations = relations(conversations, ({ one, many }) => ({
+  initiator: one(users, {
+    fields: [conversations.initiatorId],
+    references: [users.id],
+  }),
+  stand: one(stands, {
+    fields: [conversations.standId],
+    references: [stands.id],
+  }),
+  messages: many(conversationMessages),
+}));
+
+export const conversationMessagesRelations = relations(conversationMessages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [conversationMessages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(users, {
+    fields: [conversationMessages.senderId],
+    references: [users.id],
+  }),
+}));
+
+export const incidentsRelations = relations(incidents, ({ one, many }) => ({
+  reporter: one(users, {
+    fields: [incidents.reporterId],
+    references: [users.id],
+  }),
+  stand: one(stands, {
+    fields: [incidents.standId],
+    references: [stands.id],
+  }),
+  notifications: many(incidentNotifications),
+}));
+
+export const incidentNotificationsRelations = relations(incidentNotifications, ({ one }) => ({
+  incident: one(incidents, {
+    fields: [incidentNotifications.incidentId],
+    references: [incidents.id],
+  }),
+  user: one(users, {
+    fields: [incidentNotifications.userId],
+    references: [users.id],
+  }),
+}));
+
 // Insert Schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertStandSchema = createInsertSchema(stands);
@@ -164,6 +272,11 @@ export const insertNpoSchema = createInsertSchema(npos).omit({ id: true });
 export const insertStaffingGroupSchema = createInsertSchema(staffingGroups).omit({ id: true });
 export const insertSupervisorDocSchema = createInsertSchema(supervisorDocs).omit({ id: true });
 export const insertDocSignatureSchema = createInsertSchema(docSignatures).omit({ id: true, signedAt: true });
+export const insertQuickMessageSchema = createInsertSchema(quickMessages).omit({ id: true });
+export const insertConversationSchema = createInsertSchema(conversations).omit({ id: true, createdAt: true, lastMessageAt: true });
+export const insertConversationMessageSchema = createInsertSchema(conversationMessages).omit({ id: true, createdAt: true });
+export const insertIncidentSchema = createInsertSchema(incidents).omit({ id: true, createdAt: true, resolvedAt: true });
+export const insertIncidentNotificationSchema = createInsertSchema(incidentNotifications).omit({ id: true, createdAt: true, readAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -184,3 +297,13 @@ export type SupervisorDoc = typeof supervisorDocs.$inferSelect;
 export type InsertSupervisorDoc = z.infer<typeof insertSupervisorDocSchema>;
 export type DocSignature = typeof docSignatures.$inferSelect;
 export type InsertDocSignature = z.infer<typeof insertDocSignatureSchema>;
+export type QuickMessage = typeof quickMessages.$inferSelect;
+export type InsertQuickMessage = z.infer<typeof insertQuickMessageSchema>;
+export type Conversation = typeof conversations.$inferSelect;
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
+export type ConversationMessage = typeof conversationMessages.$inferSelect;
+export type InsertConversationMessage = z.infer<typeof insertConversationMessageSchema>;
+export type Incident = typeof incidents.$inferSelect;
+export type InsertIncident = z.infer<typeof insertIncidentSchema>;
+export type IncidentNotification = typeof incidentNotifications.$inferSelect;
+export type InsertIncidentNotification = z.infer<typeof insertIncidentNotificationSchema>;
