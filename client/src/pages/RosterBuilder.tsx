@@ -1,4 +1,4 @@
-import { useStore, SECTIONS, MOCK_USERS, MOCK_NPOS } from "@/lib/mockData";
+import { useStore, SECTIONS } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, Plus, Users, Save, Trash2 } from "lucide-react";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +16,12 @@ import { useToast } from "@/hooks/use-toast";
 export default function RosterBuilder() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { stands, createStaffingGroup, staffingGroups, npos } = useStore();
+  const stands = useStore((state) => state.stands);
+  const users = useStore((state) => state.users);
+  const npos = useStore((state) => state.npos);
+  const createStaffingGroup = useStore((state) => state.createStaffingGroup);
+  const staffingGroups = useStore((state) => state.staffingGroups);
+  const fetchAll = useStore((state) => state.fetchAll);
   
   const [groupName, setGroupName] = useState("");
   const [selectedSupervisor, setSelectedSupervisor] = useState("");
@@ -24,7 +29,13 @@ export default function RosterBuilder() {
   const [selectedStands, setSelectedStands] = useState<string[]>([]);
   const [filterSection, setFilterSection] = useState<string>("all");
 
-  const supervisors = MOCK_USERS.filter(u => u.role === 'Supervisor');
+  useEffect(() => {
+    if (users.length === 0) {
+      fetchAll();
+    }
+  }, [users.length, fetchAll]);
+
+  const supervisors = users.filter(u => u.role === 'Supervisor');
 
   const handleCreateGroup = () => {
     if (!groupName || !selectedSupervisor || selectedStands.length === 0) {
@@ -153,7 +164,7 @@ export default function RosterBuilder() {
                       <Badge variant="secondary" className="text-[10px]">{group.standIds.length} Stands</Badge>
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
-                      Sup: {MOCK_USERS.find(u => u.id === group.supervisorId)?.name}
+                      Sup: {users.find(u => u.id === group.supervisorId)?.name}
                     </div>
                     {group.npoId && (
                        <div className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">

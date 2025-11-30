@@ -44,8 +44,8 @@ export default function LoginPage() {
     }
   }, [currentUser, setLocation, login]);
 
-  function onSubmit(values: z.infer<typeof loginSchema>) {
-    const success = login(values.pin);
+  async function onSubmit(values: z.infer<typeof loginSchema>) {
+    const success = await login(values.pin);
     if (!success) {
       form.setError("pin", { message: "Invalid PIN" });
     }

@@ -1,7 +1,7 @@
-import { useStore, ITEMS, SUPERVISOR_PACK_DOCS } from "@/lib/mockData";
+import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, ChevronLeft, ChevronRight, Calculator, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool } from "lucide-react";
+import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2 } from "lucide-react";
 import { useLocation } from "wouter";
 import {
   Accordion,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Webcam from "react-webcam";
 import { Badge } from "@/components/ui/badge";
 
@@ -19,8 +19,19 @@ export default function SupervisorDashboard() {
   const logout = useStore((state) => state.logout);
   const [, setLocation] = useLocation();
   const stands = useStore((state) => state.stands);
+  const items = useStore((state) => state.items);
+  const supervisorDocs = useStore((state) => state.supervisorDocs);
   const currentUser = useStore((state) => state.currentUser);
   const updateCount = useStore((state) => state.updateCount);
+  const countSheets = useStore((state) => state.countSheets);
+  const fetchAll = useStore((state) => state.fetchAll);
+  const isLoading = useStore((state) => state.isLoading);
+
+  useEffect(() => {
+    if (stands.length === 0) {
+      fetchAll();
+    }
+  }, [stands.length, fetchAll]);
   
   // Filter stands for this supervisor
   const myStands = stands.filter(s => s.supervisorId === currentUser?.id);
@@ -65,7 +76,7 @@ export default function SupervisorDashboard() {
                      </div>
                    </AccordionTrigger>
                    <AccordionContent className="space-y-2 pt-2">
-                     {SUPERVISOR_PACK_DOCS.filter(d => d.category === 'Compliance').map(doc => (
+                     {supervisorDocs.filter(d => d.category === 'Compliance').map(doc => (
                        <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-md border">
                          <span className="text-sm font-medium">{doc.title}</span>
                          {doc.requiresSignature && (
@@ -87,7 +98,7 @@ export default function SupervisorDashboard() {
                      </div>
                    </AccordionTrigger>
                    <AccordionContent className="space-y-2 pt-2">
-                      {SUPERVISOR_PACK_DOCS.filter(d => d.category === 'Checklist').map(doc => (
+                      {supervisorDocs.filter(d => d.category === 'Checklist').map(doc => (
                        <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-md border">
                          <span className="text-sm font-medium">{doc.title}</span>
                          <Button size="sm" variant="ghost" className="h-6 text-xs">View</Button>
@@ -106,7 +117,7 @@ export default function SupervisorDashboard() {
                    </AccordionTrigger>
                    <AccordionContent className="pt-2">
                       <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-md border text-sm whitespace-pre-line font-mono">
-                        {SUPERVISOR_PACK_DOCS.find(d => d.category === 'Contact')?.content}
+                        {supervisorDocs.find(d => d.category === 'Contact')?.content || 'No contacts available'}
                       </div>
                    </AccordionContent>
                  </AccordionItem>
@@ -190,8 +201,9 @@ export default function SupervisorDashboard() {
             </div>
 
             <Accordion type="single" collapsible className="w-full space-y-2">
-              {ITEMS.map(item => {
-                 const count = activeStand?.countSheet?.[item.id] || { startCount: 0, adds: 0, endCount: 0, spoilage: 0, sold: 0 };
+              {items.map(item => {
+                 const standCounts = countSheets[activeStandId!] || {};
+                 const count = standCounts[item.id] || { startCount: 0, adds: 0, endCount: 0, spoilage: 0, sold: 0 };
                  
                  return (
                   <AccordionItem key={item.id} value={item.id} className="bg-white dark:bg-slate-900 border rounded-lg px-4 shadow-sm">
@@ -266,7 +278,7 @@ export default function SupervisorDashboard() {
                 </div>
 
                 <div className="grid gap-4">
-                   {SUPERVISOR_PACK_DOCS.map(doc => (
+                   {supervisorDocs.map(doc => (
                      <div key={doc.id} className="border rounded-lg p-4 bg-white dark:bg-slate-900 flex items-center justify-between shadow-sm">
                        <div className="flex items-center gap-3">
                          {doc.category === 'Compliance' ? <AlertCircle className="text-amber-500" /> : 

@@ -1,7 +1,7 @@
 import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, Package, Users, ClipboardCheck, FileBarChart, Menu, MessageSquare } from "lucide-react";
+import { LogOut, Package, Users, ClipboardCheck, FileBarChart, Menu, MessageSquare, LayoutDashboard } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
   Sheet,
@@ -10,11 +10,19 @@ import {
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StaffingGrid } from "@/components/StaffingGrid";
+import { useEffect } from "react";
 
 export default function AdminDashboard() {
   const logout = useStore((state) => state.logout);
   const [, setLocation] = useLocation();
   const stands = useStore((state) => state.stands);
+  const fetchAll = useStore((state) => state.fetchAll);
+
+  useEffect(() => {
+    if (stands.length === 0) {
+      fetchAll();
+    }
+  }, [stands.length, fetchAll]);
 
   const handleLogout = () => {
     logout();
@@ -158,5 +166,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-import { LayoutDashboard } from "lucide-react";

@@ -1,4 +1,4 @@
-import { useStore, MOCK_USERS } from "@/lib/mockData";
+import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,11 +7,21 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Send, ArrowLeft, User as UserIcon, Shield, Briefcase, Monitor } from "lucide-react";
 import { useLocation } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function MessagesPage() {
   const [, setLocation] = useLocation();
-  const { messages, addMessage, currentUser } = useStore();
+  const messages = useStore((state) => state.messages);
+  const users = useStore((state) => state.users);
+  const addMessage = useStore((state) => state.addMessage);
+  const currentUser = useStore((state) => state.currentUser);
+  const fetchAll = useStore((state) => state.fetchAll);
+
+  useEffect(() => {
+    if (users.length === 0) {
+      fetchAll();
+    }
+  }, [users.length, fetchAll]);
   const [newMessage, setNewMessage] = useState("");
 
   const handleSend = (e: React.FormEvent) => {
@@ -52,7 +62,7 @@ export default function MessagesPage() {
         </Button>
         <div className="font-bold text-lg flex-1">Team Communication</div>
         <div className="flex -space-x-2 overflow-hidden">
-           {MOCK_USERS.filter(u => u.isOnline).map(u => (
+           {users.filter(u => u.isOnline).map(u => (
              <div key={u.id} className="relative inline-block border-2 border-white dark:border-slate-900 rounded-full" title={`${u.name} (${u.role})`}>
                 <Avatar className="h-8 w-8">
                   <AvatarFallback className={`text-[10px] font-bold ${getRoleColor(u.role)}`}>
@@ -70,21 +80,24 @@ export default function MessagesPage() {
           <div className="space-y-4 pb-4">
             {messages.map((msg) => {
               const isMe = msg.senderId === currentUser?.id;
+              const sender = users.find(u => u.id === msg.senderId);
+              const senderName = sender?.name || 'Unknown';
+              const senderRole = sender?.role || 'Worker';
               return (
                 <div key={msg.id} className={`flex gap-3 ${isMe ? 'flex-row-reverse' : ''}`}>
                   <Avatar className="h-8 w-8 mt-1">
-                    <AvatarFallback className={`text-[10px] font-bold ${getRoleColor(msg.senderRole)}`}>
-                      {msg.senderName.substring(0, 2).toUpperCase()}
+                    <AvatarFallback className={`text-[10px] font-bold ${getRoleColor(senderRole)}`}>
+                      {senderName.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className={`flex flex-col max-w-[80%] ${isMe ? 'items-end' : 'items-start'}`}>
                     <div className="flex items-center gap-2 mb-1">
-                       <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{msg.senderName}</span>
-                       <Badge variant="outline" className={`h-4 px-1 text-[9px] gap-1 ${getRoleColor(msg.senderRole)}`}>
-                          {getRoleIcon(msg.senderRole)}
-                          {msg.senderRole}
+                       <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{senderName}</span>
+                       <Badge variant="outline" className={`h-4 px-1 text-[9px] gap-1 ${getRoleColor(senderRole)}`}>
+                          {getRoleIcon(senderRole)}
+                          {senderRole}
                        </Badge>
-                       <span className="text-[10px] text-muted-foreground">{msg.timestamp}</span>
+                       <span className="text-[10px] text-muted-foreground">{msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</span>
                     </div>
                     <div className={`p-3 rounded-2xl text-sm ${
                       isMe 
