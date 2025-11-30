@@ -116,6 +116,22 @@ When NPO Worker leaves stand boundary:
 - **API Endpoint**: POST /api/ocr/scan for image processing
 - **Text Extraction**: Returns text, confidence scores, and word positions
 
+### Supervisor Closing Workflow
+- **Closeout Tab**: Integrated into Supervisor Dashboard after selecting a stand
+- **Equipment Shutdown Checklist**: 16 default tasks including:
+  - Grease Pit, Hood Vent, Oven, Cheese Warmer off/unplugged
+  - Hot Dog Roller, Nacho Warmer, CO2, Beer Taps closed
+  - Lights, Fans, POS Terminals, Cash Registers secured
+  - Coolers checked, Trash removed, Counters wiped
+  - **Stanchions Removed/Delegated** (crowd control posts)
+- **Spoilage Log**: Track items thrown away, returned, damaged, or expired
+  - Reasons: ThrownAway, Returned, Damaged, Expired, Other
+  - Quantity and notes per item
+- **Voucher Summary**: Track $10 employee meal vouchers collected
+  - Voucher count and total amount
+  - Envelope ID or notes field
+- **All sections submit independently** and persist by event/stand
+
 ## Project Structure
 ```
 ├── client/src/          # React frontend
@@ -148,6 +164,8 @@ When NPO Worker leaves stand boundary:
 - Workflow rule: Jason approves all changes
 
 ## Recent Changes
+- 2024-11-30: Supervisor closing workflow with equipment checklist (including stanchions), spoilage log, and voucher tracking
+- 2024-11-30: Paper Count Sheet Scanner using GPT-4o Vision for reading handwritten count sheets
 - 2024-11-30: Three-stage inventory count workflow (Pre-event, Post-event, Day-after) with counter identity tracking
 - 2024-11-30: CounterLogin component for counter authentication via last 4 phone digits
 - 2024-11-30: CountSheet component with category accordion, session tracking, and progress display
