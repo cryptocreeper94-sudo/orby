@@ -96,6 +96,26 @@ export default function DevDashboard() {
           <Button variant="secondary" onClick={() => window.location.reload()}>
             Force Refresh App
           </Button>
+          <Button 
+            variant="outline" 
+            className="border-green-800 text-green-400 hover:bg-green-900/20"
+            onClick={() => {
+              localStorage.setItem("stadiumops_dev_bypass", "true");
+              alert("Auto-Bypass Enabled! Next time you visit Login, you will be redirected here.");
+            }}
+          >
+            Enable Auto-Bypass
+          </Button>
+          <Button 
+            variant="outline" 
+            className="border-red-800 text-red-400 hover:bg-red-900/20"
+            onClick={() => {
+              localStorage.removeItem("stadiumops_dev_bypass");
+              alert("Auto-Bypass Disabled.");
+            }}
+          >
+            Disable Auto-Bypass
+          </Button>
           <Button variant="destructive" onClick={() => { localStorage.clear(); window.location.reload(); }}>
             Clear Local Storage & Reset
           </Button>

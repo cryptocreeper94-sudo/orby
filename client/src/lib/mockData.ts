@@ -99,7 +99,7 @@ export const MOCK_USERS: User[] = [
   { id: '2', name: 'Sup. Sarah', role: 'Supervisor', pin: '5678', isOnline: true },
   { id: '3', name: 'Sup. Mike', role: 'Supervisor', pin: '9012', isOnline: false },
   { id: '4', name: 'IT Support', role: 'IT', pin: '9999', isOnline: true },
-  { id: '0', name: 'Developer', role: 'Admin', pin: '0000', isOnline: true }, // Dev Access
+  { id: '0', name: 'Developer', role: 'Admin', pin: '0424', isOnline: true }, // Dev Access
 ];
 
 export const MOCK_NPOS: NPO[] = [
