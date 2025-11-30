@@ -92,12 +92,11 @@ export function StaffingGrid() {
                       <TableHead className="w-[80px] font-bold text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-900 z-10 border-r">Section</TableHead>
                       <TableHead className="w-[80px] font-bold text-slate-900 dark:text-slate-100 sticky left-[80px] bg-white dark:bg-slate-900 z-10 border-r">ID</TableHead>
                       <TableHead className="w-[200px] font-bold text-slate-900 dark:text-slate-100 sticky left-[160px] bg-white dark:bg-slate-900 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Stand Name</TableHead>
-                      {/* Mock Columns for POS IDs based on images */}
-                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50">POS 1</TableHead>
-                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50">POS 2</TableHead>
-                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50">POS 3</TableHead>
-                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50">POS 4</TableHead>
-                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50">Rear</TableHead>
+                      {/* Device Columns based on PAX models */}
+                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50 text-xs font-black text-slate-500">E700</TableHead>
+                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50 text-xs font-black text-slate-500">A930</TableHead>
+                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50 text-xs font-black text-slate-500">Spare</TableHead>
+                      <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50 text-xs font-black text-slate-500">Rear</TableHead>
                       <TableHead className="text-center w-[100px]">Status</TableHead>
                     </TableRow>
                   </TableHeader>
