@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   FileText, TrendingDown, TrendingUp, Package, X, Download, 
-  AlertCircle, Loader2, Check
+  AlertCircle, Loader2, Check, Printer
 } from 'lucide-react';
 import {
   Accordion,
@@ -12,6 +12,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 interface VarianceItem {
   itemId: string;
@@ -80,35 +82,91 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
   const categorizedReport = groupByCategory(report);
   const totals = getTotals();
 
-  const exportReport = () => {
-    const headers = ['Item', 'Category', 'Started', 'Added', 'Ended', 'Used', 'Spoilage'];
-    const rows = report.map(item => [
-      item.itemName,
-      item.category,
-      item.preEventCount,
-      item.adds,
-      item.postEventCount,
-      item.used,
-      item.spoilage
-    ]);
+  const generatePDF = (): jsPDF => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
     
-    const csv = [
-      `Variance Report - ${standName}`,
-      `Event Date: ${eventDate}`,
-      '',
-      headers.join(','),
-      ...rows.map(row => row.join(',')),
-      '',
-      `TOTALS,, ${totals.started}, ${totals.added}, ${totals.ended}, ${totals.used}, ${totals.spoilage}`
-    ].join('\n');
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Inventory Variance Report', pageWidth / 2, 20, { align: 'center' });
     
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `variance-report-${standId}-${eventDate.replace(/\//g, '-')}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Stand: ${standName}`, 20, 35);
+    doc.text(`Event Date: ${eventDate}`, 20, 42);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 49);
+    
+    doc.setDrawColor(200);
+    doc.line(20, 55, pageWidth - 20, 55);
+    
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Summary Totals', 20, 65);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Started: ${totals.started}  |  Added: ${totals.added}  |  Ended: ${totals.ended}  |  Used/Sold: ${totals.used}  |  Spoilage: ${totals.spoilage}`, 20, 73);
+    
+    let yPos = 85;
+    
+    Object.entries(categorizedReport).forEach(([category, items]) => {
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text(category, 20, yPos);
+      yPos += 5;
+      
+      const tableData = items.map(item => [
+        item.itemName,
+        item.preEventCount.toString(),
+        item.adds.toString(),
+        item.postEventCount.toString(),
+        item.used.toString(),
+        item.spoilage.toString()
+      ]);
+      
+      (doc as any).autoTable({
+        startY: yPos,
+        head: [['Item', 'Started', 'Added', 'Ended', 'Used', 'Spoilage']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246], fontSize: 9 },
+        bodyStyles: { fontSize: 9 },
+        margin: { left: 20, right: 20 },
+        columnStyles: {
+          0: { cellWidth: 60 },
+          1: { cellWidth: 20, halign: 'center' },
+          2: { cellWidth: 20, halign: 'center' },
+          3: { cellWidth: 20, halign: 'center' },
+          4: { cellWidth: 20, halign: 'center' },
+          5: { cellWidth: 20, halign: 'center' }
+        }
+      });
+      
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+    });
+    
+    return doc;
+  };
+
+  const downloadPDF = () => {
+    const doc = generatePDF();
+    doc.save(`variance-report-${standId}-${eventDate.replace(/\//g, '-')}.pdf`);
+  };
+
+  const printPDF = () => {
+    const doc = generatePDF();
+    const pdfBlob = doc.output('blob');
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    const printWindow = window.open(pdfUrl, '_blank');
+    if (printWindow) {
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+    }
   };
 
   return (
@@ -126,12 +184,22 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
             <Button 
               variant="outline" 
               size="sm" 
-              onClick={exportReport}
+              onClick={downloadPDF}
               disabled={isLoading || report.length === 0}
-              data-testid="button-export-report"
+              data-testid="button-download-pdf"
             >
               <Download className="w-4 h-4 mr-1" />
-              Export
+              PDF
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={printPDF}
+              disabled={isLoading || report.length === 0}
+              data-testid="button-print-report"
+            >
+              <Printer className="w-4 h-4 mr-1" />
+              Print
             </Button>
             <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-report">
               <X className="w-5 h-5" />

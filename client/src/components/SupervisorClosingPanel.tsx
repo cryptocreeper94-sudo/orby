@@ -23,6 +23,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 interface ChecklistTask {
   id: string;
@@ -286,6 +287,187 @@ export function SupervisorClosingPanel({
     }
   };
 
+  const generateSpoilagePDF = (): jsPDF => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Spoilage Report', pageWidth / 2, 20, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Stand: ${standName}`, 20, 35);
+    doc.text(`Event Date: ${eventDate}`, 20, 42);
+    doc.text(`Supervisor: ${supervisorName || 'N/A'}`, 20, 49);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 56);
+    
+    doc.setDrawColor(200);
+    doc.line(20, 62, pageWidth - 20, 62);
+    
+    if (spoilageItems.length === 0) {
+      doc.setFontSize(12);
+      doc.text('No spoilage items reported for this event.', 20, 75);
+    } else {
+      const tableData = spoilageItems.map(item => [
+        item.itemName,
+        item.quantity.toString(),
+        SPOILAGE_REASONS.find(r => r.value === item.reason)?.label || item.reason,
+        item.notes || '-'
+      ]);
+      
+      (doc as any).autoTable({
+        startY: 70,
+        head: [['Item', 'Qty', 'Reason', 'Notes']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [220, 38, 38], fontSize: 10 },
+        bodyStyles: { fontSize: 10 },
+        margin: { left: 20, right: 20 },
+        columnStyles: {
+          0: { cellWidth: 50 },
+          1: { cellWidth: 20, halign: 'center' },
+          2: { cellWidth: 35 },
+          3: { cellWidth: 60 }
+        }
+      });
+      
+      const totalItems = spoilageItems.reduce((sum, item) => sum + item.quantity, 0);
+      let yPos = (doc as any).lastAutoTable.finalY + 15;
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Total Items: ${totalItems}`, 20, yPos);
+    }
+    
+    return doc;
+  };
+
+  const downloadSpoilagePDF = () => {
+    const doc = generateSpoilagePDF();
+    doc.save(`spoilage-report-${standId}-${eventDate.replace(/\//g, '-')}.pdf`);
+  };
+
+  const submitSpoilageToOps = async () => {
+    if (!spoilageReportId) return;
+    setSaving(true);
+    setError(null);
+    
+    try {
+      const doc = generateSpoilagePDF();
+      const pdfData = doc.output('datauristring');
+      
+      const res = await fetch('/api/document-submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentType: 'SpoilageReport',
+          standId,
+          eventDate,
+          submittedById: supervisorId,
+          submittedByName: supervisorName,
+          pdfData
+        })
+      });
+      
+      if (!res.ok) throw new Error('Failed to submit');
+      
+      await fetch(`/api/spoilage-reports/${spoilageReportId}/submit`, { method: 'PATCH' });
+      setSpoilageSubmitted(true);
+      setSuccessMessage('Spoilage report submitted to Operations Manager!');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError('Failed to submit spoilage report');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const generateVoucherPDF = (): jsPDF => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Employee Meal Voucher Summary', pageWidth / 2, 20, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Stand: ${standName}`, 20, 35);
+    doc.text(`Event Date: ${eventDate}`, 20, 42);
+    doc.text(`Supervisor: ${supervisorName || 'N/A'}`, 20, 49);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, 56);
+    
+    doc.setDrawColor(200);
+    doc.line(20, 62, pageWidth - 20, 62);
+    
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Voucher Collection Summary', 20, 78);
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Number of Vouchers Collected: ${voucherCount}`, 30, 92);
+    doc.text(`Voucher Value: $10.00 each`, 30, 102);
+    doc.text(`Total Amount: $${voucherTotal.toFixed(2)}`, 30, 112);
+    
+    if (voucherNotes) {
+      doc.text('Notes:', 30, 130);
+      const splitNotes = doc.splitTextToSize(voucherNotes, pageWidth - 60);
+      doc.text(splitNotes, 30, 140);
+    }
+    
+    let yPos = voucherNotes ? 160 + (doc.splitTextToSize(voucherNotes, pageWidth - 60).length * 6) : 140;
+    doc.setDrawColor(200);
+    doc.line(20, yPos, pageWidth - 20, yPos);
+    yPos += 15;
+    
+    doc.setFontSize(10);
+    doc.text('Supervisor Signature: _______________________________', 20, yPos);
+    yPos += 10;
+    doc.text('Date/Time: _______________________________', 20, yPos);
+    
+    return doc;
+  };
+
+  const downloadVoucherPDF = () => {
+    const doc = generateVoucherPDF();
+    doc.save(`voucher-report-${standId}-${eventDate.replace(/\//g, '-')}.pdf`);
+  };
+
+  const submitVoucherToOps = async () => {
+    if (!voucherReportId) return;
+    setSaving(true);
+    setError(null);
+    
+    try {
+      const doc = generateVoucherPDF();
+      const pdfData = doc.output('datauristring');
+      
+      const res = await fetch('/api/document-submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentType: 'VoucherReport',
+          standId,
+          eventDate,
+          submittedById: supervisorId,
+          submittedByName: supervisorName,
+          pdfData
+        })
+      });
+      
+      if (!res.ok) throw new Error('Failed to submit');
+      
+      await fetch(`/api/voucher-reports/${voucherReportId}/submit`, { method: 'PATCH' });
+      setVoucherSubmitted(true);
+      setSuccessMessage('Voucher report submitted to Operations Manager!');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError('Failed to submit voucher report');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const startSpoilageReport = async () => {
     setSaving(true);
     try {
@@ -338,21 +520,6 @@ export function SupervisorClosingPanel({
     }
   };
 
-  const submitSpoilageReport = async () => {
-    if (!spoilageReportId) return;
-    setSaving(true);
-    try {
-      await fetch(`/api/spoilage-reports/${spoilageReportId}/submit`, {
-        method: 'PATCH'
-      });
-      setSpoilageSubmitted(true);
-    } catch (err) {
-      setError('Failed to submit spoilage report');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const startVoucherReport = async () => {
     setSaving(true);
     try {
@@ -385,22 +552,6 @@ export function SupervisorClosingPanel({
       });
     } catch (err) {
       setError('Failed to update voucher report');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const submitVoucherReport = async () => {
-    if (!voucherReportId) return;
-    setSaving(true);
-    try {
-      await updateVoucherReport();
-      await fetch(`/api/voucher-reports/${voucherReportId}/submit`, {
-        method: 'PATCH'
-      });
-      setVoucherSubmitted(true);
-    } catch (err) {
-      setError('Failed to submit voucher report');
     } finally {
       setSaving(false);
     }
@@ -687,24 +838,33 @@ export function SupervisorClosingPanel({
                   )}
                 </div>
 
-                {!spoilageSubmitted && (
+                <div className="flex gap-2">
                   <Button 
-                    onClick={submitSpoilageReport} 
-                    disabled={saving}
-                    className="w-full bg-green-600 hover:bg-green-700"
-                    data-testid="submit-spoilage"
+                    variant="outline"
+                    onClick={downloadSpoilagePDF}
+                    className="flex-1"
+                    data-testid="download-spoilage-pdf"
                   >
-                    {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
-                    Submit Spoilage Report
+                    <FileText className="h-4 w-4 mr-2" />
+                    Download PDF
                   </Button>
-                )}
-
-                {spoilageSubmitted && (
-                  <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg">
-                    <CheckCircle className="h-5 w-5" />
-                    <span className="font-medium">Spoilage Report Submitted</span>
-                  </div>
-                )}
+                  {!spoilageSubmitted ? (
+                    <Button 
+                      onClick={submitSpoilageToOps} 
+                      disabled={saving}
+                      className="flex-1 bg-green-600 hover:bg-green-700"
+                      data-testid="submit-spoilage"
+                    >
+                      {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                      Send to Ops Manager
+                    </Button>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg">
+                      <CheckCircle className="h-5 w-5" />
+                      <span className="font-medium">Submitted</span>
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </TabsContent>
@@ -790,36 +950,45 @@ export function SupervisorClosingPanel({
                   />
                 </div>
 
-                {!voucherSubmitted && (
-                  <div className="space-y-2">
-                    <Button 
-                      onClick={updateVoucherReport} 
-                      disabled={saving}
-                      variant="outline"
-                      className="w-full"
-                      data-testid="save-vouchers"
-                    >
-                      {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                      Save Draft
-                    </Button>
-                    <Button 
-                      onClick={submitVoucherReport} 
-                      disabled={saving}
-                      className="w-full bg-green-600 hover:bg-green-700"
-                      data-testid="submit-vouchers"
-                    >
-                      {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <CheckCircle className="h-4 w-4 mr-2" />}
-                      Submit Voucher Report
-                    </Button>
-                  </div>
-                )}
-
-                {voucherSubmitted && (
-                  <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg">
-                    <CheckCircle className="h-5 w-5" />
-                    <span className="font-medium">Voucher Report Submitted</span>
-                  </div>
-                )}
+                <div className="space-y-2">
+                  <Button 
+                    variant="outline"
+                    onClick={downloadVoucherPDF}
+                    className="w-full"
+                    data-testid="download-voucher-pdf"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Download PDF
+                  </Button>
+                  {!voucherSubmitted ? (
+                    <>
+                      <Button 
+                        onClick={updateVoucherReport} 
+                        disabled={saving}
+                        variant="outline"
+                        className="w-full"
+                        data-testid="save-vouchers"
+                      >
+                        {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                        Save Draft
+                      </Button>
+                      <Button 
+                        onClick={submitVoucherToOps} 
+                        disabled={saving}
+                        className="w-full bg-green-600 hover:bg-green-700"
+                        data-testid="submit-vouchers"
+                      >
+                        {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                        Send to Ops Manager
+                      </Button>
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg">
+                      <CheckCircle className="h-5 w-5" />
+                      <span className="font-medium">Submitted to Ops Manager</span>
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </TabsContent>

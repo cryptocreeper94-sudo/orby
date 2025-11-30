@@ -164,6 +164,9 @@ When NPO Worker leaves stand boundary:
 - Workflow rule: Jason approves all changes
 
 ## Recent Changes
+- 2024-11-30: Comprehensive PDF export added across all documents (variance reports, spoilage, voucher, count sheets)
+- 2024-11-30: Created reusable pdfUtils.ts library for consistent PDF generation
+- 2024-11-30: All supervisor documents now downloadable and printable
 - 2024-11-30: PDF generation and submission for closing checklists and alcohol compliance sheets to Operations Manager
 - 2024-11-30: Operations Manager role added with initial PIN 7777
 - 2024-11-30: Supervisor closing workflow with equipment checklist (including stanchions), spoilage log, and voucher tracking
