@@ -64,7 +64,24 @@ export interface StandGroup {
   npoId?: string; // Assigned NPO
 }
 
+export interface SupervisorDoc {
+  id: string;
+  title: string;
+  category: 'Compliance' | 'Checklist' | 'Reference' | 'Contact';
+  requiresSignature?: boolean;
+  signed?: boolean;
+  content?: string; // For simple text content
+  imageUrl?: string; // For image-based docs
+}
+
 // Mock Data
+export const SUPERVISOR_PACK_DOCS: SupervisorDoc[] = [
+  { id: '1', title: 'Alcohol Compliance Sheet', category: 'Compliance', requiresSignature: true, signed: false },
+  { id: '2', title: 'Bartender Checklist', category: 'Checklist', requiresSignature: false },
+  { id: '3', title: 'Emergency Contacts', category: 'Contact', content: 'Security: 555-0199\nMedical: 555-0198\nMaintenance: 555-0197' },
+  { id: '4', title: 'Stand Opening Procedures', category: 'Reference', requiresSignature: false },
+];
+
 export const SECTIONS = ["2 East", "2 West", "7 East", "7 West"];
 
 export const ITEMS: Item[] = [
