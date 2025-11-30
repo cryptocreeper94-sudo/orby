@@ -110,12 +110,15 @@ export function StaffingGrid() {
                         </TableCell>
                         
                         {/* Render Staffing/POS Data */}
-                        {/* This is a simplification. Real app would map distinct POS IDs dynamically */}
                         <TableCell className="text-center border-r border-dashed p-1">
-                           <div className="bg-slate-100 dark:bg-slate-800 rounded py-1 text-xs font-mono">2</div>
+                           <div className="bg-slate-100 dark:bg-slate-800 rounded py-1 text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+                             {stand.e700 || '-'}
+                           </div>
                         </TableCell>
                         <TableCell className="text-center border-r border-dashed p-1">
-                           <div className="bg-slate-100 dark:bg-slate-800 rounded py-1 text-xs font-mono">1</div>
+                           <div className="bg-slate-100 dark:bg-slate-800 rounded py-1 text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+                             {stand.a930 || '-'}
+                           </div>
                         </TableCell>
                          <TableCell className="text-center border-r border-dashed p-1">
                            {/* Empty cell example */}
