@@ -25,6 +25,7 @@ StadiumOps is a full-stack PWA utilizing a React frontend and an Express backend
 - **Incident Reporting:** A unified system for all roles to report incidents, supporting photo/video attachments and auto-notifying supervisors and admins.
 - **Stand Issue Reporting:** Categorized issue reporting (e.g., Cooling, Beverage, Power, FoodSafety) with auto-routing to relevant management roles (e.g., Warehouse Manager, Operations Manager, Kitchen Manager) and severity levels including emergency escalations.
 - **Variance Reporting:** API for calculating and displaying inventory variance (Started, Added, Ended, Used, Spoilage) with CSV export.
+- **Menu Board Creator:** Built-in slide editor for Operations Manager to create digital menu boards. Supports text, prices, and divider elements with customizable colors, fonts, and positioning. Includes 5 pre-built templates (Classic Dark, Stadium Blue, Modern Red, Clean White, Concession Gold). Export slides as PNG images for USB transfer to digital displays.
 
 **Project Structure:**
 - `client/`: React frontend (pages, components, Zustand store)
