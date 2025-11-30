@@ -1,0 +1,38 @@
+{
+  "name": "StadiumOps",
+  "short_name": "StadiumOps",
+  "description": "Stadium inventory and staffing management system",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Admin Dashboard",
+      "url": "/admin",
+      "description": "Access admin controls"
+    },
+    {
+      "name": "Supervisor View",
+      "url": "/supervisor",
+      "description": "Access supervisor dashboard"
+    }
+  ]
+}

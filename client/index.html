@@ -2,19 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+    <title>StadiumOps</title>
 
-    <meta property="og:title" content="StadiumOps Inventory" />
-    <meta property="og:description" content="Stadium inventory and compliance management system." />
+    <!-- PWA Meta Tags -->
+    <meta name="application-name" content="StadiumOps" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="StadiumOps" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="msapplication-TileColor" content="#0f172a" />
+
+    <!-- Open Graph / Social -->
+    <meta property="og:title" content="StadiumOps" />
+    <meta property="og:description" content="Stadium inventory and staffing management system. Powered by DarkWave Studios, LLC." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://replit.com/public/images/opengraph.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@replit" />
-    <meta name="twitter:title" content="StadiumOps Inventory" />
-    <meta name="twitter:description" content="Stadium inventory and compliance management system." />
+    <meta name="twitter:title" content="StadiumOps" />
+    <meta name="twitter:description" content="Stadium inventory and staffing management system. Powered by DarkWave Studios, LLC." />
     <meta name="twitter:image" content="https://replit.com/public/images/opengraph.png" />
 
+    <!-- PWA Manifest & Icons -->
+    <link rel="manifest" href="/manifest.json" />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
@@ -22,5 +38,14 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((reg) => console.log('SW registered:', reg.scope))
+            .catch((err) => console.log('SW registration failed:', err));
+        });
+      }
+    </script>
   </body>
 </html>
