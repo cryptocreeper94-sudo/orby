@@ -89,8 +89,9 @@ export function StaffingGrid() {
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className="w-[50px] font-bold text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-900 z-10">ID</TableHead>
-                      <TableHead className="w-[200px] font-bold text-slate-900 dark:text-slate-100 sticky left-[50px] bg-white dark:bg-slate-900 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Stand Name</TableHead>
+                      <TableHead className="w-[80px] font-bold text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-900 z-10 border-r">Section</TableHead>
+                      <TableHead className="w-[80px] font-bold text-slate-900 dark:text-slate-100 sticky left-[80px] bg-white dark:bg-slate-900 z-10 border-r">ID</TableHead>
+                      <TableHead className="w-[200px] font-bold text-slate-900 dark:text-slate-100 sticky left-[160px] bg-white dark:bg-slate-900 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Stand Name</TableHead>
                       {/* Mock Columns for POS IDs based on images */}
                       <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50">POS 1</TableHead>
                       <TableHead className="text-center w-[60px] bg-slate-50 dark:bg-slate-800/50">POS 2</TableHead>
@@ -103,8 +104,9 @@ export function StaffingGrid() {
                   <TableBody>
                     {sectionStands.map((stand) => (
                       <TableRow key={stand.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 ${stand.status === 'Closed' ? 'opacity-60 bg-red-50/50 dark:bg-red-900/10' : ''}`}>
-                        <TableCell className="font-mono font-medium sticky left-0 bg-white dark:bg-slate-900 z-10 border-r">{stand.id}</TableCell>
-                        <TableCell className="font-medium sticky left-[50px] bg-white dark:bg-slate-900 z-10 border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                        <TableCell className="font-mono font-medium sticky left-0 bg-white dark:bg-slate-900 z-10 border-r text-muted-foreground">{stand.physicalSection}</TableCell>
+                        <TableCell className="font-mono font-medium sticky left-[80px] bg-white dark:bg-slate-900 z-10 border-r">{stand.id}</TableCell>
+                        <TableCell className="font-medium sticky left-[160px] bg-white dark:bg-slate-900 z-10 border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                           {stand.name.split(' - ')[1] || stand.name}
                         </TableCell>
                         
