@@ -20,6 +20,7 @@ import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
 import { SupervisorPack } from "@/components/SupervisorPack";
 import { SupervisorClosingPanel } from "@/components/SupervisorClosingPanel";
+import { TutorialHelpButton } from "@/components/TutorialCoach";
 
 export default function SupervisorDashboard() {
   const logout = useStore((state) => state.logout);
@@ -508,6 +509,8 @@ export default function SupervisorDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+      
+      <TutorialHelpButton page="supervisor" />
     </div>
   );
 }

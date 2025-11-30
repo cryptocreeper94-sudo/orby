@@ -13,6 +13,7 @@ import { InteractiveMap } from "@/components/InteractiveMap";
 import { WalkingDirections } from "@/components/WalkingDirections";
 import { CounterLogin } from "@/components/CounterLogin";
 import { CountSheet } from "@/components/CountSheet";
+import { TutorialHelpButton } from "@/components/TutorialCoach";
 import { 
   LocationAcknowledgement, 
   useGeolocation, 
@@ -437,6 +438,8 @@ export default function NPODashboard() {
 
         <Notepad storageKey="npo-notes" title="My Shift Notes" />
       </main>
+      
+      <TutorialHelpButton page="npo" />
     </div>
   );
 }

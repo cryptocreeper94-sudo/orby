@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LogOut, Monitor, Wifi, AlertTriangle, CheckCircle2, MessageSquare } from "lucide-react";
 import { useLocation } from "wouter";
+import { TutorialHelpButton } from "@/components/TutorialCoach";
 import {
   Tabs,
   TabsContent,
@@ -97,6 +98,8 @@ export default function ITDashboard() {
         </Tabs>
 
       </main>
+      
+      <TutorialHelpButton page="it" />
     </div>
   );
 }

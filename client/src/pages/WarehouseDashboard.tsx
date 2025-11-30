@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LogOut, MessageSquare, Package, Warehouse, ArrowRight, AlertTriangle, Map } from "lucide-react";
 import { useLocation, Link } from "wouter";
+import { TutorialHelpButton } from "@/components/TutorialCoach";
 import { useEffect, useState } from "react";
 import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
@@ -151,6 +152,8 @@ export default function WarehouseDashboard() {
           </CardContent>
         </Card>
       </main>
+      
+      <TutorialHelpButton page="warehouse" />
     </div>
   );
 }

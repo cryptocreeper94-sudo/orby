@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LogOut, Package, Users, ClipboardCheck, FileBarChart, Menu, MessageSquare, LayoutDashboard, Map } from "lucide-react";
 import { useLocation, Link } from "wouter";
+import { TutorialHelpButton } from "@/components/TutorialCoach";
 import {
   Sheet,
   SheetContent,
@@ -191,6 +192,8 @@ export default function AdminDashboard() {
         <Notepad storageKey="admin-notes" />
 
       </main>
+      
+      <TutorialHelpButton page="admin" />
     </div>
   );
 }

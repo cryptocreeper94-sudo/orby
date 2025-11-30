@@ -17,6 +17,7 @@ import { InteractiveMap } from "@/components/InteractiveMap";
 import { WalkingDirections } from "@/components/WalkingDirections";
 import { CounterLogin } from "@/components/CounterLogin";
 import { CountSheet } from "@/components/CountSheet";
+import { TutorialHelpButton } from "@/components/TutorialCoach";
 import {
   Select,
   SelectContent,
@@ -498,6 +499,8 @@ export default function StandLeadDashboard() {
 
         <Notepad storageKey="standlead-notes" title="My Shift Notes" />
       </main>
+      
+      <TutorialHelpButton page="standlead" />
     </div>
   );
 }

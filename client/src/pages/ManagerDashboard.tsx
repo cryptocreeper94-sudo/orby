@@ -9,6 +9,7 @@ import {
   HelpCircle, Bell, Eye, Check
 } from "lucide-react";
 import { useLocation } from "wouter";
+import { TutorialHelpButton } from "@/components/TutorialCoach";
 import {
   Accordion,
   AccordionContent,
@@ -397,6 +398,8 @@ export default function ManagerDashboard() {
           </AccordionItem>
         </Accordion>
       </main>
+      
+      <TutorialHelpButton page="manager" />
     </div>
   );
 }
