@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/accordion";
 
 type CountStage = 'PreEvent' | 'PostEvent' | 'DayAfter';
-type CounterRole = 'NPOLead' | 'Supervisor' | 'Manager' | 'ManagerAssistant';
+type CounterRole = 'NPOLead' | 'StandLead' | 'Supervisor' | 'Manager' | 'ManagerAssistant';
 
 interface CountSession {
   id: string;
@@ -68,6 +68,7 @@ const STAGE_COLORS: Record<CountStage, string> = {
 
 const ROLE_LABELS: Record<CounterRole, string> = {
   NPOLead: 'NPO Lead',
+  StandLead: 'Stand Lead',
   Supervisor: 'Supervisor',
   Manager: 'Manager',
   ManagerAssistant: 'Mgr Asst'

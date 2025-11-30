@@ -44,6 +44,12 @@ export default function LoginPage() {
       else if (currentUser.role === 'Kitchen') setLocation("/kitchen");
       else if (currentUser.role === 'NPO') setLocation("/npo");
       else if (currentUser.role === 'TempStaff') setLocation("/temp");
+      else if (currentUser.role === 'StandLead') setLocation("/standlead");
+      else if (currentUser.role === 'WarehouseManager') setLocation("/warehouse-manager");
+      else if (currentUser.role === 'KitchenManager') setLocation("/kitchen-manager");
+      else if (currentUser.role === 'OperationsManager' || currentUser.role === 'OperationsAssistant') setLocation("/operations");
+      else if (currentUser.role === 'GeneralManager') setLocation("/manager");
+      else if (currentUser.role === 'RegionalVP') setLocation("/executive");
       else setLocation("/supervisor");
     }
   }, [currentUser, setLocation, login]);
@@ -95,7 +101,7 @@ export default function LoginPage() {
                 </Button>
                 
                 <div className="mt-6 text-center space-y-2">
-                   <p className="text-xs text-muted-foreground font-medium bg-slate-100 dark:bg-slate-800 py-2 px-3 rounded-lg">Demo PINs: Admin: 1234 | Supervisor: 5678 | IT: 9999 | Kitchen: 2222 | NPO: 3333 | Temp: 4444</p>
+                   <p className="text-xs text-muted-foreground font-medium bg-slate-100 dark:bg-slate-800 py-2 px-3 rounded-lg">Demo PINs: Supervisor: 5678 | Stand Lead: 5555 | NPO: 3333 | Gen Mgr: 1010</p>
                 </div>
               </form>
             </Form>

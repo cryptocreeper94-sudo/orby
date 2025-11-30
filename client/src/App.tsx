@@ -12,9 +12,11 @@ import WarehouseDashboard from "@/pages/WarehouseDashboard";
 import KitchenDashboard from "@/pages/KitchenDashboard";
 import NPODashboard from "@/pages/NPODashboard";
 import TempStaffDashboard from "@/pages/TempStaffDashboard";
+import StandLeadDashboard from "@/pages/StandLeadDashboard";
 import MessagesPage from "@/pages/Messages";
 import RosterBuilder from "@/pages/RosterBuilder";
 import DevDashboard from "@/pages/DevDashboard";
+import ManagerDashboard from "@/pages/ManagerDashboard";
 
 function Router() {
   return (
@@ -27,6 +29,12 @@ function Router() {
       <Route path="/kitchen" component={KitchenDashboard} />
       <Route path="/npo" component={NPODashboard} />
       <Route path="/temp" component={TempStaffDashboard} />
+      <Route path="/standlead" component={StandLeadDashboard} />
+      <Route path="/warehouse-manager" component={ManagerDashboard} />
+      <Route path="/kitchen-manager" component={ManagerDashboard} />
+      <Route path="/operations" component={ManagerDashboard} />
+      <Route path="/manager" component={ManagerDashboard} />
+      <Route path="/executive" component={ManagerDashboard} />
       <Route path="/dev" component={DevDashboard} />
       <Route path="/messages" component={MessagesPage} />
       <Route path="/roster-builder" component={RosterBuilder} />
