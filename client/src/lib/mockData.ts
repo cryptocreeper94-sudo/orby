@@ -71,7 +71,7 @@ export const MOCK_STANDS: Stand[] = [
   // 2 East
   { id: '102S', name: '102S - Moosehead', section: '2 East', supervisorId: '2', status: 'Open', staffing: { '126': 2, '122': 1 } },
   { id: '103', name: '103 - Jack Bar North', section: '2 East', supervisorId: '2', status: 'Open', staffing: { '128': 1 } },
-  { id: '104', name: '104L - Cocktails', section: '2 East', supervisorId: '2', status: 'Hot Spot', staffing: { '123': 'Hot 3' } },
+  { id: '104L', name: '104L - Cocktails', section: '2 East', supervisorId: '2', status: 'Hot Spot', staffing: { '123': 'Hot 3' } },
   { id: '105V', name: '105V - Vending MSM', section: '2 East', supervisorId: '2', status: 'Closed', staffing: { '10': 0 } },
   
   // 7 East
@@ -79,6 +79,12 @@ export const MOCK_STANDS: Stand[] = [
   { id: '309L', name: '309L - Titos', section: '7 East', supervisorId: '3', status: 'Open', staffing: { '259': 2 } },
   { id: '310F', name: '310F - Walking Taco', section: '7 East', supervisorId: '3', status: 'Needs Power', staffing: { '260': 2 } },
   
+  // 7 West
+  { id: '329B', name: '329B - Mango Cart', section: '7 West', supervisorId: '3', status: 'Open', staffing: { '291': 2 } },
+  { id: '330G', name: '330G - 615 Market', section: '7 West', supervisorId: '3', status: 'Open', staffing: { '293': 2 } },
+  { id: '331S', name: '331S - Jet', section: '7 West', supervisorId: '3', status: 'Open', staffing: { '295': 2 } },
+  { id: '332S', name: '332S - Ice Crown', section: '7 West', supervisorId: '3', status: 'Open', staffing: { '296': 2 } },
+
   // 2 West
   { id: 'OA001', name: 'OA001 - Titan Up Tailgate', section: '2 West', supervisorId: '2', status: 'Closed', staffing: { '198': 12 } },
   { id: 'OA004', name: 'OA004 - Daddys Dogs', section: '2 West', supervisorId: '2', status: 'Open', staffing: { '195': 2, '196': 2 } },
