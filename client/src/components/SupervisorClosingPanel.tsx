@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ClipboardCheck, Trash2, Receipt, Check, Plus, Minus, 
-  AlertCircle, Loader2, CheckCircle, X, DollarSign
+  AlertCircle, Loader2, CheckCircle, X, DollarSign, Send, FileText
 } from 'lucide-react';
 import {
   Select,
@@ -22,6 +22,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import jsPDF from 'jspdf';
 
 interface ChecklistTask {
   id: string;
@@ -46,6 +47,7 @@ interface SupervisorClosingPanelProps {
   standName: string;
   eventDate: string;
   supervisorId: string;
+  supervisorName?: string;
   onClose?: () => void;
 }
 
@@ -62,16 +64,19 @@ export function SupervisorClosingPanel({
   standName,
   eventDate,
   supervisorId,
+  supervisorName,
   onClose
 }: SupervisorClosingPanelProps) {
   const [activeTab, setActiveTab] = useState('checklist');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   
   // Checklist state
   const [checklistId, setChecklistId] = useState<string | null>(null);
   const [tasks, setTasks] = useState<ChecklistTask[]>([]);
   const [checklistComplete, setChecklistComplete] = useState(false);
+  const [checklistSubmittedToOps, setChecklistSubmittedToOps] = useState(false);
   
   // Spoilage state
   const [spoilageReportId, setSpoilageReportId] = useState<string | null>(null);
@@ -193,6 +198,89 @@ export function SupervisorClosingPanel({
       setChecklistComplete(true);
     } catch (err) {
       setError('Failed to complete checklist');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const generateChecklistPDF = (): string => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Post-Event Closing Checklist', pageWidth / 2, 20, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Stand: ${standName}`, 20, 35);
+    doc.text(`Event Date: ${eventDate}`, 20, 42);
+    doc.text(`Supervisor: ${supervisorName || 'N/A'}`, 20, 49);
+    doc.text(`Completed: ${new Date().toLocaleString()}`, 20, 56);
+    
+    doc.setDrawColor(200);
+    doc.line(20, 62, pageWidth - 20, 62);
+    
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Equipment Shutdown Tasks', 20, 72);
+    
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    let yPos = 82;
+    
+    tasks.forEach((task, index) => {
+      const checkbox = task.isCompleted ? '[X]' : '[ ]';
+      doc.text(`${checkbox} ${task.taskLabel}`, 25, yPos);
+      yPos += 8;
+      
+      if (yPos > 270) {
+        doc.addPage();
+        yPos = 20;
+      }
+    });
+    
+    yPos += 10;
+    doc.setDrawColor(200);
+    doc.line(20, yPos, pageWidth - 20, yPos);
+    yPos += 15;
+    
+    doc.setFontSize(10);
+    doc.text('Supervisor Signature: _______________________________', 20, yPos);
+    yPos += 10;
+    doc.text('Date/Time: _______________________________', 20, yPos);
+    
+    return doc.output('datauristring');
+  };
+
+  const submitChecklistToOps = async () => {
+    if (!checklistComplete) return;
+    setSaving(true);
+    setError(null);
+    
+    try {
+      const pdfData = generateChecklistPDF();
+      
+      const res = await fetch('/api/document-submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentType: 'ClosingChecklist',
+          standId,
+          eventDate,
+          submittedById: supervisorId,
+          submittedByName: supervisorName,
+          pdfData
+        })
+      });
+      
+      if (!res.ok) throw new Error('Failed to submit');
+      
+      setChecklistSubmittedToOps(true);
+      setSuccessMessage('Checklist submitted to Operations Manager!');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err) {
+      setError('Failed to submit to Operations Manager');
     } finally {
       setSaving(false);
     }
@@ -356,6 +444,13 @@ export function SupervisorClosingPanel({
             <span className="text-sm">{error}</span>
           </div>
         )}
+        
+        {successMessage && (
+          <div className="flex items-center gap-2 text-green-600 bg-green-50 p-2 rounded mt-2">
+            <CheckCircle className="h-4 w-4" />
+            <span className="text-sm">{successMessage}</span>
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="p-0">
@@ -455,9 +550,28 @@ export function SupervisorClosingPanel({
                 )}
 
                 {checklistComplete && (
-                  <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg">
-                    <CheckCircle className="h-5 w-5" />
-                    <span className="font-medium">Checklist Completed</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg">
+                      <CheckCircle className="h-5 w-5" />
+                      <span className="font-medium">Checklist Completed</span>
+                    </div>
+                    
+                    {!checklistSubmittedToOps ? (
+                      <Button 
+                        onClick={submitChecklistToOps} 
+                        disabled={saving}
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                        data-testid="submit-checklist-ops"
+                      >
+                        {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+                        Submit PDF to Operations Manager
+                      </Button>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2 text-blue-700 bg-blue-50 p-3 rounded-lg">
+                        <FileText className="h-5 w-5" />
+                        <span className="font-medium">Submitted to Operations Manager</span>
+                      </div>
+                    )}
                   </div>
                 )}
               </>

@@ -607,6 +607,29 @@ export const DEFAULT_CLOSING_TASKS = [
   { key: 'stanchions_removed', label: 'Stanchions - Removed/Delegated' },
 ];
 
+// Document submissions to Operations Manager
+export const documentTypeEnum = pgEnum('document_type', ['ClosingChecklist', 'AlcoholCompliance', 'SpoilageReport', 'VoucherReport']);
+
+export const documentSubmissions = pgTable("document_submissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  documentType: documentTypeEnum("document_type").notNull(),
+  standId: varchar("stand_id").notNull(),
+  eventDate: varchar("event_date").notNull(),
+  submittedById: varchar("submitted_by_id").references(() => users.id),
+  submittedByName: varchar("submitted_by_name"),
+  recipientId: varchar("recipient_id").references(() => users.id),
+  recipientRole: varchar("recipient_role").default('OperationsManager'),
+  pdfData: text("pdf_data"),
+  signatureData: text("signature_data"),
+  submittedAt: timestamp("submitted_at").defaultNow(),
+  isRead: boolean("is_read").default(false),
+  readAt: timestamp("read_at"),
+});
+
+export const insertDocumentSubmissionSchema = createInsertSchema(documentSubmissions).omit({ id: true, submittedAt: true, isRead: true, readAt: true });
+export type DocumentSubmission = typeof documentSubmissions.$inferSelect;
+export type InsertDocumentSubmission = z.infer<typeof insertDocumentSubmissionSchema>;
+
 // Routing rules for issue categories
 export const ISSUE_ROUTING_RULES: Record<string, string[]> = {
   Cooling: ['WarehouseManager', 'Warehouse'],

@@ -1,8 +1,10 @@
 import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck } from "lucide-react";
+import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck, Send } from "lucide-react";
 import { useLocation } from "wouter";
+import SignatureCanvas from 'react-signature-canvas';
+import jsPDF from 'jspdf';
 import {
   Accordion,
   AccordionContent,
@@ -11,7 +13,7 @@ import {
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Webcam from "react-webcam";
 import { Badge } from "@/components/ui/badge";
 import { Notepad } from "@/components/Notepad";
@@ -44,10 +46,103 @@ export default function SupervisorDashboard() {
   const [activeTab, setActiveTab] = useState("inventory");
   const [showMap, setShowMap] = useState(false);
   const [showSupervisorPack, setShowSupervisorPack] = useState(false);
+  
+  // Compliance sheet state
+  const signatureRef = useRef<SignatureCanvas>(null);
+  const [complianceSubmitting, setComplianceSubmitting] = useState(false);
+  const [complianceSubmitted, setComplianceSubmitted] = useState(false);
+  const [complianceError, setComplianceError] = useState<string | null>(null);
 
   const handleLogout = () => {
     logout();
     setLocation("/");
+  };
+
+  const clearSignature = () => {
+    signatureRef.current?.clear();
+  };
+
+  const generateCompliancePDF = (): string => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const activeStand = stands.find(s => s.id === activeStandId);
+    
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Alcohol Compliance Sheet', pageWidth / 2, 20, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Stand: ${activeStand?.name || 'N/A'}`, 20, 35);
+    doc.text(`Event Date: ${new Date().toISOString().split('T')[0]}`, 20, 42);
+    doc.text(`Supervisor: ${currentUser?.name || 'N/A'}`, 20, 49);
+    doc.text(`Submitted: ${new Date().toLocaleString()}`, 20, 56);
+    
+    doc.setDrawColor(200);
+    doc.line(20, 62, pageWidth - 20, 62);
+    
+    doc.setFontSize(11);
+    doc.text('I confirm that all staff working at this stand have been TABC certified', 20, 75);
+    doc.text('and have signed the required compliance documentation.', 20, 83);
+    
+    doc.text('All alcohol service protocols have been reviewed with staff including:', 20, 100);
+    doc.text('• Checking IDs for all customers who appear under 40', 25, 110);
+    doc.text('• Refusing service to intoxicated individuals', 25, 118);
+    doc.text('• Proper wristband verification for alcohol purchases', 25, 126);
+    doc.text('• No alcohol service after designated cutoff time', 25, 134);
+    
+    // Add signature if available
+    if (signatureRef.current && !signatureRef.current.isEmpty()) {
+      const signatureData = signatureRef.current.getTrimmedCanvas().toDataURL('image/png');
+      doc.text('Supervisor Signature:', 20, 160);
+      doc.addImage(signatureData, 'PNG', 20, 165, 80, 30);
+    } else {
+      doc.text('Supervisor Signature: _______________________________', 20, 170);
+    }
+    
+    doc.setFontSize(10);
+    doc.text(`Date/Time: ${new Date().toLocaleString()}`, 20, 200);
+    
+    return doc.output('datauristring');
+  };
+
+  const submitComplianceSheet = async () => {
+    if (!activeStandId) return;
+    
+    if (signatureRef.current?.isEmpty()) {
+      setComplianceError('Please sign the compliance sheet first');
+      return;
+    }
+    
+    setComplianceSubmitting(true);
+    setComplianceError(null);
+    
+    try {
+      const pdfData = generateCompliancePDF();
+      const signatureData = signatureRef.current?.getTrimmedCanvas().toDataURL('image/png');
+      
+      const res = await fetch('/api/document-submissions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          documentType: 'AlcoholCompliance',
+          standId: activeStandId,
+          eventDate: new Date().toISOString().split('T')[0],
+          submittedById: currentUser?.id,
+          submittedByName: currentUser?.name,
+          pdfData,
+          signatureData
+        })
+      });
+      
+      if (!res.ok) throw new Error('Failed to submit');
+      
+      setComplianceSubmitted(true);
+    } catch (err) {
+      setComplianceError('Failed to submit compliance sheet');
+    } finally {
+      setComplianceSubmitting(false);
+    }
   };
 
   if (!activeStandId) {
@@ -351,17 +446,53 @@ export default function SupervisorDashboard() {
                    ))}
                 </div>
 
-                {/* Signature Pad Placeholder */}
+                {complianceError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    {complianceError}
+                  </div>
+                )}
+
+                {/* Signature Pad */}
                 <div className="space-y-2 pt-4 border-t mt-4">
-                    <label className="text-sm font-medium">Stand Lead Signature</label>
-                    <div className="h-32 bg-slate-50 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center text-slate-400 hover:bg-slate-100 cursor-pointer transition-colors">
-                        <div className="text-center">
-                          <PenTool className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          Tap to Sign
-                        </div>
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium">Supervisor Signature</label>
+                      <Button variant="ghost" size="sm" onClick={clearSignature} disabled={complianceSubmitted}>
+                        Clear
+                      </Button>
+                    </div>
+                    <div className="border-2 border-slate-300 rounded-lg bg-white overflow-hidden">
+                      <SignatureCanvas
+                        ref={signatureRef}
+                        canvasProps={{
+                          className: 'w-full h-32',
+                          style: { width: '100%', height: '128px' }
+                        }}
+                        backgroundColor="white"
+                      />
                     </div>
                 </div>
-                <Button className="w-full mt-4 btn-3d btn-glow">Submit Compliance Sheet</Button>
+                
+                {!complianceSubmitted ? (
+                  <Button 
+                    className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
+                    onClick={submitComplianceSheet}
+                    disabled={complianceSubmitting}
+                    data-testid="submit-compliance"
+                  >
+                    {complianceSubmitting ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <Send className="h-4 w-4 mr-2" />
+                    )}
+                    Submit to Operations Manager
+                  </Button>
+                ) : (
+                  <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg mt-4">
+                    <CheckCircle2 className="h-5 w-5" />
+                    <span className="font-medium">Submitted to Operations Manager</span>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -372,6 +503,7 @@ export default function SupervisorDashboard() {
               standName={activeStand?.name || ''}
               eventDate={new Date().toISOString().split('T')[0]}
               supervisorId={currentUser?.id || ''}
+              supervisorName={currentUser?.name}
             />
           </TabsContent>
         </Tabs>

@@ -1401,6 +1401,79 @@ Return your response as a JSON object with this exact structure:
     }
   });
 
+  // ============ DOCUMENT SUBMISSIONS ============
+  // Submit document to Operations Manager
+  app.post("/api/document-submissions", async (req: Request, res: Response) => {
+    try {
+      const { documentType, standId, eventDate, submittedById, submittedByName, pdfData, signatureData } = req.body;
+      if (!documentType || !standId || !eventDate) {
+        return res.status(400).json({ error: "documentType, standId, and eventDate required" });
+      }
+      
+      // Get Operations Manager ID
+      const recipientId = await storage.getOperationsManagerId();
+      
+      const submission = await storage.createDocumentSubmission({
+        documentType,
+        standId,
+        eventDate,
+        submittedById,
+        submittedByName,
+        recipientId,
+        recipientRole: 'OperationsManager',
+        pdfData,
+        signatureData
+      });
+      
+      res.json({ submission, success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to submit document" });
+    }
+  });
+
+  // Get document submissions for Operations Manager
+  app.get("/api/document-submissions/operations-manager", async (req: Request, res: Response) => {
+    try {
+      const submissions = await storage.getDocumentSubmissionsByRecipient('OperationsManager');
+      res.json(submissions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch submissions" });
+    }
+  });
+
+  // Get unread document count
+  app.get("/api/document-submissions/unread-count", async (req: Request, res: Response) => {
+    try {
+      const count = await storage.getUnreadDocumentCount('OperationsManager');
+      res.json({ count });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get unread count" });
+    }
+  });
+
+  // Get specific document submission
+  app.get("/api/document-submissions/:id", async (req: Request, res: Response) => {
+    try {
+      const submission = await storage.getDocumentSubmission(req.params.id);
+      if (!submission) {
+        return res.status(404).json({ error: "Submission not found" });
+      }
+      res.json(submission);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch submission" });
+    }
+  });
+
+  // Mark document submission as read
+  app.patch("/api/document-submissions/:id/read", async (req: Request, res: Response) => {
+    try {
+      await storage.markDocumentSubmissionRead(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to mark as read" });
+    }
+  });
+
   // ============ SEED DATA ============
   app.post("/api/seed", async (_req: Request, res: Response) => {
     try {
@@ -1424,6 +1497,7 @@ Return your response as a JSON object with this exact structure:
         { name: 'Kitchen Manager', pin: '4445', role: 'ManagementCore' as const, managementType: 'KitchenManager' as const, isOnline: false, requiresPinReset: true },
         { name: 'HR Manager', pin: '4446', role: 'ManagementCore' as const, managementType: 'HRManager' as const, isOnline: false, requiresPinReset: true },
         { name: 'General Manager', pin: '4447', role: 'ManagementCore' as const, managementType: 'GeneralManager' as const, isOnline: false, requiresPinReset: true },
+        { name: 'Operations Manager', pin: '7777', role: 'ManagementCore' as const, managementType: 'OperationsManager' as const, isOnline: false, requiresPinReset: true },
       ];
 
       const createdUsers: Record<string, string> = {};

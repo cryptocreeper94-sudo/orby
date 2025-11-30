@@ -3,6 +3,7 @@ import {
   quickMessages, conversations, conversationMessages, incidents, incidentNotifications, countSessions,
   standIssues, standIssueNotifications, managerAssignments, geofenceEvents, ISSUE_ROUTING_RULES,
   closingChecklists, closingChecklistTasks, spoilageReports, spoilageItems, voucherReports, DEFAULT_CLOSING_TASKS,
+  documentSubmissions,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -26,7 +27,8 @@ import {
   type ClosingChecklistTask, type InsertClosingChecklistTask,
   type SpoilageReport, type InsertSpoilageReport,
   type SpoilageItem, type InsertSpoilageItem,
-  type VoucherReport, type InsertVoucherReport
+  type VoucherReport, type InsertVoucherReport,
+  type DocumentSubmission, type InsertDocumentSubmission
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
@@ -192,6 +194,14 @@ export interface IStorage {
   createVoucherReport(report: InsertVoucherReport): Promise<VoucherReport>;
   updateVoucherReport(reportId: string, voucherCount: number, totalAmountCents: number, notes?: string): Promise<void>;
   submitVoucherReport(reportId: string): Promise<void>;
+
+  // Document Submissions
+  createDocumentSubmission(submission: InsertDocumentSubmission): Promise<DocumentSubmission>;
+  getDocumentSubmissionsByRecipient(recipientRole: string): Promise<DocumentSubmission[]>;
+  getDocumentSubmission(id: string): Promise<DocumentSubmission | undefined>;
+  markDocumentSubmissionRead(id: string): Promise<void>;
+  getUnreadDocumentCount(recipientRole: string): Promise<number>;
+  getOperationsManagerId(): Promise<string | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -971,6 +981,48 @@ export class DatabaseStorage implements IStorage {
         submittedAt: new Date()
       })
       .where(eq(voucherReports.id, reportId));
+  }
+
+  // Document Submissions
+  async createDocumentSubmission(submission: InsertDocumentSubmission): Promise<DocumentSubmission> {
+    const [created] = await db.insert(documentSubmissions).values(submission).returning();
+    return created;
+  }
+
+  async getDocumentSubmissionsByRecipient(recipientRole: string): Promise<DocumentSubmission[]> {
+    return await db.select().from(documentSubmissions)
+      .where(eq(documentSubmissions.recipientRole, recipientRole))
+      .orderBy(desc(documentSubmissions.submittedAt));
+  }
+
+  async getDocumentSubmission(id: string): Promise<DocumentSubmission | undefined> {
+    const [submission] = await db.select().from(documentSubmissions)
+      .where(eq(documentSubmissions.id, id));
+    return submission || undefined;
+  }
+
+  async markDocumentSubmissionRead(id: string): Promise<void> {
+    await db.update(documentSubmissions)
+      .set({ isRead: true, readAt: new Date() })
+      .where(eq(documentSubmissions.id, id));
+  }
+
+  async getUnreadDocumentCount(recipientRole: string): Promise<number> {
+    const unread = await db.select().from(documentSubmissions)
+      .where(and(
+        eq(documentSubmissions.recipientRole, recipientRole),
+        eq(documentSubmissions.isRead, false)
+      ));
+    return unread.length;
+  }
+
+  async getOperationsManagerId(): Promise<string | undefined> {
+    const [opsMgr] = await db.select().from(users)
+      .where(and(
+        eq(users.role, 'ManagementCore'),
+        eq(users.managementType, 'OperationsManager')
+      ));
+    return opsMgr?.id;
   }
 }
 
