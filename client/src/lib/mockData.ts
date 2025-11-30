@@ -21,9 +21,11 @@ export interface CountEntry {
 export interface Stand {
   id: string;
   name: string;
+  section: string; // e.g., "7 East", "2 West"
   supervisorId?: string;
-  status: 'Open' | 'Closed';
+  status: 'Open' | 'Closed' | 'Needs Power' | 'Spare' | 'Hot Spot';
   countSheet?: Record<string, CountEntry>;
+  staffing?: Record<string, number | string>; // Map of POS/Position to Staff Count/Name
 }
 
 export interface User {
@@ -31,15 +33,22 @@ export interface User {
   name: string;
   role: 'Admin' | 'Supervisor' | 'Worker' | 'IT';
   pin: string;
+  isOnline?: boolean;
 }
 
-export interface Event {
+export interface Message {
   id: string;
-  name: string;
-  date: string;
+  senderId: string;
+  senderName: string;
+  senderRole: string;
+  content: string;
+  timestamp: string;
+  type: 'Global' | 'Urgent' | 'Request';
 }
 
 // Mock Data
+export const SECTIONS = ["7 East", "2 East", "7 West", "2 West", "South Plaza"];
+
 export const ITEMS: Item[] = [
   { id: '1', name: 'Bud Light 16oz', price: 12.00, category: 'Beverage' },
   { id: '2', name: 'Miller Lite 16oz', price: 12.00, category: 'Beverage' },
@@ -51,18 +60,33 @@ export const ITEMS: Item[] = [
 ];
 
 export const MOCK_USERS: User[] = [
-  { id: '1', name: 'Admin User', role: 'Admin', pin: '1234' },
-  { id: '2', name: 'Sup. Sarah', role: 'Supervisor', pin: '5678' },
-  { id: '3', name: 'Sup. Mike', role: 'Supervisor', pin: '9012' },
-  { id: '4', name: 'IT Support', role: 'IT', pin: '9999' },
+  { id: '1', name: 'Admin User', role: 'Admin', pin: '1234', isOnline: true },
+  { id: '2', name: 'Sup. Sarah', role: 'Supervisor', pin: '5678', isOnline: true },
+  { id: '3', name: 'Sup. Mike', role: 'Supervisor', pin: '9012', isOnline: false },
+  { id: '4', name: 'IT Support', role: 'IT', pin: '9999', isOnline: true },
 ];
 
+// Replicating the complex grid structure from the images
 export const MOCK_STANDS: Stand[] = [
-  { id: '101', name: 'Stand 101 (Beer)', supervisorId: '2', status: 'Open' },
-  { id: '102', name: 'Stand 102 (Food)', supervisorId: '2', status: 'Open' },
-  { id: '103', name: 'Stand 103 (Mixed)', supervisorId: '2', status: 'Closed' },
-  { id: '201', name: 'Stand 201 (Beer)', supervisorId: '3', status: 'Open' },
-  { id: '202', name: 'Stand 202 (Food)', supervisorId: '3', status: 'Open' },
+  // 2 East
+  { id: '102S', name: '102S - Moosehead', section: '2 East', supervisorId: '2', status: 'Open', staffing: { '126': 2, '122': 1 } },
+  { id: '103', name: '103 - Jack Bar North', section: '2 East', supervisorId: '2', status: 'Open', staffing: { '128': 1 } },
+  { id: '104', name: '104L - Cocktails', section: '2 East', supervisorId: '2', status: 'Hot Spot', staffing: { '123': 'Hot 3' } },
+  { id: '105V', name: '105V - Vending MSM', section: '2 East', supervisorId: '2', status: 'Closed', staffing: { '10': 0 } },
+  
+  // 7 East
+  { id: '305V', name: '305V - Vending MSM', section: '7 East', supervisorId: '3', status: 'Open', staffing: { '255': 3 } },
+  { id: '309L', name: '309L - Titos', section: '7 East', supervisorId: '3', status: 'Open', staffing: { '259': 2 } },
+  { id: '310F', name: '310F - Walking Taco', section: '7 East', supervisorId: '3', status: 'Needs Power', staffing: { '260': 2 } },
+  
+  // 2 West
+  { id: 'OA001', name: 'OA001 - Titan Up Tailgate', section: '2 West', supervisorId: '2', status: 'Closed', staffing: { '198': 12 } },
+  { id: 'OA004', name: 'OA004 - Daddys Dogs', section: '2 West', supervisorId: '2', status: 'Open', staffing: { '195': 2, '196': 2 } },
+];
+
+export const INITIAL_MESSAGES: Message[] = [
+  { id: '1', senderId: '2', senderName: 'Sup. Sarah', senderRole: 'Supervisor', content: 'Need a runner for ice at Stand 102S', timestamp: '10:30 AM', type: 'Request' },
+  { id: '2', senderId: '4', senderName: 'IT Support', senderRole: 'IT', content: 'POS updates completed for Section 7 East', timestamp: '10:15 AM', type: 'Global' },
 ];
 
 // Store
@@ -71,13 +95,16 @@ interface AppState {
   login: (pin: string) => boolean;
   logout: () => void;
   stands: Stand[];
-  updateStandStatus: (id: string, status: 'Open' | 'Closed') => void;
+  messages: Message[];
+  addMessage: (msg: Omit<Message, 'id' | 'timestamp' | 'senderName' | 'senderRole'>) => void;
+  updateStandStatus: (id: string, status: Stand['status']) => void;
   updateCount: (standId: string, itemId: string, field: keyof CountEntry, value: number) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
   currentUser: null,
   stands: MOCK_STANDS,
+  messages: INITIAL_MESSAGES,
   login: (pin) => {
     const user = MOCK_USERS.find(u => u.pin === pin);
     if (user) {
@@ -87,6 +114,20 @@ export const useStore = create<AppState>((set, get) => ({
     return false;
   },
   logout: () => set({ currentUser: null }),
+  addMessage: (msg) => {
+    const user = get().currentUser;
+    if (!user) return;
+    
+    const newMessage: Message = {
+      id: Math.random().toString(36).substr(2, 9),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      senderName: user.name,
+      senderRole: user.role,
+      ...msg
+    };
+    
+    set(state => ({ messages: [newMessage, ...state.messages] }));
+  },
   updateStandStatus: (id, status) => 
     set(state => ({
       stands: state.stands.map(s => s.id === id ? { ...s, status } : s)
@@ -107,7 +148,6 @@ export const useStore = create<AppState>((set, get) => ({
         [field]: value
       };
 
-      // Recalculate sold
       const item = stand.countSheet[itemId];
       item.sold = (item.startCount + item.adds) - item.endCount - item.spoilage;
 

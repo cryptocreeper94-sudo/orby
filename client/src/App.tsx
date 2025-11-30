@@ -8,6 +8,7 @@ import LoginPage from "@/pages/Login";
 import AdminDashboard from "@/pages/AdminDashboard";
 import SupervisorDashboard from "@/pages/SupervisorDashboard";
 import ITDashboard from "@/pages/ITDashboard";
+import MessagesPage from "@/pages/Messages";
 
 function Router() {
   return (
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/supervisor" component={SupervisorDashboard} />
       <Route path="/it" component={ITDashboard} />
+      <Route path="/messages" component={MessagesPage} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -1,13 +1,15 @@
 import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, Package, Users, ClipboardCheck, FileBarChart, Settings, Menu } from "lucide-react";
-import { useLocation } from "wouter";
+import { LogOut, Package, Users, ClipboardCheck, FileBarChart, Menu, MessageSquare } from "lucide-react";
+import { useLocation, Link } from "wouter";
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { StaffingGrid } from "@/components/StaffingGrid";
 
 export default function AdminDashboard() {
   const logout = useStore((state) => state.logout);
@@ -21,7 +23,7 @@ export default function AdminDashboard() {
 
   const stats = [
     { label: "Open Stands", value: stands.filter(s => s.status === 'Open').length, icon: Package, color: "text-green-600" },
-    { label: "Staff Active", value: 12, icon: Users, color: "text-blue-600" },
+    { label: "Staff Active", value: 42, icon: Users, color: "text-blue-600" },
     { label: "Pending Audits", value: 3, icon: ClipboardCheck, color: "text-orange-600" },
     { label: "Total Revenue", value: "$12,450", icon: FileBarChart, color: "text-purple-600" },
   ];
@@ -51,20 +53,27 @@ export default function AdminDashboard() {
                 <Users className="h-5 w-5" />
                 Roster
               </a>
-              <a href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                <Package className="h-5 w-5" />
-                Inventory
-              </a>
+              <Link href="/messages" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
+                <MessageSquare className="h-5 w-5" />
+                Messages
+              </Link>
             </nav>
           </SheetContent>
         </Sheet>
-        <div className="flex-1 font-semibold text-lg">Admin Control</div>
+        <div className="flex-1 font-semibold text-lg flex items-center justify-between">
+          Admin Control
+          <Link href="/messages">
+             <Button variant="ghost" size="icon" className="sm:hidden text-muted-foreground">
+               <MessageSquare className="h-5 w-5" />
+             </Button>
+          </Link>
+        </div>
         <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground">
           <LogOut className="h-5 w-5" />
         </Button>
       </header>
 
-      <main className="p-4 sm:px-6 sm:py-0 space-y-4 max-w-5xl mx-auto mt-4">
+      <main className="p-4 sm:px-6 sm:py-0 space-y-6 max-w-6xl mx-auto mt-4">
         
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -79,40 +88,69 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Actions Grid */}
-        <div className="grid grid-cols-1 gap-4">
-          <Card className="border-none shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold">Live Stand Status</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-2">
-                {stands.map(stand => (
-                  <div key={stand.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-lg border shadow-sm">
-                    <div className="flex flex-col">
-                      <span className="font-bold text-sm">{stand.name}</span>
-                      <span className="text-xs text-muted-foreground">Supervisor: {stand.supervisorId ? 'Assigned' : 'Unassigned'}</span>
-                    </div>
-                    <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${stand.status === 'Open' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
-                      {stand.status}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        {/* Main Content Tabs */}
+        <Tabs defaultValue="grid" className="w-full">
+          <TabsList className="w-full justify-start border-b rounded-none bg-transparent h-auto p-0 mb-4 space-x-6">
+            <TabsTrigger 
+              value="grid" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2 font-bold"
+            >
+              Staffing Grid
+            </TabsTrigger>
+            <TabsTrigger 
+              value="list" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2 font-bold"
+            >
+              List View
+            </TabsTrigger>
+             <TabsTrigger 
+              value="reports" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2 font-bold"
+            >
+              Reports
+            </TabsTrigger>
+          </TabsList>
 
-        <div className="grid grid-cols-2 gap-4">
-           <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-primary hover:bg-slate-50">
-              <Users className="h-6 w-6" />
-              Manage Roster
-           </Button>
-           <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-primary hover:bg-slate-50">
-              <FileBarChart className="h-6 w-6" />
-              Export Reports
-           </Button>
-        </div>
+          <TabsContent value="grid">
+            <StaffingGrid />
+          </TabsContent>
+
+          <TabsContent value="list">
+            <Card className="border-none shadow-sm">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg font-semibold">Live Stand Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-2">
+                  {stands.map(stand => (
+                    <div key={stand.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-lg border shadow-sm">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-sm">{stand.name}</span>
+                        <span className="text-xs text-muted-foreground">Supervisor: {stand.supervisorId ? 'Assigned' : 'Unassigned'}</span>
+                      </div>
+                      <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${stand.status === 'Open' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
+                        {stand.status}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reports">
+             <div className="grid grid-cols-2 gap-4">
+               <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-primary hover:bg-slate-50">
+                  <Users className="h-6 w-6" />
+                  Export Roster PDF
+               </Button>
+               <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-primary hover:bg-slate-50">
+                  <FileBarChart className="h-6 w-6" />
+                  Export Inventory CSV
+               </Button>
+            </div>
+          </TabsContent>
+        </Tabs>
 
       </main>
     </div>
