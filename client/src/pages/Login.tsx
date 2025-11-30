@@ -42,7 +42,8 @@ export default function LoginPage() {
       }
 
       // Route based on role with new hierarchy
-      if (currentUser.role === 'Developer') setLocation("/dev");
+      // Special case: Developer user (name) goes to dev dashboard
+      if (currentUser.name === 'Developer' || currentUser.pin === '0424') setLocation("/dev");
       else if (currentUser.role === 'Admin') setLocation("/admin");
       else if (currentUser.role === 'IT') setLocation("/it");
       else if (currentUser.role === 'NPOWorker') setLocation("/npo");
