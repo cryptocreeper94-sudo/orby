@@ -642,3 +642,49 @@ export const ISSUE_ROUTING_RULES: Record<string, string[]> = {
   Staffing: ['GeneralManager', 'OperationsManager'],
   Other: ['OperationsManager', 'GeneralManager'],
 };
+
+// Menu Board Creator for Operations Manager
+export const menuBoards = pgTable("menu_boards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  createdById: varchar("created_by_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  isTemplate: boolean("is_template").default(false),
+});
+
+export const menuSlides = pgTable("menu_slides", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  menuBoardId: varchar("menu_board_id").references(() => menuBoards.id).notNull(),
+  slideOrder: integer("slide_order").notNull().default(0),
+  title: varchar("title", { length: 255 }),
+  backgroundColor: varchar("background_color", { length: 50 }).default('#1a1a2e'),
+  backgroundImage: text("background_image"),
+  content: jsonb("content").default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertMenuBoardSchema = createInsertSchema(menuBoards).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertMenuSlideSchema = createInsertSchema(menuSlides).omit({ id: true, createdAt: true, updatedAt: true });
+export type MenuBoard = typeof menuBoards.$inferSelect;
+export type InsertMenuBoard = z.infer<typeof insertMenuBoardSchema>;
+export type MenuSlide = typeof menuSlides.$inferSelect;
+export type InsertMenuSlide = z.infer<typeof insertMenuSlideSchema>;
+
+// Menu slide content element types
+export type MenuElement = {
+  id: string;
+  type: 'text' | 'price' | 'image' | 'divider';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  content?: string;
+  fontSize?: number;
+  fontWeight?: string;
+  color?: string;
+  textAlign?: 'left' | 'center' | 'right';
+  imageUrl?: string;
+};
