@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   LogOut, Map, MessageSquare, Navigation, MapPin, 
-  CheckCircle2, AlertTriangle, Clock, Users, Building2, Route 
+  CheckCircle2, AlertTriangle, Clock, Users, Building2, Route, ClipboardList 
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
 import { WalkingDirections } from "@/components/WalkingDirections";
+import { CounterLogin } from "@/components/CounterLogin";
+import { CountSheet } from "@/components/CountSheet";
 import { 
   LocationAcknowledgement, 
   useGeolocation, 
@@ -19,18 +21,50 @@ import {
   GEOFENCE_RADIUS_FEET 
 } from "@/components/LocationAcknowledgement";
 
+type CountSession = {
+  id: string;
+  standId: string;
+  eventDate: string;
+  stage: 'PreEvent' | 'PostEvent' | 'DayAfter';
+  counterName: string;
+  counterRole: 'NPOLead' | 'Supervisor' | 'Manager' | 'ManagerAssistant';
+  counterPhoneLast4: string;
+  status: 'InProgress' | 'Completed' | 'Verified';
+  startedAt: string;
+  completedAt?: string;
+};
+
+type Item = {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+};
+
 export default function NPODashboard() {
   const logout = useStore((state) => state.logout);
   const [, setLocation] = useLocation();
   const currentUser = useStore((state) => state.currentUser);
   const [showMap, setShowMap] = useState(false);
   const [showDirections, setShowDirections] = useState(false);
+  const [showCounterLogin, setShowCounterLogin] = useState(false);
+  const [showCountSheet, setShowCountSheet] = useState(false);
+  const [activeSession, setActiveSession] = useState<CountSession | null>(null);
+  const [items, setItems] = useState<Item[]>([]);
+  const [counts, setCounts] = useState<Record<string, number>>({});
   const [locationAccepted, setLocationAccepted] = useState(false);
   const [isOnSite, setIsOnSite] = useState(false);
   const [checkedIn, setCheckedIn] = useState(false);
   const [checkInTime, setCheckInTime] = useState<Date | null>(null);
 
   const { location, error, isLoading, requestLocation } = useGeolocation();
+
+  useEffect(() => {
+    fetch('/api/items')
+      .then(res => res.json())
+      .then(data => setItems(data))
+      .catch(err => console.error('Failed to load items:', err));
+  }, []);
 
   useEffect(() => {
     if (locationAccepted) {
@@ -63,7 +97,82 @@ export default function NPODashboard() {
     }
   };
 
+  const handleStartCountSession = async (sessionData: {
+    counterName: string;
+    counterRole: 'NPOLead' | 'Supervisor' | 'Manager' | 'ManagerAssistant';
+    counterPhoneLast4: string;
+    stage: 'PreEvent' | 'PostEvent' | 'DayAfter';
+  }) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const response = await fetch('/api/count-sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          standId: assignedSection.standId,
+          eventDate: today,
+          ...sessionData
+        })
+      });
+      
+      if (response.ok) {
+        const session = await response.json();
+        setActiveSession(session);
+        setShowCounterLogin(false);
+        setShowCountSheet(true);
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Failed to start count session');
+      }
+    } catch (err) {
+      console.error('Failed to start count session:', err);
+      alert('Failed to start count session');
+    }
+  };
+
+  const handleSaveCount = async (itemId: string, count: number) => {
+    if (!activeSession) return;
+    
+    try {
+      await fetch('/api/inventory/counts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          standId: activeSession.standId,
+          itemId,
+          eventDate: activeSession.eventDate,
+          sessionId: activeSession.id,
+          startCount: activeSession.stage === 'PreEvent' ? count : 0,
+          endCount: activeSession.stage === 'PostEvent' ? count : 0
+        })
+      });
+      setCounts(prev => ({ ...prev, [itemId]: count }));
+    } catch (err) {
+      console.error('Failed to save count:', err);
+    }
+  };
+
+  const handleCompleteSession = async () => {
+    if (!activeSession) return;
+    
+    try {
+      const response = await fetch(`/api/count-sessions/${activeSession.id}/complete`, {
+        method: 'PATCH'
+      });
+      
+      if (response.ok) {
+        const updatedSession = await response.json();
+        setActiveSession(updatedSession);
+        alert('Count completed successfully!');
+        setShowCountSheet(false);
+      }
+    } catch (err) {
+      console.error('Failed to complete session:', err);
+    }
+  };
+
   const assignedSection = {
+    standId: '105S',
     name: "Section 105",
     floor: "Level 2",
     stand: "Hot Dogs & Drinks",
@@ -113,6 +222,34 @@ export default function NPODashboard() {
             onClose={() => setShowDirections(false)}
             userLocation={location ? { lat: location.coords.latitude, lng: location.coords.longitude } : null}
             defaultDestination="105"
+          />
+        </div>
+      )}
+
+      {showCounterLogin && (
+        <div className="fixed inset-0 z-50 bg-background p-4">
+          <CounterLogin
+            standId={assignedSection.standId}
+            standName={`${assignedSection.name} - ${assignedSection.stand}`}
+            eventDate={new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+            allowedStages={['PreEvent']}
+            defaultStage="PreEvent"
+            onStartSession={handleStartCountSession}
+            onClose={() => setShowCounterLogin(false)}
+          />
+        </div>
+      )}
+
+      {showCountSheet && activeSession && (
+        <div className="fixed inset-0 z-50 bg-background p-4">
+          <CountSheet
+            session={activeSession}
+            standName={`${assignedSection.name} - ${assignedSection.stand}`}
+            items={items}
+            existingCounts={counts}
+            onSaveCount={handleSaveCount}
+            onCompleteSession={handleCompleteSession}
+            onClose={() => setShowCountSheet(false)}
           />
         </div>
       )}
@@ -240,13 +377,23 @@ export default function NPODashboard() {
                     <p className="font-bold">{assignedSection.supervisor}</p>
                   </div>
                 </div>
-                <Button 
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
-                  onClick={() => setShowDirections(true)}
-                >
-                  <Route className="h-4 w-4 mr-2" />
-                  Get Walking Directions
-                </Button>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button 
+                    className="bg-blue-600 hover:bg-blue-700 text-white" 
+                    onClick={() => setShowDirections(true)}
+                  >
+                    <Route className="h-4 w-4 mr-2" />
+                    Directions
+                  </Button>
+                  <Button 
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                    onClick={() => setShowCounterLogin(true)}
+                    data-testid="start-pre-event-count"
+                  >
+                    <ClipboardList className="h-4 w-4 mr-2" />
+                    Pre-Event Count
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </>
