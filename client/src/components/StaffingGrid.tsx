@@ -30,12 +30,10 @@ export function StaffingGrid() {
       {/* Grid Header / Actions */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-lg border shadow-sm">
         <div>
-          <h2 className="text-lg font-bold flex items-center gap-2">
-            <CalendarDays className="h-5 w-5 text-primary" />
-            Titans v Jaguars
-            <Badge variant="outline" className="ml-2 font-mono">25-11-30</Badge>
+          <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2 font-mono">
+            25-11-30 POS TITANS V JAGUARS
           </h2>
-          <p className="text-sm text-muted-foreground">Staffing Grid & Stand Status</p>
+          <p className="text-sm text-muted-foreground font-medium">Staffing Grid • Event ID: #E-251130</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm">
