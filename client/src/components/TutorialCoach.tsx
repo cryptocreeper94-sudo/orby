@@ -121,8 +121,10 @@ export function TutorialCoach({ page, onNavigate }: TutorialCoachProps) {
     } else {
       setLocation(route);
     }
-    handleClose();
-  }, [onNavigate, setLocation, handleClose]);
+    setTimeout(() => {
+      handleNext();
+    }, 300);
+  }, [onNavigate, setLocation, handleNext]);
 
   const openTutorial = useCallback(() => {
     setCurrentStep(0);
