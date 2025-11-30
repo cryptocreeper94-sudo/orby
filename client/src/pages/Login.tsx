@@ -43,18 +43,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900 p-4">
-      <Card className="w-full max-w-md border-none shadow-xl">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4 transition-colors duration-300">
+      <Card className="w-full max-w-md border-none shadow-2xl bg-card/80 backdrop-blur-sm">
         <CardHeader className="space-y-1 flex flex-col items-center text-center pb-2">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-            <LayoutDashboard className="w-8 h-8 text-primary" />
+          <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+            <LayoutDashboard className="w-10 h-10 text-primary drop-shadow-md" />
           </div>
-          <CardTitle className="text-2xl font-bold tracking-tight">StadiumOps</CardTitle>
-          <CardDescription>Enter your 4-digit PIN to access the system</CardDescription>
+          <CardTitle className="text-3xl font-black tracking-tight text-primary">StadiumOps</CardTitle>
+          <CardDescription className="text-base">Enter your 4-digit PIN to access the system</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
                 name="pin"
@@ -65,7 +65,7 @@ export default function LoginPage() {
                       <Input 
                         type="password" 
                         placeholder="0000" 
-                        className="text-center text-2xl tracking-[1em] h-14 font-mono" 
+                        className="text-center text-3xl tracking-[1em] h-16 font-mono border-2 focus-visible:ring-offset-2 shadow-inner bg-slate-50 dark:bg-slate-900" 
                         maxLength={4}
                         {...field} 
                         data-testid="input-pin"
@@ -75,13 +75,13 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full h-12 text-lg font-medium" data-testid="button-login">
+              <Button type="submit" className="w-full h-14 text-lg font-bold btn-3d btn-glow uppercase tracking-wide" data-testid="button-login">
                 <ShieldCheck className="mr-2 h-5 w-5" /> 
                 Verify Identity
               </Button>
               
               <div className="mt-6 text-center">
-                 <p className="text-xs text-muted-foreground">Demo PINs: Admin: 1234 | Supervisor: 5678 | IT: 9999</p>
+                 <p className="text-xs text-muted-foreground font-medium bg-slate-100 dark:bg-slate-800 py-2 rounded-lg">Demo PINs: Admin: 1234 | Supervisor: 5678 | IT: 9999</p>
               </div>
             </form>
           </Form>
