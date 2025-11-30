@@ -4,7 +4,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Enums
-export const userRoleEnum = pgEnum('user_role', ['Admin', 'Supervisor', 'Worker', 'IT', 'Warehouse', 'Kitchen']);
+export const userRoleEnum = pgEnum('user_role', ['Admin', 'Supervisor', 'Worker', 'IT', 'Warehouse', 'Kitchen', 'NPO', 'TempStaff']);
 export const standStatusEnum = pgEnum('stand_status', ['Open', 'Closed', 'Needs Power', 'Spare', 'Hot Spot']);
 export const messageTypeEnum = pgEnum('message_type', ['Global', 'Urgent', 'Request']);
 export const docCategoryEnum = pgEnum('doc_category', ['Compliance', 'Checklist', 'Reference', 'Contact']);

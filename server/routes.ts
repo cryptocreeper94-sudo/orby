@@ -651,6 +651,8 @@ export async function registerRoutes(
         { name: 'Developer', pin: '0424', role: 'Admin' as const, isOnline: false },
         { name: 'Warehouse', pin: '1111', role: 'Warehouse' as const, isOnline: false },
         { name: 'Kitchen', pin: '2222', role: 'Kitchen' as const, isOnline: false },
+        { name: 'NPO Staff', pin: '3333', role: 'NPO' as const, isOnline: false },
+        { name: 'Temp Worker', pin: '4444', role: 'TempStaff' as const, isOnline: false },
       ];
 
       const createdUsers: Record<string, string> = {};

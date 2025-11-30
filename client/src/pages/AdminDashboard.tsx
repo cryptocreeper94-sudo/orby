@@ -1,7 +1,7 @@
 import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, Package, Users, ClipboardCheck, FileBarChart, Menu, MessageSquare, LayoutDashboard } from "lucide-react";
+import { LogOut, Package, Users, ClipboardCheck, FileBarChart, Menu, MessageSquare, LayoutDashboard, Map } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import {
   Sheet,
@@ -10,7 +10,9 @@ import {
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StaffingGrid } from "@/components/StaffingGrid";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Notepad } from "@/components/Notepad";
+import { InteractiveMap } from "@/components/InteractiveMap";
 
 export default function AdminDashboard() {
   const logout = useStore((state) => state.logout);
@@ -29,11 +31,20 @@ export default function AdminDashboard() {
     setLocation("/");
   };
 
+  const [showMap, setShowMap] = useState(false);
+
   const stats = [
     { label: "Open Stands", value: stands.filter(s => s.status === 'Open').length, icon: Package, color: "text-green-600" },
     { label: "Staff Active", value: 42, icon: Users, color: "text-blue-600" },
     { label: "Pending Audits", value: 3, icon: ClipboardCheck, color: "text-orange-600" },
     { label: "Total Revenue", value: "$12,450", icon: FileBarChart, color: "text-purple-600" },
+  ];
+
+  const supervisors = [
+    { id: '1', name: 'Jason (You)' },
+    { id: '2', name: 'Mike Smith' },
+    { id: '3', name: 'Sarah Johnson' },
+    { id: '4', name: 'Chris Williams' },
   ];
 
   return (
@@ -117,6 +128,13 @@ export default function AdminDashboard() {
             >
               Reports
             </TabsTrigger>
+            <TabsTrigger 
+              value="map" 
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2 font-bold"
+            >
+              <Map className="h-4 w-4 mr-1" />
+              Stadium Map
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="grid">
@@ -160,7 +178,17 @@ export default function AdminDashboard() {
                </Button>
             </div>
           </TabsContent>
+
+          <TabsContent value="map" className="h-[500px]">
+            <InteractiveMap 
+              isManager={true}
+              supervisors={supervisors}
+              onSectionAssign={(section) => console.log('Section assigned:', section)}
+            />
+          </TabsContent>
         </Tabs>
+
+        <Notepad storageKey="admin-notes" />
 
       </main>
     </div>

@@ -2,9 +2,11 @@ import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, MessageSquare, Package, Warehouse, ArrowRight, AlertTriangle } from "lucide-react";
+import { LogOut, MessageSquare, Package, Warehouse, ArrowRight, AlertTriangle, Map } from "lucide-react";
 import { useLocation, Link } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Notepad } from "@/components/Notepad";
+import { InteractiveMap } from "@/components/InteractiveMap";
 
 export default function WarehouseDashboard() {
   const logout = useStore((state) => state.logout);
@@ -27,6 +29,7 @@ export default function WarehouseDashboard() {
 
   const recentMessages = messages.slice(0, 5);
   const urgentMessages = messages.filter(m => m.type === 'Urgent');
+  const [showMap, setShowMap] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
@@ -75,7 +78,26 @@ export default function WarehouseDashboard() {
           </Card>
         )}
 
+        <Notepad storageKey="warehouse-notes" />
+
+        {showMap && (
+          <div className="fixed inset-0 z-50 bg-background">
+            <InteractiveMap 
+              onClose={() => setShowMap(false)} 
+              showNavigation={true}
+            />
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-4">
+          <Card className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowMap(true)}>
+            <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
+              <div className="p-4 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <Map className="h-8 w-8 text-blue-600" />
+              </div>
+              <div className="font-bold text-sm">Stadium Map</div>
+            </CardContent>
+          </Card>
           <Card className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/messages')}>
             <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
               <div className="p-4 rounded-full bg-amber-100 dark:bg-amber-900/30">
