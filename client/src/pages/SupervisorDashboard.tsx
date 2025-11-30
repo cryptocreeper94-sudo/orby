@@ -1,7 +1,7 @@
 import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList } from "lucide-react";
+import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck } from "lucide-react";
 import { useLocation } from "wouter";
 import {
   Accordion,
@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
 import { SupervisorPack } from "@/components/SupervisorPack";
+import { SupervisorClosingPanel } from "@/components/SupervisorClosingPanel";
 
 export default function SupervisorDashboard() {
   const logout = useStore((state) => state.logout);
@@ -233,9 +234,13 @@ export default function SupervisorDashboard() {
         )}
 
         <Tabs defaultValue="inventory" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="inventory">Inventory Count</TabsTrigger>
-            <TabsTrigger value="compliance">Stand Docs</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 mb-4">
+            <TabsTrigger value="inventory">Inventory</TabsTrigger>
+            <TabsTrigger value="compliance">Docs</TabsTrigger>
+            <TabsTrigger value="closeout" data-testid="tab-closeout">
+              <ClipboardCheck className="h-3 w-3 mr-1" />
+              Closeout
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="inventory" className="space-y-4">
@@ -359,6 +364,15 @@ export default function SupervisorDashboard() {
                 <Button className="w-full mt-4 btn-3d btn-glow">Submit Compliance Sheet</Button>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="closeout">
+            <SupervisorClosingPanel
+              standId={activeStandId!}
+              standName={activeStand?.name || ''}
+              eventDate={new Date().toISOString().split('T')[0]}
+              supervisorId={currentUser?.id || ''}
+            />
           </TabsContent>
         </Tabs>
       </main>

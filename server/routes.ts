@@ -1191,6 +1191,216 @@ Return your response as a JSON object with this exact structure:
     }
   });
 
+  // ============ CLOSING CHECKLISTS ============
+  // Get or create closing checklist for stand/event
+  app.get("/api/closing-checklists/:standId/:eventDate", async (req: Request, res: Response) => {
+    try {
+      const { standId, eventDate } = req.params;
+      let checklist = await storage.getClosingChecklist(standId, eventDate);
+      
+      // Return existing checklist with tasks
+      if (checklist) {
+        const tasks = await storage.getClosingChecklistTasks(checklist.id);
+        return res.json({ checklist, tasks });
+      }
+      
+      res.json({ checklist: null, tasks: [] });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch closing checklist" });
+    }
+  });
+
+  // Create closing checklist
+  app.post("/api/closing-checklists", async (req: Request, res: Response) => {
+    try {
+      const { standId, eventDate, supervisorId } = req.body;
+      if (!standId || !eventDate || !supervisorId) {
+        return res.status(400).json({ error: "standId, eventDate, and supervisorId required" });
+      }
+      
+      // Check if already exists
+      const existing = await storage.getClosingChecklist(standId, eventDate);
+      if (existing) {
+        const tasks = await storage.getClosingChecklistTasks(existing.id);
+        return res.json({ checklist: existing, tasks });
+      }
+      
+      const checklist = await storage.createClosingChecklist({ standId, eventDate, supervisorId });
+      const tasks = await storage.getClosingChecklistTasks(checklist.id);
+      res.json({ checklist, tasks });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create closing checklist" });
+    }
+  });
+
+  // Toggle checklist task
+  app.patch("/api/closing-checklist-tasks/:taskId", async (req: Request, res: Response) => {
+    try {
+      const { isCompleted, remarks } = req.body;
+      await storage.toggleChecklistTask(req.params.taskId, isCompleted, remarks);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update task" });
+    }
+  });
+
+  // Complete closing checklist
+  app.patch("/api/closing-checklists/:id/complete", async (req: Request, res: Response) => {
+    try {
+      await storage.completeClosingChecklist(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to complete checklist" });
+    }
+  });
+
+  // ============ SPOILAGE REPORTS ============
+  // Get or create spoilage report for stand/event
+  app.get("/api/spoilage-reports/:standId/:eventDate", async (req: Request, res: Response) => {
+    try {
+      const { standId, eventDate } = req.params;
+      let report = await storage.getSpoilageReport(standId, eventDate);
+      
+      if (report) {
+        const items = await storage.getSpoilageItems(report.id);
+        return res.json({ report, items });
+      }
+      
+      res.json({ report: null, items: [] });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch spoilage report" });
+    }
+  });
+
+  // Create spoilage report
+  app.post("/api/spoilage-reports", async (req: Request, res: Response) => {
+    try {
+      const { standId, eventDate, supervisorId } = req.body;
+      if (!standId || !eventDate || !supervisorId) {
+        return res.status(400).json({ error: "standId, eventDate, and supervisorId required" });
+      }
+      
+      const existing = await storage.getSpoilageReport(standId, eventDate);
+      if (existing) {
+        const items = await storage.getSpoilageItems(existing.id);
+        return res.json({ report: existing, items });
+      }
+      
+      const report = await storage.createSpoilageReport({ standId, eventDate, supervisorId });
+      res.json({ report, items: [] });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create spoilage report" });
+    }
+  });
+
+  // Add spoilage item
+  app.post("/api/spoilage-items", async (req: Request, res: Response) => {
+    try {
+      const { reportId, itemId, itemName, quantity, unit, reason, notes } = req.body;
+      if (!reportId || !itemName || !quantity || !reason) {
+        return res.status(400).json({ error: "reportId, itemName, quantity, and reason required" });
+      }
+      
+      const item = await storage.addSpoilageItem({ 
+        reportId, 
+        itemId, 
+        itemName, 
+        quantity, 
+        unit: unit || 'each', 
+        reason, 
+        notes 
+      });
+      res.json(item);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to add spoilage item" });
+    }
+  });
+
+  // Remove spoilage item
+  app.delete("/api/spoilage-items/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.removeSpoilageItem(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to remove spoilage item" });
+    }
+  });
+
+  // Submit spoilage report
+  app.patch("/api/spoilage-reports/:id/submit", async (req: Request, res: Response) => {
+    try {
+      await storage.submitSpoilageReport(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to submit spoilage report" });
+    }
+  });
+
+  // ============ VOUCHER REPORTS ============
+  // Get or create voucher report for stand/event
+  app.get("/api/voucher-reports/:standId/:eventDate", async (req: Request, res: Response) => {
+    try {
+      const { standId, eventDate } = req.params;
+      let report = await storage.getVoucherReport(standId, eventDate);
+      
+      if (report) {
+        return res.json({ report });
+      }
+      
+      res.json({ report: null });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch voucher report" });
+    }
+  });
+
+  // Create voucher report
+  app.post("/api/voucher-reports", async (req: Request, res: Response) => {
+    try {
+      const { standId, eventDate, supervisorId, voucherCount, totalAmountCents, notes } = req.body;
+      if (!standId || !eventDate || !supervisorId) {
+        return res.status(400).json({ error: "standId, eventDate, and supervisorId required" });
+      }
+      
+      const existing = await storage.getVoucherReport(standId, eventDate);
+      if (existing) {
+        return res.json({ report: existing });
+      }
+      
+      const report = await storage.createVoucherReport({ 
+        standId, 
+        eventDate, 
+        supervisorId, 
+        voucherCount: voucherCount || 0, 
+        totalAmountCents: totalAmountCents || 0,
+        notes 
+      });
+      res.json({ report });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create voucher report" });
+    }
+  });
+
+  // Update voucher report
+  app.patch("/api/voucher-reports/:id", async (req: Request, res: Response) => {
+    try {
+      const { voucherCount, totalAmountCents, notes } = req.body;
+      await storage.updateVoucherReport(req.params.id, voucherCount, totalAmountCents, notes);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update voucher report" });
+    }
+  });
+
+  // Submit voucher report
+  app.patch("/api/voucher-reports/:id/submit", async (req: Request, res: Response) => {
+    try {
+      await storage.submitVoucherReport(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to submit voucher report" });
+    }
+  });
+
   // ============ SEED DATA ============
   app.post("/api/seed", async (_req: Request, res: Response) => {
     try {

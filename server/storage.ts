@@ -2,6 +2,7 @@ import {
   users, stands, inventoryCounts, items, messages, npos, staffingGroups, supervisorDocs, docSignatures,
   quickMessages, conversations, conversationMessages, incidents, incidentNotifications, countSessions,
   standIssues, standIssueNotifications, managerAssignments, geofenceEvents, ISSUE_ROUTING_RULES,
+  closingChecklists, closingChecklistTasks, spoilageReports, spoilageItems, voucherReports, DEFAULT_CLOSING_TASKS,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -20,7 +21,12 @@ import {
   type StandIssue, type InsertStandIssue,
   type StandIssueNotification, type InsertStandIssueNotification,
   type ManagerAssignment, type InsertManagerAssignment,
-  type GeofenceEvent, type InsertGeofenceEvent
+  type GeofenceEvent, type InsertGeofenceEvent,
+  type ClosingChecklist, type InsertClosingChecklist,
+  type ClosingChecklistTask, type InsertClosingChecklistTask,
+  type SpoilageReport, type InsertSpoilageReport,
+  type SpoilageItem, type InsertSpoilageItem,
+  type VoucherReport, type InsertVoucherReport
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
@@ -165,6 +171,27 @@ export interface IStorage {
   // PIN Reset
   updateUserPin(id: string, newPin: string): Promise<void>;
   getUsersRequiringPinReset(): Promise<User[]>;
+
+  // Closing Checklists
+  getClosingChecklist(standId: string, eventDate: string): Promise<ClosingChecklist | undefined>;
+  createClosingChecklist(checklist: InsertClosingChecklist): Promise<ClosingChecklist>;
+  getClosingChecklistTasks(checklistId: string): Promise<ClosingChecklistTask[]>;
+  toggleChecklistTask(taskId: string, isCompleted: boolean, remarks?: string): Promise<void>;
+  completeClosingChecklist(checklistId: string): Promise<void>;
+
+  // Spoilage Reports
+  getSpoilageReport(standId: string, eventDate: string): Promise<SpoilageReport | undefined>;
+  createSpoilageReport(report: InsertSpoilageReport): Promise<SpoilageReport>;
+  getSpoilageItems(reportId: string): Promise<SpoilageItem[]>;
+  addSpoilageItem(item: InsertSpoilageItem): Promise<SpoilageItem>;
+  removeSpoilageItem(itemId: string): Promise<void>;
+  submitSpoilageReport(reportId: string): Promise<void>;
+
+  // Voucher Reports
+  getVoucherReport(standId: string, eventDate: string): Promise<VoucherReport | undefined>;
+  createVoucherReport(report: InsertVoucherReport): Promise<VoucherReport>;
+  updateVoucherReport(reportId: string, voucherCount: number, totalAmountCents: number, notes?: string): Promise<void>;
+  submitVoucherReport(reportId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -280,10 +307,10 @@ export class DatabaseStorage implements IStorage {
     const preCountMap = new Map(preEventCounts.map(c => [c.itemId, c]));
     const postCountMap = new Map(postEventCounts.map(c => [c.itemId, c]));
     
-    const allItemIds = new Set([
+    const allItemIds = Array.from(new Set([
       ...preEventCounts.map(c => c.itemId),
       ...postEventCounts.map(c => c.itemId)
-    ]);
+    ]));
     
     const report: VarianceReportItem[] = [];
     
@@ -826,6 +853,124 @@ export class DatabaseStorage implements IStorage {
   async getUsersRequiringPinReset(): Promise<User[]> {
     return await db.select().from(users)
       .where(eq(users.requiresPinReset, true));
+  }
+
+  // Closing Checklists
+  async getClosingChecklist(standId: string, eventDate: string): Promise<ClosingChecklist | undefined> {
+    const [checklist] = await db.select().from(closingChecklists)
+      .where(and(
+        eq(closingChecklists.standId, standId),
+        eq(closingChecklists.eventDate, eventDate)
+      ));
+    return checklist || undefined;
+  }
+
+  async createClosingChecklist(checklist: InsertClosingChecklist): Promise<ClosingChecklist> {
+    const [created] = await db.insert(closingChecklists).values(checklist).returning();
+    
+    // Create default tasks for this checklist
+    const defaultTasks = DEFAULT_CLOSING_TASKS.map(task => ({
+      checklistId: created.id,
+      taskKey: task.key,
+      taskLabel: task.label,
+      isCompleted: false
+    }));
+    
+    await db.insert(closingChecklistTasks).values(defaultTasks);
+    
+    return created;
+  }
+
+  async getClosingChecklistTasks(checklistId: string): Promise<ClosingChecklistTask[]> {
+    return await db.select().from(closingChecklistTasks)
+      .where(eq(closingChecklistTasks.checklistId, checklistId));
+  }
+
+  async toggleChecklistTask(taskId: string, isCompleted: boolean, remarks?: string): Promise<void> {
+    await db.update(closingChecklistTasks)
+      .set({ 
+        isCompleted, 
+        completedAt: isCompleted ? new Date() : null,
+        remarks 
+      })
+      .where(eq(closingChecklistTasks.id, taskId));
+  }
+
+  async completeClosingChecklist(checklistId: string): Promise<void> {
+    await db.update(closingChecklists)
+      .set({ 
+        isComplete: true,
+        submittedAt: new Date()
+      })
+      .where(eq(closingChecklists.id, checklistId));
+  }
+
+  // Spoilage Reports
+  async getSpoilageReport(standId: string, eventDate: string): Promise<SpoilageReport | undefined> {
+    const [report] = await db.select().from(spoilageReports)
+      .where(and(
+        eq(spoilageReports.standId, standId),
+        eq(spoilageReports.eventDate, eventDate)
+      ));
+    return report || undefined;
+  }
+
+  async createSpoilageReport(report: InsertSpoilageReport): Promise<SpoilageReport> {
+    const [created] = await db.insert(spoilageReports).values(report).returning();
+    return created;
+  }
+
+  async getSpoilageItems(reportId: string): Promise<SpoilageItem[]> {
+    return await db.select().from(spoilageItems)
+      .where(eq(spoilageItems.reportId, reportId));
+  }
+
+  async addSpoilageItem(item: InsertSpoilageItem): Promise<SpoilageItem> {
+    const [created] = await db.insert(spoilageItems).values(item).returning();
+    return created;
+  }
+
+  async removeSpoilageItem(itemId: string): Promise<void> {
+    await db.delete(spoilageItems).where(eq(spoilageItems.id, itemId));
+  }
+
+  async submitSpoilageReport(reportId: string): Promise<void> {
+    await db.update(spoilageReports)
+      .set({ 
+        isSubmitted: true,
+        submittedAt: new Date()
+      })
+      .where(eq(spoilageReports.id, reportId));
+  }
+
+  // Voucher Reports
+  async getVoucherReport(standId: string, eventDate: string): Promise<VoucherReport | undefined> {
+    const [report] = await db.select().from(voucherReports)
+      .where(and(
+        eq(voucherReports.standId, standId),
+        eq(voucherReports.eventDate, eventDate)
+      ));
+    return report || undefined;
+  }
+
+  async createVoucherReport(report: InsertVoucherReport): Promise<VoucherReport> {
+    const [created] = await db.insert(voucherReports).values(report).returning();
+    return created;
+  }
+
+  async updateVoucherReport(reportId: string, voucherCount: number, totalAmountCents: number, notes?: string): Promise<void> {
+    await db.update(voucherReports)
+      .set({ voucherCount, totalAmountCents, notes })
+      .where(eq(voucherReports.id, reportId));
+  }
+
+  async submitVoucherReport(reportId: string): Promise<void> {
+    await db.update(voucherReports)
+      .set({ 
+        isSubmitted: true,
+        submittedAt: new Date()
+      })
+      .where(eq(voucherReports.id, reportId));
   }
 }
 

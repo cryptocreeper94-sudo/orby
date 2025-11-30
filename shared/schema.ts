@@ -40,6 +40,7 @@ export const employmentAffiliationEnum = pgEnum('employment_affiliation', ['Lege
 export const issueCategoryEnum = pgEnum('issue_category', ['Cooling', 'Beverage', 'Power', 'AV', 'Menu', 'FoodSafety', 'Equipment', 'Staffing', 'Other']);
 export const issueSeverityEnum = pgEnum('issue_severity', ['Emergency', 'High', 'Normal', 'Low']);
 export const issueStatusEnum = pgEnum('issue_status', ['Open', 'Acknowledged', 'InProgress', 'Resolved', 'Closed']);
+export const spoilageReasonEnum = pgEnum('spoilage_reason', ['ThrownAway', 'Returned', 'Damaged', 'Expired', 'Other']);
 
 // Users table
 export const users = pgTable("users", {
@@ -272,6 +273,68 @@ export const geofenceEvents = pgTable("geofence_events", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Closing Checklists - end-of-shift equipment shutdown verification
+export const closingChecklists = pgTable("closing_checklists", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id).notNull(),
+  eventDate: text("event_date").notNull(),
+  supervisorId: varchar("supervisor_id", { length: 36 }).references(() => users.id).notNull(),
+  isComplete: boolean("is_complete").default(false),
+  notes: text("notes"),
+  submittedAt: timestamp("submitted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Closing Checklist Tasks - individual items on the checklist
+export const closingChecklistTasks = pgTable("closing_checklist_tasks", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  checklistId: varchar("checklist_id", { length: 36 }).references(() => closingChecklists.id).notNull(),
+  taskKey: text("task_key").notNull(), // e.g., 'grease_pit', 'hood_vent', 'co2', 'lights', etc.
+  taskLabel: text("task_label").notNull(), // Human-readable label
+  isCompleted: boolean("is_completed").default(false),
+  completedAt: timestamp("completed_at"),
+  remarks: text("remarks"),
+});
+
+// Spoilage Reports - tracks items thrown away, returned, or wasted
+export const spoilageReports = pgTable("spoilage_reports", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id).notNull(),
+  eventDate: text("event_date").notNull(),
+  supervisorId: varchar("supervisor_id", { length: 36 }).references(() => users.id).notNull(),
+  isSubmitted: boolean("is_submitted").default(false),
+  submittedAt: timestamp("submitted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Spoilage Items - individual spoiled/wasted items
+export const spoilageItems = pgTable("spoilage_items", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  reportId: varchar("report_id", { length: 36 }).references(() => spoilageReports.id).notNull(),
+  itemId: varchar("item_id", { length: 36 }).references(() => items.id),
+  itemName: text("item_name").notNull(), // For custom/manual entries
+  quantity: integer("quantity").notNull(),
+  unit: text("unit").default('each'),
+  reason: spoilageReasonEnum("reason").notNull(),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Voucher Reports - tracks employee meal vouchers collected
+export const voucherReports = pgTable("voucher_reports", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id).notNull(),
+  eventDate: text("event_date").notNull(),
+  supervisorId: varchar("supervisor_id", { length: 36 }).references(() => users.id).notNull(),
+  voucherCount: integer("voucher_count").notNull().default(0),
+  totalAmountCents: integer("total_amount_cents").notNull().default(0), // in cents, e.g., 1000 = $10
+  envelopeId: text("envelope_id"), // Optional envelope number/identifier
+  notes: text("notes"),
+  isSubmitted: boolean("is_submitted").default(false),
+  submittedAt: timestamp("submitted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Communication ACL - defines who can contact whom
 export const ROLE_CONTACT_RULES: Record<string, string[]> = {
   NPOWorker: ['StandLead'],                    // Can only contact their Stand Lead
@@ -468,6 +531,11 @@ export const insertStandIssueSchema = createInsertSchema(standIssues).omit({ id:
 export const insertStandIssueNotificationSchema = createInsertSchema(standIssueNotifications).omit({ id: true, createdAt: true, readAt: true });
 export const insertManagerAssignmentSchema = createInsertSchema(managerAssignments).omit({ id: true, createdAt: true });
 export const insertGeofenceEventSchema = createInsertSchema(geofenceEvents).omit({ id: true, createdAt: true });
+export const insertClosingChecklistSchema = createInsertSchema(closingChecklists).omit({ id: true, createdAt: true, submittedAt: true });
+export const insertClosingChecklistTaskSchema = createInsertSchema(closingChecklistTasks).omit({ id: true, completedAt: true });
+export const insertSpoilageReportSchema = createInsertSchema(spoilageReports).omit({ id: true, createdAt: true, submittedAt: true });
+export const insertSpoilageItemSchema = createInsertSchema(spoilageItems).omit({ id: true, createdAt: true });
+export const insertVoucherReportSchema = createInsertSchema(voucherReports).omit({ id: true, createdAt: true, submittedAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -508,6 +576,36 @@ export type ManagerAssignment = typeof managerAssignments.$inferSelect;
 export type InsertManagerAssignment = z.infer<typeof insertManagerAssignmentSchema>;
 export type GeofenceEvent = typeof geofenceEvents.$inferSelect;
 export type InsertGeofenceEvent = z.infer<typeof insertGeofenceEventSchema>;
+export type ClosingChecklist = typeof closingChecklists.$inferSelect;
+export type InsertClosingChecklist = z.infer<typeof insertClosingChecklistSchema>;
+export type ClosingChecklistTask = typeof closingChecklistTasks.$inferSelect;
+export type InsertClosingChecklistTask = z.infer<typeof insertClosingChecklistTaskSchema>;
+export type SpoilageReport = typeof spoilageReports.$inferSelect;
+export type InsertSpoilageReport = z.infer<typeof insertSpoilageReportSchema>;
+export type SpoilageItem = typeof spoilageItems.$inferSelect;
+export type InsertSpoilageItem = z.infer<typeof insertSpoilageItemSchema>;
+export type VoucherReport = typeof voucherReports.$inferSelect;
+export type InsertVoucherReport = z.infer<typeof insertVoucherReportSchema>;
+
+// Default closing checklist tasks
+export const DEFAULT_CLOSING_TASKS = [
+  { key: 'grease_pit', label: 'Grease Pit - Turned Off' },
+  { key: 'hood_vent', label: 'Hood Vent - Turned Off' },
+  { key: 'oven', label: 'Oven - Turned Off & Unplugged' },
+  { key: 'cheese_warmer', label: 'Cheese Warmer - Unplugged' },
+  { key: 'hot_dog_roller', label: 'Hot Dog Roller - Turned Off' },
+  { key: 'nacho_warmer', label: 'Nacho Warmer - Unplugged' },
+  { key: 'co2', label: 'CO2 - Turned Off' },
+  { key: 'beer_taps', label: 'Beer Taps - Closed' },
+  { key: 'lights', label: 'Lights - Turned Off' },
+  { key: 'fans', label: 'Fans - Turned Off' },
+  { key: 'pos_terminals', label: 'POS Terminals - Logged Out' },
+  { key: 'registers_closed', label: 'Cash Registers - Closed & Secured' },
+  { key: 'coolers_checked', label: 'Coolers - Doors Closed & Secure' },
+  { key: 'trash_removed', label: 'Trash - Removed' },
+  { key: 'counters_wiped', label: 'Counters - Cleaned & Wiped' },
+  { key: 'stanchions_removed', label: 'Stanchions - Removed/Delegated' },
+];
 
 // Routing rules for issue categories
 export const ISSUE_ROUTING_RULES: Record<string, string[]> = {
