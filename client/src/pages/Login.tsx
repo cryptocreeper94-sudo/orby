@@ -40,6 +40,8 @@ export default function LoginPage() {
       if (currentUser.pin === '0424') setLocation("/dev"); // Explicit Dev Redirect
       else if (currentUser.role === 'Admin') setLocation("/admin");
       else if (currentUser.role === 'IT') setLocation("/it");
+      else if (currentUser.role === 'Warehouse') setLocation("/warehouse");
+      else if (currentUser.role === 'Kitchen') setLocation("/kitchen");
       else setLocation("/supervisor");
     }
   }, [currentUser, setLocation, login]);
@@ -91,7 +93,7 @@ export default function LoginPage() {
                 </Button>
                 
                 <div className="mt-6 text-center space-y-2">
-                   <p className="text-xs text-muted-foreground font-medium bg-slate-100 dark:bg-slate-800 py-2 rounded-lg">Demo PINs: Admin: 1234 | Supervisor: 5678 | IT: 9999</p>
+                   <p className="text-xs text-muted-foreground font-medium bg-slate-100 dark:bg-slate-800 py-2 rounded-lg">Demo PINs: Admin: 1234 | Supervisor: 5678 | IT: 9999 | Warehouse: 1111 | Kitchen: 2222</p>
                 </div>
               </form>
             </Form>

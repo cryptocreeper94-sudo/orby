@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Send, ArrowLeft, User as UserIcon, Shield, Briefcase, Monitor } from "lucide-react";
+import { Send, ArrowLeft, User as UserIcon, Shield, Briefcase, Monitor, Warehouse, ChefHat } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 
@@ -29,9 +29,8 @@ export default function MessagesPage() {
     if (!newMessage.trim() || !currentUser) return;
     
     addMessage({
-      senderId: currentUser.id,
       content: newMessage,
-      type: 'Request' // Default to request for now
+      type: 'Request'
     });
     setNewMessage("");
   };
@@ -41,6 +40,8 @@ export default function MessagesPage() {
       case 'Admin': return <Shield className="h-3 w-3" />;
       case 'Supervisor': return <UserIcon className="h-3 w-3" />;
       case 'IT': return <Monitor className="h-3 w-3" />;
+      case 'Warehouse': return <Warehouse className="h-3 w-3" />;
+      case 'Kitchen': return <ChefHat className="h-3 w-3" />;
       default: return <Briefcase className="h-3 w-3" />;
     }
   };
@@ -50,6 +51,8 @@ export default function MessagesPage() {
       case 'Admin': return 'bg-purple-100 text-purple-700 border-purple-200';
       case 'IT': return 'bg-cyan-100 text-cyan-700 border-cyan-200';
       case 'Supervisor': return 'bg-blue-100 text-blue-700 border-blue-200';
+      case 'Warehouse': return 'bg-amber-100 text-amber-700 border-amber-200';
+      case 'Kitchen': return 'bg-rose-100 text-rose-700 border-rose-200';
       default: return 'bg-slate-100 text-slate-700 border-slate-200';
     }
   };
