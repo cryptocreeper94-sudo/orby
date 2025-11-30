@@ -4,10 +4,13 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ScanLine, CalendarDays, Upload, Printer } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ScanLine, CalendarDays, Upload, Printer, Search } from "lucide-react";
+import { useState } from "react";
 
 export function StaffingGrid() {
   const stands = useStore((state) => state.stands);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getStatusColor = (status: Stand['status']) => {
     switch (status) {
@@ -19,31 +22,51 @@ export function StaffingGrid() {
     }
   };
 
+  // Filter stands based on search query
+  const filteredStands = stands.filter(stand => 
+    stand.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    stand.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    stand.section.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   // Group stands by section
   const standsBySection = SECTIONS.reduce((acc, section) => {
-    acc[section] = stands.filter(s => s.section === section);
+    acc[section] = filteredStands.filter(s => s.section === section);
     return acc;
   }, {} as Record<string, Stand[]>);
 
   return (
     <div className="space-y-6">
       {/* Grid Header / Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-lg border shadow-sm">
-        <div>
-          <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2 font-mono">
-            25-11-30 POS TITANS V JAGUARS
-          </h2>
-          <p className="text-sm text-muted-foreground font-medium">Staffing Grid • Event ID: #E-251130</p>
+      <div className="flex flex-col gap-4 bg-white dark:bg-slate-900 p-4 rounded-lg border shadow-sm">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2 font-mono">
+              25-11-30 POS TITANS V JAGUARS
+            </h2>
+            <p className="text-sm text-muted-foreground font-medium">Staffing Grid • Event ID: #E-251130</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm">
+              <Printer className="mr-2 h-4 w-4" />
+              Print Grid
+            </Button>
+            <Button className="bg-primary text-primary-foreground shadow-md hover:bg-primary/90" size="sm">
+              <ScanLine className="mr-2 h-4 w-4" />
+              Scan Grid Sheet
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm">
-            <Printer className="mr-2 h-4 w-4" />
-            Print Grid
-          </Button>
-          <Button className="bg-primary text-primary-foreground shadow-md hover:bg-primary/90" size="sm">
-            <ScanLine className="mr-2 h-4 w-4" />
-            Scan Grid Sheet
-          </Button>
+        
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search by Stand Name (e.g., 'Hattie B's') or ID (e.g., '121')..."
+            className="pl-9 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus-visible:ring-primary"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
       </div>
 
