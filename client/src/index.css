@@ -43,6 +43,7 @@
 }
 
 /* LIGHT MODE - Industrial Productivity Theme (Updated to Pastel Blue) */
+/* Cache bust: Force rebuild 1 */
 :root {
   --background: 210 60% 98%; /* Pastel Blue Background */
   --foreground: 222 47% 11%;
