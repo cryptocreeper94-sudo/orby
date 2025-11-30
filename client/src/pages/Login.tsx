@@ -30,6 +30,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (currentUser) {
       if (currentUser.role === 'Admin') setLocation("/admin");
+      else if (currentUser.role === 'IT') setLocation("/it");
       else setLocation("/supervisor");
     }
   }, [currentUser, setLocation]);
@@ -80,7 +81,7 @@ export default function LoginPage() {
               </Button>
               
               <div className="mt-6 text-center">
-                 <p className="text-xs text-muted-foreground">Demo PINs: Admin: 1234 | Supervisor: 5678</p>
+                 <p className="text-xs text-muted-foreground">Demo PINs: Admin: 1234 | Supervisor: 5678 | IT: 9999</p>
               </div>
             </form>
           </Form>

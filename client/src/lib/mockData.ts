@@ -29,7 +29,7 @@ export interface Stand {
 export interface User {
   id: string;
   name: string;
-  role: 'Admin' | 'Supervisor' | 'Worker';
+  role: 'Admin' | 'Supervisor' | 'Worker' | 'IT';
   pin: string;
 }
 
@@ -54,6 +54,7 @@ export const MOCK_USERS: User[] = [
   { id: '1', name: 'Admin User', role: 'Admin', pin: '1234' },
   { id: '2', name: 'Sup. Sarah', role: 'Supervisor', pin: '5678' },
   { id: '3', name: 'Sup. Mike', role: 'Supervisor', pin: '9012' },
+  { id: '4', name: 'IT Support', role: 'IT', pin: '9999' },
 ];
 
 export const MOCK_STANDS: Stand[] = [
