@@ -1,7 +1,7 @@
 import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map } from "lucide-react";
+import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList } from "lucide-react";
 import { useLocation } from "wouter";
 import {
   Accordion,
@@ -16,6 +16,7 @@ import Webcam from "react-webcam";
 import { Badge } from "@/components/ui/badge";
 import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
+import { SupervisorPack } from "@/components/SupervisorPack";
 
 export default function SupervisorDashboard() {
   const logout = useStore((state) => state.logout);
@@ -41,6 +42,7 @@ export default function SupervisorDashboard() {
   const [showScanner, setShowScanner] = useState(false);
   const [activeTab, setActiveTab] = useState("inventory");
   const [showMap, setShowMap] = useState(false);
+  const [showSupervisorPack, setShowSupervisorPack] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -128,6 +130,15 @@ export default function SupervisorDashboard() {
              </CardContent>
           </Card>
 
+          <Button 
+            className="w-full h-14 bg-amber-600 hover:bg-amber-700 text-white font-bold"
+            onClick={() => setShowSupervisorPack(true)}
+            data-testid="open-supervisor-pack"
+          >
+            <ClipboardList className="h-5 w-5 mr-2" />
+            Open Full Supervisor Pack
+          </Button>
+
           <div className="grid grid-cols-2 gap-4">
             <Notepad storageKey="supervisor-notes" className="col-span-2" />
             <Button 
@@ -146,6 +157,16 @@ export default function SupervisorDashboard() {
               <InteractiveMap 
                 onClose={() => setShowMap(false)} 
                 showNavigation={true}
+              />
+            </div>
+          )}
+
+          {showSupervisorPack && (
+            <div className="fixed inset-0 z-50 bg-background">
+              <SupervisorPack 
+                onClose={() => setShowSupervisorPack(false)}
+                supervisorName={currentUser?.name}
+                standName={myStands[0]?.name || 'My Stand'}
               />
             </div>
           )}

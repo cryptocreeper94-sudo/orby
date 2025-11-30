@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   LogOut, Map, MessageSquare, Navigation, MapPin, 
-  CheckCircle2, AlertTriangle, Clock, Users, Building2 
+  CheckCircle2, AlertTriangle, Clock, Users, Building2, Route 
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
+import { WalkingDirections } from "@/components/WalkingDirections";
 import { 
   LocationAcknowledgement, 
   useGeolocation, 
@@ -23,6 +24,7 @@ export default function NPODashboard() {
   const [, setLocation] = useLocation();
   const currentUser = useStore((state) => state.currentUser);
   const [showMap, setShowMap] = useState(false);
+  const [showDirections, setShowDirections] = useState(false);
   const [locationAccepted, setLocationAccepted] = useState(false);
   const [isOnSite, setIsOnSite] = useState(false);
   const [checkedIn, setCheckedIn] = useState(false);
@@ -101,6 +103,16 @@ export default function NPODashboard() {
             onClose={() => setShowMap(false)} 
             showNavigation={true}
             userLocation={location ? { lat: location.coords.latitude, lng: location.coords.longitude } : null}
+          />
+        </div>
+      )}
+
+      {showDirections && (
+        <div className="fixed inset-0 z-50 bg-background p-4">
+          <WalkingDirections 
+            onClose={() => setShowDirections(false)}
+            userLocation={location ? { lat: location.coords.latitude, lng: location.coords.longitude } : null}
+            defaultDestination="105"
           />
         </div>
       )}
@@ -229,11 +241,10 @@ export default function NPODashboard() {
                   </div>
                 </div>
                 <Button 
-                  className="w-full" 
-                  variant="outline"
-                  onClick={() => setShowMap(true)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
+                  onClick={() => setShowDirections(true)}
                 >
-                  <Navigation className="h-4 w-4 mr-2" />
+                  <Route className="h-4 w-4 mr-2" />
                   Get Walking Directions
                 </Button>
               </CardContent>
@@ -241,27 +252,38 @@ export default function NPODashboard() {
           </>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-3">
           <Card 
             className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer" 
             onClick={() => setShowMap(true)}
           >
-            <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-              <div className="p-4 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                <Map className="h-8 w-8 text-blue-600" />
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
+              <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                <Map className="h-6 w-6 text-blue-600" />
               </div>
-              <div className="font-bold text-sm">Stadium Map</div>
+              <div className="font-bold text-xs">Map</div>
+            </CardContent>
+          </Card>
+          <Card 
+            className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => setShowDirections(true)}
+          >
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
+              <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/30">
+                <Route className="h-6 w-6 text-green-600" />
+              </div>
+              <div className="font-bold text-xs">Directions</div>
             </CardContent>
           </Card>
           <Card 
             className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer"
             onClick={() => setLocation('/messages')}
           >
-            <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-              <div className="p-4 rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-                <MessageSquare className="h-8 w-8 text-indigo-600" />
+            <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
+              <div className="p-3 rounded-full bg-indigo-100 dark:bg-indigo-900/30">
+                <MessageSquare className="h-6 w-6 text-indigo-600" />
               </div>
-              <div className="font-bold text-sm">Messages</div>
+              <div className="font-bold text-xs">Messages</div>
             </CardContent>
           </Card>
         </div>
