@@ -774,6 +774,110 @@ Return your response as a JSON object with this exact structure:
     }
   });
 
+  // ============ PAPER COUNT SHEET SCANNER ============
+  // Scan a paper count sheet using GPT-4o Vision to extract item counts
+  app.post("/api/ai-scanner/count-sheet", uploadOcr.single('image'), async (req: Request, res: Response) => {
+    let filePath: string | null = null;
+    
+    try {
+      const file = req.file as Express.Multer.File;
+      if (!file) {
+        return res.status(400).json({ error: "No image uploaded" });
+      }
+      
+      filePath = file.path;
+
+      // Read the image and convert to base64
+      const imageBuffer = fs.readFileSync(file.path);
+      const base64Image = imageBuffer.toString('base64');
+      const mimeType = file.mimetype || 'image/jpeg';
+
+      // Call GPT-4o Vision to analyze the paper count sheet
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert at reading inventory count sheets for stadium concessions.
+Your task is to analyze images of handwritten or printed count sheets and extract all item names with their counts.
+
+When analyzing an image:
+1. Read each line item carefully, including handwritten numbers
+2. Extract the item/product name and the count number
+3. Handle messy handwriting by using context clues
+4. Common items include: Bud Light, Michelob Ultra, Blue Moon, Corona, Modelo, White Claw, Truly, Hot Dogs, Nachos, Pretzels, Popcorn, Peanuts, etc.
+5. Look for tally marks, crossed out numbers, and final counts
+
+Return your response as a JSON object with this exact structure:
+{
+  "items": [
+    {
+      "name": "<item/product name as written>",
+      "count": <number>,
+      "confidence": "<high|medium|low>",
+      "notes": "<optional notes about readability>"
+    }
+  ],
+  "totalItems": <number of line items found>,
+  "overallConfidence": "<high|medium|low>",
+  "notes": "<any observations about the document quality, handwriting, or areas that were hard to read>"
+}`
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "text",
+                text: "Please read this count sheet image and extract all item names with their counts. This may be handwritten or printed. Return the results as JSON."
+              },
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType};base64,${base64Image}`,
+                  detail: "high"
+                }
+              }
+            ]
+          }
+        ],
+        max_tokens: 2048,
+        response_format: { type: "json_object" }
+      });
+
+      const aiResponse = response.choices[0]?.message?.content;
+      if (!aiResponse) {
+        throw new Error("No response from AI");
+      }
+
+      const countResult = JSON.parse(aiResponse);
+      
+      // Clean up temp file after successful processing
+      if (filePath && fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+
+      res.json({
+        success: true,
+        result: countResult
+      });
+    } catch (error) {
+      // Clean up temp file on error
+      if (filePath && fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+        } catch (cleanupError) {
+          console.error("Failed to cleanup temp file:", cleanupError);
+        }
+      }
+      
+      console.error("Paper Count Sheet Scanner error:", error);
+      res.status(500).json({ 
+        error: "Failed to read count sheet", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+
   // ============ COUNT SESSIONS ============
   // Start a new count session (with last 4 phone verification)
   app.post("/api/count-sessions", async (req: Request, res: Response) => {

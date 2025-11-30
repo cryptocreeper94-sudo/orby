@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ClipboardList, User, Phone, Clock, Check, Save, 
-  Package, Plus, Minus, AlertCircle, X, ChevronDown, ChevronUp, ScanLine
+  Package, Plus, Minus, AlertCircle, X, ChevronDown, ChevronUp, ScanLine, FileText
 } from 'lucide-react';
 import {
   Accordion,
@@ -15,6 +15,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { AIScanner } from './AIScanner';
+import { PaperCountSheetScanner } from './PaperCountSheetScanner';
 
 type CountStage = 'PreEvent' | 'PostEvent' | 'DayAfter';
 type CounterRole = 'NPOLead' | 'StandLead' | 'Supervisor' | 'Manager' | 'ManagerAssistant';
@@ -90,7 +91,9 @@ export function CountSheet({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [savingItem, setSavingItem] = useState<string | null>(null);
   const [showAIScanner, setShowAIScanner] = useState(false);
+  const [showPaperScanner, setShowPaperScanner] = useState(false);
   const [lastScanResult, setLastScanResult] = useState<{totalCount: number; productsMatched: number} | null>(null);
+  const [lastPaperScanResult, setLastPaperScanResult] = useState<{totalItems: number; matched: number} | null>(null);
 
   const categories = Array.from(new Set(items.map((item: Item) => item.category)));
   const itemsByCategory = categories.reduce((acc, cat) => {
@@ -161,6 +164,33 @@ export function CountSheet({
     setShowAIScanner(false);
   };
 
+  const handlePaperScanComplete = (scannedItems: Array<{name: string; count: number}>) => {
+    let matched = 0;
+    
+    for (const scannedItem of scannedItems) {
+      const scannedNameLower = scannedItem.name.toLowerCase();
+      
+      const matchingItem = items.find(item => {
+        const itemNameLower = item.name.toLowerCase();
+        return itemNameLower.includes(scannedNameLower) || 
+               scannedNameLower.includes(itemNameLower) ||
+               itemNameLower.split(' ').some(word => scannedNameLower.includes(word) && word.length > 3);
+      });
+      
+      if (matchingItem) {
+        setCounts(prev => ({ 
+          ...prev, 
+          [matchingItem.id]: scannedItem.count 
+        }));
+        setHasUnsavedChanges(true);
+        matched++;
+      }
+    }
+    
+    setLastPaperScanResult({ totalItems: scannedItems.length, matched });
+    setShowPaperScanner(false);
+  };
+
   const formatTime = (isoString: string) => {
     return new Date(isoString).toLocaleTimeString('en-US', { 
       hour: 'numeric', 
@@ -224,7 +254,7 @@ export function CountSheet({
         </div>
 
         {!isReadOnly && session.status === 'InProgress' && (
-          <div className="mt-3">
+          <div className="mt-3 space-y-2">
             <Button
               onClick={() => setShowAIScanner(true)}
               variant="outline"
@@ -240,6 +270,21 @@ export function CountSheet({
             {lastScanResult && (
               <div className="text-xs text-center text-purple-600 mt-1">
                 Last scan: {lastScanResult.totalCount} items found, {lastScanResult.productsMatched} matched
+              </div>
+            )}
+            
+            <Button
+              onClick={() => setShowPaperScanner(true)}
+              variant="outline"
+              className="w-full bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:from-green-100 hover:to-emerald-100"
+              data-testid="button-open-paper-scanner"
+            >
+              <FileText className="w-4 h-4 mr-2 text-green-600" />
+              <span className="text-green-700">Scan Paper Count Sheet</span>
+            </Button>
+            {lastPaperScanResult && (
+              <div className="text-xs text-center text-green-600 mt-1">
+                Last scan: {lastPaperScanResult.totalItems} items read, {lastPaperScanResult.matched} matched
               </div>
             )}
           </div>
