@@ -5,7 +5,7 @@ import {
   insertUserSchema, insertStandSchema, insertItemSchema, insertMessageSchema,
   insertNpoSchema, insertStaffingGroupSchema, insertSupervisorDocSchema, insertDocSignatureSchema,
   insertInventoryCountSchema, insertQuickMessageSchema, insertConversationSchema, insertConversationMessageSchema,
-  insertIncidentSchema, insertCountSessionSchema, insertStandIssueSchema
+  insertIncidentSchema, insertCountSessionSchema, insertStandIssueSchema, insertMenuBoardSchema
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -1608,6 +1608,121 @@ Return your response as a JSON object with this exact structure:
     } catch (error) {
       console.error("Seed error:", error);
       res.status(500).json({ error: "Failed to seed database" });
+    }
+  });
+
+  // ============ MENU BOARDS ============
+  app.get("/api/menu-boards", async (req: Request, res: Response) => {
+    try {
+      const boards = await storage.getAllMenuBoards();
+      res.json(boards);
+    } catch (error) {
+      console.error("Error fetching menu boards:", error);
+      res.status(500).json({ error: "Failed to fetch menu boards" });
+    }
+  });
+
+  app.get("/api/menu-boards/:id", async (req: Request, res: Response) => {
+    try {
+      const board = await storage.getMenuBoard(req.params.id);
+      if (!board) {
+        return res.status(404).json({ error: "Menu board not found" });
+      }
+      res.json(board);
+    } catch (error) {
+      console.error("Error fetching menu board:", error);
+      res.status(500).json({ error: "Failed to fetch menu board" });
+    }
+  });
+
+  app.post("/api/menu-boards", async (req: Request, res: Response) => {
+    try {
+      const validated = insertMenuBoardSchema.parse(req.body);
+      const board = await storage.createMenuBoard(validated);
+      res.json(board);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      console.error("Error creating menu board:", error);
+      res.status(500).json({ error: "Failed to create menu board" });
+    }
+  });
+
+  const updateMenuBoardSchema = z.object({
+    name: z.string().optional(),
+    description: z.string().optional()
+  });
+
+  app.put("/api/menu-boards/:id", async (req: Request, res: Response) => {
+    try {
+      const validated = updateMenuBoardSchema.parse(req.body);
+      await storage.updateMenuBoard(req.params.id, validated);
+      res.json({ success: true });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      console.error("Error updating menu board:", error);
+      res.status(500).json({ error: "Failed to update menu board" });
+    }
+  });
+
+  app.delete("/api/menu-boards/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deleteMenuBoard(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting menu board:", error);
+      res.status(500).json({ error: "Failed to delete menu board" });
+    }
+  });
+
+  app.get("/api/menu-boards/:id/slides", async (req: Request, res: Response) => {
+    try {
+      const slides = await storage.getMenuSlides(req.params.id);
+      const formattedSlides = slides.map(slide => ({
+        id: slide.id,
+        title: slide.title || '',
+        backgroundColor: slide.backgroundColor || '#1a1a2e',
+        backgroundImage: slide.backgroundImage,
+        elements: Array.isArray(slide.content) ? slide.content : []
+      }));
+      res.json(formattedSlides);
+    } catch (error) {
+      console.error("Error fetching slides:", error);
+      res.status(500).json({ error: "Failed to fetch slides" });
+    }
+  });
+
+  const saveMenuSlidesSchema = z.object({
+    slides: z.array(z.object({
+      id: z.string().optional(),
+      title: z.string().optional().default(''),
+      backgroundColor: z.string().optional().default('#1a1a2e'),
+      backgroundImage: z.string().optional(),
+      elements: z.array(z.any()).optional().default([])
+    }))
+  });
+
+  app.put("/api/menu-boards/:id/slides", async (req: Request, res: Response) => {
+    try {
+      const validated = saveMenuSlidesSchema.parse(req.body);
+      const formattedSlides = validated.slides.map((slide, index) => ({
+        title: slide.title || '',
+        backgroundColor: slide.backgroundColor || '#1a1a2e',
+        backgroundImage: slide.backgroundImage,
+        content: slide.elements || [],
+        slideOrder: index
+      }));
+      const saved = await storage.saveMenuSlides(req.params.id, formattedSlides);
+      res.json(saved);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      console.error("Error saving slides:", error);
+      res.status(500).json({ error: "Failed to save slides" });
     }
   });
 

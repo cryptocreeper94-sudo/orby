@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
   LogOut, AlertTriangle, CheckCircle2, Clock, ClipboardList,
   Building2, Users, Thermometer, Zap, Tv, UtensilsCrossed, Wrench,
-  HelpCircle, Bell, Eye, Check
+  HelpCircle, Bell, Eye, Check, LayoutGrid
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
@@ -264,6 +264,28 @@ export default function ManagerDashboard() {
           </h1>
           <p className="text-muted-foreground">{getRoleTitle()} Dashboard</p>
         </div>
+
+        {/* Operations Manager Quick Actions */}
+        {location === '/operations' && (
+          <Card className="border-blue-300 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-blue-800 dark:text-blue-200">Menu Board Creator</h3>
+                  <p className="text-sm text-blue-600 dark:text-blue-400">Create and manage digital menu displays</p>
+                </div>
+                <Button 
+                  onClick={() => setLocation('/menu-board-creator')}
+                  className="bg-blue-600 hover:bg-blue-700"
+                  data-testid="menu-board-creator-btn"
+                >
+                  <LayoutGrid className="h-4 w-4 mr-2" />
+                  Open Creator
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-3 gap-3">
           <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">

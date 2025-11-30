@@ -3,7 +3,7 @@ import {
   quickMessages, conversations, conversationMessages, incidents, incidentNotifications, countSessions,
   standIssues, standIssueNotifications, managerAssignments, geofenceEvents, ISSUE_ROUTING_RULES,
   closingChecklists, closingChecklistTasks, spoilageReports, spoilageItems, voucherReports, DEFAULT_CLOSING_TASKS,
-  documentSubmissions,
+  documentSubmissions, menuBoards, menuSlides,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -28,7 +28,9 @@ import {
   type SpoilageReport, type InsertSpoilageReport,
   type SpoilageItem, type InsertSpoilageItem,
   type VoucherReport, type InsertVoucherReport,
-  type DocumentSubmission, type InsertDocumentSubmission
+  type DocumentSubmission, type InsertDocumentSubmission,
+  type MenuBoard, type InsertMenuBoard,
+  type MenuSlide, type InsertMenuSlide
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
@@ -202,6 +204,17 @@ export interface IStorage {
   markDocumentSubmissionRead(id: string): Promise<void>;
   getUnreadDocumentCount(recipientRole: string): Promise<number>;
   getOperationsManagerId(): Promise<string | undefined>;
+
+  // Menu Boards
+  getAllMenuBoards(): Promise<MenuBoard[]>;
+  getMenuBoard(id: string): Promise<MenuBoard | undefined>;
+  createMenuBoard(board: InsertMenuBoard): Promise<MenuBoard>;
+  updateMenuBoard(id: string, updates: Partial<InsertMenuBoard>): Promise<void>;
+  deleteMenuBoard(id: string): Promise<void>;
+
+  // Menu Slides
+  getMenuSlides(boardId: string): Promise<MenuSlide[]>;
+  saveMenuSlides(boardId: string, slides: Array<{ title: string; backgroundColor: string; backgroundImage?: string; content: any; slideOrder: number }>): Promise<MenuSlide[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1023,6 +1036,57 @@ export class DatabaseStorage implements IStorage {
         eq(users.managementType, 'OperationsManager')
       ));
     return opsMgr?.id;
+  }
+
+  // Menu Boards
+  async getAllMenuBoards(): Promise<MenuBoard[]> {
+    return await db.select().from(menuBoards).orderBy(desc(menuBoards.updatedAt));
+  }
+
+  async getMenuBoard(id: string): Promise<MenuBoard | undefined> {
+    const [board] = await db.select().from(menuBoards).where(eq(menuBoards.id, id));
+    return board || undefined;
+  }
+
+  async createMenuBoard(board: InsertMenuBoard): Promise<MenuBoard> {
+    const [created] = await db.insert(menuBoards).values(board).returning();
+    return created;
+  }
+
+  async updateMenuBoard(id: string, updates: Partial<InsertMenuBoard>): Promise<void> {
+    await db.update(menuBoards)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(menuBoards.id, id));
+  }
+
+  async deleteMenuBoard(id: string): Promise<void> {
+    await db.delete(menuSlides).where(eq(menuSlides.menuBoardId, id));
+    await db.delete(menuBoards).where(eq(menuBoards.id, id));
+  }
+
+  // Menu Slides
+  async getMenuSlides(boardId: string): Promise<MenuSlide[]> {
+    return await db.select().from(menuSlides)
+      .where(eq(menuSlides.menuBoardId, boardId))
+      .orderBy(asc(menuSlides.slideOrder));
+  }
+
+  async saveMenuSlides(boardId: string, slides: Array<{ title: string; backgroundColor: string; backgroundImage?: string; content: any; slideOrder: number }>): Promise<MenuSlide[]> {
+    await db.delete(menuSlides).where(eq(menuSlides.menuBoardId, boardId));
+    if (slides.length === 0) return [];
+    
+    const slidesToInsert = slides.map((slide, index) => ({
+      menuBoardId: boardId,
+      title: slide.title,
+      backgroundColor: slide.backgroundColor,
+      backgroundImage: slide.backgroundImage,
+      content: slide.content,
+      slideOrder: index
+    }));
+    
+    const created = await db.insert(menuSlides).values(slidesToInsert).returning();
+    await db.update(menuBoards).set({ updatedAt: new Date() }).where(eq(menuBoards.id, boardId));
+    return created;
   }
 }
 
