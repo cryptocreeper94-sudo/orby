@@ -10,6 +10,7 @@ import SupervisorDashboard from "@/pages/SupervisorDashboard";
 import ITDashboard from "@/pages/ITDashboard";
 import MessagesPage from "@/pages/Messages";
 import RosterBuilder from "@/pages/RosterBuilder";
+import DevDashboard from "@/pages/DevDashboard";
 
 function Router() {
   return (
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/supervisor" component={SupervisorDashboard} />
       <Route path="/it" component={ITDashboard} />
+      <Route path="/dev" component={DevDashboard} />
       <Route path="/messages" component={MessagesPage} />
       <Route path="/roster-builder" component={RosterBuilder} />
       <Route component={NotFound} />
