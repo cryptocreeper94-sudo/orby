@@ -140,10 +140,12 @@ export default function AdminDashboard() {
 
           <TabsContent value="reports">
              <div className="grid grid-cols-2 gap-4">
-               <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-primary hover:bg-slate-50">
-                  <Users className="h-6 w-6" />
-                  Export Roster PDF
-               </Button>
+               <Link href="/roster-builder">
+                  <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-primary hover:bg-slate-50 cursor-pointer">
+                    <Users className="h-6 w-6" />
+                    Roster & Group Builder
+                  </Button>
+               </Link>
                <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-primary hover:bg-slate-50">
                   <FileBarChart className="h-6 w-6" />
                   Export Inventory CSV
