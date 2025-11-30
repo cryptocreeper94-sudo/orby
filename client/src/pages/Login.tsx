@@ -37,19 +37,20 @@ export default function LoginPage() {
     }
 
     if (currentUser) {
-      if (currentUser.pin === '0424') setLocation("/dev"); // Explicit Dev Redirect
+      // Check if user needs to reset their PIN first
+      if (currentUser.requiresPinReset) {
+        setLocation("/set-pin");
+        return;
+      }
+
+      // Route based on role with new hierarchy
+      if (currentUser.role === 'Developer') setLocation("/dev");
       else if (currentUser.role === 'Admin') setLocation("/admin");
       else if (currentUser.role === 'IT') setLocation("/it");
-      else if (currentUser.role === 'Warehouse') setLocation("/warehouse");
-      else if (currentUser.role === 'Kitchen') setLocation("/kitchen");
-      else if (currentUser.role === 'NPO') setLocation("/npo");
-      else if (currentUser.role === 'TempStaff') setLocation("/temp");
+      else if (currentUser.role === 'NPOWorker') setLocation("/npo");
       else if (currentUser.role === 'StandLead') setLocation("/standlead");
-      else if (currentUser.role === 'WarehouseManager') setLocation("/warehouse-manager");
-      else if (currentUser.role === 'KitchenManager') setLocation("/kitchen-manager");
-      else if (currentUser.role === 'OperationsManager' || currentUser.role === 'OperationsAssistant') setLocation("/operations");
-      else if (currentUser.role === 'GeneralManager') setLocation("/manager");
-      else if (currentUser.role === 'RegionalVP') setLocation("/executive");
+      else if (currentUser.role === 'StandSupervisor') setLocation("/supervisor");
+      else if (currentUser.role === 'ManagementCore' || currentUser.role === 'ManagementAssistant') setLocation("/manager");
       else setLocation("/supervisor");
     }
   }, [currentUser, setLocation, login]);
@@ -101,7 +102,7 @@ export default function LoginPage() {
                 </Button>
                 
                 <div className="mt-6 text-center space-y-2">
-                   <p className="text-xs text-muted-foreground font-medium bg-slate-100 dark:bg-slate-800 py-2 px-3 rounded-lg">Demo PINs: Supervisor: 5678 | Stand Lead: 5555 | NPO: 3333 | Gen Mgr: 1010</p>
+                   <p className="text-xs text-muted-foreground font-medium bg-slate-100 dark:bg-slate-800 py-2 px-3 rounded-lg">Demo PINs: NPO: 1111 | Stand Lead: 2222 | Supervisor: 3333 | Mgmt: 4444</p>
                 </div>
               </form>
             </Form>

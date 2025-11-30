@@ -6,26 +6,58 @@ StadiumOps is a comprehensive digital inventory and staffing management system f
 ## Current State
 - Full-stack application with Express backend and PostgreSQL database
 - PWA-enabled for mobile installation
-- Role-based access control (Admin, Supervisor, IT, Developer, Warehouse, Kitchen)
+- Role-based access control with new hierarchy
+- First-time PIN reset required for all field roles
 - Accordion-style UI with pastel blue theme and 3D buttons
 
-## User Roles & PINs
-| Role | PIN | Dashboard Route |
-|------|-----|-----------------|
-| Admin | 1234 | /admin |
-| Supervisor | 5678 | /supervisor |
-| IT | 9999 | /it |
-| Warehouse Worker | 1111 | /warehouse |
-| Kitchen Worker | 2222 | /kitchen |
-| NPO Staff | 3333 | /npo |
-| Temp Worker | 4444 | /temp |
-| Stand Lead | 5555 | /standlead |
-| Warehouse Manager | 6666 | /warehouse-manager |
-| Kitchen Manager | 7777 | /kitchen-manager |
-| Operations Manager | 8888 | /operations |
-| General Manager | 1010 | /manager |
-| Regional VP | 2020 | /executive |
-| Developer | 0424 | /dev |
+## New Role Hierarchy & Communication Rules
+
+### Role Hierarchy (Initial PINs)
+| Role | Initial PIN | Dashboard | Can Contact |
+|------|-------------|-----------|-------------|
+| NPOWorker | 1111 | /npo | Stand Lead only |
+| StandLead | 2222 | /standlead | Supervisor only |
+| StandSupervisor | 3333 | /supervisor | Everyone |
+| ManagementCore | 4444 | /manager | Everyone |
+| ManagementAssistant | 4444 | /manager | Supervisor, Management |
+| Admin | 1234 | /admin | Everyone |
+| IT | 9999 | /it | Admin, Management |
+| Developer | 0424 | /dev | Everyone |
+
+### Management Sub-Types (ManagementCore role)
+- WarehouseManager
+- BarManager
+- InventoryManager
+- KitchenManager
+- CulinaryManager
+- HRManager
+- OperationsManager
+- GeneralManager
+
+### First-Time PIN Reset Flow
+1. Users login with initial role-based PIN (1111, 2222, 3333, or 4444)
+2. System detects `requiresPinReset: true` flag
+3. Redirects to /set-pin page
+4. User creates personal 4-digit PIN
+5. PIN stored securely, `requiresPinReset` set to false
+6. User must re-login with new personal PIN
+
+### Communication Access Control
+- **NPO Worker → Stand Lead**: Can only message their assigned Stand Lead
+- **Stand Lead → Supervisor**: Cannot contact warehouse/kitchen/management directly
+- **Supervisor → All**: Full access to warehouse, kitchen, management
+- **Management → All**: Can reach any role
+
+### Geofencing Alerts
+When NPO Worker leaves stand boundary:
+- Stand Lead notified automatically
+- Supervisor notified automatically
+- Event logged in geofence_events table
+
+### Manager Assistant Assignment
+- Managers can assign assistants for event day
+- Assistants inherit contact privileges of assigning manager
+- Stored in manager_assignments table with event date scope
 
 ## Key Features
 - **Staffing Grid**: Event-based staffing assignments (format: "YY-MM-DD POS [Team] v [Team]")

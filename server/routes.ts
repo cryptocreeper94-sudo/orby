@@ -96,6 +96,30 @@ export async function registerRoutes(
     }
   });
 
+  // PIN Reset for first-time login
+  app.post("/api/users/reset-pin", async (req: Request, res: Response) => {
+    try {
+      const { userId, newPin } = req.body;
+      if (!userId || !newPin) {
+        return res.status(400).json({ error: "User ID and new PIN required" });
+      }
+      if (!/^\d{4}$/.test(newPin)) {
+        return res.status(400).json({ error: "PIN must be 4 digits" });
+      }
+      
+      // Check if PIN is already in use
+      const existingUser = await storage.getUserByPin(newPin);
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(400).json({ error: "This PIN is already in use" });
+      }
+      
+      await storage.updateUserPin(userId, newPin);
+      res.json({ success: true, message: "PIN updated successfully" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update PIN" });
+    }
+  });
+
   // ============ USERS ============
   app.get("/api/users", async (_req: Request, res: Response) => {
     try {
@@ -950,23 +974,20 @@ export async function registerRoutes(
         return res.json({ message: "Database already seeded", seeded: false });
       }
 
-      // Seed Users
+      // Seed Users with new role hierarchy
+      // Initial PINs: NPOWorker=1111, StandLead=2222, StandSupervisor=3333, Management=4444
       const users = [
-        { name: 'Admin User', pin: '1234', role: 'Admin' as const, isOnline: false },
-        { name: 'Sup. Sarah', pin: '5678', role: 'Supervisor' as const, isOnline: false },
-        { name: 'Sup. Mike', pin: '9012', role: 'Supervisor' as const, isOnline: false },
-        { name: 'IT Support', pin: '9999', role: 'IT' as const, isOnline: false },
-        { name: 'Developer', pin: '0424', role: 'Admin' as const, isOnline: false },
-        { name: 'Warehouse Worker', pin: '1111', role: 'Warehouse' as const, isOnline: false },
-        { name: 'Kitchen Worker', pin: '2222', role: 'Kitchen' as const, isOnline: false },
-        { name: 'NPO Staff', pin: '3333', role: 'NPO' as const, isOnline: false },
-        { name: 'Temp Worker', pin: '4444', role: 'TempStaff' as const, isOnline: false },
-        { name: 'Stand Lead', pin: '5555', role: 'StandLead' as const, isOnline: false },
-        { name: 'Warehouse Manager', pin: '6666', role: 'WarehouseManager' as const, isOnline: false },
-        { name: 'Kitchen Manager', pin: '7777', role: 'KitchenManager' as const, isOnline: false },
-        { name: 'Operations Manager', pin: '8888', role: 'OperationsManager' as const, isOnline: false },
-        { name: 'General Manager', pin: '1010', role: 'GeneralManager' as const, isOnline: false },
-        { name: 'Regional VP', pin: '2020', role: 'RegionalVP' as const, isOnline: false },
+        { name: 'Admin User', pin: '1234', role: 'Admin' as const, isOnline: false, requiresPinReset: false },
+        { name: 'Sup. Sarah', pin: '3333', role: 'StandSupervisor' as const, isOnline: false, requiresPinReset: true },
+        { name: 'Sup. Mike', pin: '3334', role: 'StandSupervisor' as const, isOnline: false, requiresPinReset: true },
+        { name: 'IT Support', pin: '9999', role: 'IT' as const, isOnline: false, requiresPinReset: false },
+        { name: 'Developer', pin: '0424', role: 'Developer' as const, isOnline: false, requiresPinReset: false },
+        { name: 'NPO Worker 1', pin: '1111', role: 'NPOWorker' as const, isOnline: false, requiresPinReset: true },
+        { name: 'Stand Lead 1', pin: '2222', role: 'StandLead' as const, isOnline: false, requiresPinReset: true },
+        { name: 'Warehouse Manager', pin: '4444', role: 'ManagementCore' as const, managementType: 'WarehouseManager' as const, isOnline: false, requiresPinReset: true },
+        { name: 'Kitchen Manager', pin: '4445', role: 'ManagementCore' as const, managementType: 'KitchenManager' as const, isOnline: false, requiresPinReset: true },
+        { name: 'HR Manager', pin: '4446', role: 'ManagementCore' as const, managementType: 'HRManager' as const, isOnline: false, requiresPinReset: true },
+        { name: 'General Manager', pin: '4447', role: 'ManagementCore' as const, managementType: 'GeneralManager' as const, isOnline: false, requiresPinReset: true },
       ];
 
       const createdUsers: Record<string, string> = {};

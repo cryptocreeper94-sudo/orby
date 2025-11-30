@@ -1,7 +1,7 @@
 import { 
   users, stands, inventoryCounts, items, messages, npos, staffingGroups, supervisorDocs, docSignatures,
   quickMessages, conversations, conversationMessages, incidents, incidentNotifications, countSessions,
-  standIssues, standIssueNotifications, ISSUE_ROUTING_RULES,
+  standIssues, standIssueNotifications, managerAssignments, geofenceEvents, ISSUE_ROUTING_RULES,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -18,7 +18,9 @@ import {
   type IncidentNotification, type InsertIncidentNotification,
   type CountSession, type InsertCountSession,
   type StandIssue, type InsertStandIssue,
-  type StandIssueNotification, type InsertStandIssueNotification
+  type StandIssueNotification, type InsertStandIssueNotification,
+  type ManagerAssignment, type InsertManagerAssignment,
+  type GeofenceEvent, type InsertGeofenceEvent
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
@@ -135,6 +137,21 @@ export interface IStorage {
   getUnreadStandIssueNotifications(userId: string): Promise<StandIssueNotification[]>;
   markStandIssueNotificationRead(id: string): Promise<void>;
   createStandIssueNotifications(issueId: string, category: string, isEmergency: boolean): Promise<void>;
+
+  // Manager Assignments
+  getManagerAssignments(eventDate: string): Promise<ManagerAssignment[]>;
+  getAssignmentsByManager(managerId: string, eventDate: string): Promise<ManagerAssignment[]>;
+  createManagerAssignment(assignment: InsertManagerAssignment): Promise<ManagerAssignment>;
+  deactivateManagerAssignment(id: string): Promise<void>;
+
+  // Geofence Events
+  createGeofenceEvent(event: InsertGeofenceEvent): Promise<GeofenceEvent>;
+  getRecentGeofenceEvents(userId: string): Promise<GeofenceEvent[]>;
+  markGeofenceEventNotified(id: string, notifiedStandLead: boolean, notifiedSupervisor: boolean): Promise<void>;
+
+  // PIN Reset
+  updateUserPin(id: string, newPin: string): Promise<void>;
+  getUsersRequiringPinReset(): Promise<User[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -476,7 +493,7 @@ export class DatabaseStorage implements IStorage {
 
   async createIncidentNotificationsForManagers(incidentId: string): Promise<void> {
     // Get all supervisors and admins to notify
-    const managersAndSupervisors = await this.getUsersByRoles(['Supervisor', 'Admin']);
+    const managersAndSupervisors = await this.getUsersByRoles(['StandSupervisor', 'ManagementCore', 'Admin']);
     
     // Create notification for each
     const notifications = managersAndSupervisors.map(user => ({
@@ -651,14 +668,13 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createStandIssueNotifications(issueId: string, category: string, isEmergency: boolean): Promise<void> {
-    // Get routing roles for this category
-    const routingRoles = ISSUE_ROUTING_RULES[category] || ['OperationsManager', 'GeneralManager'];
+    // All management roles receive issue notifications, filtered by category/type later
+    // For now, notify all ManagementCore users for issues
+    const rolesToNotify: User['role'][] = ['ManagementCore', 'StandSupervisor'];
     
-    // For emergencies, also notify General Manager and Regional VP
-    const rolesToNotify: User['role'][] = routingRoles as User['role'][];
+    // For emergencies, also notify Admin
     if (isEmergency) {
-      if (!rolesToNotify.includes('GeneralManager')) rolesToNotify.push('GeneralManager');
-      if (!rolesToNotify.includes('RegionalVP')) rolesToNotify.push('RegionalVP');
+      if (!rolesToNotify.includes('Admin')) rolesToNotify.push('Admin');
     }
 
     // Get all users with matching roles
@@ -675,6 +691,71 @@ export class DatabaseStorage implements IStorage {
       await db.insert(standIssueNotifications).values(notifications);
     }
   }
+
+  // Manager Assignments
+  async getManagerAssignments(eventDate: string): Promise<ManagerAssignment[]> {
+    return await db.select().from(managerAssignments)
+      .where(and(
+        eq(managerAssignments.eventDate, eventDate),
+        eq(managerAssignments.isActive, true)
+      ));
+  }
+
+  async getAssignmentsByManager(managerId: string, eventDate: string): Promise<ManagerAssignment[]> {
+    return await db.select().from(managerAssignments)
+      .where(and(
+        eq(managerAssignments.managerId, managerId),
+        eq(managerAssignments.eventDate, eventDate),
+        eq(managerAssignments.isActive, true)
+      ));
+  }
+
+  async createManagerAssignment(assignment: InsertManagerAssignment): Promise<ManagerAssignment> {
+    const [created] = await db.insert(managerAssignments).values(assignment).returning();
+    return created;
+  }
+
+  async deactivateManagerAssignment(id: string): Promise<void> {
+    await db.update(managerAssignments)
+      .set({ isActive: false })
+      .where(eq(managerAssignments.id, id));
+  }
+
+  // Geofence Events
+  async createGeofenceEvent(event: InsertGeofenceEvent): Promise<GeofenceEvent> {
+    const [created] = await db.insert(geofenceEvents).values(event).returning();
+    return created;
+  }
+
+  async getRecentGeofenceEvents(userId: string): Promise<GeofenceEvent[]> {
+    return await db.select().from(geofenceEvents)
+      .where(eq(geofenceEvents.userId, userId))
+      .orderBy(desc(geofenceEvents.createdAt))
+      .limit(10);
+  }
+
+  async markGeofenceEventNotified(id: string, notifiedStandLead: boolean, notifiedSupervisor: boolean): Promise<void> {
+    await db.update(geofenceEvents)
+      .set({ notifiedStandLead, notifiedSupervisor })
+      .where(eq(geofenceEvents.id, id));
+  }
+
+  // PIN Reset
+  async updateUserPin(id: string, newPin: string): Promise<void> {
+    await db.update(users)
+      .set({ 
+        pin: newPin, 
+        requiresPinReset: false, 
+        pinSetAt: new Date() 
+      })
+      .where(eq(users.id, id));
+  }
+
+  async getUsersRequiringPinReset(): Promise<User[]> {
+    return await db.select().from(users)
+      .where(eq(users.requiresPinReset, true));
+  }
 }
+
 
 export const storage = new DatabaseStorage();

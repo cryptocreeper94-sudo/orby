@@ -5,9 +5,26 @@ import { z } from "zod";
 
 // Enums
 export const userRoleEnum = pgEnum('user_role', [
-  'Admin', 'Supervisor', 'Worker', 'IT', 'Warehouse', 'Kitchen', 'NPO', 'TempStaff',
-  'StandLead', 'WarehouseManager', 'WarehouseWorker', 'KitchenManager', 'KitchenWorker',
-  'OperationsManager', 'OperationsAssistant', 'GeneralManager', 'RegionalVP'
+  'NPOWorker',        // PIN: 1111 - Can only contact Stand Lead
+  'StandLead',        // PIN: 2222 - Can only contact Supervisor
+  'StandSupervisor',  // PIN: 3333 - Can contact warehouse/kitchen/management
+  'ManagementCore',   // PIN: 4444 - Warehouse/Kitchen/Culinary/HR/Bar managers
+  'ManagementAssistant', // Assigned by managers for the day
+  'Admin',            // System admin
+  'IT',               // IT support
+  'Developer'         // Dev access
+]);
+
+// Management sub-types for ManagementCore role
+export const managementTypeEnum = pgEnum('management_type', [
+  'WarehouseManager',
+  'BarManager', 
+  'InventoryManager',
+  'KitchenManager',
+  'CulinaryManager',
+  'HRManager',
+  'OperationsManager',
+  'GeneralManager'
 ]);
 export const standStatusEnum = pgEnum('stand_status', ['Open', 'Closed', 'Needs Power', 'Spare', 'Hot Spot']);
 export const messageTypeEnum = pgEnum('message_type', ['Global', 'Urgent', 'Request']);
@@ -29,8 +46,13 @@ export const users = pgTable("users", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   pin: varchar("pin", { length: 4 }).notNull().unique(),
-  role: userRoleEnum("role").notNull().default('Worker'),
+  role: userRoleEnum("role").notNull().default('NPOWorker'),
+  managementType: managementTypeEnum("management_type"), // Only for ManagementCore role
+  requiresPinReset: boolean("requires_pin_reset").default(true), // First login requires PIN change
+  pinSetAt: timestamp("pin_set_at"), // When user set their personal PIN
   isOnline: boolean("is_online").default(false),
+  assignedStandId: varchar("assigned_stand_id", { length: 20 }), // Current stand assignment
+  standLeadId: varchar("stand_lead_id", { length: 36 }), // NPO Worker's assigned Stand Lead
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -226,6 +248,51 @@ export const standIssueNotifications = pgTable("stand_issue_notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Manager Assignments - tracks daily assistant assignments by managers
+export const managerAssignments = pgTable("manager_assignments", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  managerId: varchar("manager_id", { length: 36 }).references(() => users.id).notNull(),
+  assistantId: varchar("assistant_id", { length: 36 }).references(() => users.id).notNull(),
+  eventDate: text("event_date").notNull(),
+  roleScope: managementTypeEnum("role_scope"), // What role they're assisting with
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Geofence Events - tracks when workers leave their assigned location
+export const geofenceEvents = pgTable("geofence_events", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id).notNull(),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  eventType: text("event_type").notNull(), // 'exit' or 'enter'
+  latitude: text("latitude"),
+  longitude: text("longitude"),
+  notifiedStandLead: boolean("notified_stand_lead").default(false),
+  notifiedSupervisor: boolean("notified_supervisor").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Communication ACL - defines who can contact whom
+export const ROLE_CONTACT_RULES: Record<string, string[]> = {
+  NPOWorker: ['StandLead'],                    // Can only contact their Stand Lead
+  StandLead: ['StandSupervisor'],              // Can only contact Supervisor
+  StandSupervisor: ['StandLead', 'ManagementCore', 'ManagementAssistant'], // Can contact all
+  ManagementCore: ['StandSupervisor', 'StandLead', 'ManagementCore', 'ManagementAssistant', 'Admin'],
+  ManagementAssistant: ['StandSupervisor', 'ManagementCore'],
+  Admin: ['StandSupervisor', 'StandLead', 'ManagementCore', 'ManagementAssistant', 'NPOWorker'],
+  IT: ['Admin', 'ManagementCore'],
+  Developer: ['Admin', 'ManagementCore', 'StandSupervisor', 'StandLead', 'NPOWorker'],
+};
+
+// Initial PINs for first-time login (users must change on first login)
+export const INITIAL_PINS: Record<string, string> = {
+  NPOWorker: '1111',
+  StandLead: '2222',
+  StandSupervisor: '3333',
+  ManagementCore: '4444',
+  ManagementAssistant: '4444',
+};
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   stands: many(stands),
@@ -399,6 +466,8 @@ export const insertIncidentSchema = createInsertSchema(incidents).omit({ id: tru
 export const insertIncidentNotificationSchema = createInsertSchema(incidentNotifications).omit({ id: true, createdAt: true, readAt: true });
 export const insertStandIssueSchema = createInsertSchema(standIssues).omit({ id: true, createdAt: true, acknowledgedAt: true, resolvedAt: true });
 export const insertStandIssueNotificationSchema = createInsertSchema(standIssueNotifications).omit({ id: true, createdAt: true, readAt: true });
+export const insertManagerAssignmentSchema = createInsertSchema(managerAssignments).omit({ id: true, createdAt: true });
+export const insertGeofenceEventSchema = createInsertSchema(geofenceEvents).omit({ id: true, createdAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -435,6 +504,10 @@ export type StandIssue = typeof standIssues.$inferSelect;
 export type InsertStandIssue = z.infer<typeof insertStandIssueSchema>;
 export type StandIssueNotification = typeof standIssueNotifications.$inferSelect;
 export type InsertStandIssueNotification = z.infer<typeof insertStandIssueNotificationSchema>;
+export type ManagerAssignment = typeof managerAssignments.$inferSelect;
+export type InsertManagerAssignment = z.infer<typeof insertManagerAssignmentSchema>;
+export type GeofenceEvent = typeof geofenceEvents.$inferSelect;
+export type InsertGeofenceEvent = z.infer<typeof insertGeofenceEventSchema>;
 
 // Routing rules for issue categories
 export const ISSUE_ROUTING_RULES: Record<string, string[]> = {

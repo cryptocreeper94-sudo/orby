@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/Login";
+import SetPinPage from "@/pages/SetPin";
 import AdminDashboard from "@/pages/AdminDashboard";
 import SupervisorDashboard from "@/pages/SupervisorDashboard";
 import ITDashboard from "@/pages/ITDashboard";
@@ -16,12 +17,13 @@ import StandLeadDashboard from "@/pages/StandLeadDashboard";
 import MessagesPage from "@/pages/Messages";
 import RosterBuilder from "@/pages/RosterBuilder";
 import DevDashboard from "@/pages/DevDashboard";
-import ManagerDashboard from "@/pages/ManagerDashboard";
+import ManagerDashboard from "./pages/ManagerDashboard";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={LoginPage} />
+      <Route path="/set-pin" component={SetPinPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/supervisor" component={SupervisorDashboard} />
       <Route path="/it" component={ITDashboard} />
