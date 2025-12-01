@@ -21,7 +21,7 @@ import ManagerDashboard from "./pages/ManagerDashboard";
 import MenuBoardCreator from "@/pages/MenuBoardCreator";
 import OpsCommandCenter from "@/pages/OpsCommandCenter";
 import CommandCenter from "@/pages/CommandCenter";
-import orbyCommanderImg from "@assets/generated_images/orby_commander_planet_mascot.png";
+import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 function Router() {
   return (
@@ -52,17 +52,52 @@ function Router() {
   );
 }
 
+function TwinklingStars() {
+  const stars = Array.from({ length: 50 }, (_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    size: Math.random() * 2 + 0.5,
+    delay: `${Math.random() * 4}s`,
+    duration: `${Math.random() * 2 + 2}s`,
+    opacity: Math.random() * 0.4 + 0.1
+  }));
+
+  return (
+    <>
+      {stars.map(star => (
+        <div
+          key={star.id}
+          className="absolute rounded-full bg-cyan-200 animate-pulse"
+          style={{
+            left: star.left,
+            top: star.top,
+            width: `${star.size}px`,
+            height: `${star.size}px`,
+            animationDelay: star.delay,
+            animationDuration: star.duration,
+            opacity: star.opacity
+          }}
+        />
+      ))}
+    </>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
-          <img 
-            src={orbyCommanderImg} 
-            alt="" 
-            className="w-[70vmin] h-[70vmin] object-contain opacity-[0.04] select-none"
-            aria-hidden="true"
-          />
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          <TwinklingStars />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <img 
+              src={orbyCommanderImg} 
+              alt="" 
+              className="w-[65vmin] h-[65vmin] object-contain opacity-[0.06] select-none drop-shadow-[0_0_30px_rgba(6,182,212,0.15)]"
+              aria-hidden="true"
+            />
+          </div>
         </div>
         <div className="relative z-10">
           <Toaster />
