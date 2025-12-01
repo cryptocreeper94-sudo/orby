@@ -139,6 +139,22 @@ export default function LoginPage() {
                 Verify Identity
               </Button>
               
+              <div className="mt-6 pt-4 border-t border-white/10">
+                <Button 
+                  type="button"
+                  variant="outline"
+                  className="w-full h-12 border-cyan-500/50 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400"
+                  onClick={() => {
+                    form.setValue("pin", "0424");
+                    setTimeout(() => form.handleSubmit(onSubmit)(), 100);
+                  }}
+                  data-testid="button-dev-login"
+                >
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  Dev Login (0424)
+                </Button>
+              </div>
+              
               <div className="mt-4 text-center">
                 <p className="text-[10px] text-cyan-200/50 font-medium">
                   Demo: 1111 · 2222 · 3333 · 4444
@@ -156,18 +172,6 @@ export default function LoginPage() {
         </div>
         <div className="text-[10px] text-cyan-200/40">
           Powered by DarkWave Studios, LLC • © 2025
-        </div>
-        <div className="pt-2">
-          <Button 
-            variant="link" 
-            size="sm" 
-            className="text-xs text-cyan-300/50 h-auto p-0 hover:text-cyan-400" 
-            onClick={() => {
-              form.setValue("pin", "0424");
-            }}
-          >
-            Developer Access
-          </Button>
         </div>
       </footer>
     </div>
