@@ -1,41 +1,75 @@
-# StadiumOps - Digital Stadium Concessions Management
+# Orby - Operations Communication Platform
 
 ## Overview
-StadiumOps is a comprehensive digital inventory and staffing management system for stadium concessions operations. It is a Progressive Web App (PWA) with a full backend API, designed to replace traditional paper-based processes with a mobile-optimized web application. The system streamlines inventory, manages staffing, facilitates inter-role communication, and provides robust incident and issue reporting. Its core purpose is to enhance operational efficiency and accountability within stadium concession environments.
+Orby (getorby.io) is a comprehensive venue operations communications platform designed to replace texts, phone calls, and two-way radios. Built as a Progressive Web App (PWA), it provides real-time communication, delivery tracking, and issue routing for stadium and venue operations. Orby focuses on front-of-house operations and complements enterprise systems like Yellow Dog (inventory) and OrbitStaffing (scheduling/staffing).
+
+**Key Value Proposition:** Contextual, trackable communication that's better than fragmented texts, interruptive calls, or spotty radios.
 
 ## User Preferences
-- Mobile-first design critical
+- Mobile-first design critical (operations staff use phones)
 - No question dialog boxes - all questions in regular chat
 - User must approve all changes before implementation
 - Workflow rule: Jason approves all changes
+- Brand: Aqua theme (#06B6D4), Orby mascot (aqua planet character)
+- Domain: getorby.io
 
 ## System Architecture
-StadiumOps is a full-stack PWA utilizing a React frontend and an Express backend, with a PostgreSQL database managed by Drizzle ORM. The application is designed with role-based access control, featuring a new hierarchical structure for stadium personnel including NPO Workers, Stand Leads, Supervisors, various Management roles, Admin, IT, and Developer.
+Orby is a full-stack PWA utilizing React frontend and Express backend with PostgreSQL/Drizzle ORM. The app is designed around role-based access and hierarchical communication.
 
-**UI/UX Decisions:** The application features an accordion-style UI with a pastel blue theme and 3D buttons, optimized for mobile use.
+**Core Roles:**
+- NPO Workers (frontline concessions)
+- Stand Leads (stand-level coordination)
+- Supervisors (section oversight, delivery requests)
+- Management (Ops Manager, Warehouse, Kitchen, IT)
+- Admin
+- Developer
 
-**Technical Implementations & Features:**
-- **Role-based Access Control:** A detailed hierarchy dictates access and communication permissions, including a mandatory first-time PIN reset for security.
-- **Communication System:** A threaded messaging system allows two-way communication between specific roles, with target selection and quick message capabilities. Conversations auto-timeout after inactivity.
-- **Geofencing Alerts:** Automatic notifications and event logging when NPO Workers leave their assigned stand boundaries.
-- **Staffing Grid:** Event-based staffing assignments and NPO group management.
-- **Inventory Management:** Supports pre-event counting by stand, item counting by EACH (not case), and a three-stage inventory count workflow (Pre-event, Post-event, Day-after) with counter identity tracking.
-- **POS Hardware Tracking:** Management of E700, A930 terminals, and hotspot devices.
-- **Supervisor Closing Workflow:** A guided process for supervisors including equipment shutdown checklists, spoilage logging (thrown away, returned, damaged, expired items), and voucher summary tracking, all of which generate and submit PDFs.
-- **Incident Reporting:** A unified system for all roles to report incidents, supporting photo/video attachments and auto-notifying supervisors and admins.
-- **Stand Issue Reporting:** Categorized issue reporting (e.g., Cooling, Beverage, Power, FoodSafety) with auto-routing to relevant management roles (e.g., Warehouse Manager, Operations Manager, Kitchen Manager) and severity levels including emergency escalations.
-- **Variance Reporting:** API for calculating and displaying inventory variance (Started, Added, Ended, Used, Spoilage) with CSV export.
-- **Menu Board Creator:** Built-in slide editor for Operations Manager to create digital menu boards. Supports text, prices, and divider elements with customizable colors, fonts, and positioning. Includes 5 pre-built templates (Classic Dark, Stadium Blue, Modern Red, Clean White, Concession Gold). Export slides as PNG images for USB transfer to digital displays.
+**Key Features:**
+1. **Smart Message Routing** - Issues automatically route to the right role (Cooling → Warehouse, Power → IT)
+2. **Delivery Tracking** - Full lifecycle: Requested → Approved → Picking → On the Way (ETA) → Delivered
+3. **Status Dashboard** - Ops Manager sees all stands, issues, and deliveries in one view
+4. **Quick Messages** - Pre-built responses for common situations
+5. **Priority Escalation** - Emergency alerts vs normal queue
+6. **Presence Awareness** - Who's on duty, who's at which stand
+7. **Closing Workflows** - Guided checklists, signatures, PDF generation
+8. **AI Scanning** - Photo coolers for auto-count, scan handwritten sheets
+9. **Offline Mode** - Works when radio signals don't
+10. **Full Audit Trail** - Everything documented for accountability
 
-**Project Structure:**
-- `client/`: React frontend (pages, components, Zustand store)
-- `server/`: Express backend (routes, storage, Drizzle DB connection)
-- `shared/`: Drizzle ORM schema
+**Communication Hierarchy:**
+- Supervisors can request from Warehouse/Kitchen (Stand Leads cannot)
+- Issues route to appropriate management roles based on category
+- Two-way threaded conversations with quick responses
+- Delivery status updates with ETAs
+
+**Technical Stack:**
+- Frontend: React, Wouter (routing), Zustand (state), TailwindCSS
+- Backend: Express, Drizzle ORM, PostgreSQL
+- PWA: Service Worker, offline support
+- AI: GPT-4o Vision for can counting, Tesseract.js for OCR
+
+## Integration Strategy
+- **OrbitStaffing:** Roster sync, GPS verification, shift completion (sister product at orbitstaffing.io)
+- **Yellow Dog:** Complements (not competes) - Orby = front-of-house ops, Yellow Dog = back-office inventory
+- **POS Systems:** Real-time sales data integration potential
 
 ## External Dependencies
-- **PostgreSQL:** Primary database for persistent storage.
-- **Drizzle ORM:** Used for database schema definition and interaction.
-- **GPT-4o Vision API:** Integrated for AI-powered can counting and product identification from cooler images and for reading handwritten count sheets.
-- **Tesseract.js:** Client-side OCR for extracting text from images, primarily for legacy OCR scanning.
-- **Zustand:** Frontend state management library with persist middleware.
-- **jsPDF:** Client-side library for generating PDF documents (e.g., variance reports, closing checklists).
+- PostgreSQL: Primary database
+- Drizzle ORM: Schema and queries
+- GPT-4o Vision: AI-powered counting from images
+- Tesseract.js: Client-side OCR
+- Zustand: State management
+- jsPDF: PDF report generation
+
+## File Structure
+- `client/`: React frontend (pages, components, lib)
+- `server/`: Express backend (routes, storage)
+- `shared/`: Drizzle schema definitions
+- `client/public/`: PWA assets, icons, manifest
+
+## Branding
+- Name: Orby
+- Tagline: "Operations Communication Platform" or "Your team, connected"
+- Theme Color: #06B6D4 (Cyan/Aqua)
+- Parent Brand: "Orby by Orbit" (connects to OrbitStaffing)
+- Powered by: DarkWave Studios, LLC

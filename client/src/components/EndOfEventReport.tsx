@@ -304,7 +304,7 @@ export function EndOfEventReport({
         doc.setFontSize(10);
         doc.setFont('helvetica', 'normal');
         doc.text(
-          `Page ${i} of ${pageCount} | StadiumOps Report`,
+          `Page ${i} of ${pageCount} | Orby Report`,
           pageWidth / 2,
           doc.internal.pageSize.getHeight() - 10,
           { align: 'center' }

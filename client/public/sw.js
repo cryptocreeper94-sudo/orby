@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stadiumops-v1';
+const CACHE_NAME = 'orby-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json'

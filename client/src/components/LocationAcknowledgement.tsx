@@ -90,7 +90,7 @@ export function LocationAcknowledgement({
               <p className="font-medium text-amber-900">Privacy Notice</p>
               <p className="text-sm text-amber-700">
                 Your location is only used while the app is open and for stadium operations. 
-                Location data is not stored or shared outside the StadiumOps system.
+                Location data is not stored or shared outside the Orby system.
               </p>
             </div>
           </div>

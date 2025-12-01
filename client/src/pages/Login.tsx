@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ShieldCheck, LayoutDashboard } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 const loginSchema = z.object({
   pin: z.string().length(4, "PIN must be 4 digits"),
@@ -26,23 +26,19 @@ export default function LoginPage() {
   });
 
   useEffect(() => {
-    // Check for Dev Auto-Bypass
-    const devBypass = localStorage.getItem("stadiumops_dev_bypass");
+    const devBypass = localStorage.getItem("orby_dev_bypass");
     if (devBypass === "true") {
-      login("0424"); // Auto-login as dev
+      login("0424");
       setLocation("/dev");
       return;
     }
 
     if (currentUser) {
-      // Check if user needs to reset their PIN first
       if (currentUser.requiresPinReset) {
         setLocation("/set-pin");
         return;
       }
 
-      // Route based on role with new hierarchy
-      // Special case: Developer user (name) goes to dev dashboard
       if (currentUser.name === 'Developer' || currentUser.pin === '0424') setLocation("/dev");
       else if (currentUser.role === 'Admin') setLocation("/admin");
       else if (currentUser.role === 'IT') setLocation("/it");
@@ -62,16 +58,28 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-800 p-4">
       <div className="flex-1 flex items-center justify-center w-full max-w-md">
         <div className="w-full p-8 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl">
-          {/* Header */}
+          {/* Header with Orby Mascot */}
           <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-20 h-20 bg-blue-500/20 rounded-2xl flex items-center justify-center mb-6 border border-blue-400/30">
-              <LayoutDashboard className="w-10 h-10 text-blue-400 drop-shadow-md" />
+            <div className="w-24 h-24 mb-6 relative">
+              <img 
+                src="/attached_assets/image_1764551627990.png" 
+                alt="Orby" 
+                className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.5)]"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+              <div className="hidden w-20 h-20 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-400/30 absolute inset-0 m-auto">
+                <span className="text-4xl">🪐</span>
+              </div>
             </div>
-            <h1 className="text-3xl font-black tracking-tight text-white">StadiumOps</h1>
-            <p className="text-blue-200/80 mt-2">Enter your 4-digit PIN to access the system</p>
+            <h1 className="text-4xl font-black tracking-tight text-white">Orby</h1>
+            <p className="text-cyan-200/80 mt-2 text-sm">Operations Communication Platform</p>
+            <p className="text-cyan-200/60 mt-1 text-xs">Enter your 4-digit PIN to access</p>
           </div>
 
           {/* Form */}
@@ -87,7 +95,7 @@ export default function LoginPage() {
                       <Input 
                         type="password" 
                         placeholder="0000" 
-                        className="text-center text-3xl tracking-[1em] h-16 font-mono border-2 border-white/20 bg-white/10 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400/50 focus-visible:ring-offset-0" 
+                        className="text-center text-3xl tracking-[1em] h-16 font-mono border-2 border-white/20 bg-white/10 text-white placeholder:text-white/40 focus:border-cyan-400 focus:ring-cyan-400/50 focus-visible:ring-offset-0" 
                         maxLength={4}
                         {...field} 
                         data-testid="input-pin"
@@ -99,7 +107,7 @@ export default function LoginPage() {
               />
               <Button 
                 type="submit" 
-                className="w-full h-14 text-lg font-bold uppercase tracking-wide bg-blue-600/80 hover:bg-blue-500 text-white border border-blue-400/30 shadow-lg shadow-blue-500/20" 
+                className="w-full h-14 text-lg font-bold uppercase tracking-wide bg-cyan-600/80 hover:bg-cyan-500 text-white border border-cyan-400/30 shadow-lg shadow-cyan-500/20" 
                 data-testid="button-login"
               >
                 <ShieldCheck className="mr-2 h-5 w-5" /> 
@@ -107,8 +115,8 @@ export default function LoginPage() {
               </Button>
               
               <div className="mt-6 text-center">
-                <p className="text-xs text-blue-200/60 font-medium bg-white/5 py-2 px-3 rounded-lg border border-white/10">
-                  Demo PINs: NPO: 1111 | Stand Lead: 2222 | Supervisor: 3333 | Mgmt: 4444
+                <p className="text-xs text-cyan-200/60 font-medium bg-white/5 py-2 px-3 rounded-lg border border-white/10">
+                  Demo PINs: Team: 1111 | Lead: 2222 | Supervisor: 3333 | Mgmt: 4444
                 </p>
               </div>
             </form>
@@ -118,17 +126,17 @@ export default function LoginPage() {
 
       {/* Footer */}
       <footer className="w-full max-w-md text-center py-6 space-y-2">
-        <div className="text-xs text-blue-200/60 font-medium">
-          Powered by <span className="font-bold text-blue-400">DarkWave Studios, LLC</span>
+        <div className="text-xs text-cyan-200/60 font-medium">
+          <span className="font-bold text-cyan-400">Orby</span> by Orbit
         </div>
-        <div className="text-[10px] text-blue-200/40">
-          Copyright © 2025 All Rights Reserved
+        <div className="text-[10px] text-cyan-200/40">
+          Powered by DarkWave Studios, LLC • © 2025
         </div>
         <div className="pt-2">
           <Button 
             variant="link" 
             size="sm" 
-            className="text-xs text-blue-300/50 h-auto p-0 hover:text-blue-400" 
+            className="text-xs text-cyan-300/50 h-auto p-0 hover:text-cyan-400" 
             onClick={() => {
               form.setValue("pin", "0424");
             }}

@@ -63,7 +63,7 @@ export default function AdminDashboard() {
             <nav className="grid gap-6 text-lg font-medium">
               <div className="flex items-center gap-2 text-lg font-semibold">
                 <Package className="h-6 w-6" />
-                <span className="sr-only">StadiumOps</span>
+                <span className="sr-only">Orby</span>
               </div>
               <a href="#" className="flex items-center gap-4 px-2.5 text-foreground hover:text-foreground">
                 <LayoutDashboard className="h-5 w-5" />

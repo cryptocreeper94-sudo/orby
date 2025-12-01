@@ -11,7 +11,7 @@ interface TutorialCoachProps {
   onNavigate?: (route: string) => void;
 }
 
-const TUTORIAL_COMPLETION_KEY = 'stadiumops_tutorials_completed';
+const TUTORIAL_COMPLETION_KEY = 'orby_tutorials_completed';
 
 function getTutorialCompletionState(): Record<string, boolean> {
   try {
