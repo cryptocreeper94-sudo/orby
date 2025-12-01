@@ -1,13 +1,14 @@
 import { useStore } from "@/lib/mockData";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, MessageSquare, ChefHat, ArrowRight, AlertTriangle, UtensilsCrossed, Map } from "lucide-react";
+import { LogOut, MessageSquare, ChefHat, ArrowRight, AlertTriangle, UtensilsCrossed, Map, Clock, Flame, Utensils } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
 import { useEffect, useState } from "react";
 import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
+import { motion, AnimatePresence } from "framer-motion";
+import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader } from "@/components/ui/premium";
 
 export default function KitchenDashboard() {
   const logout = useStore((state) => state.logout);
@@ -33,127 +34,226 @@ export default function KitchenDashboard() {
   const [showMap, setShowMap] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-20">
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-rose-500/30 bg-rose-500 text-white px-4 shadow-md">
-        <div className="flex items-center gap-2">
-          <ChefHat className="h-6 w-6" />
-          <span className="font-bold text-lg">Kitchen</span>
-        </div>
-        <div className="flex-1" />
-        <Link href="/messages">
-          <Button variant="ghost" size="icon" className="text-white hover:bg-rose-600 relative">
-            <MessageSquare className="h-5 w-5" />
-            {urgentMessages.length > 0 && (
-              <span className="absolute -top-1 -right-1 bg-yellow-400 text-yellow-900 text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
-                {urgentMessages.length}
-              </span>
-            )}
-          </Button>
-        </Link>
-        <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white hover:bg-rose-600">
-          <LogOut className="h-5 w-5" />
-        </Button>
-      </header>
-
-      <main className="p-4 sm:px-6 space-y-6 max-w-4xl mx-auto mt-4">
-        <div className="text-center py-4">
-          <h1 className="text-2xl font-black text-slate-200">Welcome, {currentUser?.name}</h1>
-          <p className="text-muted-foreground">Kitchen Operations Dashboard</p>
-        </div>
-
-        {urgentMessages.length > 0 && (
-          <Card className="border-red-500/30 bg-red-950/40">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-red-400 flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4" />
-                Urgent Messages ({urgentMessages.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {urgentMessages.slice(0, 3).map(msg => (
-                <div key={msg.id} className="p-3 bg-slate-800/80 rounded-lg border border-red-500/30 text-sm text-slate-200">
-                  {msg.content}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        <Notepad storageKey="kitchen-notes" />
-
-        {showMap && (
-          <div className="fixed inset-0 z-50 bg-background">
-            <InteractiveMap 
-              onClose={() => setShowMap(false)} 
-              showNavigation={true}
-            />
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-4">
-          <Card className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowMap(true)}>
-            <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-              <div className="p-4 rounded-full bg-blue-900/30">
-                <Map className="h-8 w-8 text-blue-400" />
-              </div>
-              <div className="font-bold text-sm text-slate-200">Stadium Map</div>
-            </CardContent>
-          </Card>
-          <Card className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/messages')}>
-            <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-              <div className="p-4 rounded-full bg-rose-900/30">
-                <MessageSquare className="h-8 w-8 text-rose-400" />
-              </div>
-              <div className="font-bold text-lg text-slate-200">Messages</div>
-              <p className="text-xs text-muted-foreground">Communicate with supervisors</p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-slate-700 bg-slate-900/80 shadow-md">
-            <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-              <div className="p-4 rounded-full bg-slate-800">
-                <UtensilsCrossed className="h-8 w-8 text-slate-400" />
-              </div>
-              <div className="font-bold text-lg text-slate-200">Orders</div>
-              <p className="text-xs text-muted-foreground">Coming soon</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card className="border-slate-700 bg-slate-900/80 shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold uppercase tracking-wider flex items-center justify-between text-slate-200">
-              Recent Messages
+    <AnimatedBackground>
+      <div className="min-h-screen pb-20">
+        <PageHeader
+          title="Kitchen"
+          subtitle={`Welcome, ${currentUser?.name}`}
+          icon={<ChefHat className="h-5 w-5" />}
+          iconColor="red"
+          actions={
+            <div className="flex items-center gap-2">
               <Link href="/messages">
-                <Button variant="ghost" size="sm" className="text-xs">
-                  View All <ArrowRight className="h-3 w-3 ml-1" />
+                <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-white/10 relative" data-testid="button-messages">
+                  <MessageSquare className="h-5 w-5" />
+                  {urgentMessages.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-amber-400 text-amber-900 text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">
+                      {urgentMessages.length}
+                    </span>
+                  )}
                 </Button>
               </Link>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {recentMessages.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">No messages yet</p>
-            ) : (
-              recentMessages.map(msg => (
-                <div key={msg.id} className="p-3 bg-slate-800/80 rounded-lg border border-slate-700 shadow-sm text-sm">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant={msg.type === 'Urgent' ? 'destructive' : 'secondary'} className="text-[10px]">
-                      {msg.type}
-                    </Badge>
-                    <span className="text-[10px] text-muted-foreground">
-                      {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
-                    </span>
-                  </div>
-                  <p className="text-slate-300">{msg.content}</p>
-                </div>
-              ))
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-300 hover:bg-white/10" data-testid="button-logout">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
+          }
+        />
+
+        <main className="p-4 sm:px-6 space-y-4 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <StatCard
+              icon={<Flame className="h-5 w-5" />}
+              label="Active Orders"
+              value={0}
+              subValue="Coming soon"
+              color="red"
+            />
+            <StatCard
+              icon={<Clock className="h-5 w-5" />}
+              label="Avg Prep Time"
+              value="--"
+              subValue="Coming soon"
+              color="amber"
+            />
+            <StatCard
+              icon={<Utensils className="h-5 w-5" />}
+              label="Items Ready"
+              value={0}
+              subValue="Coming soon"
+              color="green"
+            />
+            <StatCard
+              icon={<MessageSquare className="h-5 w-5" />}
+              label="Messages"
+              value={messages.length}
+              subValue={`${urgentMessages.length} urgent`}
+              color="purple"
+            />
+          </div>
+
+          <AnimatePresence>
+            {urgentMessages.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                <GlassCard className="border-red-500/30" glow>
+                  <GlassCardHeader className="pb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-red-500/20">
+                        <AlertTriangle className="h-4 w-4 text-red-400" />
+                      </div>
+                      <span className="font-bold text-sm text-red-300">
+                        Urgent Messages ({urgentMessages.length})
+                      </span>
+                    </div>
+                  </GlassCardHeader>
+                  <GlassCardContent className="space-y-2 pt-0">
+                    {urgentMessages.slice(0, 3).map((msg, idx) => (
+                      <motion.div 
+                        key={msg.id} 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        className="p-3 bg-red-500/10 rounded-xl border border-red-500/20 text-sm text-slate-200"
+                      >
+                        {msg.content}
+                      </motion.div>
+                    ))}
+                  </GlassCardContent>
+                </GlassCard>
+              </motion.div>
             )}
-          </CardContent>
-        </Card>
-      </main>
-      
-      <TutorialHelpButton page="kitchen" />
-    </div>
+          </AnimatePresence>
+
+          <Notepad storageKey="kitchen-notes" />
+
+          {showMap && (
+            <div className="fixed inset-0 z-50 bg-slate-950">
+              <InteractiveMap 
+                onClose={() => setShowMap(false)} 
+                showNavigation={true}
+              />
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <GlassCard 
+                className="cursor-pointer hover:border-blue-500/30 transition-colors h-full" 
+                onClick={() => setShowMap(true)}
+                data-testid="card-stadium-map"
+              >
+                <GlassCardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/10">
+                    <Map className="h-8 w-8 text-blue-400" />
+                  </div>
+                  <div className="font-bold text-sm text-slate-200">Stadium Map</div>
+                  <p className="text-xs text-slate-400">View venue layout</p>
+                </GlassCardContent>
+              </GlassCard>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <GlassCard 
+                className="cursor-pointer hover:border-rose-500/30 transition-colors h-full" 
+                onClick={() => setLocation('/messages')}
+                data-testid="card-messages"
+              >
+                <GlassCardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-rose-500/20 to-rose-600/10">
+                    <MessageSquare className="h-8 w-8 text-rose-400" />
+                  </div>
+                  <div className="font-bold text-sm text-slate-200">Messages</div>
+                  <p className="text-xs text-slate-400">Communicate with supervisors</p>
+                </GlassCardContent>
+              </GlassCard>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <GlassCard className="h-full opacity-60" data-testid="card-orders">
+                <GlassCardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-500/20 to-slate-600/10">
+                    <UtensilsCrossed className="h-8 w-8 text-slate-400" />
+                  </div>
+                  <div className="font-bold text-sm text-slate-200">Orders</div>
+                  <Badge variant="secondary" className="bg-white/10 text-slate-400 text-[10px]">Coming soon</Badge>
+                </GlassCardContent>
+              </GlassCard>
+            </motion.div>
+
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <GlassCard className="h-full opacity-60" data-testid="card-inventory">
+                <GlassCardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
+                  <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-500/20 to-slate-600/10">
+                    <Flame className="h-8 w-8 text-slate-400" />
+                  </div>
+                  <div className="font-bold text-sm text-slate-200">Prep Station</div>
+                  <Badge variant="secondary" className="bg-white/10 text-slate-400 text-[10px]">Coming soon</Badge>
+                </GlassCardContent>
+              </GlassCard>
+            </motion.div>
+          </div>
+
+          <GlassCard data-testid="card-recent-messages">
+            <GlassCardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-cyan-500/20">
+                    <MessageSquare className="h-4 w-4 text-cyan-400" />
+                  </div>
+                  <span className="font-bold text-sm text-slate-200">Recent Messages</span>
+                </div>
+                <Link href="/messages">
+                  <Button variant="ghost" size="sm" className="text-xs text-cyan-400 hover:bg-cyan-500/10">
+                    View All <ArrowRight className="h-3 w-3 ml-1" />
+                  </Button>
+                </Link>
+              </div>
+            </GlassCardHeader>
+            <GlassCardContent className="space-y-2 pt-0">
+              {recentMessages.length === 0 ? (
+                <div className="text-center py-8">
+                  <div className="p-4 rounded-2xl bg-slate-500/10 w-fit mx-auto mb-3">
+                    <MessageSquare className="h-8 w-8 text-slate-500" />
+                  </div>
+                  <p className="text-sm text-slate-500">No messages yet</p>
+                </div>
+              ) : (
+                recentMessages.map((msg, idx) => (
+                  <motion.div 
+                    key={msg.id} 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="p-3 bg-white/5 rounded-xl border border-white/10 text-sm hover:bg-white/10 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge 
+                        className={`text-[10px] border ${
+                          msg.type === 'Urgent' 
+                            ? 'bg-red-500/20 text-red-400 border-red-500/30' 
+                            : 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+                        }`}
+                      >
+                        {msg.type}
+                      </Badge>
+                      <span className="text-[10px] text-slate-500">
+                        {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                      </span>
+                    </div>
+                    <p className="text-slate-300">{msg.content}</p>
+                  </motion.div>
+                ))
+              )}
+            </GlassCardContent>
+          </GlassCard>
+        </main>
+        
+        <TutorialHelpButton page="kitchen" />
+      </div>
+    </AnimatedBackground>
   );
 }
