@@ -6,7 +6,7 @@ import {
   documentSubmissions, menuBoards, menuSlides,
   warehouseCategories, warehouseProducts, warehouseStock, warehouseParLevels, warehouseRequests, warehouseRequestItems,
   auditLogs, emergencyAlerts, emergencyResponders, emergencyEscalationHistory, emergencyAlertNotifications,
-  orbitRosters, orbitShifts, deliveryRequests,
+  orbitRosters, orbitShifts, deliveryRequests, departmentContacts,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -46,7 +46,8 @@ import {
   type EmergencyEscalationHistory, type InsertEmergencyEscalationHistory,
   type EmergencyAlertNotification, type InsertEmergencyAlertNotification,
   type OrbitRoster, type InsertOrbitRoster,
-  type OrbitShift, type InsertOrbitShift
+  type OrbitShift, type InsertOrbitShift,
+  type DepartmentContact, type InsertDepartmentContact
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
@@ -341,6 +342,12 @@ export interface IStorage {
   getDeliveryRequestsByDepartment(department: string): Promise<any[]>;
   createDeliveryRequest(request: any): Promise<any>;
   updateDeliveryRequestStatus(id: string, status: string, userId: string, eta?: number): Promise<void>;
+
+  // ============ DEPARTMENT CONTACTS (Quick Call Feature) ============
+  getAllDepartmentContacts(): Promise<DepartmentContact[]>;
+  getDepartmentContact(department: string): Promise<DepartmentContact | undefined>;
+  updateDepartmentContact(department: string, updates: Partial<InsertDepartmentContact>): Promise<void>;
+  createDepartmentContact(contact: InsertDepartmentContact): Promise<DepartmentContact>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1839,6 +1846,31 @@ export class DatabaseStorage implements IStorage {
     }
     
     await db.update(deliveryRequests).set(updates).where(eq(deliveryRequests.id, id));
+  }
+
+  // ============ DEPARTMENT CONTACTS (Quick Call Feature) ============
+  async getAllDepartmentContacts(): Promise<DepartmentContact[]> {
+    return await db.select().from(departmentContacts).where(eq(departmentContacts.isActive, true));
+  }
+
+  async getDepartmentContact(department: string): Promise<DepartmentContact | undefined> {
+    const [contact] = await db.select().from(departmentContacts)
+      .where(and(
+        eq(departmentContacts.department, department as any),
+        eq(departmentContacts.isActive, true)
+      ));
+    return contact || undefined;
+  }
+
+  async updateDepartmentContact(department: string, updates: Partial<InsertDepartmentContact>): Promise<void> {
+    await db.update(departmentContacts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(departmentContacts.department, department as any));
+  }
+
+  async createDepartmentContact(contact: InsertDepartmentContact): Promise<DepartmentContact> {
+    const [created] = await db.insert(departmentContacts).values(contact).returning();
+    return created;
   }
 }
 

@@ -565,6 +565,31 @@ export const ROLE_CONTACT_RULES: Record<string, string[]> = {
   Developer: ['Admin', 'ManagementCore', 'StandSupervisor', 'StandLead', 'NPOWorker'],
 };
 
+// Department contact phone numbers - configurable for quick call feature
+export const departmentContacts = pgTable("department_contacts", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  department: departmentEnum("department").notNull().unique(),
+  contactName: text("contact_name").notNull(),
+  phoneNumber: varchar("phone_number", { length: 20 }).notNull(),
+  alternatePhone: varchar("alternate_phone", { length: 20 }),
+  isActive: boolean("is_active").default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedBy: varchar("updated_by", { length: 36 }).references(() => users.id),
+});
+
+export const insertDepartmentContactSchema = createInsertSchema(departmentContacts).omit({ id: true, updatedAt: true });
+export type InsertDepartmentContact = z.infer<typeof insertDepartmentContactSchema>;
+export type DepartmentContact = typeof departmentContacts.$inferSelect;
+
+// Roles that can use quick call feature (Supervisor and above)
+export const QUICK_CALL_ROLES = [
+  'StandSupervisor', 'Supervisor',
+  'ManagementCore', 'ManagementAssistant', 
+  'OperationsManager', 'OperationsAssistant',
+  'WarehouseManager', 'KitchenManager', 'GeneralManager', 'RegionalVP',
+  'Admin', 'Developer'
+];
+
 // Initial PINs for first-time login (users must change on first login)
 export const INITIAL_PINS: Record<string, string> = {
   NPOWorker: '1111',

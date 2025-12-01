@@ -6,7 +6,8 @@ import {
   insertNpoSchema, insertStaffingGroupSchema, insertSupervisorDocSchema, insertDocSignatureSchema,
   insertInventoryCountSchema, insertQuickMessageSchema, insertConversationSchema, insertConversationMessageSchema,
   insertIncidentSchema, insertCountSessionSchema, insertStandIssueSchema, insertMenuBoardSchema,
-  insertAuditLogSchema, insertEmergencyAlertSchema, insertOrbitRosterSchema, insertOrbitShiftSchema
+  insertAuditLogSchema, insertEmergencyAlertSchema, insertOrbitRosterSchema, insertOrbitShiftSchema,
+  QUICK_CALL_ROLES
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -2656,6 +2657,58 @@ Return your response as a JSON object with this exact structure:
     } catch (error) {
       console.error("Error fetching ops dashboard:", error);
       res.status(500).json({ error: "Failed to fetch ops dashboard" });
+    }
+  });
+
+  // ============ DEPARTMENT CONTACTS (Quick Call Feature) ============
+  app.get("/api/department-contacts", async (_req: Request, res: Response) => {
+    try {
+      const contacts = await storage.getAllDepartmentContacts();
+      res.json(contacts);
+    } catch (error) {
+      console.error("Error fetching department contacts:", error);
+      res.status(500).json({ error: "Failed to fetch department contacts" });
+    }
+  });
+
+  app.get("/api/department-contacts/:department", async (req: Request, res: Response) => {
+    try {
+      const contact = await storage.getDepartmentContact(req.params.department);
+      if (!contact) {
+        return res.status(404).json({ error: "Department contact not found" });
+      }
+      res.json(contact);
+    } catch (error) {
+      console.error("Error fetching department contact:", error);
+      res.status(500).json({ error: "Failed to fetch department contact" });
+    }
+  });
+
+  app.patch("/api/department-contacts/:department", async (req: Request, res: Response) => {
+    try {
+      const { contactName, phoneNumber, alternatePhone, isActive, userId } = req.body;
+      
+      if (!userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user || !QUICK_CALL_ROLES.includes(user.role)) {
+        return res.status(403).json({ error: "Insufficient permissions - supervisor level access required" });
+      }
+      
+      const updatePayload: any = {};
+      if (contactName !== undefined) updatePayload.contactName = contactName;
+      if (phoneNumber !== undefined) updatePayload.phoneNumber = phoneNumber;
+      if (alternatePhone !== undefined) updatePayload.alternatePhone = alternatePhone;
+      if (isActive !== undefined) updatePayload.isActive = isActive;
+      updatePayload.updatedBy = userId;
+      
+      await storage.updateDepartmentContact(req.params.department, updatePayload);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating department contact:", error);
+      res.status(500).json({ error: "Failed to update department contact" });
     }
   });
 
