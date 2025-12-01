@@ -106,7 +106,7 @@ export default function SetPinPage() {
 
       <Card className="w-full max-w-md border-slate-700/50 shadow-2xl bg-slate-900/90 backdrop-blur-sm">
         <CardHeader className="space-y-1 flex flex-col items-center text-center pb-2">
-          <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-amber-500/30">
+          <div className="w-20 h-20 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-cyan-500/30">
             <KeyRound className="w-10 h-10 text-white drop-shadow-md" />
           </div>
           <CardTitle className="text-2xl font-black tracking-tight text-slate-100">
@@ -120,9 +120,9 @@ export default function SetPinPage() {
           </p>
         </CardHeader>
         <CardContent>
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 mb-6 flex items-start gap-2">
-            <AlertCircle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-amber-300">
+          <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3 mb-6 flex items-start gap-2">
+            <AlertCircle className="w-5 h-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-cyan-300">
               <strong>First-time login:</strong> Your initial PIN ({initialPin}) must be changed for security.
             </div>
           </div>
