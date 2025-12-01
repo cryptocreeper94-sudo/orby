@@ -10,6 +10,7 @@ export const userRoleEnum = pgEnum('user_role', [
   'StandSupervisor',  // PIN: 3333 - Can contact warehouse/kitchen/management
   'ManagementCore',   // PIN: 4444 - Warehouse/Kitchen/Culinary/HR/Bar managers
   'ManagementAssistant', // Assigned by managers for the day
+  'AlcoholCompliance', // PIN: 5555 - Monitors vendors, reports violations
   'Admin',            // System admin
   'IT',               // IT support
   'Developer'         // Dev access
@@ -41,6 +42,21 @@ export const issueCategoryEnum = pgEnum('issue_category', ['Cooling', 'Beverage'
 export const issueSeverityEnum = pgEnum('issue_severity', ['Emergency', 'High', 'Normal', 'Low']);
 export const issueStatusEnum = pgEnum('issue_status', ['Open', 'Acknowledged', 'InProgress', 'Resolved', 'Closed']);
 export const spoilageReasonEnum = pgEnum('spoilage_reason', ['ThrownAway', 'Returned', 'Damaged', 'Expired', 'Other']);
+
+// Alcohol compliance enums
+export const violationTypeEnum = pgEnum('violation_type', [
+  'UnderageSale',      // Attempted or completed sale to minor
+  'OverService',       // Serving visibly intoxicated patron
+  'NoIDCheck',         // Failed to check ID
+  'ExpiredLicense',    // Vendor operating with expired license
+  'OpenContainer',     // Open container violation
+  'UnauthorizedSale',  // Sale outside designated area
+  'PricingViolation',  // Incorrect pricing or fraud
+  'Other'              // Other violation
+]);
+
+export const violationSeverityEnum = pgEnum('violation_severity', ['Warning', 'Minor', 'Major', 'Critical']);
+export const violationStatusEnum = pgEnum('violation_status', ['Reported', 'UnderReview', 'Confirmed', 'Dismissed', 'Resolved']);
 
 // Department request system enums
 export const departmentEnum = pgEnum('department', ['Warehouse', 'Kitchen', 'Bar', 'IT', 'Operations', 'HR']);
@@ -553,16 +569,64 @@ export const emergencyAlertNotifications = pgTable("emergency_alert_notification
   respondedAt: timestamp("responded_at"),
 });
 
+// Alcohol Violations - tracks vendor compliance violations
+export const alcoholViolations = pgTable("alcohol_violations", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  reporterId: varchar("reporter_id", { length: 36 }).references(() => users.id).notNull(),
+  
+  // Location info
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  section: text("section"),
+  vendorName: text("vendor_name"),
+  vendorBadgeNumber: text("vendor_badge_number"),
+  
+  // Violation details
+  violationType: violationTypeEnum("violation_type").notNull(),
+  severity: violationSeverityEnum("severity").notNull().default('Minor'),
+  description: text("description").notNull(),
+  
+  // Evidence - images/videos
+  mediaUrls: text("media_urls").array(),
+  
+  // Status tracking
+  status: violationStatusEnum("status").notNull().default('Reported'),
+  
+  // Review info
+  reviewedBy: varchar("reviewed_by", { length: 36 }).references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewNotes: text("review_notes"),
+  
+  // Resolution
+  resolvedBy: varchar("resolved_by", { length: 36 }).references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  resolutionNotes: text("resolution_notes"),
+  actionTaken: text("action_taken"), // 'verbal_warning', 'written_warning', 'removed', 'reported_to_authorities'
+  
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertAlcoholViolationSchema = createInsertSchema(alcoholViolations).omit({ 
+  id: true, 
+  createdAt: true, 
+  updatedAt: true,
+  reviewedAt: true,
+  resolvedAt: true 
+});
+export type InsertAlcoholViolation = z.infer<typeof insertAlcoholViolationSchema>;
+export type AlcoholViolation = typeof alcoholViolations.$inferSelect;
+
 // Communication ACL - defines who can contact whom
 export const ROLE_CONTACT_RULES: Record<string, string[]> = {
   NPOWorker: ['StandLead'],                    // Can only contact their Stand Lead
   StandLead: ['StandSupervisor'],              // Can only contact Supervisor
   StandSupervisor: ['StandLead', 'ManagementCore', 'ManagementAssistant'], // Can contact all
-  ManagementCore: ['StandSupervisor', 'StandLead', 'ManagementCore', 'ManagementAssistant', 'Admin'],
+  ManagementCore: ['StandSupervisor', 'StandLead', 'ManagementCore', 'ManagementAssistant', 'Admin', 'AlcoholCompliance'],
   ManagementAssistant: ['StandSupervisor', 'ManagementCore'],
-  Admin: ['StandSupervisor', 'StandLead', 'ManagementCore', 'ManagementAssistant', 'NPOWorker'],
+  AlcoholCompliance: ['ManagementCore', 'StandSupervisor', 'Admin'], // Can report to management/supervisors
+  Admin: ['StandSupervisor', 'StandLead', 'ManagementCore', 'ManagementAssistant', 'NPOWorker', 'AlcoholCompliance'],
   IT: ['Admin', 'ManagementCore'],
-  Developer: ['Admin', 'ManagementCore', 'StandSupervisor', 'StandLead', 'NPOWorker'],
+  Developer: ['Admin', 'ManagementCore', 'StandSupervisor', 'StandLead', 'NPOWorker', 'AlcoholCompliance'],
 };
 
 // Department contact phone numbers - configurable for quick call feature
@@ -597,6 +661,7 @@ export const INITIAL_PINS: Record<string, string> = {
   StandSupervisor: '3333',
   ManagementCore: '4444',
   ManagementAssistant: '4444',
+  AlcoholCompliance: '5555',
 };
 
 // Relations
@@ -750,6 +815,25 @@ export const standIssueNotificationsRelations = relations(standIssueNotification
   }),
   user: one(users, {
     fields: [standIssueNotifications.userId],
+    references: [users.id],
+  }),
+}));
+
+export const alcoholViolationsRelations = relations(alcoholViolations, ({ one }) => ({
+  reporter: one(users, {
+    fields: [alcoholViolations.reporterId],
+    references: [users.id],
+  }),
+  stand: one(stands, {
+    fields: [alcoholViolations.standId],
+    references: [stands.id],
+  }),
+  reviewer: one(users, {
+    fields: [alcoholViolations.reviewedBy],
+    references: [users.id],
+  }),
+  resolver: one(users, {
+    fields: [alcoholViolations.resolvedBy],
     references: [users.id],
   }),
 }));

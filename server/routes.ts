@@ -7,6 +7,7 @@ import {
   insertInventoryCountSchema, insertQuickMessageSchema, insertConversationSchema, insertConversationMessageSchema,
   insertIncidentSchema, insertCountSessionSchema, insertStandIssueSchema, insertMenuBoardSchema,
   insertAuditLogSchema, insertEmergencyAlertSchema, insertOrbitRosterSchema, insertOrbitShiftSchema,
+  insertAlcoholViolationSchema,
   QUICK_CALL_ROLES
 } from "@shared/schema";
 import { z } from "zod";
@@ -2709,6 +2710,180 @@ Return your response as a JSON object with this exact structure:
     } catch (error) {
       console.error("Error updating department contact:", error);
       res.status(500).json({ error: "Failed to update department contact" });
+    }
+  });
+
+  // ============ ALCOHOL VIOLATIONS (Compliance Reporting) ============
+  
+  // Validation schemas for alcohol violations
+  const createViolationSchema = z.object({
+    reporterId: z.string().min(1),
+    standId: z.string().nullable().optional(),
+    section: z.string().nullable().optional(),
+    vendorName: z.string().nullable().optional(),
+    vendorBadgeNumber: z.string().nullable().optional(),
+    violationType: z.enum(['UnderageSale', 'OverService', 'NoIDCheck', 'ExpiredLicense', 'OpenContainer', 'UnauthorizedSale', 'PricingViolation', 'Other']),
+    severity: z.enum(['Warning', 'Minor', 'Major', 'Critical']).optional().default('Minor'),
+    description: z.string().min(1),
+    mediaUrls: z.array(z.string()).optional().default([])
+  });
+
+  const updateViolationStatusSchema = z.object({
+    status: z.enum(['Reported', 'UnderReview', 'Confirmed', 'Dismissed', 'Resolved']),
+    reviewerId: z.string().min(1),
+    reviewNotes: z.string().optional()
+  });
+
+  const resolveViolationSchema = z.object({
+    resolverId: z.string().min(1),
+    resolutionNotes: z.string().optional().default(''),
+    actionTaken: z.string().optional().default('')
+  });
+
+  // Get all violations
+  app.get("/api/alcohol-violations", async (req: Request, res: Response) => {
+    try {
+      const { status, reporterId } = req.query;
+      
+      let violations;
+      if (status) {
+        violations = await storage.getAlcoholViolationsByStatus(status as string);
+      } else if (reporterId) {
+        violations = await storage.getAlcoholViolationsByReporter(reporterId as string);
+      } else {
+        violations = await storage.getAllAlcoholViolations();
+      }
+      
+      res.json(violations);
+    } catch (error) {
+      console.error("Error fetching alcohol violations:", error);
+      res.status(500).json({ error: "Failed to fetch alcohol violations" });
+    }
+  });
+
+  // Get single violation
+  app.get("/api/alcohol-violations/:id", async (req: Request, res: Response) => {
+    try {
+      const violation = await storage.getAlcoholViolation(req.params.id);
+      if (!violation) {
+        return res.status(404).json({ error: "Violation not found" });
+      }
+      res.json(violation);
+    } catch (error) {
+      console.error("Error fetching violation:", error);
+      res.status(500).json({ error: "Failed to fetch violation" });
+    }
+  });
+
+  // Create violation (with image upload support)
+  app.post("/api/alcohol-violations", async (req: Request, res: Response) => {
+    try {
+      // Validate request body
+      const validationResult = createViolationSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: validationResult.error.errors 
+        });
+      }
+      
+      const { reporterId, standId, section, vendorName, vendorBadgeNumber, violationType, severity, description, mediaUrls } = validationResult.data;
+      
+      // Validate the user exists and has permission
+      const user = await storage.getUser(reporterId);
+      if (!user) {
+        return res.status(403).json({ error: "User not found" });
+      }
+      
+      // AlcoholCompliance role and above can report violations
+      const allowedRoles = ['AlcoholCompliance', 'StandSupervisor', 'ManagementCore', 'ManagementAssistant', 'Admin', 'Developer'];
+      if (!allowedRoles.includes(user.role)) {
+        return res.status(403).json({ error: "Insufficient permissions to report violations" });
+      }
+      
+      const violation = await storage.createAlcoholViolation({
+        reporterId,
+        standId: standId || null,
+        section: section || null,
+        vendorName: vendorName || null,
+        vendorBadgeNumber: vendorBadgeNumber || null,
+        violationType: violationType as any,
+        severity: severity as any,
+        description,
+        mediaUrls: mediaUrls || [],
+        status: 'Reported'
+      });
+      
+      res.status(201).json(violation);
+    } catch (error) {
+      console.error("Error creating violation:", error);
+      res.status(500).json({ error: "Failed to create violation" });
+    }
+  });
+
+  // Update violation status (review/confirm/dismiss)
+  app.patch("/api/alcohol-violations/:id/status", async (req: Request, res: Response) => {
+    try {
+      // Validate request body
+      const validationResult = updateViolationStatusSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: validationResult.error.errors 
+        });
+      }
+      
+      const { status, reviewerId, reviewNotes } = validationResult.data;
+      
+      // Only managers and above can review/update violation status
+      const user = await storage.getUser(reviewerId);
+      if (!user) {
+        return res.status(403).json({ error: "User not found" });
+      }
+      
+      const allowedRoles = ['ManagementCore', 'ManagementAssistant', 'Admin', 'Developer'];
+      if (!allowedRoles.includes(user.role)) {
+        return res.status(403).json({ error: "Insufficient permissions - manager level required" });
+      }
+      
+      await storage.updateAlcoholViolationStatus(req.params.id, status, reviewerId, reviewNotes);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating violation status:", error);
+      res.status(500).json({ error: "Failed to update violation status" });
+    }
+  });
+
+  // Resolve violation
+  app.patch("/api/alcohol-violations/:id/resolve", async (req: Request, res: Response) => {
+    try {
+      // Validate request body
+      const validationResult = resolveViolationSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: validationResult.error.errors 
+        });
+      }
+      
+      const { resolverId, resolutionNotes, actionTaken } = validationResult.data;
+      
+      // Only managers and above can resolve violations
+      const user = await storage.getUser(resolverId);
+      if (!user) {
+        return res.status(403).json({ error: "User not found" });
+      }
+      
+      const allowedRoles = ['ManagementCore', 'ManagementAssistant', 'Admin', 'Developer'];
+      if (!allowedRoles.includes(user.role)) {
+        return res.status(403).json({ error: "Insufficient permissions - manager level required" });
+      }
+      
+      await storage.resolveAlcoholViolation(req.params.id, resolverId, resolutionNotes, actionTaken);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error resolving violation:", error);
+      res.status(500).json({ error: "Failed to resolve violation" });
     }
   });
 

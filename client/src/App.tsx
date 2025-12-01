@@ -28,6 +28,7 @@ import MenuBoardCreator from "@/pages/MenuBoardCreator";
 import OpsCommandCenter from "@/pages/OpsCommandCenter";
 import CommandCenter from "@/pages/CommandCenter";
 import ReportingDashboard from "@/pages/ReportingDashboard";
+import AlcoholComplianceDashboard from "@/pages/AlcoholComplianceDashboard";
 import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
@@ -64,6 +65,7 @@ function Router() {
       <Route path="/ops-command" component={OpsCommandCenter} />
       <Route path="/command-center" component={CommandCenter} />
       <Route path="/reports" component={ReportingDashboard} />
+      <Route path="/alcohol-compliance" component={AlcoholComplianceDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

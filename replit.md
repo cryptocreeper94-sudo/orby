@@ -75,6 +75,7 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 - Bar
 - Operations
 - HR
+- AlcoholCompliance (event-day vendor monitoring, violation reporting)
 - Stand Supervisor (full dashboard access)
 - Stand Lead
 - NPO Worker
@@ -90,6 +91,7 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 8. **AI Scanning** - Photo coolers for auto-count, scan handwritten sheets
 9. **Offline Mode** - Works when radio signals don't
 10. **Full Audit Trail** - Everything documented for accountability
+11. **Alcohol Compliance** - Vendor monitoring with photo/video evidence capture for violation reporting
 
 **Technical Stack:**
 - Frontend: React, Wouter (routing), Zustand (state), TailwindCSS

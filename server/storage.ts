@@ -6,7 +6,7 @@ import {
   documentSubmissions, menuBoards, menuSlides,
   warehouseCategories, warehouseProducts, warehouseStock, warehouseParLevels, warehouseRequests, warehouseRequestItems,
   auditLogs, emergencyAlerts, emergencyResponders, emergencyEscalationHistory, emergencyAlertNotifications,
-  orbitRosters, orbitShifts, deliveryRequests, departmentContacts,
+  orbitRosters, orbitShifts, deliveryRequests, departmentContacts, alcoholViolations,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -47,7 +47,8 @@ import {
   type EmergencyAlertNotification, type InsertEmergencyAlertNotification,
   type OrbitRoster, type InsertOrbitRoster,
   type OrbitShift, type InsertOrbitShift,
-  type DepartmentContact, type InsertDepartmentContact
+  type DepartmentContact, type InsertDepartmentContact,
+  type AlcoholViolation, type InsertAlcoholViolation
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
@@ -348,6 +349,15 @@ export interface IStorage {
   getDepartmentContact(department: string): Promise<DepartmentContact | undefined>;
   updateDepartmentContact(department: string, updates: Partial<InsertDepartmentContact>): Promise<void>;
   createDepartmentContact(contact: InsertDepartmentContact): Promise<DepartmentContact>;
+
+  // ============ ALCOHOL VIOLATIONS (Compliance Reporting) ============
+  getAlcoholViolation(id: string): Promise<AlcoholViolation | undefined>;
+  getAllAlcoholViolations(): Promise<AlcoholViolation[]>;
+  getAlcoholViolationsByStatus(status: string): Promise<AlcoholViolation[]>;
+  getAlcoholViolationsByReporter(reporterId: string): Promise<AlcoholViolation[]>;
+  createAlcoholViolation(violation: InsertAlcoholViolation): Promise<AlcoholViolation>;
+  updateAlcoholViolationStatus(id: string, status: string, reviewerId?: string, reviewNotes?: string): Promise<void>;
+  resolveAlcoholViolation(id: string, resolverId: string, notes: string, actionTaken: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1871,6 +1881,56 @@ export class DatabaseStorage implements IStorage {
   async createDepartmentContact(contact: InsertDepartmentContact): Promise<DepartmentContact> {
     const [created] = await db.insert(departmentContacts).values(contact).returning();
     return created;
+  }
+
+  // ============ ALCOHOL VIOLATIONS (Compliance Reporting) ============
+  async getAlcoholViolation(id: string): Promise<AlcoholViolation | undefined> {
+    const [violation] = await db.select().from(alcoholViolations).where(eq(alcoholViolations.id, id));
+    return violation || undefined;
+  }
+
+  async getAllAlcoholViolations(): Promise<AlcoholViolation[]> {
+    return await db.select().from(alcoholViolations).orderBy(desc(alcoholViolations.createdAt));
+  }
+
+  async getAlcoholViolationsByStatus(status: string): Promise<AlcoholViolation[]> {
+    return await db.select().from(alcoholViolations)
+      .where(eq(alcoholViolations.status, status as any))
+      .orderBy(desc(alcoholViolations.createdAt));
+  }
+
+  async getAlcoholViolationsByReporter(reporterId: string): Promise<AlcoholViolation[]> {
+    return await db.select().from(alcoholViolations)
+      .where(eq(alcoholViolations.reporterId, reporterId))
+      .orderBy(desc(alcoholViolations.createdAt));
+  }
+
+  async createAlcoholViolation(violation: InsertAlcoholViolation): Promise<AlcoholViolation> {
+    const [created] = await db.insert(alcoholViolations).values(violation).returning();
+    return created;
+  }
+
+  async updateAlcoholViolationStatus(id: string, status: string, reviewerId?: string, reviewNotes?: string): Promise<void> {
+    const updates: any = { status, updatedAt: new Date() };
+    if (reviewerId) {
+      updates.reviewedBy = reviewerId;
+      updates.reviewedAt = new Date();
+    }
+    if (reviewNotes !== undefined) {
+      updates.reviewNotes = reviewNotes;
+    }
+    await db.update(alcoholViolations).set(updates).where(eq(alcoholViolations.id, id));
+  }
+
+  async resolveAlcoholViolation(id: string, resolverId: string, notes: string, actionTaken: string): Promise<void> {
+    await db.update(alcoholViolations).set({
+      status: 'Resolved' as any,
+      resolvedBy: resolverId,
+      resolvedAt: new Date(),
+      resolutionNotes: notes,
+      actionTaken: actionTaken,
+      updatedAt: new Date()
+    }).where(eq(alcoholViolations.id, id));
   }
 }
 

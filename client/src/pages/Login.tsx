@@ -49,6 +49,7 @@ export default function LoginPage() {
       else if (role === 'NPOWorker' || role === 'NPO') setLocation("/npo");
       else if (role === 'StandLead') setLocation("/standlead");
       else if (role === 'StandSupervisor' || role === 'Supervisor') setLocation("/supervisor");
+      else if (role === 'AlcoholCompliance') setLocation("/alcohol-compliance");
       else if (role === 'Warehouse' || role === 'WarehouseManager' || role === 'WarehouseWorker') setLocation("/warehouse");
       else if (role === 'Kitchen' || role === 'KitchenManager' || role === 'KitchenWorker') setLocation("/kitchen");
       else if (role === 'ManagementCore' || role === 'ManagementAssistant' || role === 'OperationsAssistant') setLocation("/manager");
