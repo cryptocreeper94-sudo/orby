@@ -28,8 +28,8 @@ export default function ITDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-50 pb-20">
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-slate-800 bg-slate-900 px-4 shadow-sm">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-slate-50 pb-20">
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b border-cyan-500/20 bg-slate-950/95 backdrop-blur-sm px-4 shadow-sm">
         <div className="flex items-center gap-2 font-bold text-lg text-cyan-400">
           <Monitor className="h-5 w-5" />
           IT Command Center

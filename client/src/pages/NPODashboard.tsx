@@ -184,7 +184,7 @@ export default function NPODashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-20">
       <LocationAcknowledgement 
         onAccept={() => setLocationAccepted(true)}
         onDecline={() => setLocation("/")}
@@ -270,16 +270,16 @@ export default function NPODashboard() {
 
       <main className="p-4 sm:px-6 space-y-6 max-w-4xl mx-auto mt-4">
         <div className="text-center py-4">
-          <h1 className="text-2xl font-black text-slate-800 dark:text-slate-200">
+          <h1 className="text-2xl font-black text-slate-200">
             Welcome, {currentUser?.name || 'NPO Staff'}
           </h1>
           <p className="text-muted-foreground">Non-Profit Organization Dashboard</p>
         </div>
 
-        <Card className={`border-2 ${isOnSite ? 'border-green-500 bg-green-50' : 'border-amber-500 bg-amber-50'}`}>
+        <Card className={`border-2 ${isOnSite ? 'border-green-500 bg-green-950/40' : 'border-amber-500 bg-amber-950/40'}`}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <MapPin className={`h-5 w-5 ${isOnSite ? 'text-green-600' : 'text-amber-600'}`} />
+            <CardTitle className="text-base flex items-center gap-2 text-slate-200">
+              <MapPin className={`h-5 w-5 ${isOnSite ? 'text-green-500' : 'text-amber-500'}`} />
               Location Status
             </CardTitle>
           </CardHeader>
@@ -289,16 +289,16 @@ export default function NPODashboard() {
                 {isLoading ? (
                   <p className="text-sm text-muted-foreground">Checking location...</p>
                 ) : error ? (
-                  <p className="text-sm text-red-600">{error}</p>
+                  <p className="text-sm text-red-400">{error}</p>
                 ) : isOnSite ? (
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <span className="text-green-700 font-medium">You are on-site at the stadium</span>
+                    <CheckCircle2 className="h-5 w-5 text-green-500" />
+                    <span className="text-green-400 font-medium">You are on-site at the stadium</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-amber-600" />
-                    <span className="text-amber-700 font-medium">
+                    <AlertTriangle className="h-5 w-5 text-amber-500" />
+                    <span className="text-amber-400 font-medium">
                       You are outside the stadium geofence (100ft)
                     </span>
                   </div>
@@ -318,12 +318,12 @@ export default function NPODashboard() {
         </Card>
 
         {!checkedIn ? (
-          <Card className="border-2 border-indigo-200 bg-indigo-50">
+          <Card className="border-2 border-indigo-500/40 bg-indigo-950/40">
             <CardContent className="p-6 text-center space-y-4">
-              <Clock className="h-12 w-12 text-indigo-600 mx-auto" />
+              <Clock className="h-12 w-12 text-indigo-400 mx-auto" />
               <div>
-                <h3 className="text-lg font-bold text-indigo-900">Ready to Check In?</h3>
-                <p className="text-sm text-indigo-700">
+                <h3 className="text-lg font-bold text-indigo-200">Ready to Check In?</h3>
+                <p className="text-sm text-indigo-300">
                   {isOnSite 
                     ? "You're at the stadium. Tap below to start your shift."
                     : "Please arrive at the stadium to check in (geofence: 100ft radius)."
@@ -346,16 +346,16 @@ export default function NPODashboard() {
           </Card>
         ) : (
           <>
-            <Card className="border-2 border-green-200 bg-green-50">
+            <Card className="border-2 border-green-500/40 bg-green-950/40">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-100 rounded-full">
-                      <CheckCircle2 className="h-6 w-6 text-green-600" />
+                    <div className="p-2 bg-green-900/50 rounded-full">
+                      <CheckCircle2 className="h-6 w-6 text-green-500" />
                     </div>
                     <div>
-                      <p className="font-bold text-green-900">Checked In</p>
-                      <p className="text-sm text-green-700">
+                      <p className="font-bold text-green-200">Checked In</p>
+                      <p className="text-sm text-green-400">
                         {checkInTime?.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                       </p>
                     </div>
@@ -365,30 +365,30 @@ export default function NPODashboard() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="border-slate-700 bg-slate-900/80">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-indigo-600" />
+                <CardTitle className="text-base flex items-center gap-2 text-slate-200">
+                  <Building2 className="h-5 w-5 text-indigo-400" />
                   Your Assignment
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-slate-50 rounded-lg">
+                  <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
                     <p className="text-xs text-muted-foreground uppercase">Section</p>
-                    <p className="font-bold">{assignedSection.name}</p>
+                    <p className="font-bold text-slate-200">{assignedSection.name}</p>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-lg">
+                  <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
                     <p className="text-xs text-muted-foreground uppercase">Floor</p>
-                    <p className="font-bold">{assignedSection.floor}</p>
+                    <p className="font-bold text-slate-200">{assignedSection.floor}</p>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-lg">
+                  <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
                     <p className="text-xs text-muted-foreground uppercase">Stand</p>
-                    <p className="font-bold">{assignedSection.stand}</p>
+                    <p className="font-bold text-slate-200">{assignedSection.stand}</p>
                   </div>
-                  <div className="p-3 bg-slate-50 rounded-lg">
+                  <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
                     <p className="text-xs text-muted-foreground uppercase">Supervisor</p>
-                    <p className="font-bold">{assignedSection.supervisor}</p>
+                    <p className="font-bold text-slate-200">{assignedSection.supervisor}</p>
                   </div>
                 </div>
                 <Button 
@@ -433,36 +433,36 @@ export default function NPODashboard() {
 
         <div className="grid grid-cols-3 gap-3">
           <Card 
-            className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer" 
+            className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer" 
             onClick={() => setShowMap(true)}
           >
             <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-              <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                <Map className="h-6 w-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-blue-900/30">
+                <Map className="h-6 w-6 text-blue-400" />
               </div>
-              <div className="font-bold text-xs">Map</div>
+              <div className="font-bold text-xs text-slate-200">Map</div>
             </CardContent>
           </Card>
           <Card 
-            className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
             onClick={() => setShowDirections(true)}
           >
             <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-              <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/30">
-                <Route className="h-6 w-6 text-green-600" />
+              <div className="p-3 rounded-full bg-green-900/30">
+                <Route className="h-6 w-6 text-green-400" />
               </div>
-              <div className="font-bold text-xs">Directions</div>
+              <div className="font-bold text-xs text-slate-200">Directions</div>
             </CardContent>
           </Card>
           <Card 
-            className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
             onClick={() => setLocation('/messages')}
           >
             <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-              <div className="p-3 rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-                <MessageSquare className="h-6 w-6 text-indigo-600" />
+              <div className="p-3 rounded-full bg-indigo-900/30">
+                <MessageSquare className="h-6 w-6 text-indigo-400" />
               </div>
-              <div className="font-bold text-xs">Messages</div>
+              <div className="font-bold text-xs text-slate-200">Messages</div>
             </CardContent>
           </Card>
         </div>

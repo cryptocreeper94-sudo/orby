@@ -33,8 +33,8 @@ export default function KitchenDashboard() {
   const [showMap, setShowMap] = useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-rose-500 text-white px-4 shadow-md">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-20">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-rose-500/30 bg-rose-500 text-white px-4 shadow-md">
         <div className="flex items-center gap-2">
           <ChefHat className="h-6 w-6" />
           <span className="font-bold text-lg">Kitchen</span>
@@ -57,21 +57,21 @@ export default function KitchenDashboard() {
 
       <main className="p-4 sm:px-6 space-y-6 max-w-4xl mx-auto mt-4">
         <div className="text-center py-4">
-          <h1 className="text-2xl font-black text-slate-800 dark:text-slate-200">Welcome, {currentUser?.name}</h1>
+          <h1 className="text-2xl font-black text-slate-200">Welcome, {currentUser?.name}</h1>
           <p className="text-muted-foreground">Kitchen Operations Dashboard</p>
         </div>
 
         {urgentMessages.length > 0 && (
-          <Card className="border-red-200 bg-red-50 dark:bg-red-950/20">
+          <Card className="border-red-500/30 bg-red-950/40">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-bold text-red-700 dark:text-red-400 flex items-center gap-2">
+              <CardTitle className="text-sm font-bold text-red-400 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4" />
                 Urgent Messages ({urgentMessages.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {urgentMessages.slice(0, 3).map(msg => (
-                <div key={msg.id} className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-red-200 text-sm">
+                <div key={msg.id} className="p-3 bg-slate-800/80 rounded-lg border border-red-500/30 text-sm text-slate-200">
                   {msg.content}
                 </div>
               ))}
@@ -91,38 +91,38 @@ export default function KitchenDashboard() {
         )}
 
         <div className="grid grid-cols-2 gap-4">
-          <Card className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowMap(true)}>
+          <Card className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowMap(true)}>
             <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-              <div className="p-4 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                <Map className="h-8 w-8 text-blue-600" />
+              <div className="p-4 rounded-full bg-blue-900/30">
+                <Map className="h-8 w-8 text-blue-400" />
               </div>
-              <div className="font-bold text-sm">Stadium Map</div>
+              <div className="font-bold text-sm text-slate-200">Stadium Map</div>
             </CardContent>
           </Card>
-          <Card className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/messages')}>
+          <Card className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setLocation('/messages')}>
             <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-              <div className="p-4 rounded-full bg-rose-100 dark:bg-rose-900/30">
-                <MessageSquare className="h-8 w-8 text-rose-600" />
+              <div className="p-4 rounded-full bg-rose-900/30">
+                <MessageSquare className="h-8 w-8 text-rose-400" />
               </div>
-              <div className="font-bold text-lg">Messages</div>
+              <div className="font-bold text-lg text-slate-200">Messages</div>
               <p className="text-xs text-muted-foreground">Communicate with supervisors</p>
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-md">
+          <Card className="border-slate-700 bg-slate-900/80 shadow-md">
             <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-              <div className="p-4 rounded-full bg-slate-100 dark:bg-slate-800">
-                <UtensilsCrossed className="h-8 w-8 text-slate-600" />
+              <div className="p-4 rounded-full bg-slate-800">
+                <UtensilsCrossed className="h-8 w-8 text-slate-400" />
               </div>
-              <div className="font-bold text-lg">Orders</div>
+              <div className="font-bold text-lg text-slate-200">Orders</div>
               <p className="text-xs text-muted-foreground">Coming soon</p>
             </CardContent>
           </Card>
         </div>
 
-        <Card className="border-none shadow-sm">
+        <Card className="border-slate-700 bg-slate-900/80 shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold uppercase tracking-wider flex items-center justify-between">
+            <CardTitle className="text-sm font-bold uppercase tracking-wider flex items-center justify-between text-slate-200">
               Recent Messages
               <Link href="/messages">
                 <Button variant="ghost" size="sm" className="text-xs">
@@ -136,7 +136,7 @@ export default function KitchenDashboard() {
               <p className="text-sm text-muted-foreground text-center py-4">No messages yet</p>
             ) : (
               recentMessages.map(msg => (
-                <div key={msg.id} className="p-3 bg-white dark:bg-slate-900 rounded-lg border shadow-sm text-sm">
+                <div key={msg.id} className="p-3 bg-slate-800/80 rounded-lg border border-slate-700 shadow-sm text-sm">
                   <div className="flex items-center gap-2 mb-1">
                     <Badge variant={msg.type === 'Urgent' ? 'destructive' : 'secondary'} className="text-[10px]">
                       {msg.type}
@@ -145,7 +145,7 @@ export default function KitchenDashboard() {
                       {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                     </span>
                   </div>
-                  <p className="text-slate-700 dark:text-slate-300">{msg.content}</p>
+                  <p className="text-slate-300">{msg.content}</p>
                 </div>
               ))
             )}

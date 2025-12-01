@@ -58,12 +58,12 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
-      <header className="sticky top-0 z-10 bg-white dark:bg-slate-900 border-b px-4 h-14 flex items-center gap-3 shadow-sm shrink-0">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col">
+      <header className="sticky top-0 z-10 bg-slate-950/95 backdrop-blur-sm border-b border-cyan-500/20 px-4 h-14 flex items-center gap-3 shadow-sm shrink-0">
         <Button variant="ghost" size="icon" onClick={() => window.history.back()} className="-ml-2">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div className="font-bold text-lg flex-1">Team Communication</div>
+        <div className="font-bold text-lg flex-1 text-slate-200">Team Communication</div>
         <div className="flex -space-x-2 overflow-hidden">
            {users.filter(u => u.isOnline).map(u => (
              <div key={u.id} className="relative inline-block border-2 border-white dark:border-slate-900 rounded-full" title={`${u.name} (${u.role})`}>
@@ -105,7 +105,7 @@ export default function MessagesPage() {
                     <div className={`p-3 rounded-2xl text-sm ${
                       isMe 
                         ? 'bg-primary text-primary-foreground rounded-tr-none' 
-                        : 'bg-white dark:bg-slate-800 border shadow-sm rounded-tl-none'
+                        : 'bg-slate-800/80 border border-slate-700 shadow-sm rounded-tl-none text-slate-200'
                     }`}>
                       {msg.content}
                     </div>
@@ -116,13 +116,13 @@ export default function MessagesPage() {
           </div>
         </ScrollArea>
 
-        <div className="p-4 bg-white dark:bg-slate-900 border-t mt-auto">
+        <div className="p-4 bg-slate-950/95 backdrop-blur-sm border-t border-cyan-500/20 mt-auto">
           <form onSubmit={handleSend} className="flex gap-2">
             <Input 
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               placeholder="Type your message..." 
-              className="flex-1"
+              className="flex-1 bg-slate-800/80 border-slate-700"
             />
             <Button type="submit" size="icon" disabled={!newMessage.trim()}>
               <Send className="h-4 w-4" />

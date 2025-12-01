@@ -225,8 +225,8 @@ export default function WarehouseDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-amber-500 text-white px-4 shadow-md">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-20">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-amber-500/30 bg-amber-500 text-white px-4 shadow-md">
         <div className="flex items-center gap-2">
           <Warehouse className="h-6 w-6" />
           <span className="font-bold text-lg">Warehouse</span>
@@ -249,18 +249,18 @@ export default function WarehouseDashboard() {
 
       <main className="p-4 sm:px-6 space-y-4 max-w-4xl mx-auto mt-4">
         <div className="text-center py-2">
-          <h1 className="text-2xl font-black text-slate-800 dark:text-slate-200">Welcome, {currentUser?.name}</h1>
+          <h1 className="text-2xl font-black text-slate-200">Welcome, {currentUser?.name}</h1>
           <p className="text-muted-foreground">Warehouse Operations Dashboard</p>
         </div>
 
         {showConfigNotice && stats?.isExampleData && (
-          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20" data-testid="card-config-notice">
+          <Card className="border-blue-500/30 bg-blue-950/40" data-testid="card-config-notice">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <Info className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <h3 className="font-semibold text-blue-900 dark:text-blue-200 text-sm">Configurable Example System</h3>
-                  <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">
+                  <h3 className="font-semibold text-blue-200 text-sm">Configurable Example System</h3>
+                  <p className="text-xs text-blue-300 mt-1">
                     {stats.configNote}
                   </p>
                   <div className="flex gap-2 mt-3">
@@ -323,27 +323,27 @@ export default function WarehouseDashboard() {
             )}
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <Card className="border-none shadow-md" data-testid="stat-products">
+              <Card className="border-slate-700 bg-slate-900/80 shadow-md" data-testid="stat-products">
                 <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-amber-600">{stats?.totalProducts ?? 0}</div>
+                  <div className="text-2xl font-bold text-amber-400">{stats?.totalProducts ?? 0}</div>
                   <div className="text-xs text-muted-foreground">Products</div>
                 </CardContent>
               </Card>
-              <Card className="border-none shadow-md" data-testid="stat-categories">
+              <Card className="border-slate-700 bg-slate-900/80 shadow-md" data-testid="stat-categories">
                 <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-blue-600">{stats?.totalCategories ?? 0}</div>
+                  <div className="text-2xl font-bold text-blue-400">{stats?.totalCategories ?? 0}</div>
                   <div className="text-xs text-muted-foreground">Categories</div>
                 </CardContent>
               </Card>
-              <Card className="border-none shadow-md" data-testid="stat-pending">
+              <Card className="border-slate-700 bg-slate-900/80 shadow-md" data-testid="stat-pending">
                 <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-orange-600">{stats?.pendingRequestCount ?? 0}</div>
+                  <div className="text-2xl font-bold text-orange-400">{stats?.pendingRequestCount ?? 0}</div>
                   <div className="text-xs text-muted-foreground">Pending</div>
                 </CardContent>
               </Card>
-              <Card className="border-none shadow-md" data-testid="stat-low-stock">
+              <Card className="border-slate-700 bg-slate-900/80 shadow-md" data-testid="stat-low-stock">
                 <CardContent className="p-4 text-center">
-                  <div className="text-2xl font-bold text-red-600">{stats?.lowStockCount ?? 0}</div>
+                  <div className="text-2xl font-bold text-red-400">{stats?.lowStockCount ?? 0}</div>
                   <div className="text-xs text-muted-foreground">Low Stock</div>
                 </CardContent>
               </Card>
@@ -352,30 +352,30 @@ export default function WarehouseDashboard() {
             <Notepad storageKey="warehouse-notes" />
 
             <div className="grid grid-cols-2 gap-4">
-              <Card className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowMap(true)} data-testid="card-stadium-map">
+              <Card className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setShowMap(true)} data-testid="card-stadium-map">
                 <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-                  <div className="p-4 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                    <Map className="h-8 w-8 text-blue-600" />
+                  <div className="p-4 rounded-full bg-blue-900/30">
+                    <Map className="h-8 w-8 text-blue-400" />
                   </div>
-                  <div className="font-bold text-sm">Stadium Map</div>
+                  <div className="font-bold text-sm text-slate-200">Stadium Map</div>
                 </CardContent>
               </Card>
-              <Card className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setActiveTab('inventory')} data-testid="card-inventory">
+              <Card className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setActiveTab('inventory')} data-testid="card-inventory">
                 <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-                  <div className="p-4 rounded-full bg-amber-100 dark:bg-amber-900/30">
-                    <Package className="h-8 w-8 text-amber-600" />
+                  <div className="p-4 rounded-full bg-amber-900/30">
+                    <Package className="h-8 w-8 text-amber-400" />
                   </div>
-                  <div className="font-bold text-sm">Inventory</div>
+                  <div className="font-bold text-sm text-slate-200">Inventory</div>
                   <p className="text-xs text-muted-foreground">{products.length} products</p>
                 </CardContent>
               </Card>
             </div>
 
             {pendingRequests.length > 0 && (
-              <Card className="border-none shadow-md" data-testid="card-pending-requests">
+              <Card className="border-slate-700 bg-slate-900/80 shadow-md" data-testid="card-pending-requests">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-bold flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-orange-500" />
+                  <CardTitle className="text-sm font-bold flex items-center gap-2 text-slate-200">
+                    <Clock className="h-4 w-4 text-orange-400" />
                     Pending Requests ({pendingRequests.length})
                   </CardTitle>
                 </CardHeader>
@@ -383,7 +383,7 @@ export default function WarehouseDashboard() {
                   {pendingRequests.slice(0, 3).map(req => {
                     const stand = stands.find(s => s.id === req.standId);
                     return (
-                      <div key={req.id} className="p-3 bg-white dark:bg-slate-900 rounded-lg border flex items-center justify-between" data-testid={`request-${req.id}`}>
+                      <div key={req.id} className="p-3 bg-slate-800/80 rounded-lg border border-slate-700 flex items-center justify-between" data-testid={`request-${req.id}`}>
                         <div>
                           <div className="font-medium text-sm">{stand?.name ?? 'Unknown Stand'}</div>
                           <div className="flex gap-2 mt-1">

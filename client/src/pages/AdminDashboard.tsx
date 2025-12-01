@@ -49,9 +49,9 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-20">
       {/* Mobile Header */}
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 shadow-sm sm:shadow-none">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-cyan-500/20 bg-slate-950/95 backdrop-blur-sm px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 shadow-sm sm:shadow-none">
         <Sheet>
           <SheetTrigger asChild>
             <Button size="icon" variant="outline" className="sm:hidden">
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {stats.map((stat, i) => (
-            <Card key={i} className="overflow-hidden border-none shadow-sm">
+            <Card key={i} className="overflow-hidden border-slate-700 bg-slate-900/80 shadow-sm">
               <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
                 <stat.icon className={`h-8 w-8 ${stat.color} opacity-80`} />
                 <div className="text-2xl font-bold tracking-tighter">{stat.value}</div>
@@ -143,14 +143,14 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="list">
-            <Card className="border-none shadow-sm">
+            <Card className="border-slate-700 bg-slate-900/80 shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-semibold">Live Stand Status</CardTitle>
+                <CardTitle className="text-lg font-semibold text-slate-200">Live Stand Status</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 gap-2">
                   {stands.map(stand => (
-                    <div key={stand.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-900 rounded-lg border shadow-sm">
+                    <div key={stand.id} className="flex items-center justify-between p-3 bg-slate-800/80 rounded-lg border border-slate-700 shadow-sm">
                       <div className="flex flex-col">
                         <span className="font-bold text-sm">{stand.name}</span>
                         <span className="text-xs text-muted-foreground">Supervisor: {stand.supervisorId ? 'Assigned' : 'Unassigned'}</span>
@@ -168,12 +168,12 @@ export default function AdminDashboard() {
           <TabsContent value="reports">
              <div className="grid grid-cols-2 gap-4">
                <Link href="/roster-builder">
-                  <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-primary hover:bg-slate-50 cursor-pointer">
+                  <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-600 hover:border-cyan-500 hover:bg-slate-800/50 cursor-pointer text-slate-200">
                     <Users className="h-6 w-6" />
                     Roster & Group Builder
                   </Button>
                </Link>
-               <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-300 hover:border-primary hover:bg-slate-50">
+               <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-600 hover:border-cyan-500 hover:bg-slate-800/50 text-slate-200">
                   <FileBarChart className="h-6 w-6" />
                   Export Inventory CSV
                </Button>

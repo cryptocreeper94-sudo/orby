@@ -236,7 +236,7 @@ export default function StandLeadDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-20">
       <header className="sticky top-0 z-10 bg-gradient-to-r from-amber-600 to-orange-600 text-white px-4 h-14 flex items-center justify-between shadow-md">
         <div className="font-bold text-lg">Stand Lead</div>
         <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white hover:bg-white/20">
@@ -390,9 +390,9 @@ export default function StandLeadDashboard() {
               />
             </div>
 
-            <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg text-sm">
-              <p className="font-medium text-slate-700 dark:text-slate-300">Auto-Routing</p>
-              <p className="text-slate-500 text-xs mt-1">
+            <div className="bg-slate-800 p-3 rounded-lg text-sm border border-slate-700">
+              <p className="font-medium text-slate-200">Auto-Routing</p>
+              <p className="text-slate-400 text-xs mt-1">
                 {issueCategory === 'Cooling' || issueCategory === 'Beverage' 
                   ? '→ Warehouse Manager'
                   : issueCategory === 'Power' || issueCategory === 'AV' || issueCategory === 'Menu'
@@ -429,36 +429,36 @@ export default function StandLeadDashboard() {
 
       <main className="p-4 sm:px-6 space-y-6 max-w-4xl mx-auto mt-4">
         <div className="text-center py-4">
-          <h1 className="text-2xl font-black text-slate-800 dark:text-slate-200">
+          <h1 className="text-2xl font-black text-slate-200">
             Welcome, {currentUser?.name || 'Stand Lead'}
           </h1>
           <p className="text-muted-foreground">Stand Lead Dashboard</p>
         </div>
 
-        <Card>
+        <Card className="border-slate-700 bg-slate-900/80">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-orange-600" />
+            <CardTitle className="text-base flex items-center gap-2 text-slate-200">
+              <Building2 className="h-5 w-5 text-orange-400" />
               Your Stand
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-slate-50 rounded-lg">
+              <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
                 <p className="text-xs text-muted-foreground uppercase">Section</p>
-                <p className="font-bold">{assignedSection.name}</p>
+                <p className="font-bold text-slate-200">{assignedSection.name}</p>
               </div>
-              <div className="p-3 bg-slate-50 rounded-lg">
+              <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
                 <p className="text-xs text-muted-foreground uppercase">Floor</p>
-                <p className="font-bold">{assignedSection.floor}</p>
+                <p className="font-bold text-slate-200">{assignedSection.floor}</p>
               </div>
-              <div className="p-3 bg-slate-50 rounded-lg">
+              <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
                 <p className="text-xs text-muted-foreground uppercase">Stand</p>
-                <p className="font-bold">{assignedSection.stand}</p>
+                <p className="font-bold text-slate-200">{assignedSection.stand}</p>
               </div>
-              <div className="p-3 bg-slate-50 rounded-lg">
+              <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
                 <p className="text-xs text-muted-foreground uppercase">Supervisor</p>
-                <p className="font-bold">{assignedSection.supervisor}</p>
+                <p className="font-bold text-slate-200">{assignedSection.supervisor}</p>
               </div>
             </div>
           </CardContent>
@@ -504,36 +504,36 @@ export default function StandLeadDashboard() {
 
         <div className="grid grid-cols-3 gap-3">
           <Card 
-            className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer" 
+            className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer" 
             onClick={() => setShowMap(true)}
           >
             <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-              <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30">
-                <Map className="h-6 w-6 text-blue-600" />
+              <div className="p-3 rounded-full bg-blue-900/30">
+                <Map className="h-6 w-6 text-blue-400" />
               </div>
-              <div className="font-bold text-xs">Map</div>
+              <div className="font-bold text-xs text-slate-200">Map</div>
             </CardContent>
           </Card>
           <Card 
-            className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
             onClick={() => setShowDirections(true)}
           >
             <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-              <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/30">
-                <Route className="h-6 w-6 text-green-600" />
+              <div className="p-3 rounded-full bg-green-900/30">
+                <Route className="h-6 w-6 text-green-400" />
               </div>
-              <div className="font-bold text-xs">Directions</div>
+              <div className="font-bold text-xs text-slate-200">Directions</div>
             </CardContent>
           </Card>
           <Card 
-            className="border-none shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+            className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
             onClick={() => setLocation('/messages')}
           >
             <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-              <div className="p-3 rounded-full bg-indigo-100 dark:bg-indigo-900/30">
-                <MessageSquare className="h-6 w-6 text-indigo-600" />
+              <div className="p-3 rounded-full bg-indigo-900/30">
+                <MessageSquare className="h-6 w-6 text-indigo-400" />
               </div>
-              <div className="font-bold text-xs">Messages</div>
+              <div className="font-bold text-xs text-slate-200">Messages</div>
             </CardContent>
           </Card>
         </div>

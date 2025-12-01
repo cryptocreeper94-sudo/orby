@@ -167,8 +167,8 @@ export default function ManagerDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white" data-testid="manager-dashboard">
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-white/10 bg-slate-900/80 backdrop-blur-md px-4">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white" data-testid="manager-dashboard">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-cyan-500/20 bg-slate-950/95 backdrop-blur-sm px-4">
         <Sheet>
           <SheetTrigger asChild>
             <Button size="icon" variant="ghost" className="md:hidden text-white">

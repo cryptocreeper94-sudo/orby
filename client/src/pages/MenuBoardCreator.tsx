@@ -139,20 +139,20 @@ export default function MenuBoardCreator() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => setLocation('/manager')} data-testid="back-to-manager">
+            <Button variant="ghost" onClick={() => setLocation('/manager')} data-testid="back-to-manager" className="text-slate-300 hover:text-slate-100">
               <ChevronLeft className="h-4 w-4 mr-1" /> Back to Dashboard
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <LayoutGrid className="h-6 w-6 text-blue-600" />
+              <h1 className="text-2xl font-bold text-slate-200 flex items-center gap-2">
+                <LayoutGrid className="h-6 w-6 text-cyan-400" />
                 Menu Board Creator
               </h1>
-              <p className="text-gray-500 text-sm">Create and manage digital menu displays</p>
+              <p className="text-slate-400 text-sm">Create and manage digital menu displays</p>
             </div>
           </div>
           
@@ -210,17 +210,17 @@ export default function MenuBoardCreator() {
         {/* Menu Boards Grid */}
         {isLoading ? (
           <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400" />
           </div>
         ) : menuBoards.length === 0 ? (
-          <Card className="border-dashed">
+          <Card className="border-dashed border-slate-700 bg-slate-900/80">
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <LayoutGrid className="h-12 w-12 text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium text-gray-600 mb-2">No Menu Boards Yet</h3>
-              <p className="text-gray-400 text-center mb-4">
+              <LayoutGrid className="h-12 w-12 text-slate-500 mb-4" />
+              <h3 className="text-lg font-medium text-slate-300 mb-2">No Menu Boards Yet</h3>
+              <p className="text-slate-400 text-center mb-4">
                 Create your first menu board to display on your digital screens
               </p>
-              <Button onClick={() => setIsCreateDialogOpen(true)} data-testid="create-first-board">
+              <Button onClick={() => setIsCreateDialogOpen(true)} data-testid="create-first-board" className="bg-cyan-600 hover:bg-cyan-700">
                 <Plus className="h-4 w-4 mr-1" /> Create Your First Menu Board
               </Button>
             </CardContent>
@@ -230,13 +230,13 @@ export default function MenuBoardCreator() {
             {menuBoards.map((board: MenuBoard) => (
               <Card 
                 key={board.id} 
-                className="hover:shadow-lg transition-shadow cursor-pointer group"
+                className="border-slate-700 bg-slate-900/80 hover:shadow-lg transition-shadow cursor-pointer group"
                 data-testid={`menu-board-card-${board.id}`}
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
                     <div>
-                      <CardTitle className="text-lg">{board.name}</CardTitle>
+                      <CardTitle className="text-lg text-slate-200">{board.name}</CardTitle>
                       {board.description && (
                         <CardDescription className="mt-1">{board.description}</CardDescription>
                       )}
@@ -259,12 +259,12 @@ export default function MenuBoardCreator() {
                 </CardHeader>
                 <CardContent>
                   <div 
-                    className="aspect-video bg-gray-800 rounded-lg mb-3 flex items-center justify-center"
+                    className="aspect-video bg-slate-800 rounded-lg mb-3 flex items-center justify-center border border-slate-700"
                     onClick={() => loadBoard(board)}
                   >
-                    <LayoutGrid className="h-8 w-8 text-gray-500" />
+                    <LayoutGrid className="h-8 w-8 text-slate-500" />
                   </div>
-                  <div className="flex items-center justify-between text-xs text-gray-400">
+                  <div className="flex items-center justify-between text-xs text-slate-400">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
                       {new Date(board.updatedAt || board.createdAt).toLocaleDateString()}
@@ -288,9 +288,9 @@ export default function MenuBoardCreator() {
         )}
 
         {/* Tips Section */}
-        <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-100">
-          <h3 className="font-medium text-blue-800 mb-2">Tips for Creating Great Menus</h3>
-          <ul className="text-sm text-blue-700 space-y-1">
+        <div className="mt-8 p-4 bg-cyan-950/40 rounded-lg border border-cyan-500/30">
+          <h3 className="font-medium text-cyan-300 mb-2">Tips for Creating Great Menus</h3>
+          <ul className="text-sm text-cyan-400/80 space-y-1">
             <li>• Use high contrast colors for better readability from a distance</li>
             <li>• Keep text large - aim for 32px or larger for menu items</li>
             <li>• Use the "Export All" button to download slides for your USB drive</li>
