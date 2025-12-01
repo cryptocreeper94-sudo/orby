@@ -148,16 +148,100 @@
   }
 }
 
-/* Custom Utility Classes for 3D Buttons & Glow */
+/* Premium Button & Glow Effects */
 .btn-3d {
   @apply transition-all duration-150 ease-out transform border-b-4 active:border-b-0 active:translate-y-1;
 }
 
 .btn-glow {
-  @apply shadow-[0_0_15px_rgba(59,130,246,0.5)] hover:shadow-[0_0_25px_rgba(59,130,246,0.7)];
+  @apply shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:shadow-[0_0_35px_rgba(6,182,212,0.8)];
+}
+
+.btn-glow-cyan {
+  @apply shadow-[0_0_25px_rgba(6,182,212,0.6)] hover:shadow-[0_0_40px_rgba(6,182,212,0.9)] transition-shadow duration-300;
+}
+
+.btn-sparkle {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-sparkle::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+  animation: sparkle 3s infinite;
+}
+
+@keyframes sparkle {
+  0% { transform: translateX(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) rotate(45deg); }
 }
 
 /* Floating effect */
 .float-effect {
-  @apply shadow-lg hover:-translate-y-1 transition-transform duration-200;
+  @apply shadow-xl hover:-translate-y-1 hover:shadow-2xl transition-all duration-300;
+}
+
+/* Glass card effect */
+.glass-card {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl;
+}
+
+/* Premium card with glow */
+.premium-card {
+  @apply bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl;
+}
+
+/* Text utilities for mobile */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-clamp {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Smooth scrolling for mobile */
+.scroll-smooth-touch {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar but allow scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Pulse glow animation */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.4); }
+  50% { box-shadow: 0 0 35px rgba(6, 182, 212, 0.7); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
 }

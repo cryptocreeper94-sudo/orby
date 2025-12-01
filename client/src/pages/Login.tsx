@@ -60,7 +60,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-800 p-4">
       <div className="flex-1 flex items-center justify-center w-full max-w-md">
-        <div className="w-full p-8 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl">
+        <div className="w-full p-6 rounded-3xl glass-card premium-card">
           {/* Header with Orby Mascot */}
           <div className="flex flex-col items-center text-center mb-8">
             <div className="w-40 h-40 mb-6 relative flex items-center justify-center">
@@ -109,16 +109,17 @@ export default function LoginPage() {
               />
               <Button 
                 type="submit" 
-                className="w-full h-14 text-lg font-bold uppercase tracking-wide bg-cyan-600/80 hover:bg-cyan-500 text-white border border-cyan-400/30 shadow-lg shadow-cyan-500/20" 
+                variant="glow"
+                className="w-full h-14 text-lg font-bold uppercase tracking-wide btn-sparkle animate-pulse-glow" 
                 data-testid="button-login"
               >
                 <ShieldCheck className="mr-2 h-5 w-5" /> 
                 Verify Identity
               </Button>
               
-              <div className="mt-6 text-center">
-                <p className="text-xs text-cyan-200/60 font-medium bg-white/5 py-2 px-3 rounded-lg border border-white/10">
-                  Demo PINs: Team: 1111 | Lead: 2222 | Supervisor: 3333 | Mgmt: 4444
+              <div className="mt-4 text-center">
+                <p className="text-[10px] text-cyan-200/50 font-medium">
+                  Demo: 1111 · 2222 · 3333 · 4444
                 </p>
               </div>
             </form>
