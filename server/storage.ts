@@ -5,6 +5,7 @@ import {
   closingChecklists, closingChecklistTasks, spoilageReports, spoilageItems, voucherReports, DEFAULT_CLOSING_TASKS,
   documentSubmissions, menuBoards, menuSlides,
   warehouseCategories, warehouseProducts, warehouseStock, warehouseParLevels, warehouseRequests, warehouseRequestItems,
+  auditLogs, emergencyAlerts, orbitRosters, orbitShifts, deliveryRequests,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -37,7 +38,11 @@ import {
   type WarehouseStock, type InsertWarehouseStock,
   type WarehouseParLevel, type InsertWarehouseParLevel,
   type WarehouseRequest, type InsertWarehouseRequest,
-  type WarehouseRequestItem, type InsertWarehouseRequestItem
+  type WarehouseRequestItem, type InsertWarehouseRequestItem,
+  type AuditLog, type InsertAuditLog,
+  type EmergencyAlert, type InsertEmergencyAlert,
+  type OrbitRoster, type InsertOrbitRoster,
+  type OrbitShift, type InsertOrbitShift
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
@@ -274,6 +279,40 @@ export interface IStorage {
 
   // Seed example data
   seedExampleWarehouseData(): Promise<void>;
+
+  // ============ AUDIT LOGS ============
+  createAuditLog(log: InsertAuditLog): Promise<AuditLog>;
+  getAuditLogs(limit?: number): Promise<AuditLog[]>;
+  getAuditLogsByUser(userId: string, limit?: number): Promise<AuditLog[]>;
+  getAuditLogsByAction(action: AuditLog['action'], limit?: number): Promise<AuditLog[]>;
+
+  // ============ EMERGENCY ALERTS ============
+  createEmergencyAlert(alert: InsertEmergencyAlert): Promise<EmergencyAlert>;
+  getActiveEmergencyAlerts(): Promise<EmergencyAlert[]>;
+  getAllEmergencyAlerts(): Promise<EmergencyAlert[]>;
+  getEmergencyAlert(id: string): Promise<EmergencyAlert | undefined>;
+  acknowledgeEmergencyAlert(id: string, userId: string): Promise<void>;
+  resolveEmergencyAlert(id: string, userId: string, notes?: string): Promise<void>;
+
+  // ============ ORBIT STAFFING INTEGRATION ============
+  createOrbitRoster(roster: InsertOrbitRoster): Promise<OrbitRoster>;
+  getAllOrbitRosters(): Promise<OrbitRoster[]>;
+  getOrbitRoster(id: string): Promise<OrbitRoster | undefined>;
+  getOrbitRosterByEventDate(eventDate: string): Promise<OrbitRoster | undefined>;
+  updateOrbitRosterSyncStatus(id: string, status: OrbitRoster['syncStatus']): Promise<void>;
+  createOrbitShift(shift: InsertOrbitShift): Promise<OrbitShift>;
+  getOrbitShiftsByRoster(rosterId: string): Promise<OrbitShift[]>;
+  getOrbitShiftsByUser(userId: string): Promise<OrbitShift[]>;
+  checkInOrbitShift(id: string, gpsVerified?: boolean): Promise<void>;
+  checkOutOrbitShift(id: string): Promise<void>;
+
+  // ============ DELIVERY REQUESTS (Enhanced) ============
+  getDeliveryRequest(id: string): Promise<any | undefined>;
+  getAllDeliveryRequests(): Promise<any[]>;
+  getDeliveryRequestsByStatus(status: string): Promise<any[]>;
+  getDeliveryRequestsByDepartment(department: string): Promise<any[]>;
+  createDeliveryRequest(request: any): Promise<any>;
+  updateDeliveryRequestStatus(id: string, status: string, userId: string, eta?: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1461,6 +1500,165 @@ export class DatabaseStorage implements IStorage {
         location: 'Main Warehouse'
       });
     }
+  }
+
+  // ============ AUDIT LOGS ============
+  async createAuditLog(log: InsertAuditLog): Promise<AuditLog> {
+    const [created] = await db.insert(auditLogs).values(log).returning();
+    return created;
+  }
+
+  async getAuditLogs(limit: number = 100): Promise<AuditLog[]> {
+    return await db.select().from(auditLogs).orderBy(desc(auditLogs.createdAt)).limit(limit);
+  }
+
+  async getAuditLogsByUser(userId: string, limit: number = 100): Promise<AuditLog[]> {
+    return await db.select().from(auditLogs)
+      .where(eq(auditLogs.userId, userId))
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(limit);
+  }
+
+  async getAuditLogsByAction(action: AuditLog['action'], limit: number = 100): Promise<AuditLog[]> {
+    return await db.select().from(auditLogs)
+      .where(eq(auditLogs.action, action))
+      .orderBy(desc(auditLogs.createdAt))
+      .limit(limit);
+  }
+
+  // ============ EMERGENCY ALERTS ============
+  async createEmergencyAlert(alert: InsertEmergencyAlert): Promise<EmergencyAlert> {
+    const [created] = await db.insert(emergencyAlerts).values(alert).returning();
+    return created;
+  }
+
+  async getActiveEmergencyAlerts(): Promise<EmergencyAlert[]> {
+    return await db.select().from(emergencyAlerts)
+      .where(eq(emergencyAlerts.isActive, true))
+      .orderBy(desc(emergencyAlerts.createdAt));
+  }
+
+  async getAllEmergencyAlerts(): Promise<EmergencyAlert[]> {
+    return await db.select().from(emergencyAlerts).orderBy(desc(emergencyAlerts.createdAt));
+  }
+
+  async getEmergencyAlert(id: string): Promise<EmergencyAlert | undefined> {
+    const [alert] = await db.select().from(emergencyAlerts).where(eq(emergencyAlerts.id, id));
+    return alert || undefined;
+  }
+
+  async acknowledgeEmergencyAlert(id: string, userId: string): Promise<void> {
+    await db.update(emergencyAlerts).set({
+      acknowledgedBy: userId,
+      acknowledgedAt: new Date()
+    }).where(eq(emergencyAlerts.id, id));
+  }
+
+  async resolveEmergencyAlert(id: string, userId: string, notes?: string): Promise<void> {
+    await db.update(emergencyAlerts).set({
+      isActive: false,
+      resolvedBy: userId,
+      resolvedAt: new Date(),
+      resolutionNotes: notes
+    }).where(eq(emergencyAlerts.id, id));
+  }
+
+  // ============ ORBIT STAFFING INTEGRATION ============
+  async createOrbitRoster(roster: InsertOrbitRoster): Promise<OrbitRoster> {
+    const [created] = await db.insert(orbitRosters).values(roster).returning();
+    return created;
+  }
+
+  async getAllOrbitRosters(): Promise<OrbitRoster[]> {
+    return await db.select().from(orbitRosters).orderBy(desc(orbitRosters.eventDate));
+  }
+
+  async getOrbitRoster(id: string): Promise<OrbitRoster | undefined> {
+    const [roster] = await db.select().from(orbitRosters).where(eq(orbitRosters.id, id));
+    return roster || undefined;
+  }
+
+  async getOrbitRosterByEventDate(eventDate: string): Promise<OrbitRoster | undefined> {
+    const [roster] = await db.select().from(orbitRosters).where(eq(orbitRosters.eventDate, eventDate));
+    return roster || undefined;
+  }
+
+  async updateOrbitRosterSyncStatus(id: string, status: OrbitRoster['syncStatus']): Promise<void> {
+    await db.update(orbitRosters).set({
+      syncStatus: status,
+      lastSyncAt: new Date()
+    }).where(eq(orbitRosters.id, id));
+  }
+
+  async createOrbitShift(shift: InsertOrbitShift): Promise<OrbitShift> {
+    const [created] = await db.insert(orbitShifts).values(shift).returning();
+    return created;
+  }
+
+  async getOrbitShiftsByRoster(rosterId: string): Promise<OrbitShift[]> {
+    return await db.select().from(orbitShifts).where(eq(orbitShifts.rosterId, rosterId));
+  }
+
+  async getOrbitShiftsByUser(userId: string): Promise<OrbitShift[]> {
+    return await db.select().from(orbitShifts).where(eq(orbitShifts.userId, userId));
+  }
+
+  async checkInOrbitShift(id: string, gpsVerified?: boolean): Promise<void> {
+    await db.update(orbitShifts).set({
+      checkedIn: true,
+      checkedInAt: new Date(),
+      gpsVerified: gpsVerified ?? false
+    }).where(eq(orbitShifts.id, id));
+  }
+
+  async checkOutOrbitShift(id: string): Promise<void> {
+    await db.update(orbitShifts).set({
+      checkedOut: true,
+      checkedOutAt: new Date()
+    }).where(eq(orbitShifts.id, id));
+  }
+
+  // ============ DELIVERY REQUESTS (Enhanced) ============
+  async getDeliveryRequest(id: string): Promise<any | undefined> {
+    const [request] = await db.select().from(deliveryRequests).where(eq(deliveryRequests.id, id));
+    return request || undefined;
+  }
+
+  async getAllDeliveryRequests(): Promise<any[]> {
+    return await db.select().from(deliveryRequests).orderBy(desc(deliveryRequests.createdAt));
+  }
+
+  async getDeliveryRequestsByStatus(status: string): Promise<any[]> {
+    return await db.select().from(deliveryRequests)
+      .where(eq(deliveryRequests.status, status as any))
+      .orderBy(desc(deliveryRequests.createdAt));
+  }
+
+  async getDeliveryRequestsByDepartment(department: string): Promise<any[]> {
+    return await db.select().from(deliveryRequests)
+      .where(eq(deliveryRequests.department, department as any))
+      .orderBy(desc(deliveryRequests.createdAt));
+  }
+
+  async createDeliveryRequest(request: any): Promise<any> {
+    const [created] = await db.insert(deliveryRequests).values(request).returning();
+    return created;
+  }
+
+  async updateDeliveryRequestStatus(id: string, status: string, userId: string, eta?: number): Promise<void> {
+    const updates: any = { status, updatedAt: new Date() };
+    
+    if (status === 'Acknowledged') {
+      updates.acknowledgedBy = userId;
+      updates.acknowledgedAt = new Date();
+    } else if (status === 'OnTheWay') {
+      updates.eta = eta;
+    } else if (status === 'Delivered') {
+      updates.deliveredBy = userId;
+      updates.deliveredAt = new Date();
+    }
+    
+    await db.update(deliveryRequests).set(updates).where(eq(deliveryRequests.id, id));
   }
 }
 

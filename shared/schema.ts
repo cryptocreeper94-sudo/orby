@@ -384,6 +384,75 @@ export const voucherReports = pgTable("voucher_reports", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Audit Log - tracks all actions for accountability
+export const auditActionEnum = pgEnum('audit_action', [
+  'Login', 'Logout', 'DeliveryRequest', 'DeliveryAcknowledge', 'DeliveryPick', 'DeliveryDispatch', 'DeliveryComplete',
+  'IssueReport', 'IssueAcknowledge', 'IssueResolve', 'IssueEscalate',
+  'MessageSent', 'EmergencyAlert', 'StandStatusChange', 'CountSubmit', 'ClosingSubmit',
+  'UserCreate', 'UserUpdate', 'RoleSwitch', 'PresenceUpdate'
+]);
+
+export const auditLogs = pgTable("audit_logs", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id),
+  action: auditActionEnum("action").notNull(),
+  targetType: text("target_type"), // 'delivery', 'issue', 'message', 'stand', etc.
+  targetId: varchar("target_id", { length: 36 }),
+  details: jsonb("details"), // Additional context
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// OrbitStaffing Integration - sync roster and shift data
+export const orbitSyncStatusEnum = pgEnum('orbit_sync_status', ['Pending', 'Synced', 'Error']);
+
+export const orbitRosters = pgTable("orbit_rosters", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  orbitEventId: text("orbit_event_id").notNull(),
+  eventName: text("event_name").notNull(),
+  eventDate: text("event_date").notNull(),
+  syncStatus: orbitSyncStatusEnum("sync_status").notNull().default('Pending'),
+  lastSyncAt: timestamp("last_sync_at"),
+  staffCount: integer("staff_count").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const orbitShifts = pgTable("orbit_shifts", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  rosterId: varchar("roster_id", { length: 36 }).references(() => orbitRosters.id).notNull(),
+  orbitShiftId: text("orbit_shift_id").notNull(),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  role: text("role").notNull(),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  checkedIn: boolean("checked_in").default(false),
+  checkedInAt: timestamp("checked_in_at"),
+  checkedOut: boolean("checked_out").default(false),
+  checkedOutAt: timestamp("checked_out_at"),
+  gpsVerified: boolean("gps_verified").default(false),
+});
+
+// Emergency Alerts - priority escalation system
+export const emergencyAlerts = pgTable("emergency_alerts", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  reporterId: varchar("reporter_id", { length: 36 }).references(() => users.id).notNull(),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  alertType: text("alert_type").notNull(), // 'medical', 'security', 'fire', 'equipment', 'other'
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  location: text("location"),
+  isActive: boolean("is_active").default(true),
+  acknowledgedBy: varchar("acknowledged_by", { length: 36 }).references(() => users.id),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  resolvedBy: varchar("resolved_by", { length: 36 }).references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  resolutionNotes: text("resolution_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Communication ACL - defines who can contact whom
 export const ROLE_CONTACT_RULES: Record<string, string[]> = {
   NPOWorker: ['StandLead'],                    // Can only contact their Stand Lead
@@ -868,3 +937,20 @@ export const EXAMPLE_WAREHOUSE_CATEGORIES = [
   { name: 'Condiments', color: '#10B981', icon: 'Droplet' },
   { name: 'Supplies', color: '#64748B', icon: 'Wrench' },
 ];
+
+// ============ AUDIT LOG, ORBIT INTEGRATION & EMERGENCY ALERTS ============
+// Insert schemas
+export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({ id: true, createdAt: true });
+export const insertOrbitRosterSchema = createInsertSchema(orbitRosters).omit({ id: true, createdAt: true });
+export const insertOrbitShiftSchema = createInsertSchema(orbitShifts).omit({ id: true });
+export const insertEmergencyAlertSchema = createInsertSchema(emergencyAlerts).omit({ id: true, createdAt: true });
+
+// Types
+export type AuditLog = typeof auditLogs.$inferSelect;
+export type InsertAuditLog = z.infer<typeof insertAuditLogSchema>;
+export type OrbitRoster = typeof orbitRosters.$inferSelect;
+export type InsertOrbitRoster = z.infer<typeof insertOrbitRosterSchema>;
+export type OrbitShift = typeof orbitShifts.$inferSelect;
+export type InsertOrbitShift = z.infer<typeof insertOrbitShiftSchema>;
+export type EmergencyAlert = typeof emergencyAlerts.$inferSelect;
+export type InsertEmergencyAlert = z.infer<typeof insertEmergencyAlertSchema>;

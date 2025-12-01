@@ -5,7 +5,8 @@ import {
   insertUserSchema, insertStandSchema, insertItemSchema, insertMessageSchema,
   insertNpoSchema, insertStaffingGroupSchema, insertSupervisorDocSchema, insertDocSignatureSchema,
   insertInventoryCountSchema, insertQuickMessageSchema, insertConversationSchema, insertConversationMessageSchema,
-  insertIncidentSchema, insertCountSessionSchema, insertStandIssueSchema, insertMenuBoardSchema
+  insertIncidentSchema, insertCountSessionSchema, insertStandIssueSchema, insertMenuBoardSchema,
+  insertAuditLogSchema, insertEmergencyAlertSchema, insertOrbitRosterSchema, insertOrbitShiftSchema
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -13,6 +14,7 @@ import path from "path";
 import fs from "fs";
 import { createWorker } from "tesseract.js";
 import OpenAI from "openai";
+import { initializeWebSocket, getWebSocketServer } from "./websocket";
 
 // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
 const openai = new OpenAI({
@@ -73,6 +75,35 @@ export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+
+  // Initialize WebSocket server for real-time updates
+  const wsServer = initializeWebSocket(httpServer);
+
+  // Helper function to create audit log
+  async function createAuditLog(
+    userId: string | undefined,
+    action: string,
+    targetType?: string,
+    targetId?: string,
+    details?: any,
+    standId?: string,
+    req?: Request
+  ) {
+    try {
+      await storage.createAuditLog({
+        userId: userId || null,
+        action: action as any,
+        targetType,
+        targetId,
+        details,
+        standId,
+        ipAddress: req?.ip,
+        userAgent: req?.get('user-agent')
+      });
+    } catch (error) {
+      console.error('Failed to create audit log:', error);
+    }
+  }
 
   // ============ AUTH ============
   app.post("/api/auth/login", async (req: Request, res: Response) => {
@@ -2021,7 +2052,7 @@ Return your response as a JSON object with this exact structure:
   const insertWarehouseRequestSchema = z.object({
     standId: z.string(),
     requestedById: z.string(),
-    priority: z.enum(['Normal', 'Rush', 'Emergency']).optional(),
+    priority: z.enum(['Normal', 'Emergency']).optional(),
     notes: z.string().optional()
   });
 
@@ -2142,6 +2173,364 @@ Return your response as a JSON object with this exact structure:
     } catch (error) {
       console.error("Error fetching warehouse stats:", error);
       res.status(500).json({ error: "Failed to fetch warehouse stats" });
+    }
+  });
+
+  // ============ DELIVERY REQUESTS (Enhanced with Real-time) ============
+  app.get("/api/deliveries", async (_req: Request, res: Response) => {
+    try {
+      const deliveries = await storage.getAllDeliveryRequests();
+      res.json(deliveries);
+    } catch (error) {
+      console.error("Error fetching deliveries:", error);
+      res.status(500).json({ error: "Failed to fetch deliveries" });
+    }
+  });
+
+  app.get("/api/deliveries/status/:status", async (req: Request, res: Response) => {
+    try {
+      const deliveries = await storage.getDeliveryRequestsByStatus(req.params.status);
+      res.json(deliveries);
+    } catch (error) {
+      console.error("Error fetching deliveries by status:", error);
+      res.status(500).json({ error: "Failed to fetch deliveries" });
+    }
+  });
+
+  app.get("/api/deliveries/department/:department", async (req: Request, res: Response) => {
+    try {
+      const deliveries = await storage.getDeliveryRequestsByDepartment(req.params.department);
+      res.json(deliveries);
+    } catch (error) {
+      console.error("Error fetching deliveries by department:", error);
+      res.status(500).json({ error: "Failed to fetch deliveries" });
+    }
+  });
+
+  app.get("/api/deliveries/:id", async (req: Request, res: Response) => {
+    try {
+      const delivery = await storage.getDeliveryRequest(req.params.id);
+      if (!delivery) {
+        return res.status(404).json({ error: "Delivery not found" });
+      }
+      res.json(delivery);
+    } catch (error) {
+      console.error("Error fetching delivery:", error);
+      res.status(500).json({ error: "Failed to fetch delivery" });
+    }
+  });
+
+  app.post("/api/deliveries", async (req: Request, res: Response) => {
+    try {
+      const delivery = await storage.createDeliveryRequest(req.body);
+      await createAuditLog(req.body.requesterId, 'DeliveryRequest', 'delivery', delivery.id, { department: req.body.department }, req.body.standId, req);
+      wsServer.broadcastDeliveryUpdate(delivery);
+      res.status(201).json(delivery);
+    } catch (error) {
+      console.error("Error creating delivery:", error);
+      res.status(500).json({ error: "Failed to create delivery request" });
+    }
+  });
+
+  app.patch("/api/deliveries/:id/status", async (req: Request, res: Response) => {
+    try {
+      const { status, userId, eta } = req.body;
+      await storage.updateDeliveryRequestStatus(req.params.id, status, userId, eta);
+      const updated = await storage.getDeliveryRequest(req.params.id);
+      
+      const actionMap: Record<string, string> = {
+        'Acknowledged': 'DeliveryAcknowledge',
+        'InProgress': 'DeliveryPick',
+        'OnTheWay': 'DeliveryDispatch',
+        'Delivered': 'DeliveryComplete'
+      };
+      if (actionMap[status]) {
+        await createAuditLog(userId, actionMap[status], 'delivery', req.params.id, { status, eta }, updated?.standId, req);
+      }
+      
+      wsServer.broadcastDeliveryUpdate(updated);
+      res.json({ success: true, delivery: updated });
+    } catch (error) {
+      console.error("Error updating delivery status:", error);
+      res.status(500).json({ error: "Failed to update delivery status" });
+    }
+  });
+
+  // ============ EMERGENCY ALERTS ============
+  app.get("/api/emergency-alerts", async (_req: Request, res: Response) => {
+    try {
+      const alerts = await storage.getAllEmergencyAlerts();
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching emergency alerts:", error);
+      res.status(500).json({ error: "Failed to fetch emergency alerts" });
+    }
+  });
+
+  app.get("/api/emergency-alerts/active", async (_req: Request, res: Response) => {
+    try {
+      const alerts = await storage.getActiveEmergencyAlerts();
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching active alerts:", error);
+      res.status(500).json({ error: "Failed to fetch active alerts" });
+    }
+  });
+
+  app.get("/api/emergency-alerts/:id", async (req: Request, res: Response) => {
+    try {
+      const alert = await storage.getEmergencyAlert(req.params.id);
+      if (!alert) {
+        return res.status(404).json({ error: "Alert not found" });
+      }
+      res.json(alert);
+    } catch (error) {
+      console.error("Error fetching alert:", error);
+      res.status(500).json({ error: "Failed to fetch alert" });
+    }
+  });
+
+  app.post("/api/emergency-alerts", async (req: Request, res: Response) => {
+    try {
+      const validated = insertEmergencyAlertSchema.parse(req.body);
+      const alert = await storage.createEmergencyAlert(validated);
+      await createAuditLog(validated.reporterId, 'EmergencyAlert', 'emergency', alert.id, { type: validated.alertType, title: validated.title }, validated.standId ?? undefined, req);
+      wsServer.broadcastEmergency(alert);
+      res.status(201).json(alert);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      console.error("Error creating emergency alert:", error);
+      res.status(500).json({ error: "Failed to create emergency alert" });
+    }
+  });
+
+  app.patch("/api/emergency-alerts/:id/acknowledge", async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.body;
+      await storage.acknowledgeEmergencyAlert(req.params.id, userId);
+      const updated = await storage.getEmergencyAlert(req.params.id);
+      wsServer.broadcastEmergency(updated);
+      res.json({ success: true, alert: updated });
+    } catch (error) {
+      console.error("Error acknowledging alert:", error);
+      res.status(500).json({ error: "Failed to acknowledge alert" });
+    }
+  });
+
+  app.patch("/api/emergency-alerts/:id/resolve", async (req: Request, res: Response) => {
+    try {
+      const { userId, notes } = req.body;
+      await storage.resolveEmergencyAlert(req.params.id, userId, notes);
+      const updated = await storage.getEmergencyAlert(req.params.id);
+      wsServer.broadcastEmergency(updated);
+      res.json({ success: true, alert: updated });
+    } catch (error) {
+      console.error("Error resolving alert:", error);
+      res.status(500).json({ error: "Failed to resolve alert" });
+    }
+  });
+
+  // ============ AUDIT LOGS ============
+  app.get("/api/audit-logs", async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const logs = await storage.getAuditLogs(limit);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ error: "Failed to fetch audit logs" });
+    }
+  });
+
+  app.get("/api/audit-logs/user/:userId", async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const logs = await storage.getAuditLogsByUser(req.params.userId, limit);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching user audit logs:", error);
+      res.status(500).json({ error: "Failed to fetch user audit logs" });
+    }
+  });
+
+  app.get("/api/audit-logs/action/:action", async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const logs = await storage.getAuditLogsByAction(req.params.action as any, limit);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching action audit logs:", error);
+      res.status(500).json({ error: "Failed to fetch action audit logs" });
+    }
+  });
+
+  // ============ ORBIT STAFFING INTEGRATION ============
+  app.get("/api/orbit/rosters", async (_req: Request, res: Response) => {
+    try {
+      const rosters = await storage.getAllOrbitRosters();
+      res.json(rosters);
+    } catch (error) {
+      console.error("Error fetching orbit rosters:", error);
+      res.status(500).json({ error: "Failed to fetch orbit rosters" });
+    }
+  });
+
+  app.get("/api/orbit/rosters/:id", async (req: Request, res: Response) => {
+    try {
+      const roster = await storage.getOrbitRoster(req.params.id);
+      if (!roster) {
+        return res.status(404).json({ error: "Roster not found" });
+      }
+      res.json(roster);
+    } catch (error) {
+      console.error("Error fetching roster:", error);
+      res.status(500).json({ error: "Failed to fetch roster" });
+    }
+  });
+
+  app.get("/api/orbit/rosters/date/:eventDate", async (req: Request, res: Response) => {
+    try {
+      const roster = await storage.getOrbitRosterByEventDate(decodeURIComponent(req.params.eventDate));
+      if (!roster) {
+        return res.status(404).json({ error: "Roster not found for this date" });
+      }
+      res.json(roster);
+    } catch (error) {
+      console.error("Error fetching roster by date:", error);
+      res.status(500).json({ error: "Failed to fetch roster" });
+    }
+  });
+
+  app.post("/api/orbit/rosters", async (req: Request, res: Response) => {
+    try {
+      const validated = insertOrbitRosterSchema.parse(req.body);
+      const roster = await storage.createOrbitRoster(validated);
+      res.status(201).json(roster);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      console.error("Error creating orbit roster:", error);
+      res.status(500).json({ error: "Failed to create orbit roster" });
+    }
+  });
+
+  app.patch("/api/orbit/rosters/:id/sync-status", async (req: Request, res: Response) => {
+    try {
+      const { status } = req.body;
+      await storage.updateOrbitRosterSyncStatus(req.params.id, status);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating sync status:", error);
+      res.status(500).json({ error: "Failed to update sync status" });
+    }
+  });
+
+  app.get("/api/orbit/rosters/:rosterId/shifts", async (req: Request, res: Response) => {
+    try {
+      const shifts = await storage.getOrbitShiftsByRoster(req.params.rosterId);
+      res.json(shifts);
+    } catch (error) {
+      console.error("Error fetching roster shifts:", error);
+      res.status(500).json({ error: "Failed to fetch roster shifts" });
+    }
+  });
+
+  app.post("/api/orbit/shifts", async (req: Request, res: Response) => {
+    try {
+      const validated = insertOrbitShiftSchema.parse(req.body);
+      const shift = await storage.createOrbitShift(validated);
+      res.status(201).json(shift);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      console.error("Error creating orbit shift:", error);
+      res.status(500).json({ error: "Failed to create orbit shift" });
+    }
+  });
+
+  app.get("/api/orbit/shifts/user/:userId", async (req: Request, res: Response) => {
+    try {
+      const shifts = await storage.getOrbitShiftsByUser(req.params.userId);
+      res.json(shifts);
+    } catch (error) {
+      console.error("Error fetching user shifts:", error);
+      res.status(500).json({ error: "Failed to fetch user shifts" });
+    }
+  });
+
+  app.patch("/api/orbit/shifts/:id/check-in", async (req: Request, res: Response) => {
+    try {
+      const { gpsVerified } = req.body;
+      await storage.checkInOrbitShift(req.params.id, gpsVerified);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error checking in:", error);
+      res.status(500).json({ error: "Failed to check in" });
+    }
+  });
+
+  app.patch("/api/orbit/shifts/:id/check-out", async (req: Request, res: Response) => {
+    try {
+      await storage.checkOutOrbitShift(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error checking out:", error);
+      res.status(500).json({ error: "Failed to check out" });
+    }
+  });
+
+  // ============ REAL-TIME PRESENCE ============
+  app.get("/api/presence/online", async (_req: Request, res: Response) => {
+    try {
+      const onlineUsers = wsServer.getOnlineUsers();
+      res.json(onlineUsers);
+    } catch (error) {
+      console.error("Error fetching online users:", error);
+      res.status(500).json({ error: "Failed to fetch online users" });
+    }
+  });
+
+  // ============ OPS COMMAND CENTER DASHBOARD ============
+  app.get("/api/ops/dashboard", async (_req: Request, res: Response) => {
+    try {
+      const [
+        activeDeliveries,
+        activeEmergencies,
+        openIssues,
+        onlineUsers,
+        recentAuditLogs
+      ] = await Promise.all([
+        storage.getAllDeliveryRequests(),
+        storage.getActiveEmergencyAlerts(),
+        storage.getOpenStandIssues(),
+        Promise.resolve(wsServer.getOnlineUsers()),
+        storage.getAuditLogs(20)
+      ]);
+
+      const pendingDeliveries = activeDeliveries.filter((d: any) => ['Requested', 'Acknowledged', 'InProgress', 'OnTheWay'].includes(d.status));
+      const emergencyDeliveries = activeDeliveries.filter((d: any) => d.priority === 'Emergency');
+
+      res.json({
+        summary: {
+          activeDeliveries: pendingDeliveries.length,
+          emergencyDeliveries: emergencyDeliveries.length,
+          activeEmergencies: activeEmergencies.length,
+          openIssues: openIssues.length,
+          onlineStaff: onlineUsers.length
+        },
+        deliveries: pendingDeliveries.slice(0, 10),
+        emergencies: activeEmergencies,
+        issues: openIssues.slice(0, 10),
+        onlineUsers,
+        recentActivity: recentAuditLogs
+      });
+    } catch (error) {
+      console.error("Error fetching ops dashboard:", error);
+      res.status(500).json({ error: "Failed to fetch ops dashboard" });
     }
   });
 

@@ -19,6 +19,7 @@ import RosterBuilder from "@/pages/RosterBuilder";
 import DevDashboard from "@/pages/DevDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import MenuBoardCreator from "@/pages/MenuBoardCreator";
+import OpsCommandCenter from "@/pages/OpsCommandCenter";
 
 function Router() {
   return (
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/messages" component={MessagesPage} />
       <Route path="/roster-builder" component={RosterBuilder} />
       <Route path="/menu-board-creator" component={MenuBoardCreator} />
+      <Route path="/ops-command" component={OpsCommandCenter} />
       <Route component={NotFound} />
     </Switch>
   );
