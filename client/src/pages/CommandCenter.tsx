@@ -40,29 +40,29 @@ import { useStore } from '@/lib/mockData';
 import type { EmergencyAlert, Stand, User as UserType } from '@shared/schema';
 
 const EMERGENCY_TYPES = [
-  { id: 'Medical', icon: Heart, color: 'bg-red-600', label: 'Medical Emergency', sla: 3 },
-  { id: 'Security', icon: Shield, color: 'bg-orange-600', label: 'Security Threat', sla: 5 },
-  { id: 'Fire', icon: Flame, color: 'bg-red-700', label: 'Fire/Smoke', sla: 2 },
-  { id: 'Equipment', icon: Wrench, color: 'bg-yellow-600', label: 'Equipment Failure', sla: 10 },
-  { id: 'Weather', icon: Cloud, color: 'bg-blue-600', label: 'Weather Alert', sla: 5 },
-  { id: 'Crowd', icon: Users, color: 'bg-purple-600', label: 'Crowd Control', sla: 5 },
-  { id: 'Other', icon: HelpCircle, color: 'bg-slate-600', label: 'Other Emergency', sla: 10 }
+  { id: 'Medical', icon: Heart, color: 'bg-rose-500', label: 'Medical Emergency', sla: 3 },
+  { id: 'Security', icon: Shield, color: 'bg-cyan-600', label: 'Security Threat', sla: 5 },
+  { id: 'Fire', icon: Flame, color: 'bg-rose-600', label: 'Fire/Smoke', sla: 2 },
+  { id: 'Equipment', icon: Wrench, color: 'bg-teal-500', label: 'Equipment Failure', sla: 10 },
+  { id: 'Weather', icon: Cloud, color: 'bg-sky-500', label: 'Weather Alert', sla: 5 },
+  { id: 'Crowd', icon: Users, color: 'bg-violet-500', label: 'Crowd Control', sla: 5 },
+  { id: 'Other', icon: HelpCircle, color: 'bg-slate-500', label: 'Other Emergency', sla: 10 }
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  'Reported': 'bg-red-600 text-white',
-  'Dispatched': 'bg-orange-600 text-white',
-  'OnScene': 'bg-yellow-600 text-black',
-  'Stabilized': 'bg-blue-600 text-white',
-  'Resolved': 'bg-green-600 text-white',
-  'Escalated': 'bg-purple-600 text-white'
+  'Reported': 'bg-rose-500 text-white',
+  'Dispatched': 'bg-cyan-500 text-white',
+  'OnScene': 'bg-teal-400 text-slate-900',
+  'Stabilized': 'bg-sky-500 text-white',
+  'Resolved': 'bg-emerald-500 text-white',
+  'Escalated': 'bg-violet-500 text-white'
 };
 
 const ESCALATION_LEVELS: Record<string, { label: string; color: string }> = {
-  'Level1': { label: 'L1 - Supervisor', color: 'bg-slate-600' },
-  'Level2': { label: 'L2 - Manager', color: 'bg-yellow-600' },
-  'Level3': { label: 'L3 - Executive', color: 'bg-orange-600' },
-  'Level4': { label: 'L4 - External', color: 'bg-red-600' }
+  'Level1': { label: 'L1 - Supervisor', color: 'bg-slate-500' },
+  'Level2': { label: 'L2 - Manager', color: 'bg-cyan-500' },
+  'Level3': { label: 'L3 - Executive', color: 'bg-teal-500' },
+  'Level4': { label: 'L4 - External', color: 'bg-rose-500' }
 };
 
 function SLATimer({ createdAt, slaMinutes }: { createdAt: string | null; slaMinutes: number }) {
@@ -219,7 +219,7 @@ function IncidentCard({
                       <Button 
                         size="sm"
                         variant="outline"
-                        className="border-yellow-600 text-yellow-400"
+                        className="border-teal-500 text-teal-400"
                         onClick={() => onUpdateStatus(alert.id, 'OnScene')}
                         data-testid={`button-onscene-${alert.id}`}
                       >
@@ -249,7 +249,7 @@ function IncidentCard({
                     <Button 
                       size="sm"
                       variant="outline"
-                      className="border-orange-600 text-orange-400"
+                      className="border-violet-500 text-violet-400"
                       onClick={() => setShowEscalateDialog(true)}
                       data-testid={`button-escalate-${alert.id}`}
                     >
@@ -342,7 +342,7 @@ function IncidentCard({
           <DialogFooter>
             <Button variant="ghost" onClick={() => setShowEscalateDialog(false)} data-testid={`button-cancel-escalate-${alert.id}`}>Cancel</Button>
             <Button 
-              className="bg-orange-600 hover:bg-orange-700"
+              className="bg-violet-600 hover:bg-violet-700"
               onClick={handleEscalate}
               disabled={!escalateReason}
               data-testid={`button-confirm-escalate-${alert.id}`}
