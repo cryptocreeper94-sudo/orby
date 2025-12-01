@@ -41,13 +41,17 @@ export default function LoginPage() {
         return;
       }
 
+      const role = currentUser.role as string;
       if (currentUser.name === 'Developer' || currentUser.pin === '0424') setLocation("/dev");
-      else if (currentUser.role === 'Admin') setLocation("/admin");
-      else if (currentUser.role === 'IT') setLocation("/it");
-      else if (currentUser.role === 'NPOWorker') setLocation("/npo");
-      else if (currentUser.role === 'StandLead') setLocation("/standlead");
-      else if (currentUser.role === 'StandSupervisor') setLocation("/supervisor");
-      else if (currentUser.role === 'ManagementCore' || currentUser.role === 'ManagementAssistant') setLocation("/manager");
+      else if (role === 'OperationsManager' || role === 'GeneralManager' || role === 'RegionalVP') setLocation("/command-center");
+      else if (role === 'Admin') setLocation("/admin");
+      else if (role === 'IT') setLocation("/it");
+      else if (role === 'NPOWorker' || role === 'NPO') setLocation("/npo");
+      else if (role === 'StandLead') setLocation("/standlead");
+      else if (role === 'StandSupervisor' || role === 'Supervisor') setLocation("/supervisor");
+      else if (role === 'Warehouse' || role === 'WarehouseManager' || role === 'WarehouseWorker') setLocation("/warehouse");
+      else if (role === 'Kitchen' || role === 'KitchenManager' || role === 'KitchenWorker') setLocation("/kitchen");
+      else if (role === 'ManagementCore' || role === 'ManagementAssistant' || role === 'OperationsAssistant') setLocation("/manager");
       else setLocation("/supervisor");
     }
   }, [currentUser, setLocation, login]);
