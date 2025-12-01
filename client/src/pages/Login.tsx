@@ -63,19 +63,41 @@ export default function LoginPage() {
         <div className="w-full p-6 rounded-3xl glass-card premium-card">
           {/* Header with Orby Mascot */}
           <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-56 h-56 mb-4 relative flex items-center justify-center">
-              <div className="absolute inset-0 bg-cyan-400/30 rounded-full blur-3xl animate-pulse" />
+            <div className="w-64 h-64 mb-4 relative flex items-center justify-center">
+              {/* Starfield background */}
+              <div className="absolute inset-0 overflow-hidden rounded-full">
+                {/* Twinkling stars */}
+                <div className="star absolute w-1 h-1 bg-white rounded-full top-[15%] left-[20%] animate-twinkle" style={{animationDelay: '0s'}} />
+                <div className="star absolute w-0.5 h-0.5 bg-cyan-200 rounded-full top-[25%] left-[75%] animate-twinkle" style={{animationDelay: '0.5s'}} />
+                <div className="star absolute w-1.5 h-1.5 bg-white rounded-full top-[10%] left-[50%] animate-twinkle" style={{animationDelay: '1s'}} />
+                <div className="star absolute w-0.5 h-0.5 bg-cyan-300 rounded-full top-[40%] left-[10%] animate-twinkle" style={{animationDelay: '1.5s'}} />
+                <div className="star absolute w-1 h-1 bg-white rounded-full top-[70%] left-[85%] animate-twinkle" style={{animationDelay: '0.3s'}} />
+                <div className="star absolute w-0.5 h-0.5 bg-white rounded-full top-[80%] left-[25%] animate-twinkle" style={{animationDelay: '0.8s'}} />
+                <div className="star absolute w-1 h-1 bg-cyan-200 rounded-full top-[55%] left-[90%] animate-twinkle" style={{animationDelay: '1.2s'}} />
+                <div className="star absolute w-0.5 h-0.5 bg-white rounded-full top-[85%] left-[60%] animate-twinkle" style={{animationDelay: '0.7s'}} />
+                <div className="star absolute w-1.5 h-1.5 bg-cyan-100 rounded-full top-[20%] left-[5%] animate-twinkle" style={{animationDelay: '1.8s'}} />
+                <div className="star absolute w-0.5 h-0.5 bg-white rounded-full top-[45%] left-[95%] animate-twinkle" style={{animationDelay: '0.2s'}} />
+                <div className="star absolute w-1 h-1 bg-white rounded-full top-[5%] left-[35%] animate-twinkle" style={{animationDelay: '1.4s'}} />
+                <div className="star absolute w-0.5 h-0.5 bg-cyan-200 rounded-full top-[90%] left-[45%] animate-twinkle" style={{animationDelay: '0.6s'}} />
+                <div className="star absolute w-1 h-1 bg-white rounded-full top-[65%] left-[15%] animate-twinkle" style={{animationDelay: '1.1s'}} />
+                <div className="star absolute w-1.5 h-1.5 bg-white rounded-full top-[35%] left-[80%] animate-twinkle" style={{animationDelay: '0.4s'}} />
+                <div className="star absolute w-0.5 h-0.5 bg-cyan-300 rounded-full top-[75%] left-[5%] animate-twinkle" style={{animationDelay: '1.6s'}} />
+              </div>
+              {/* Glowing aura */}
+              <div className="absolute inset-0 bg-cyan-400/25 rounded-full blur-3xl animate-pulse" />
+              <div className="absolute inset-4 bg-cyan-500/15 rounded-full blur-2xl animate-pulse" style={{animationDelay: '0.5s'}} />
+              {/* Orby mascot */}
               <img 
                 src="/orby-mascot.png" 
                 alt="Orby" 
-                className="relative w-52 h-52 object-contain drop-shadow-[0_0_35px_rgba(6,182,212,0.8)]"
+                className="relative w-52 h-52 object-contain drop-shadow-[0_0_35px_rgba(6,182,212,0.8)] z-10"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                   const fallback = e.currentTarget.parentElement?.querySelector('.fallback-icon');
                   if (fallback) fallback.classList.remove('hidden');
                 }}
               />
-              <div className="hidden fallback-icon absolute w-20 h-20 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-400/30">
+              <div className="hidden fallback-icon absolute w-20 h-20 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-400/30 z-10">
                 <span className="text-4xl">🪐</span>
               </div>
             </div>
