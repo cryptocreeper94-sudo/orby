@@ -4,8 +4,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ModeProvider, useMode } from "@/lib/ModeContext";
+import { OnboardingProvider } from "@/lib/OnboardingContext";
 import { SandboxBanner } from "@/components/SandboxBanner";
 import { SandboxWelcome } from "@/components/SandboxWelcome";
+import { OnboardingOverlay, OnboardingHelpButton } from "@/components/OnboardingOverlay";
+import { FeatureSlideshow } from "@/components/FeatureSlideshow";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/Login";
 import SetPinPage from "@/pages/SetPin";
@@ -102,25 +105,30 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ModeProvider>
-        <TooltipProvider>
-          <SandboxBanner />
-          <SandboxWelcome />
-          <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-            <TwinklingStars />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <img 
-                src={orbyCommanderImg} 
-                alt="" 
-                className="w-[65vmin] h-[65vmin] object-contain opacity-[0.06] select-none drop-shadow-[0_0_30px_rgba(6,182,212,0.15)]"
-                aria-hidden="true"
-              />
+        <OnboardingProvider>
+          <TooltipProvider>
+            <SandboxBanner />
+            <SandboxWelcome />
+            <OnboardingOverlay />
+            <FeatureSlideshow />
+            <OnboardingHelpButton />
+            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+              <TwinklingStars />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <img 
+                  src={orbyCommanderImg} 
+                  alt="" 
+                  className="w-[65vmin] h-[65vmin] object-contain opacity-[0.06] select-none drop-shadow-[0_0_30px_rgba(6,182,212,0.15)]"
+                  aria-hidden="true"
+                />
+              </div>
             </div>
-          </div>
-          <SandboxContentWrapper>
-            <Toaster />
-            <Router />
-          </SandboxContentWrapper>
-        </TooltipProvider>
+            <SandboxContentWrapper>
+              <Toaster />
+              <Router />
+            </SandboxContentWrapper>
+          </TooltipProvider>
+        </OnboardingProvider>
       </ModeProvider>
     </QueryClientProvider>
   );
