@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { WeatherWidget, WeatherAlertBanner } from '@/components/WeatherWidget';
+import { LiveSalesWidget } from '@/components/LiveSalesWidget';
 import {
   LogOut, Menu, Bell, MessageSquare, Package, Utensils, Beer, Monitor, Trash2,
   AlertTriangle, CheckCircle2, Clock, MapPin, Users, Radio, TrendingUp, 
@@ -395,6 +396,8 @@ export default function ManagerDashboard() {
           </div>
 
           <div className="space-y-4">
+            <LiveSalesWidget compact className="w-full" />
+            
             <WeatherWidget compact className="w-full" />
 
             <Card className="bg-white/5 border-white/10" data-testid="stand-overview">
@@ -468,6 +471,8 @@ export default function ManagerDashboard() {
           </div>
         </div>
 
+        <LiveSalesWidget className="w-full" />
+        
         <WeatherWidget className="w-full" />
       </main>
     </div>
