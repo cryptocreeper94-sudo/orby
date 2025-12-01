@@ -1,9 +1,9 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   AlertTriangle, 
-  ChevronLeft,
   Clock,
   MapPin,
   User,
@@ -11,17 +11,17 @@ import {
   X,
   Upload,
   CheckCircle2,
-  XCircle,
   Shield,
   Wine,
   Image as ImageIcon,
   FileText,
   AlertCircle,
   Eye,
-  Plus
+  LogOut,
+  Plus,
+  Filter
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,19 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useStore } from '@/lib/mockData';
+import { 
+  AnimatedBackground, 
+  GlassCard, 
+  GlassCardHeader, 
+  GlassCardContent,
+  StatCard,
+  GlowButton,
+  StatusBadge,
+  SectionHeader,
+  EmptyState,
+  PageHeader,
+  AnimatedList
+} from '@/components/ui/premium';
 import type { Stand } from '@shared/schema';
 
 interface AlcoholViolation {
@@ -59,30 +72,22 @@ interface AlcoholViolation {
 }
 
 const VIOLATION_TYPES = [
-  { id: 'UnderageSale', label: 'Underage Sale', icon: AlertCircle, color: 'bg-rose-500' },
-  { id: 'OverService', label: 'Over-Service', icon: Wine, color: 'bg-amber-500' },
-  { id: 'NoIDCheck', label: 'No ID Check', icon: Eye, color: 'bg-cyan-500' },
-  { id: 'ExpiredLicense', label: 'Expired License', icon: FileText, color: 'bg-violet-500' },
-  { id: 'OpenContainer', label: 'Open Container', icon: Wine, color: 'bg-teal-500' },
-  { id: 'UnauthorizedSale', label: 'Unauthorized Sale', icon: Shield, color: 'bg-rose-600' },
-  { id: 'PricingViolation', label: 'Pricing Violation', icon: AlertTriangle, color: 'bg-amber-600' },
-  { id: 'Other', label: 'Other', icon: AlertCircle, color: 'bg-slate-500' }
+  { id: 'UnderageSale', label: 'Underage Sale', icon: AlertCircle, color: 'from-rose-500 to-rose-600' },
+  { id: 'OverService', label: 'Over-Service', icon: Wine, color: 'from-amber-500 to-amber-600' },
+  { id: 'NoIDCheck', label: 'No ID Check', icon: Eye, color: 'from-cyan-500 to-cyan-600' },
+  { id: 'ExpiredLicense', label: 'Expired License', icon: FileText, color: 'from-violet-500 to-violet-600' },
+  { id: 'OpenContainer', label: 'Open Container', icon: Wine, color: 'from-teal-500 to-teal-600' },
+  { id: 'UnauthorizedSale', label: 'Unauthorized Sale', icon: Shield, color: 'from-rose-600 to-rose-700' },
+  { id: 'PricingViolation', label: 'Pricing Violation', icon: AlertTriangle, color: 'from-amber-600 to-amber-700' },
+  { id: 'Other', label: 'Other', icon: AlertCircle, color: 'from-slate-500 to-slate-600' }
 ];
 
 const SEVERITY_OPTIONS = [
-  { value: 'Warning', label: 'Warning', color: 'bg-slate-500' },
-  { value: 'Minor', label: 'Minor', color: 'bg-amber-500' },
-  { value: 'Major', label: 'Major', color: 'bg-rose-500' },
-  { value: 'Critical', label: 'Critical', color: 'bg-rose-700 animate-pulse' }
+  { value: 'Warning', label: 'Warning', color: 'slate' },
+  { value: 'Minor', label: 'Minor', color: 'amber' },
+  { value: 'Major', label: 'Major', color: 'red' },
+  { value: 'Critical', label: 'Critical', color: 'red' }
 ];
-
-const STATUS_COLORS: Record<string, string> = {
-  'Reported': 'bg-amber-500 text-white',
-  'UnderReview': 'bg-cyan-500 text-white',
-  'Confirmed': 'bg-rose-500 text-white',
-  'Dismissed': 'bg-slate-500 text-white',
-  'Resolved': 'bg-emerald-500 text-white'
-};
 
 function ViolationCard({ 
   violation, 
@@ -107,56 +112,69 @@ function ViolationCard({
     if (hours < 24) return `${hours}h ago`;
     return `${Math.floor(hours / 24)}d ago`;
   };
+
+  const isResolved = violation.status === 'Resolved' || violation.status === 'Dismissed';
   
   return (
-    <Card 
-      className="bg-slate-800/50 border-slate-700 cursor-pointer hover:bg-slate-800/70 transition-colors"
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.01, x: 4 }}
       onClick={() => onView(violation)}
+      className={`relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-300 ${
+        isResolved 
+          ? 'border-slate-700/50 bg-slate-800/30' 
+          : 'border-white/10 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-lg hover:shadow-xl'
+      }`}
       data-testid={`violation-card-${violation.id}`}
     >
-      <CardContent className="p-3">
-        <div className="flex items-start gap-3">
-          <div className={`p-2 rounded-lg ${typeConfig.color}`}>
+      <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${typeConfig.color}`} />
+      
+      <div className="p-4 md:p-5">
+        <div className="flex items-start gap-4">
+          <motion.div 
+            className={`p-3 rounded-xl bg-gradient-to-br ${typeConfig.color} shadow-lg`}
+            whileHover={{ rotate: [0, -5, 5, 0] }}
+          >
             <TypeIcon className="w-5 h-5 text-white" />
-          </div>
+          </motion.div>
+          
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between gap-2 mb-1">
-              <h4 className="font-semibold text-white truncate">{typeConfig.label}</h4>
-              <Badge className={STATUS_COLORS[violation.status || 'Reported']}>
-                {violation.status}
-              </Badge>
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <h4 className="font-bold text-white">{typeConfig.label}</h4>
+              <StatusBadge status={violation.status || 'Reported'} pulse={!isResolved} />
             </div>
             
-            <div className="flex items-center gap-3 text-xs text-slate-400 mb-2">
+            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400 mb-3">
               {stand && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
+                <span className="flex items-center gap-1.5 bg-slate-800/50 px-2 py-1 rounded-lg">
+                  <MapPin className="w-3.5 h-3.5 text-cyan-400" />
                   {stand.name}
                 </span>
               )}
               {violation.section && (
-                <span>{violation.section}</span>
+                <span className="text-slate-500">{violation.section}</span>
               )}
-              <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5" />
                 {timeAgo(violation.createdAt)}
               </span>
             </div>
             
-            <p className="text-sm text-slate-300 line-clamp-2 mb-2">{violation.description}</p>
+            <p className="text-sm text-slate-300 line-clamp-2 mb-3">{violation.description}</p>
             
-            <div className="flex items-center gap-2">
-              <Badge className={severityConfig?.color || 'bg-slate-500'}>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className={`bg-${severityConfig?.color || 'slate'}-500/20 text-${severityConfig?.color || 'slate'}-400 border-${severityConfig?.color || 'slate'}-500/30`}>
                 {violation.severity}
               </Badge>
               {violation.vendorName && (
-                <span className="text-xs text-slate-400">
-                  <User className="w-3 h-3 inline mr-1" />
+                <span className="text-xs text-slate-400 flex items-center gap-1">
+                  <User className="w-3 h-3" />
                   {violation.vendorName}
                 </span>
               )}
               {violation.mediaUrls && violation.mediaUrls.length > 0 && (
-                <span className="text-xs text-cyan-400 flex items-center gap-1">
+                <span className="text-xs text-cyan-400 flex items-center gap-1 bg-cyan-500/10 px-2 py-0.5 rounded-full">
                   <ImageIcon className="w-3 h-3" />
                   {violation.mediaUrls.length} photo(s)
                 </span>
@@ -164,16 +182,16 @@ function ViolationCard({
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </motion.div>
   );
 }
 
 export default function AlcoholComplianceDashboard() {
-  const [, setLocation] = useLocation();
+  const [, navigate] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { currentUser } = useStore();
+  const { currentUser, logout } = useStore();
   
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [showViewDialog, setShowViewDialog] = useState(false);
@@ -289,6 +307,11 @@ export default function AlcoholComplianceDashboard() {
     setSelectedViolation(violation);
     setShowViewDialog(true);
   };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
   
   const myViolations = violations.filter(v => v.reporterId === currentUser?.id);
   const pendingViolations = violations.filter(v => v.status === 'Reported' || v.status === 'UnderReview');
@@ -304,112 +327,176 @@ export default function AlcoholComplianceDashboard() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-cyan-900 relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-        <div className="absolute top-40 right-20 w-1 h-1 bg-white rounded-full animate-twinkle"></div>
-        <div className="absolute bottom-40 left-1/4 w-1.5 h-1.5 bg-teal-300 rounded-full animate-pulse delay-300"></div>
-        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-cyan-300 rounded-full animate-twinkle delay-700"></div>
-        
-        <div className="absolute bottom-10 right-10 opacity-10">
-          <Wine className="w-64 h-64 text-cyan-400" />
-        </div>
-      </div>
-      
-      <div className="relative z-10 p-4 pb-24">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="ghost" 
-              size="icon"
-              className="text-white hover:bg-white/10"
-              onClick={() => setLocation('/')}
-              data-testid="button-back"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-white flex items-center gap-2">
-                <Wine className="w-7 h-7 text-cyan-400" />
-                Alcohol Compliance
-              </h1>
-              <p className="text-sm text-slate-400">Vendor monitoring & violation reporting</p>
+    <AnimatedBackground>
+      <PageHeader 
+        title="Alcohol Compliance"
+        subtitle="Vendor monitoring & violation reporting"
+        icon={<Wine className="w-5 h-5" />}
+        backAction={() => navigate('/')}
+        actions={
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleLogout}
+            className="text-slate-400 hover:text-white"
+          >
+            <LogOut className="w-5 h-5" />
+          </Button>
+        }
+      />
+
+      <main className="p-4 md:p-6 lg:p-8 space-y-6 pb-32 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="lg:col-span-3 space-y-6">
+            <div className="grid grid-cols-3 gap-4">
+              <StatCard 
+                icon={<FileText className="w-5 h-5" />}
+                label="Total Reports"
+                value={violations.length}
+                color="cyan"
+              />
+              <StatCard 
+                icon={<Clock className="w-5 h-5" />}
+                label="Pending"
+                value={pendingViolations.length}
+                color={pendingViolations.length > 0 ? "amber" : "green"}
+              />
+              <StatCard 
+                icon={<CheckCircle2 className="w-5 h-5" />}
+                label="Resolved"
+                value={resolvedViolations.length}
+                color="green"
+              />
             </div>
+
+            <GlassCard gradient>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="w-full bg-slate-800/50 rounded-t-2xl rounded-b-none border-b border-white/5 p-1 grid grid-cols-4">
+                  <TabsTrigger 
+                    value="all" 
+                    className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl text-xs md:text-sm"
+                    data-testid="tab-all"
+                  >
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="my" 
+                    className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl text-xs md:text-sm"
+                    data-testid="tab-my"
+                  >
+                    My Reports
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="pending" 
+                    className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 rounded-xl text-xs md:text-sm"
+                    data-testid="tab-pending"
+                  >
+                    Pending
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="resolved" 
+                    className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 rounded-xl text-xs md:text-sm"
+                    data-testid="tab-resolved"
+                  >
+                    Resolved
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value={activeTab} className="p-4 md:p-5 m-0">
+                  <ScrollArea className="h-[calc(100vh-450px)] md:h-[calc(100vh-400px)]">
+                    <AnimatePresence mode="popLayout">
+                      {loadingViolations ? (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="text-center py-12"
+                        >
+                          <Wine className="w-10 h-10 mx-auto mb-3 text-cyan-400 animate-pulse" />
+                          <p className="text-slate-400">Loading violations...</p>
+                        </motion.div>
+                      ) : getFilteredViolations().length === 0 ? (
+                        <EmptyState 
+                          icon={<Wine className="w-12 h-12" />}
+                          title="No Violations"
+                          description="Use the report button to log a new violation"
+                        />
+                      ) : (
+                        <div className="space-y-4">
+                          {getFilteredViolations().map(violation => (
+                            <ViolationCard 
+                              key={violation.id}
+                              violation={violation}
+                              stands={stands}
+                              onView={handleViewViolation}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </AnimatePresence>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+            </GlassCard>
           </div>
-          
+
+          <div className="space-y-6 hidden lg:block">
+            <SectionHeader 
+              title="Quick Actions" 
+              icon={<Plus className="w-5 h-5" />}
+            />
+            
+            <GlowButton 
+              variant="red"
+              size="lg"
+              onClick={() => setShowReportDialog(true)}
+              className="w-full"
+            >
+              <AlertTriangle className="w-5 h-5" />
+              Report Violation
+            </GlowButton>
+
+            <GlassCard gradient>
+              <GlassCardHeader>
+                <h3 className="text-sm font-semibold text-slate-300">Violation Types</h3>
+              </GlassCardHeader>
+              <GlassCardContent className="space-y-3">
+                {VIOLATION_TYPES.slice(0, 5).map(type => (
+                  <div key={type.id} className="flex items-center gap-3 text-sm">
+                    <div className={`p-1.5 rounded-lg bg-gradient-to-br ${type.color}`}>
+                      <type.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-slate-300">{type.label}</span>
+                  </div>
+                ))}
+              </GlassCardContent>
+            </GlassCard>
+          </div>
         </div>
         
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <Card className="bg-slate-800/50 border-slate-700">
-            <CardContent className="p-3 text-center">
-              <div className="text-2xl font-bold text-white">{violations.length}</div>
-              <div className="text-xs text-slate-400">Total Reports</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-amber-500/20 border-amber-500/30">
-            <CardContent className="p-3 text-center">
-              <div className="text-2xl font-bold text-amber-400">{pendingViolations.length}</div>
-              <div className="text-xs text-amber-300">Pending</div>
-            </CardContent>
-          </Card>
-          <Card className="bg-emerald-500/20 border-emerald-500/30">
-            <CardContent className="p-3 text-center">
-              <div className="text-2xl font-bold text-emerald-400">{resolvedViolations.length}</div>
-              <div className="text-xs text-emerald-300">Resolved</div>
-            </CardContent>
-          </Card>
-        </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-          <TabsList className="grid w-full grid-cols-4 bg-slate-800/50">
-            <TabsTrigger value="all" data-testid="tab-all">All</TabsTrigger>
-            <TabsTrigger value="my" data-testid="tab-my">My Reports</TabsTrigger>
-            <TabsTrigger value="pending" data-testid="tab-pending">Pending</TabsTrigger>
-            <TabsTrigger value="resolved" data-testid="tab-resolved">Resolved</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        
-        <ScrollArea className="h-[calc(100vh-380px)]">
-          <div className="space-y-3">
-            {loadingViolations ? (
-              <div className="text-center py-10 text-slate-400">Loading violations...</div>
-            ) : getFilteredViolations().length === 0 ? (
-              <div className="text-center py-10">
-                <Wine className="w-16 h-16 mx-auto text-slate-600 mb-4" />
-                <p className="text-slate-400">No violations to display</p>
-                <p className="text-sm text-slate-500 mt-1">Use the report button to log a new violation</p>
-              </div>
-            ) : (
-              getFilteredViolations().map(violation => (
-                <ViolationCard 
-                  key={violation.id}
-                  violation={violation}
-                  stands={stands}
-                  onView={handleViewViolation}
-                />
-              ))
-            )}
-          </div>
-        </ScrollArea>
-        
-        <div className="fixed bottom-6 left-0 right-0 flex justify-center z-20">
-          <Button
+        <motion.div 
+          className="fixed bottom-6 left-0 right-0 flex justify-center z-20 lg:hidden"
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+        >
+          <GlowButton
             size="lg"
-            className="bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white shadow-lg shadow-rose-500/30 gap-2 px-8"
+            variant="red"
             onClick={() => setShowReportDialog(true)}
-            data-testid="button-report-violation"
+            className="shadow-2xl"
           >
             <AlertTriangle className="w-5 h-5" />
             Report Violation
-          </Button>
-        </div>
-      </div>
+          </GlowButton>
+        </motion.div>
+      </main>
       
       <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 text-rose-400" />
+              <div className="p-2 rounded-lg bg-gradient-to-br from-rose-500 to-amber-500">
+                <AlertTriangle className="w-5 h-5 text-white" />
+              </div>
               Report Violation
             </DialogTitle>
           </DialogHeader>
@@ -418,7 +505,7 @@ export default function AlcoholComplianceDashboard() {
             <div>
               <Label className="text-slate-300">Violation Type *</Label>
               <Select value={violationType} onValueChange={setViolationType}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white" data-testid="select-violation-type">
+                <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid="select-violation-type">
                   <SelectValue placeholder="Select type..." />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
@@ -437,7 +524,7 @@ export default function AlcoholComplianceDashboard() {
             <div>
               <Label className="text-slate-300">Severity</Label>
               <Select value={severity} onValueChange={setSeverity}>
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white" data-testid="select-severity">
+                <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid="select-severity">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-700">
@@ -454,7 +541,7 @@ export default function AlcoholComplianceDashboard() {
               <Label className="text-slate-300">Description *</Label>
               <Textarea 
                 placeholder="Describe what you observed..."
-                className="bg-slate-800 border-slate-700 text-white min-h-[100px]"
+                className="bg-slate-800/50 border-white/10 text-white min-h-[100px] mt-1.5"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 data-testid="input-description"
@@ -465,7 +552,7 @@ export default function AlcoholComplianceDashboard() {
               <div>
                 <Label className="text-slate-300">Location/Stand</Label>
                 <Select value={standId} onValueChange={setStandId}>
-                  <SelectTrigger className="bg-slate-800 border-slate-700 text-white" data-testid="select-stand">
+                  <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid="select-stand">
                     <SelectValue placeholder="Select stand..." />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-700 max-h-48">
@@ -481,7 +568,7 @@ export default function AlcoholComplianceDashboard() {
                 <Label className="text-slate-300">Section</Label>
                 <Input 
                   placeholder="e.g. Section 127"
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-white/10 text-white mt-1.5"
                   value={section}
                   onChange={(e) => setSection(e.target.value)}
                   data-testid="input-section"
@@ -494,7 +581,7 @@ export default function AlcoholComplianceDashboard() {
                 <Label className="text-slate-300">Vendor Name</Label>
                 <Input 
                   placeholder="Name if known"
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-white/10 text-white mt-1.5"
                   value={vendorName}
                   onChange={(e) => setVendorName(e.target.value)}
                   data-testid="input-vendor-name"
@@ -504,7 +591,7 @@ export default function AlcoholComplianceDashboard() {
                 <Label className="text-slate-300">Badge #</Label>
                 <Input 
                   placeholder="Badge number"
-                  className="bg-slate-800 border-slate-700 text-white"
+                  className="bg-slate-800/50 border-white/10 text-white mt-1.5"
                   value={vendorBadge}
                   onChange={(e) => setVendorBadge(e.target.value)}
                   data-testid="input-vendor-badge"
@@ -518,7 +605,7 @@ export default function AlcoholComplianceDashboard() {
                 <Button 
                   type="button"
                   variant="outline"
-                  className="flex-1 bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+                  className="flex-1 bg-slate-800/50 border-white/10 text-white hover:bg-slate-700/50"
                   onClick={() => cameraInputRef.current?.click()}
                   data-testid="button-take-photo"
                 >
@@ -528,7 +615,7 @@ export default function AlcoholComplianceDashboard() {
                 <Button 
                   type="button"
                   variant="outline"
-                  className="flex-1 bg-slate-800 border-slate-700 text-white hover:bg-slate-700"
+                  className="flex-1 bg-slate-800/50 border-white/10 text-white hover:bg-slate-700/50"
                   onClick={() => fileInputRef.current?.click()}
                   data-testid="button-upload"
                 >
@@ -557,22 +644,27 @@ export default function AlcoholComplianceDashboard() {
               {capturedImages.length > 0 && (
                 <div className="grid grid-cols-3 gap-2">
                   {capturedImages.map((img, idx) => (
-                    <div key={idx} className="relative aspect-square">
+                    <motion.div 
+                      key={idx} 
+                      className="relative aspect-square"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                    >
                       <img 
                         src={img} 
                         alt={`Evidence ${idx + 1}`}
-                        className="w-full h-full object-cover rounded-lg"
+                        className="w-full h-full object-cover rounded-xl border border-white/10"
                       />
                       <Button
                         size="icon"
                         variant="destructive"
-                        className="absolute top-1 right-1 w-6 h-6"
+                        className="absolute top-1 right-1 w-6 h-6 rounded-full"
                         onClick={() => removeImage(idx)}
                         data-testid={`button-remove-image-${idx}`}
                       >
                         <X className="w-3 h-3" />
                       </Button>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
@@ -581,132 +673,143 @@ export default function AlcoholComplianceDashboard() {
           
           <DialogFooter className="gap-2">
             <Button 
-              variant="outline" 
+              variant="ghost" 
               onClick={() => setShowReportDialog(false)}
-              className="border-slate-700 text-slate-300"
+              className="text-slate-400"
               data-testid="button-cancel-report"
             >
               Cancel
             </Button>
-            <Button 
+            <GlowButton 
+              variant="red"
               onClick={handleSubmitViolation}
-              className="bg-rose-500 hover:bg-rose-600"
               disabled={createViolation.isPending}
-              data-testid="button-submit-violation"
             >
-              {createViolation.isPending ? 'Submitting...' : 'Submit Report'}
-            </Button>
+              <Plus className="w-4 h-4" />
+              Submit Report
+            </GlowButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <FileText className="w-5 h-5 text-cyan-400" />
-              Violation Details
-            </DialogTitle>
-          </DialogHeader>
-          
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md max-h-[90vh] overflow-y-auto">
           {selectedViolation && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Badge className={STATUS_COLORS[selectedViolation.status || 'Reported']}>
-                  {selectedViolation.status}
-                </Badge>
-                <Badge className={SEVERITY_OPTIONS.find(s => s.value === selectedViolation.severity)?.color || 'bg-slate-500'}>
-                  {selectedViolation.severity}
-                </Badge>
-              </div>
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-white flex items-center gap-2">
+                  {(() => {
+                    const typeConfig = VIOLATION_TYPES.find(t => t.id === selectedViolation.violationType) || VIOLATION_TYPES[7];
+                    const TypeIcon = typeConfig.icon;
+                    return (
+                      <>
+                        <div className={`p-2 rounded-lg bg-gradient-to-br ${typeConfig.color}`}>
+                          <TypeIcon className="w-5 h-5 text-white" />
+                        </div>
+                        {typeConfig.label}
+                      </>
+                    );
+                  })()}
+                </DialogTitle>
+              </DialogHeader>
               
-              <div>
-                <Label className="text-slate-400 text-xs">Violation Type</Label>
-                <p className="text-white font-medium">
-                  {VIOLATION_TYPES.find(t => t.id === selectedViolation.violationType)?.label}
-                </p>
-              </div>
-              
-              <div>
-                <Label className="text-slate-400 text-xs">Description</Label>
-                <p className="text-slate-300">{selectedViolation.description}</p>
-              </div>
-              
-              {selectedViolation.vendorName && (
-                <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <StatusBadge status={selectedViolation.status || 'Reported'} />
+                  <Badge className={`bg-${SEVERITY_OPTIONS.find(s => s.value === selectedViolation.severity)?.color || 'slate'}-500/20`}>
+                    {selectedViolation.severity}
+                  </Badge>
+                </div>
+                
+                <div>
+                  <Label className="text-slate-400 text-xs">Description</Label>
+                  <p className="text-slate-200 mt-1">{selectedViolation.description}</p>
+                </div>
+                
+                {(selectedViolation.standId || selectedViolation.section) && (
+                  <div className="flex gap-4">
+                    {selectedViolation.standId && (
+                      <div>
+                        <Label className="text-slate-400 text-xs">Location</Label>
+                        <p className="text-slate-200 flex items-center gap-1 mt-1">
+                          <MapPin className="w-4 h-4 text-cyan-400" />
+                          {stands.find(s => s.id === selectedViolation.standId)?.name}
+                        </p>
+                      </div>
+                    )}
+                    {selectedViolation.section && (
+                      <div>
+                        <Label className="text-slate-400 text-xs">Section</Label>
+                        <p className="text-slate-200 mt-1">{selectedViolation.section}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {(selectedViolation.vendorName || selectedViolation.vendorBadgeNumber) && (
+                  <div className="flex gap-4">
+                    {selectedViolation.vendorName && (
+                      <div>
+                        <Label className="text-slate-400 text-xs">Vendor Name</Label>
+                        <p className="text-slate-200 mt-1">{selectedViolation.vendorName}</p>
+                      </div>
+                    )}
+                    {selectedViolation.vendorBadgeNumber && (
+                      <div>
+                        <Label className="text-slate-400 text-xs">Badge #</Label>
+                        <p className="text-slate-200 mt-1">{selectedViolation.vendorBadgeNumber}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {selectedViolation.mediaUrls && selectedViolation.mediaUrls.length > 0 && (
                   <div>
-                    <Label className="text-slate-400 text-xs">Vendor Name</Label>
-                    <p className="text-white">{selectedViolation.vendorName}</p>
-                  </div>
-                  {selectedViolation.vendorBadgeNumber && (
-                    <div>
-                      <Label className="text-slate-400 text-xs">Badge #</Label>
-                      <p className="text-white">{selectedViolation.vendorBadgeNumber}</p>
+                    <Label className="text-slate-400 text-xs">Evidence</Label>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                      {selectedViolation.mediaUrls.map((url, idx) => (
+                        <img 
+                          key={idx}
+                          src={url} 
+                          alt={`Evidence ${idx + 1}`}
+                          className="w-full aspect-square object-cover rounded-xl border border-white/10"
+                        />
+                      ))}
                     </div>
-                  )}
-                </div>
-              )}
-              
-              {selectedViolation.section && (
-                <div>
-                  <Label className="text-slate-400 text-xs">Location</Label>
-                  <p className="text-white">{selectedViolation.section}</p>
-                </div>
-              )}
-              
-              {selectedViolation.mediaUrls && selectedViolation.mediaUrls.length > 0 && (
-                <div>
-                  <Label className="text-slate-400 text-xs mb-2 block">Evidence</Label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {selectedViolation.mediaUrls.map((url, idx) => (
-                      <img 
-                        key={idx}
-                        src={url} 
-                        alt={`Evidence ${idx + 1}`}
-                        className="w-full aspect-square object-cover rounded-lg"
-                      />
-                    ))}
                   </div>
-                </div>
-              )}
-              
-              {selectedViolation.reviewNotes && (
-                <div>
-                  <Label className="text-slate-400 text-xs">Review Notes</Label>
-                  <p className="text-slate-300">{selectedViolation.reviewNotes}</p>
-                </div>
-              )}
-              
-              {selectedViolation.resolutionNotes && (
-                <div>
-                  <Label className="text-slate-400 text-xs">Resolution</Label>
-                  <p className="text-slate-300">{selectedViolation.resolutionNotes}</p>
-                  {selectedViolation.actionTaken && (
-                    <Badge className="mt-2 bg-emerald-500/20 text-emerald-300">
-                      Action: {selectedViolation.actionTaken}
-                    </Badge>
-                  )}
-                </div>
-              )}
-              
-              <div className="text-xs text-slate-500 pt-2 border-t border-slate-700">
-                Reported: {selectedViolation.createdAt ? new Date(selectedViolation.createdAt).toLocaleString() : 'Unknown'}
+                )}
+                
+                {selectedViolation.reviewNotes && (
+                  <div className="p-3 bg-slate-800/50 rounded-xl border border-white/10">
+                    <Label className="text-slate-400 text-xs">Review Notes</Label>
+                    <p className="text-slate-200 mt-1">{selectedViolation.reviewNotes}</p>
+                  </div>
+                )}
+                
+                {selectedViolation.resolutionNotes && (
+                  <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                    <Label className="text-emerald-400 text-xs">Resolution</Label>
+                    <p className="text-slate-200 mt-1">{selectedViolation.resolutionNotes}</p>
+                    {selectedViolation.actionTaken && (
+                      <p className="text-xs text-slate-400 mt-2">Action: {selectedViolation.actionTaken}</p>
+                    )}
+                  </div>
+                )}
               </div>
-            </div>
+              
+              <DialogFooter>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setShowViewDialog(false)}
+                  className="text-slate-400"
+                >
+                  Close
+                </Button>
+              </DialogFooter>
+            </>
           )}
-          
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setShowViewDialog(false)}
-              className="border-slate-700 text-slate-300"
-              data-testid="button-close-details"
-            >
-              Close
-            </Button>
-          </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </AnimatedBackground>
   );
 }

@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useLocation } from 'wouter';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   AlertTriangle, 
   Heart, 
@@ -10,22 +11,22 @@ import {
   Cloud, 
   Users, 
   HelpCircle,
-  ChevronLeft,
   Clock,
   MapPin,
   User,
-  Phone,
   CheckCircle2,
-  XCircle,
   ArrowUp,
   Bell,
   Siren,
   Timer,
   Activity,
-  Send
+  Send,
+  LogOut,
+  ChevronRight,
+  Radio,
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -33,30 +34,32 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { useStore } from '@/lib/mockData';
+import { 
+  AnimatedBackground, 
+  GlassCard, 
+  GlassCardHeader, 
+  GlassCardContent,
+  StatCard,
+  GlowButton,
+  StatusBadge,
+  SectionHeader,
+  EmptyState,
+  PageHeader
+} from '@/components/ui/premium';
 import type { EmergencyAlert, Stand, User as UserType } from '@shared/schema';
 
 const EMERGENCY_TYPES = [
-  { id: 'Medical', icon: Heart, color: 'bg-rose-500', label: 'Medical Emergency', sla: 3 },
-  { id: 'Security', icon: Shield, color: 'bg-cyan-600', label: 'Security Threat', sla: 5 },
-  { id: 'Fire', icon: Flame, color: 'bg-rose-600', label: 'Fire/Smoke', sla: 2 },
-  { id: 'Equipment', icon: Wrench, color: 'bg-teal-500', label: 'Equipment Failure', sla: 10 },
-  { id: 'Weather', icon: Cloud, color: 'bg-sky-500', label: 'Weather Alert', sla: 5 },
-  { id: 'Crowd', icon: Users, color: 'bg-violet-500', label: 'Crowd Control', sla: 5 },
-  { id: 'Other', icon: HelpCircle, color: 'bg-slate-500', label: 'Other Emergency', sla: 10 }
+  { id: 'Medical', icon: Heart, color: 'from-rose-500 to-rose-600', bgColor: 'bg-rose-500', label: 'Medical Emergency', sla: 3 },
+  { id: 'Security', icon: Shield, color: 'from-cyan-500 to-cyan-600', bgColor: 'bg-cyan-500', label: 'Security Threat', sla: 5 },
+  { id: 'Fire', icon: Flame, color: 'from-orange-500 to-orange-600', bgColor: 'bg-orange-500', label: 'Fire/Smoke', sla: 2 },
+  { id: 'Equipment', icon: Wrench, color: 'from-teal-500 to-teal-600', bgColor: 'bg-teal-500', label: 'Equipment Failure', sla: 10 },
+  { id: 'Weather', icon: Cloud, color: 'from-sky-500 to-sky-600', bgColor: 'bg-sky-500', label: 'Weather Alert', sla: 5 },
+  { id: 'Crowd', icon: Users, color: 'from-violet-500 to-violet-600', bgColor: 'bg-violet-500', label: 'Crowd Control', sla: 5 },
+  { id: 'Other', icon: HelpCircle, color: 'from-slate-500 to-slate-600', bgColor: 'bg-slate-500', label: 'Other Emergency', sla: 10 }
 ];
-
-const STATUS_COLORS: Record<string, string> = {
-  'Reported': 'bg-rose-500 text-white',
-  'Dispatched': 'bg-cyan-500 text-white',
-  'OnScene': 'bg-teal-400 text-slate-900',
-  'Stabilized': 'bg-sky-500 text-white',
-  'Resolved': 'bg-emerald-500 text-white',
-  'Escalated': 'bg-violet-500 text-white'
-};
 
 const ESCALATION_LEVELS: Record<string, { label: string; color: string }> = {
   'Level1': { label: 'L1 - Supervisor', color: 'bg-slate-500' },
@@ -94,14 +97,22 @@ function SLATimer({ createdAt, slaMinutes }: { createdAt: string | null; slaMinu
   };
   
   return (
-    <div className={`flex items-center gap-1 text-sm font-mono ${isOverdue ? 'text-red-400 animate-pulse' : 'text-emerald-400'}`}>
-      <Timer className="w-3 h-3" />
+    <motion.div 
+      className={`flex items-center gap-1.5 text-sm font-mono px-2 py-1 rounded-lg ${
+        isOverdue 
+          ? 'bg-red-500/20 text-red-400' 
+          : 'bg-emerald-500/20 text-emerald-400'
+      }`}
+      animate={isOverdue ? { scale: [1, 1.02, 1] } : {}}
+      transition={{ repeat: Infinity, duration: 1 }}
+    >
+      <Timer className="w-3.5 h-3.5" />
       {isOverdue ? (
-        <span>-{formatTime(remaining)}</span>
+        <span className="font-bold">-{formatTime(remaining)}</span>
       ) : (
         <span>{formatTime(remaining)}</span>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -148,146 +159,171 @@ function IncidentCard({
     setEscalateReason('');
   };
   
+  const isResolved = alert.status === 'Resolved';
+  
   return (
     <>
-      <Card className="bg-slate-800/50 border-slate-700">
-        <CardContent className="p-3">
-          <div className="flex items-start gap-3">
-            <div className={`p-2 rounded-lg ${typeConfig.color}`}>
-              <TypeIcon className="w-5 h-5 text-white" />
-            </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        whileHover={{ scale: 1.01 }}
+        className={`relative rounded-2xl border overflow-hidden transition-all duration-300 ${
+          isResolved 
+            ? 'border-slate-700/50 bg-slate-800/30' 
+            : 'border-white/10 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-lg'
+        }`}
+      >
+        <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${typeConfig.color}`} />
+        
+        <div className="p-4 md:p-5">
+          <div className="flex items-start gap-4">
+            <motion.div 
+              className={`p-3 rounded-xl bg-gradient-to-br ${typeConfig.color} shadow-lg`}
+              whileHover={{ rotate: [0, -10, 10, 0] }}
+              transition={{ duration: 0.5 }}
+            >
+              <TypeIcon className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            </motion.div>
+            
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between gap-2 mb-1">
-                <h4 className="font-semibold text-white truncate">{alert.title}</h4>
-                <Badge className={STATUS_COLORS[alert.status || 'Reported']}>
-                  {alert.status}
-                </Badge>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <h4 className="font-bold text-white text-base md:text-lg truncate">{alert.title}</h4>
+                <StatusBadge status={alert.status || 'Reported'} pulse={!isResolved} />
               </div>
               
-              <div className="flex items-center gap-3 text-xs text-slate-400 mb-2">
+              <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400 mb-3">
                 {stand && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
+                  <span className="flex items-center gap-1.5 bg-slate-800/50 px-2 py-1 rounded-lg">
+                    <MapPin className="w-3.5 h-3.5 text-cyan-400" />
                     {stand.name}
                   </span>
                 )}
                 {reporter && (
-                  <span className="flex items-center gap-1">
-                    <User className="w-3 h-3" />
+                  <span className="flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5" />
                     {reporter.name}
                   </span>
                 )}
-                <SLATimer 
-                  createdAt={alert.createdAt?.toString() || null}
-                  slaMinutes={alert.slaTargetMinutes || typeConfig.sla}
-                />
+                {!isResolved && (
+                  <SLATimer 
+                    createdAt={alert.createdAt?.toString() || null}
+                    slaMinutes={alert.slaTargetMinutes || typeConfig.sla}
+                  />
+                )}
               </div>
               
               {alert.description && (
-                <p className="text-sm text-slate-300 mb-2 line-clamp-2">{alert.description}</p>
+                <p className="text-sm text-slate-300 mb-3 line-clamp-2">{alert.description}</p>
               )}
               
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex flex-wrap items-center gap-2 mb-3">
                 {alert.escalationLevel && (
-                  <Badge variant="outline" className={`text-xs ${ESCALATION_LEVELS[alert.escalationLevel]?.color}`}>
+                  <Badge variant="outline" className={`text-xs border-slate-600 ${ESCALATION_LEVELS[alert.escalationLevel]?.color} text-white`}>
                     {ESCALATION_LEVELS[alert.escalationLevel]?.label}
                   </Badge>
                 )}
                 {acknowledger && (
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-slate-500 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-cyan-400" />
                     Claimed by {acknowledger.name}
                   </span>
                 )}
               </div>
               
-              <div className="flex items-center gap-2 mt-3">
-                {!alert.acknowledgedBy && (
-                  <Button 
-                    size="sm" 
-                    className="bg-cyan-600 hover:bg-cyan-700"
-                    onClick={() => onAcknowledge(alert.id)}
-                    data-testid={`button-acknowledge-${alert.id}`}
-                  >
-                    <Bell className="w-3 h-3 mr-1" />
-                    Claim
-                  </Button>
-                )}
-                
-                {alert.acknowledgedBy && alert.status !== 'Resolved' && (
-                  <>
-                    {alert.status === 'Dispatched' && (
+              {!isResolved && (
+                <div className="flex flex-wrap items-center gap-2">
+                  {!alert.acknowledgedBy && (
+                    <GlowButton 
+                      size="sm" 
+                      variant="cyan"
+                      onClick={() => onAcknowledge(alert.id)}
+                    >
+                      <Bell className="w-3.5 h-3.5" />
+                      Claim
+                    </GlowButton>
+                  )}
+                  
+                  {alert.acknowledgedBy && (
+                    <>
+                      {alert.status === 'Dispatched' && (
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          className="border-teal-500/50 text-teal-400 hover:bg-teal-500/10"
+                          onClick={() => onUpdateStatus(alert.id, 'OnScene')}
+                          data-testid={`button-onscene-${alert.id}`}
+                        >
+                          <Radio className="w-3.5 h-3.5 mr-1" />
+                          On Scene
+                        </Button>
+                      )}
+                      {alert.status === 'OnScene' && (
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10"
+                          onClick={() => onUpdateStatus(alert.id, 'Stabilized')}
+                          data-testid={`button-stabilized-${alert.id}`}
+                        >
+                          <Zap className="w-3.5 h-3.5 mr-1" />
+                          Stabilized
+                        </Button>
+                      )}
+                      <GlowButton 
+                        size="sm"
+                        variant="green"
+                        onClick={() => setShowResolveDialog(true)}
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Resolve
+                      </GlowButton>
                       <Button 
                         size="sm"
                         variant="outline"
-                        className="border-teal-500 text-teal-400"
-                        onClick={() => onUpdateStatus(alert.id, 'OnScene')}
-                        data-testid={`button-onscene-${alert.id}`}
+                        className="border-violet-500/50 text-violet-400 hover:bg-violet-500/10"
+                        onClick={() => setShowEscalateDialog(true)}
+                        data-testid={`button-escalate-${alert.id}`}
                       >
-                        On Scene
+                        <ArrowUp className="w-3.5 h-3.5 mr-1" />
+                        Escalate
                       </Button>
-                    )}
-                    {alert.status === 'OnScene' && (
-                      <Button 
-                        size="sm"
-                        variant="outline"
-                        className="border-blue-600 text-blue-400"
-                        onClick={() => onUpdateStatus(alert.id, 'Stabilized')}
-                        data-testid={`button-stabilized-${alert.id}`}
-                      >
-                        Stabilized
-                      </Button>
-                    )}
-                    <Button 
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700"
-                      onClick={() => setShowResolveDialog(true)}
-                      data-testid={`button-resolve-${alert.id}`}
-                    >
-                      <CheckCircle2 className="w-3 h-3 mr-1" />
-                      Resolve
-                    </Button>
-                    <Button 
-                      size="sm"
-                      variant="outline"
-                      className="border-violet-500 text-violet-400"
-                      onClick={() => setShowEscalateDialog(true)}
-                      data-testid={`button-escalate-${alert.id}`}
-                    >
-                      <ArrowUp className="w-3 h-3 mr-1" />
-                      Escalate
-                    </Button>
-                  </>
-                )}
-              </div>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </motion.div>
 
       <Dialog open={showResolveDialog} onOpenChange={setShowResolveDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700" data-testid={`dialog-resolve-${alert.id}`}>
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md" data-testid={`dialog-resolve-${alert.id}`}>
           <DialogHeader>
-            <DialogTitle className="text-white">Resolve Incident</DialogTitle>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              Resolve Incident
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
               <Label className="text-slate-300">Resolution Type</Label>
               <Select value={resolutionType} onValueChange={setResolutionType}>
-                <SelectTrigger className="bg-slate-800 border-slate-600 text-white" data-testid={`select-resolution-type-${alert.id}`}>
+                <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid={`select-resolution-type-${alert.id}`}>
                   <SelectValue placeholder="How was it resolved?" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-600">
-                  <SelectItem value="Handled Internally" data-testid="option-handled-internally">Handled Internally</SelectItem>
-                  <SelectItem value="External Services Called" data-testid="option-external-services">External Services Called</SelectItem>
-                  <SelectItem value="False Alarm" data-testid="option-false-alarm">False Alarm</SelectItem>
-                  <SelectItem value="Deferred" data-testid="option-deferred">Deferred/Referred</SelectItem>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="Handled Internally">Handled Internally</SelectItem>
+                  <SelectItem value="External Services Called">External Services Called</SelectItem>
+                  <SelectItem value="False Alarm">False Alarm</SelectItem>
+                  <SelectItem value="Deferred">Deferred/Referred</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label className="text-slate-300">Resolution Notes</Label>
               <Textarea 
-                className="bg-slate-800 border-slate-600 text-white"
+                className="bg-slate-800/50 border-white/10 text-white mt-1.5 focus:ring-cyan-500/30"
                 placeholder="Describe how the incident was resolved..."
                 value={resolveNotes}
                 onChange={(e) => setResolveNotes(e.target.value)}
@@ -295,43 +331,45 @@ function IncidentCard({
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowResolveDialog(false)} data-testid={`button-cancel-resolve-${alert.id}`}>Cancel</Button>
-            <Button 
-              className="bg-green-600 hover:bg-green-700"
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => setShowResolveDialog(false)} className="text-slate-400">Cancel</Button>
+            <GlowButton 
+              variant="green"
               onClick={handleResolve}
               disabled={!resolutionType}
-              data-testid={`button-confirm-resolve-${alert.id}`}
             >
               Resolve Incident
-            </Button>
+            </GlowButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={showEscalateDialog} onOpenChange={setShowEscalateDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700" data-testid={`dialog-escalate-${alert.id}`}>
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md" data-testid={`dialog-escalate-${alert.id}`}>
           <DialogHeader>
-            <DialogTitle className="text-white">Escalate Incident</DialogTitle>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <ArrowUp className="w-5 h-5 text-violet-400" />
+              Escalate Incident
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
               <Label className="text-slate-300">Escalate To</Label>
               <Select value={nextLevel} onValueChange={setNextLevel}>
-                <SelectTrigger className="bg-slate-800 border-slate-600 text-white" data-testid={`select-escalation-level-${alert.id}`}>
+                <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid={`select-escalation-level-${alert.id}`}>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-600">
-                  <SelectItem value="Level2" data-testid="option-level2">Level 2 - Manager</SelectItem>
-                  <SelectItem value="Level3" data-testid="option-level3">Level 3 - Executive</SelectItem>
-                  <SelectItem value="Level4" data-testid="option-level4">Level 4 - External Services</SelectItem>
+                <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectItem value="Level2">Level 2 - Manager</SelectItem>
+                  <SelectItem value="Level3">Level 3 - Executive</SelectItem>
+                  <SelectItem value="Level4">Level 4 - External Services</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
               <Label className="text-slate-300">Reason for Escalation</Label>
               <Textarea 
-                className="bg-slate-800 border-slate-600 text-white"
+                className="bg-slate-800/50 border-white/10 text-white mt-1.5 focus:ring-violet-500/30"
                 placeholder="Why does this need escalation?"
                 value={escalateReason}
                 onChange={(e) => setEscalateReason(e.target.value)}
@@ -339,16 +377,15 @@ function IncidentCard({
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowEscalateDialog(false)} data-testid={`button-cancel-escalate-${alert.id}`}>Cancel</Button>
-            <Button 
-              className="bg-violet-600 hover:bg-violet-700"
+          <DialogFooter className="gap-2">
+            <Button variant="ghost" onClick={() => setShowEscalateDialog(false)} className="text-slate-400">Cancel</Button>
+            <GlowButton 
+              variant="purple"
               onClick={handleEscalate}
               disabled={!escalateReason}
-              data-testid={`button-confirm-escalate-${alert.id}`}
             >
               Escalate
-            </Button>
+            </GlowButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -356,9 +393,29 @@ function IncidentCard({
   );
 }
 
+function QuickAlertButton({ type, onClick }: { type: typeof EMERGENCY_TYPES[0]; onClick: () => void }) {
+  const Icon = type.icon;
+  return (
+    <motion.button
+      whileHover={{ scale: 1.05, y: -2 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={onClick}
+      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${type.color} p-4 md:p-5 shadow-lg group`}
+      data-testid={`button-quick-${type.id.toLowerCase()}`}
+    >
+      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="relative flex flex-col items-center gap-2">
+        <Icon className="w-6 h-6 md:w-8 md:h-8 text-white" />
+        <span className="text-xs md:text-sm font-semibold text-white">{type.id}</span>
+      </div>
+    </motion.button>
+  );
+}
+
 export default function CommandCenter() {
   const [, navigate] = useLocation();
   const currentUser = useStore((state) => state.currentUser);
+  const logout = useStore((state) => state.logout);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -454,201 +511,233 @@ export default function CommandCenter() {
     });
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-      <header className="bg-slate-900/80 backdrop-blur border-b border-slate-800 sticky top-0 z-50">
-        <div className="flex items-center justify-between p-3">
-          <div className="flex items-center gap-3">
+    <AnimatedBackground>
+      <PageHeader 
+        title="Command Center"
+        subtitle="Emergency Response Control"
+        icon={<Siren className="w-5 h-5" />}
+        backAction={() => navigate('/dev')}
+        actions={
+          <div className="flex items-center gap-2">
+            {criticalAlerts.length > 0 && (
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 1.5 }}
+              >
+                <Badge className="bg-red-500/20 text-red-400 border-red-500/30" data-testid="badge-critical-count">
+                  {criticalAlerts.length} Critical
+                </Badge>
+              </motion.div>
+            )}
+            <Badge variant="outline" className="border-cyan-500/30 text-cyan-400" data-testid="badge-active-count">
+              {activeAlerts.length} Active
+            </Badge>
             <Button 
               variant="ghost" 
               size="icon" 
-              onClick={() => navigate('/dev')}
-              className="text-slate-400"
-              data-testid="button-back"
+              onClick={handleLogout}
+              className="text-slate-400 hover:text-white"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <LogOut className="w-5 h-5" />
             </Button>
-            <div>
-              <h1 className="text-lg font-bold text-white flex items-center gap-2">
-                <Siren className="w-5 h-5 text-red-500" />
-                Command Center
-              </h1>
-              <p className="text-xs text-slate-400">Emergency Response Control</p>
-            </div>
           </div>
-          <div className="flex items-center gap-2">
-            {criticalAlerts.length > 0 && (
-              <Badge variant="destructive" className="animate-pulse" data-testid="badge-critical-count">
-                {criticalAlerts.length} Critical
-              </Badge>
-            )}
-            <Badge variant="outline" className="border-slate-600 text-slate-300" data-testid="badge-active-count">
-              {activeAlerts.length} Active
-            </Badge>
+        }
+      />
+
+      <main className="p-4 md:p-6 lg:p-8 space-y-6 pb-24 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <GlassCard gradient>
+              <GlassCardHeader>
+                <SectionHeader 
+                  title="Quick Alert" 
+                  subtitle="One-tap emergency dispatch"
+                  icon={<AlertTriangle className="w-5 h-5" />}
+                />
+              </GlassCardHeader>
+              <GlassCardContent>
+                <div className="grid grid-cols-4 gap-3 mb-3">
+                  {EMERGENCY_TYPES.slice(0, 4).map((type) => (
+                    <QuickAlertButton 
+                      key={type.id} 
+                      type={type} 
+                      onClick={() => {
+                        setSelectedType(type.id);
+                        setShowNewIncident(true);
+                      }}
+                    />
+                  ))}
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {EMERGENCY_TYPES.slice(4).map((type) => (
+                    <motion.button
+                      key={type.id}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => {
+                        setSelectedType(type.id);
+                        setShowNewIncident(true);
+                      }}
+                      className="rounded-xl border border-white/10 bg-slate-800/50 p-3 flex flex-col items-center gap-2 hover:bg-slate-700/50 transition-colors"
+                      data-testid={`button-quick-${type.id.toLowerCase()}`}
+                    >
+                      <type.icon className="w-5 h-5 text-slate-400" />
+                      <span className="text-xs text-slate-400">{type.id}</span>
+                    </motion.button>
+                  ))}
+                </div>
+              </GlassCardContent>
+            </GlassCard>
+
+            <GlassCard gradient>
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="w-full bg-slate-800/50 rounded-t-2xl rounded-b-none border-b border-white/5 p-1">
+                  <TabsTrigger 
+                    value="active" 
+                    className="flex-1 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl"
+                    data-testid="tab-active"
+                  >
+                    <Activity className="w-4 h-4 mr-2" />
+                    Active ({activeAlerts.length})
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="resolved" 
+                    className="flex-1 data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 rounded-xl"
+                    data-testid="tab-resolved"
+                  >
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Resolved ({resolvedAlerts.length})
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="active" className="p-4 md:p-5 space-y-4 m-0">
+                  <AnimatePresence mode="popLayout">
+                    {alertsLoading ? (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-center py-12"
+                      >
+                        <Activity className="w-10 h-10 mx-auto mb-3 text-cyan-400 animate-pulse" />
+                        <p className="text-slate-400">Loading incidents...</p>
+                      </motion.div>
+                    ) : activeAlerts.length === 0 ? (
+                      <EmptyState 
+                        icon={<CheckCircle2 className="w-12 h-12" />}
+                        title="All Clear"
+                        description="No active incidents at this time"
+                      />
+                    ) : (
+                      activeAlerts.map(alert => (
+                        <IncidentCard
+                          key={alert.id}
+                          alert={alert}
+                          stands={stands as Stand[]}
+                          users={users as UserType[]}
+                          onAcknowledge={(id) => acknowledgeMutation.mutate(id)}
+                          onResolve={(id, notes, resolutionType) => resolveMutation.mutate({ id, notes, resolutionType })}
+                          onEscalate={(id, toLevel, reason) => escalateMutation.mutate({ id, toLevel, reason })}
+                          onUpdateStatus={(id, status) => updateStatusMutation.mutate({ id, status })}
+                        />
+                      ))
+                    )}
+                  </AnimatePresence>
+                </TabsContent>
+                
+                <TabsContent value="resolved" className="p-4 md:p-5 space-y-4 m-0">
+                  {resolvedAlerts.length === 0 ? (
+                    <EmptyState 
+                      icon={<Clock className="w-12 h-12" />}
+                      title="No Resolved Incidents"
+                      description="Resolved incidents will appear here"
+                    />
+                  ) : (
+                    resolvedAlerts.slice(0, 20).map(alert => (
+                      <IncidentCard
+                        key={alert.id}
+                        alert={alert}
+                        stands={stands as Stand[]}
+                        users={users as UserType[]}
+                        onAcknowledge={() => {}}
+                        onResolve={() => {}}
+                        onEscalate={() => {}}
+                        onUpdateStatus={() => {}}
+                      />
+                    ))
+                  )}
+                </TabsContent>
+              </Tabs>
+            </GlassCard>
+          </div>
+
+          <div className="space-y-6">
+            <SectionHeader 
+              title="Response Metrics" 
+              icon={<Clock className="w-5 h-5" />}
+            />
+            
+            <div className="grid grid-cols-1 gap-4">
+              <StatCard 
+                icon={<Activity className="w-5 h-5" />}
+                label="Active Incidents"
+                value={activeAlerts.length}
+                color={activeAlerts.length > 0 ? "amber" : "green"}
+                trend={activeAlerts.length > 3 ? "up" : "neutral"}
+              />
+              <StatCard 
+                icon={<Bell className="w-5 h-5" />}
+                label="Claimed"
+                value={activeAlerts.filter(a => a.acknowledgedBy).length}
+                subValue={`of ${activeAlerts.length} active`}
+                color="cyan"
+              />
+              <StatCard 
+                icon={<CheckCircle2 className="w-5 h-5" />}
+                label="Resolved Today"
+                value={resolvedAlerts.filter(a => {
+                  const today = new Date().toDateString();
+                  return a.resolvedAt && new Date(a.resolvedAt).toDateString() === today;
+                }).length}
+                color="green"
+              />
+              <StatCard 
+                icon={<ArrowUp className="w-5 h-5" />}
+                label="Escalated"
+                value={activeAlerts.filter(a => a.escalationLevel && a.escalationLevel !== 'Level1').length}
+                color={activeAlerts.filter(a => a.escalationLevel && a.escalationLevel !== 'Level1').length > 0 ? "purple" : "green"}
+              />
+            </div>
+
+            <GlassCard gradient className="hidden lg:block">
+              <GlassCardHeader>
+                <h3 className="text-sm font-semibold text-slate-300">Emergency Types Guide</h3>
+              </GlassCardHeader>
+              <GlassCardContent className="space-y-3">
+                {EMERGENCY_TYPES.slice(0, 4).map(type => (
+                  <div key={type.id} className="flex items-center gap-3 text-sm">
+                    <div className={`p-1.5 rounded-lg bg-gradient-to-br ${type.color}`}>
+                      <type.icon className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-slate-300 font-medium">{type.label}</p>
+                      <p className="text-xs text-slate-500">SLA: {type.sla} min</p>
+                    </div>
+                  </div>
+                ))}
+              </GlassCardContent>
+            </GlassCard>
           </div>
         </div>
-      </header>
-
-      <main className="p-3 space-y-4 pb-24">
-        <Card className="bg-red-900/20 border-red-900/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-red-400 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4" />
-              Quick Alert - One Tap Emergency
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-4 gap-2">
-              {EMERGENCY_TYPES.slice(0, 4).map((type) => {
-                const Icon = type.icon;
-                return (
-                  <Button
-                    key={type.id}
-                    className={`${type.color} hover:opacity-90 h-16 flex-col gap-1`}
-                    onClick={() => {
-                      setSelectedType(type.id);
-                      setShowNewIncident(true);
-                    }}
-                    data-testid={`button-quick-${type.id.toLowerCase()}`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="text-[10px]">{type.id}</span>
-                  </Button>
-                );
-              })}
-            </div>
-            <div className="grid grid-cols-3 gap-2 mt-2">
-              {EMERGENCY_TYPES.slice(4).map((type) => {
-                const Icon = type.icon;
-                return (
-                  <Button
-                    key={type.id}
-                    variant="outline"
-                    className="border-slate-600 h-12 flex-col gap-1"
-                    onClick={() => {
-                      setSelectedType(type.id);
-                      setShowNewIncident(true);
-                    }}
-                    data-testid={`button-quick-${type.id.toLowerCase()}`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="text-[10px]">{type.id}</span>
-                  </Button>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-800/30 border-slate-700">
-          <CardContent className="p-0">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="w-full bg-slate-800/50 rounded-none border-b border-slate-700">
-                <TabsTrigger 
-                  value="active" 
-                  className="flex-1 data-[state=active]:bg-slate-700"
-                  data-testid="tab-active"
-                >
-                  <Activity className="w-4 h-4 mr-1" />
-                  Active ({activeAlerts.length})
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="resolved" 
-                  className="flex-1 data-[state=active]:bg-slate-700"
-                  data-testid="tab-resolved"
-                >
-                  <CheckCircle2 className="w-4 h-4 mr-1" />
-                  Resolved ({resolvedAlerts.length})
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="active" className="p-3 space-y-3 m-0">
-                {alertsLoading ? (
-                  <div className="text-center py-8 text-slate-400">
-                    <Activity className="w-8 h-8 mx-auto mb-2 animate-pulse" />
-                    Loading incidents...
-                  </div>
-                ) : activeAlerts.length === 0 ? (
-                  <div className="text-center py-8 text-slate-400">
-                    <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-green-500" />
-                    <p className="font-medium">All Clear</p>
-                    <p className="text-xs">No active incidents</p>
-                  </div>
-                ) : (
-                  activeAlerts.map(alert => (
-                    <IncidentCard
-                      key={alert.id}
-                      alert={alert}
-                      stands={stands as Stand[]}
-                      users={users as UserType[]}
-                      onAcknowledge={(id) => acknowledgeMutation.mutate(id)}
-                      onResolve={(id, notes, resolutionType) => resolveMutation.mutate({ id, notes, resolutionType })}
-                      onEscalate={(id, toLevel, reason) => escalateMutation.mutate({ id, toLevel, reason })}
-                      onUpdateStatus={(id, status) => updateStatusMutation.mutate({ id, status })}
-                    />
-                  ))
-                )}
-              </TabsContent>
-              
-              <TabsContent value="resolved" className="p-3 space-y-3 m-0">
-                {resolvedAlerts.length === 0 ? (
-                  <div className="text-center py-8 text-slate-400">
-                    <p>No resolved incidents today</p>
-                  </div>
-                ) : (
-                  resolvedAlerts.slice(0, 20).map(alert => (
-                    <IncidentCard
-                      key={alert.id}
-                      alert={alert}
-                      stands={stands as Stand[]}
-                      users={users as UserType[]}
-                      onAcknowledge={() => {}}
-                      onResolve={() => {}}
-                      onEscalate={() => {}}
-                      onUpdateStatus={() => {}}
-                    />
-                  ))
-                )}
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-800/30 border-slate-700">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-slate-300 flex items-center gap-2">
-              <Clock className="w-4 h-4" />
-              Response Metrics
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-3 bg-slate-800/50 rounded-lg">
-                <div className="text-2xl font-bold text-white">{activeAlerts.length}</div>
-                <div className="text-xs text-slate-400">Active</div>
-              </div>
-              <div className="text-center p-3 bg-slate-800/50 rounded-lg">
-                <div className="text-2xl font-bold text-cyan-400">
-                  {activeAlerts.filter(a => a.acknowledgedBy).length}
-                </div>
-                <div className="text-xs text-slate-400">Claimed</div>
-              </div>
-              <div className="text-center p-3 bg-slate-800/50 rounded-lg">
-                <div className="text-2xl font-bold text-green-400">
-                  {resolvedAlerts.filter(a => {
-                    const today = new Date().toDateString();
-                    return a.resolvedAt && new Date(a.resolvedAt).toDateString() === today;
-                  }).length}
-                </div>
-                <div className="text-xs text-slate-400">Resolved Today</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </main>
 
       <Dialog open={showNewIncident} onOpenChange={setShowNewIncident}>
-        <DialogContent className="bg-slate-900 border-slate-700 max-w-md" data-testid="dialog-new-incident">
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md" data-testid="dialog-new-incident">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               {selectedType && (() => {
@@ -656,7 +745,9 @@ export default function CommandCenter() {
                 const Icon = typeConfig?.icon || AlertTriangle;
                 return (
                   <>
-                    <Icon className="w-5 h-5 text-red-500" />
+                    <div className={`p-2 rounded-lg bg-gradient-to-br ${typeConfig?.color}`}>
+                      <Icon className="w-5 h-5 text-white" />
+                    </div>
                     Report {typeConfig?.label}
                   </>
                 );
@@ -668,7 +759,7 @@ export default function CommandCenter() {
             <div>
               <Label className="text-slate-300">Title</Label>
               <Input 
-                className="bg-slate-800 border-slate-600 text-white"
+                className="bg-slate-800/50 border-white/10 text-white mt-1.5 focus:ring-cyan-500/30"
                 placeholder="Brief description of the emergency"
                 value={newIncident.title}
                 onChange={(e) => setNewIncident({...newIncident, title: e.target.value})}
@@ -682,10 +773,10 @@ export default function CommandCenter() {
                 value={newIncident.standId} 
                 onValueChange={(v) => setNewIncident({...newIncident, standId: v})}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-600 text-white" data-testid="select-incident-location">
+                <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid="select-incident-location">
                   <SelectValue placeholder="Select location" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-600 max-h-60">
+                <SelectContent className="bg-slate-800 border-slate-700 max-h-60">
                   {(stands as Stand[]).map(stand => (
                     <SelectItem key={stand.id} value={stand.id} data-testid={`option-stand-${stand.id}`}>
                       {stand.name} - {stand.section}
@@ -698,7 +789,7 @@ export default function CommandCenter() {
             <div>
               <Label className="text-slate-300">Additional Location Details</Label>
               <Input 
-                className="bg-slate-800 border-slate-600 text-white"
+                className="bg-slate-800/50 border-white/10 text-white mt-1.5"
                 placeholder="e.g., Near Section 115 entrance"
                 value={newIncident.locationDetails}
                 onChange={(e) => setNewIncident({...newIncident, locationDetails: e.target.value})}
@@ -709,7 +800,7 @@ export default function CommandCenter() {
             <div>
               <Label className="text-slate-300">Description</Label>
               <Textarea 
-                className="bg-slate-800 border-slate-600 text-white"
+                className="bg-slate-800/50 border-white/10 text-white mt-1.5"
                 placeholder="What is happening? Any additional details..."
                 value={newIncident.description}
                 onChange={(e) => setNewIncident({...newIncident, description: e.target.value})}
@@ -726,22 +817,22 @@ export default function CommandCenter() {
                 setShowNewIncident(false);
                 setSelectedType(null);
               }}
+              className="text-slate-400"
               data-testid="button-cancel-new-incident"
             >
               Cancel
             </Button>
-            <Button 
-              className="bg-red-600 hover:bg-red-700"
+            <GlowButton 
+              variant="red"
               onClick={handleCreateAlert}
               disabled={createAlertMutation.isPending}
-              data-testid="button-submit-alert"
             >
-              <Send className="w-4 h-4 mr-1" />
+              <Send className="w-4 h-4" />
               Send Alert
-            </Button>
+            </GlowButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </AnimatedBackground>
   );
 }
