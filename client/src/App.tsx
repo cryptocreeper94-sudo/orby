@@ -24,6 +24,7 @@ import ManagerDashboard from "./pages/ManagerDashboard";
 import MenuBoardCreator from "@/pages/MenuBoardCreator";
 import OpsCommandCenter from "@/pages/OpsCommandCenter";
 import CommandCenter from "@/pages/CommandCenter";
+import ReportingDashboard from "@/pages/ReportingDashboard";
 import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
@@ -59,6 +60,7 @@ function Router() {
       <Route path="/menu-board-creator" component={MenuBoardCreator} />
       <Route path="/ops-command" component={OpsCommandCenter} />
       <Route path="/command-center" component={CommandCenter} />
+      <Route path="/reports" component={ReportingDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

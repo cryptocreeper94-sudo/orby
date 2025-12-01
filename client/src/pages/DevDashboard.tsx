@@ -316,6 +316,22 @@ export default function DevDashboard() {
           <AlertTriangle className={cn("h-4 w-4", systemStats.activeEmergencies > 0 ? "text-cyan-300" : "text-slate-400")} />
         </Button>
 
+        {/* Reporting Dashboard Quick Access */}
+        <Button
+          onClick={() => setLocation('/reports')}
+          className="w-full py-4 text-left justify-start gap-3 font-bold bg-gradient-to-r from-cyan-900/50 to-teal-900/50 border border-cyan-700/50 hover:from-cyan-800/60 hover:to-teal-800/60"
+          data-testid="button-reports"
+        >
+          <Activity className="h-5 w-5 text-cyan-400" />
+          <div className="flex-1">
+            <div className="text-sm">Ultimate Reporting Dashboard</div>
+            <div className="text-xs text-white/70 font-normal">
+              Puzzle-style unified operations view
+            </div>
+          </div>
+          <Zap className="h-4 w-4 text-cyan-400" />
+        </Button>
+
         {/* Role Sections */}
         <AccordionSection 
           title="Command Center" 
