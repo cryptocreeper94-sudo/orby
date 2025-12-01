@@ -16,6 +16,7 @@ const ModeContext = createContext<ModeContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'orby_mode';
 const RETURN_PATH_KEY = 'orby_sandbox_return';
+const WELCOME_SEEN_KEY = 'orby_sandbox_welcome_seen';
 
 export function ModeProvider({ children }: { children: ReactNode }) {
   const [mode, setMode] = useState<Mode>('live');
@@ -55,6 +56,7 @@ export function ModeProvider({ children }: { children: ReactNode }) {
     setMode('live');
     sessionStorage.setItem(STORAGE_KEY, 'live');
     sessionStorage.removeItem(RETURN_PATH_KEY);
+    sessionStorage.removeItem(WELCOME_SEEN_KEY);
     setReturnPath(null);
   }, []);
 

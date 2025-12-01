@@ -3,7 +3,7 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ModeProvider } from "@/lib/ModeContext";
+import { ModeProvider, useMode } from "@/lib/ModeContext";
 import { SandboxBanner } from "@/components/SandboxBanner";
 import { SandboxWelcome } from "@/components/SandboxWelcome";
 import NotFound from "@/pages/not-found";
@@ -25,6 +25,15 @@ import MenuBoardCreator from "@/pages/MenuBoardCreator";
 import OpsCommandCenter from "@/pages/OpsCommandCenter";
 import CommandCenter from "@/pages/CommandCenter";
 import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
+
+function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
+  const { isSandbox } = useMode();
+  return (
+    <div className={`relative z-10 ${isSandbox ? 'pt-10' : ''}`}>
+      {children}
+    </div>
+  );
+}
 
 function Router() {
   return (
@@ -105,10 +114,10 @@ function App() {
               />
             </div>
           </div>
-          <div className="relative z-10 sandbox-content">
+          <SandboxContentWrapper>
             <Toaster />
             <Router />
-          </div>
+          </SandboxContentWrapper>
         </TooltipProvider>
       </ModeProvider>
     </QueryClientProvider>
