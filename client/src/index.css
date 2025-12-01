@@ -408,7 +408,8 @@
 .mobile-nav {
   @apply fixed bottom-0 left-0 right-0 z-50;
   @apply bg-slate-950/95 backdrop-blur-xl border-t border-white/10;
-  @apply px-2 py-2 safe-area-inset-bottom;
+  @apply px-2 py-2;
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
 
 .mobile-nav-item {

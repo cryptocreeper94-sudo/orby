@@ -518,16 +518,29 @@ export function ProgressRing({
   );
 }
 
+const ICON_COLORS = {
+  cyan: "from-cyan-500/20 to-cyan-600/10 text-cyan-400",
+  amber: "from-amber-500/20 to-amber-600/10 text-amber-400",
+  green: "from-emerald-500/20 to-emerald-600/10 text-emerald-400",
+  red: "from-red-500/20 to-red-600/10 text-red-400",
+  purple: "from-violet-500/20 to-violet-600/10 text-violet-400",
+  blue: "from-blue-500/20 to-blue-600/10 text-blue-400",
+};
+
 export function PageHeader({ 
   title, 
   subtitle,
+  subtitleColor,
   icon,
+  iconColor = "cyan",
   actions,
   backAction
 }: { 
   title: string;
   subtitle?: string;
+  subtitleColor?: string;
   icon?: React.ReactNode;
+  iconColor?: keyof typeof ICON_COLORS;
   actions?: React.ReactNode;
   backAction?: () => void;
 }) {
@@ -547,13 +560,13 @@ export function PageHeader({
             </motion.button>
           )}
           {icon && (
-            <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500/20 to-cyan-600/10 text-cyan-400">
+            <div className={cn("p-2 rounded-xl bg-gradient-to-br", ICON_COLORS[iconColor])}>
               {icon}
             </div>
           )}
           <div>
             <h1 className="text-lg md:text-xl font-bold text-white">{title}</h1>
-            {subtitle && <p className="text-xs md:text-sm text-slate-400">{subtitle}</p>}
+            {subtitle && <p className={cn("text-xs md:text-sm", subtitleColor || "text-slate-400")}>{subtitle}</p>}
           </div>
         </div>
         {actions && (

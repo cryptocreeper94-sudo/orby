@@ -1,10 +1,10 @@
 import { useStore } from "@/lib/mockData";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck, Send, Package, Warehouse, Plus, Minus, Truck, ScanLine, Sparkles, ChevronDown } from "lucide-react";
+import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck, Send, Package, Warehouse, Plus, Minus, Truck, ScanLine, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import SignatureCanvas from 'react-signature-canvas';
 import jsPDF from 'jspdf';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Accordion,
   AccordionContent,
@@ -29,6 +29,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { 
+  AnimatedBackground,
+  GlassCard,
+  GlassCardHeader,
+  GlassCardContent,
+  GlowButton,
+  PageHeader,
+  SectionHeader,
+  StatCard
+} from "@/components/ui/premium";
 
 type WarehouseProduct = {
   id: string;
@@ -54,6 +64,17 @@ function getStandSection(standName: string): string {
   if (standName.toLowerCase().includes('vend')) return 'Vending';
   return 'Other Locations';
 }
+
+const SECTION_COLORS: Record<string, string> = {
+  '100 Level': 'from-emerald-500 to-emerald-600',
+  '200 Level': 'from-blue-500 to-blue-600',
+  '300 Level': 'from-violet-500 to-violet-600',
+  'Bars': 'from-pink-500 to-pink-600',
+  'Premium': 'from-amber-500 to-amber-600',
+  'Outdoor Areas': 'from-cyan-500 to-cyan-600',
+  'Vending': 'from-orange-500 to-orange-600',
+  'Other Locations': 'from-slate-500 to-slate-600'
+};
 
 export default function SupervisorDashboard() {
   const logout = useStore((state) => state.logout);
@@ -276,73 +297,69 @@ export default function SupervisorDashboard() {
 
   if (!activeStandId) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-24">
-        <header className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
-                <ClipboardList className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-amber-400">Supervisor</h1>
-                <p className="text-xs text-slate-500">{stands.length} stands available</p>
-              </div>
-            </div>
+      <AnimatedBackground>
+        <PageHeader 
+          title="Supervisor"
+          subtitle={`${stands.length} stands available`}
+          icon={<ClipboardList className="w-5 h-5" />}
+          iconColor="amber"
+          actions={
             <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-400 hover:text-white">
               <LogOut className="h-5 w-5" />
             </Button>
-          </div>
-        </header>
+          }
+        />
 
-        <main className="px-4 py-4 space-y-4 max-w-lg mx-auto">
-          {/* Quick Actions */}
-          <div className="grid grid-cols-2 gap-3">
-            <Button 
-              className="h-14 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/20"
+        <main className="px-4 md:px-6 lg:px-8 py-4 space-y-4 max-w-4xl mx-auto pb-24">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="h-16 md:h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 p-4 shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-3"
               onClick={() => setShowQuickScan(true)}
               data-testid="quick-scan-btn"
             >
-              <ScanLine className="h-5 w-5 mr-2" />
-              <span className="text-sm">AI Scan</span>
-            </Button>
-            <Button 
-              className="h-14 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-amber-500/20"
+              <ScanLine className="h-5 w-5 md:h-6 md:w-6 text-white" />
+              <span className="text-sm md:text-base font-semibold text-white">AI Scan</span>
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="h-16 md:h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-4 shadow-lg shadow-amber-500/20 flex items-center justify-center gap-3"
               onClick={() => setShowSupervisorPack(true)}
               data-testid="open-supervisor-pack"
             >
-              <FileText className="h-5 w-5 mr-2" />
-              <span className="text-sm">Pack</span>
-            </Button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Button 
-              variant="outline" 
-              className="h-12 border-slate-700 bg-slate-900/50 text-slate-300 hover:bg-slate-800"
+              <FileText className="h-5 w-5 md:h-6 md:w-6 text-white" />
+              <span className="text-sm md:text-base font-semibold text-white">Pack</span>
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="h-16 md:h-20 rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-4 flex items-center justify-center gap-3 hover:bg-slate-700/50 transition-colors"
               onClick={() => setShowMap(true)}
               data-testid="open-map"
             >
-              <Map className="h-4 w-4 mr-2 text-blue-400" />
-              <span className="text-sm">Map</span>
-            </Button>
-            <Button 
-              variant="outline" 
-              className="h-12 border-slate-700 bg-slate-900/50 text-slate-300 hover:bg-slate-800"
+              <Map className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />
+              <span className="text-sm md:text-base font-medium text-slate-200">Map</span>
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className="h-16 md:h-20 rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-4 flex items-center justify-center gap-3 hover:bg-slate-700/50 transition-colors"
               onClick={() => setShowWarehouseRequest(true)}
               data-testid="open-warehouse-request"
             >
-              <Warehouse className="h-4 w-4 mr-2 text-amber-400" />
-              <span className="text-sm">Supplies</span>
-            </Button>
+              <Warehouse className="h-5 w-5 md:h-6 md:w-6 text-amber-400" />
+              <span className="text-sm md:text-base font-medium text-slate-200">Supplies</span>
+            </motion.button>
           </div>
 
-          {/* Search */}
           <div className="relative">
             <Input
               placeholder="Search stands..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-slate-900/50 border-slate-700 text-slate-200 placeholder:text-slate-500 pl-4 pr-10"
+              className="bg-slate-800/50 backdrop-blur-sm border-white/10 text-slate-200 placeholder:text-slate-500 pl-4 pr-10 rounded-xl h-12"
               data-testid="input-search-stands"
             />
             {searchQuery && (
@@ -355,54 +372,48 @@ export default function SupervisorDashboard() {
             )}
           </div>
 
-          {/* Grouped Stands Accordion */}
-          <Accordion type="multiple" className="space-y-2" defaultValue={['100 Level']}>
+          <Accordion type="multiple" className="space-y-3" defaultValue={['100 Level']}>
             {sortedSections.map(section => (
               <AccordionItem 
                 key={section} 
                 value={section}
-                className="rounded-lg border border-slate-700/50 bg-slate-900/50 overflow-hidden"
+                className="rounded-2xl border border-white/10 bg-slate-800/40 backdrop-blur-sm overflow-hidden"
               >
-                <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-slate-800/50">
+                <AccordionTrigger className="px-4 py-4 hover:no-underline hover:bg-white/5 [&[data-state=open]]:bg-white/5">
                   <div className="flex items-center gap-3">
                     <div className={cn(
-                      "w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold",
-                      section === '100 Level' && "bg-green-500/20 text-green-400",
-                      section === '200 Level' && "bg-blue-500/20 text-blue-400",
-                      section === '300 Level' && "bg-purple-500/20 text-purple-400",
-                      section === 'Bars' && "bg-pink-500/20 text-pink-400",
-                      section === 'Premium' && "bg-amber-500/20 text-amber-400",
-                      section === 'Outdoor Areas' && "bg-cyan-500/20 text-cyan-400",
-                      section === 'Vending' && "bg-orange-500/20 text-orange-400",
-                      section === 'Other Locations' && "bg-slate-500/20 text-slate-400"
+                      "w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold bg-gradient-to-br shadow-lg",
+                      SECTION_COLORS[section] || 'from-slate-500 to-slate-600'
                     )}>
-                      {groupedStands[section].length}
+                      <span className="text-white">{groupedStands[section].length}</span>
                     </div>
-                    <span className="text-slate-200 font-medium">{section}</span>
+                    <span className="text-slate-200 font-semibold">{section}</span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-2 pb-2">
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {groupedStands[section].map(stand => (
-                      <button
+                      <motion.button
                         key={stand.id}
+                        whileHover={{ x: 4 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => setActiveStandId(stand.id)}
                         className={cn(
-                          "w-full px-3 py-2.5 rounded-lg flex items-center justify-between",
-                          "bg-slate-800/50 hover:bg-slate-700/50 transition-colors",
-                          "border-l-2",
-                          stand.status === 'Open' ? "border-l-green-500" : "border-l-red-500"
+                          "w-full px-4 py-3 rounded-xl flex items-center justify-between",
+                          "bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-200",
+                          "border-l-3",
+                          stand.status === 'Open' ? "border-l-emerald-500" : "border-l-red-500"
                         )}
                         data-testid={`stand-${stand.id}`}
                       >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-slate-200 font-medium text-sm truncate">{stand.name}</span>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className="text-slate-200 font-medium truncate">{stand.name}</span>
                           <Badge 
                             variant="outline" 
                             className={cn(
-                              "text-xs px-1.5 py-0",
+                              "text-xs px-2",
                               stand.status === 'Open' 
-                                ? "border-green-500/50 text-green-400 bg-green-500/10" 
+                                ? "border-emerald-500/50 text-emerald-400 bg-emerald-500/10" 
                                 : "border-red-500/50 text-red-400 bg-red-500/10"
                             )}
                           >
@@ -410,7 +421,7 @@ export default function SupervisorDashboard() {
                           </Badge>
                         </div>
                         <ChevronRight className="h-4 w-4 text-slate-500 flex-shrink-0" />
-                      </button>
+                      </motion.button>
                     ))}
                   </div>
                 </AccordionContent>
@@ -419,21 +430,22 @@ export default function SupervisorDashboard() {
           </Accordion>
 
           {stands.length === 0 && (
-            <div className="text-center py-10 text-slate-500">
-              <ClipboardList className="h-12 w-12 mx-auto mb-3 opacity-30" />
-              <p>No stands available</p>
+            <div className="text-center py-12 text-slate-500">
+              <ClipboardList className="h-16 w-16 mx-auto mb-4 opacity-30" />
+              <p className="text-lg">No stands available</p>
             </div>
           )}
 
-          <Notepad storageKey="supervisor-notes" className="bg-slate-900/50 border-slate-700" />
+          <Notepad storageKey="supervisor-notes" className="bg-slate-800/40 backdrop-blur-sm border-white/10 rounded-2xl" />
         </main>
 
-        {/* Modals */}
         <Dialog open={showWarehouseRequest} onOpenChange={setShowWarehouseRequest}>
-          <DialogContent className="max-w-md max-h-[90vh] flex flex-col bg-slate-900 border-slate-700 text-slate-200">
+          <DialogContent className="max-w-md max-h-[90vh] flex flex-col bg-slate-900/95 backdrop-blur-xl border-white/10 text-slate-200">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-amber-400">
-                <Warehouse className="h-5 w-5" />
+                <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600">
+                  <Warehouse className="h-5 w-5 text-white" />
+                </div>
                 Request from Warehouse
               </DialogTitle>
             </DialogHeader>
@@ -446,10 +458,10 @@ export default function SupervisorDashboard() {
                     value={selectedStandForRequest || stands[0]?.id} 
                     onValueChange={setSelectedStandForRequest}
                   >
-                    <SelectTrigger className="bg-slate-800 border-slate-600" data-testid="select-stand-for-request">
+                    <SelectTrigger className="bg-slate-800/50 border-white/10 mt-1.5" data-testid="select-stand-for-request">
                       <SelectValue placeholder="Select stand..." />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-600">
+                    <SelectContent className="bg-slate-800 border-slate-700">
                       {stands.map(stand => (
                         <SelectItem key={stand.id} value={stand.id}>{stand.name}</SelectItem>
                       ))}
@@ -461,10 +473,10 @@ export default function SupervisorDashboard() {
               <div>
                 <Label className="text-slate-300">Priority</Label>
                 <Select value={requestPriority} onValueChange={(v) => setRequestPriority(v as typeof requestPriority)}>
-                  <SelectTrigger className="bg-slate-800 border-slate-600" data-testid="select-request-priority">
+                  <SelectTrigger className="bg-slate-800/50 border-white/10 mt-1.5" data-testid="select-request-priority">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-600">
+                  <SelectContent className="bg-slate-800 border-slate-700">
                     <SelectItem value="Normal">
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-blue-500"></span>
@@ -491,24 +503,24 @@ export default function SupervisorDashboard() {
                 <Label className="text-slate-300 mb-2 block">Items ({getTotalItemsInRequest()} selected)</Label>
                 {warehouseProducts.length === 0 ? (
                   <div className="text-center py-8 text-slate-500">
-                    <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <Package className="h-10 w-10 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">No products available</p>
                   </div>
                 ) : (
-                  <ScrollArea className="h-[200px] border border-slate-700 rounded-md p-2 bg-slate-800/50">
+                  <ScrollArea className="h-[200px] border border-white/10 rounded-xl p-2 bg-slate-800/30">
                     <div className="space-y-2">
                       {warehouseCategories.map(category => {
                         const categoryProducts = warehouseProducts.filter(p => p.categoryId === category.id);
                         if (categoryProducts.length === 0) return null;
                         return (
                           <div key={category.id}>
-                            <div className="text-xs font-semibold text-slate-400 uppercase mb-1 sticky top-0 bg-slate-800 py-1">
+                            <div className="text-xs font-semibold text-slate-400 uppercase mb-1 sticky top-0 bg-slate-800 py-1 px-2 rounded">
                               {category.name}
                             </div>
                             {categoryProducts.map(product => (
                               <div 
                                 key={product.id} 
-                                className="flex items-center justify-between p-2 rounded hover:bg-slate-700/50"
+                                className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5"
                               >
                                 <div className="flex-1 min-w-0">
                                   <span className="text-sm text-slate-200 truncate block">{product.name}</span>
@@ -518,7 +530,7 @@ export default function SupervisorDashboard() {
                                   <Button
                                     variant="outline"
                                     size="icon"
-                                    className="h-7 w-7 border-slate-600"
+                                    className="h-7 w-7 border-white/10 hover:bg-white/10"
                                     onClick={() => setRequestItems(prev => ({
                                       ...prev,
                                       [product.id]: Math.max(0, (prev[product.id] || 0) - 1)
@@ -533,7 +545,7 @@ export default function SupervisorDashboard() {
                                   <Button
                                     variant="outline"
                                     size="icon"
-                                    className="h-7 w-7 border-slate-600"
+                                    className="h-7 w-7 border-white/10 hover:bg-white/10"
                                     onClick={() => setRequestItems(prev => ({
                                       ...prev,
                                       [product.id]: (prev[product.id] || 0) + 1
@@ -559,29 +571,28 @@ export default function SupervisorDashboard() {
                   value={requestNotes}
                   onChange={(e) => setRequestNotes(e.target.value)}
                   rows={2}
-                  className="bg-slate-800 border-slate-600 text-slate-200"
+                  className="bg-slate-800/50 border-white/10 text-slate-200 mt-1.5"
                   data-testid="input-request-notes"
                 />
               </div>
             </div>
 
             <DialogFooter className="gap-2 mt-4">
-              <Button variant="outline" onClick={() => setShowWarehouseRequest(false)} className="border-slate-600">
+              <Button variant="ghost" onClick={() => setShowWarehouseRequest(false)} className="text-slate-400">
                 Cancel
               </Button>
-              <Button 
+              <GlowButton 
+                variant="amber"
                 onClick={() => createRequestMutation.mutate()}
                 disabled={createRequestMutation.isPending || getTotalItemsInRequest() === 0}
-                className={requestPriority === 'Emergency' ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'}
-                data-testid="button-submit-warehouse-request"
               >
                 {createRequestMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <Truck className="h-4 w-4 mr-2" />
+                  <Truck className="h-4 w-4" />
                 )}
-                Submit
-              </Button>
+                Submit Request
+              </GlowButton>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -616,33 +627,22 @@ export default function SupervisorDashboard() {
         )}
 
         <TutorialHelpButton page="supervisor" />
-      </div>
+      </AnimatedBackground>
     );
   }
 
   const activeStand = stands.find(s => s.id === activeStandId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-24">
-      <header className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => setActiveStandId(null)} className="text-slate-400 hover:text-white -ml-2">
-            <ChevronLeft className="h-6 w-6" />
-          </Button>
-          <div className="flex-1 min-w-0">
-            <h1 className="font-bold text-lg text-slate-200 truncate">{activeStand?.name}</h1>
-            <p className="text-xs text-slate-500">
-              {activeStand?.status === 'Open' ? (
-                <span className="text-green-400">● Open</span>
-              ) : (
-                <span className="text-red-400">● Closed</span>
-              )}
-            </p>
-          </div>
-        </div>
-      </header>
+    <AnimatedBackground>
+      <PageHeader 
+        title={activeStand?.name || 'Stand'}
+        subtitle={activeStand?.status === 'Open' ? '● Open' : '● Closed'}
+        subtitleColor={activeStand?.status === 'Open' ? 'text-emerald-400' : 'text-red-400'}
+        backAction={() => setActiveStandId(null)}
+      />
 
-      <main className="p-4 max-w-lg mx-auto">
+      <main className="p-4 md:p-6 max-w-4xl mx-auto pb-24">
         {showScanner && (
            <div className="fixed inset-0 z-50 bg-black flex flex-col">
              <div className="relative flex-1 bg-black">
@@ -652,190 +652,215 @@ export default function SupervisorDashboard() {
                   videoConstraints={{ facingMode: "environment" }}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 border-2 border-white/50 m-12 rounded-lg pointer-events-none flex items-center justify-center">
-                  <span className="bg-black/50 text-white px-2 py-1 text-xs rounded">Align Product Code</span>
+                <div className="absolute inset-0 border-2 border-cyan-400/50 m-12 rounded-2xl pointer-events-none flex items-center justify-center">
+                  <span className="bg-black/50 text-white px-3 py-1.5 text-sm rounded-lg backdrop-blur-sm">Align Product Code</span>
                 </div>
              </div>
              <div className="p-6 bg-black flex justify-between items-center">
-               <Button variant="secondary" onClick={() => setShowScanner(false)}>Cancel</Button>
-               <Button onClick={() => setShowScanner(false)} className="bg-cyan-600 text-white">Capture</Button>
+               <Button variant="secondary" onClick={() => setShowScanner(false)} className="bg-slate-800">Cancel</Button>
+               <GlowButton variant="cyan" onClick={() => setShowScanner(false)}>Capture</GlowButton>
              </div>
            </div>
         )}
 
-        <Tabs defaultValue="inventory" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 mb-4 bg-slate-800/50">
-            <TabsTrigger value="inventory" className="data-[state=active]:bg-slate-700">Inventory</TabsTrigger>
-            <TabsTrigger value="compliance" className="data-[state=active]:bg-slate-700">Docs</TabsTrigger>
-            <TabsTrigger value="closeout" className="data-[state=active]:bg-slate-700" data-testid="tab-closeout">
-              <ClipboardCheck className="h-3 w-3 mr-1" />
-              Close
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="inventory" className="space-y-4">
-            <div className="flex gap-2 mb-4">
-              <Button className="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700" variant="outline" onClick={() => setShowScanner(true)}>
-                <QrCode className="mr-2 h-4 w-4 text-cyan-400" /> Scan Item
-              </Button>
-            </div>
+        <GlassCard gradient className="mb-6">
+          <Tabs defaultValue="inventory" className="w-full" onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 rounded-t-2xl rounded-b-none border-b border-white/5 p-1">
+              <TabsTrigger value="inventory" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl">
+                Inventory
+              </TabsTrigger>
+              <TabsTrigger value="compliance" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl">
+                Docs
+              </TabsTrigger>
+              <TabsTrigger value="closeout" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl" data-testid="tab-closeout">
+                <ClipboardCheck className="h-3 w-3 mr-1" />
+                Close
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="inventory" className="p-4 md:p-5 space-y-4">
+              <motion.button
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                className="w-full py-3 px-4 rounded-xl border border-white/10 bg-slate-800/50 flex items-center justify-center gap-2 hover:bg-slate-700/50 transition-colors"
+                onClick={() => setShowScanner(true)}
+              >
+                <QrCode className="h-4 w-4 text-cyan-400" /> 
+                <span className="text-slate-200 font-medium">Scan Item</span>
+              </motion.button>
 
-            <Accordion type="single" collapsible className="w-full space-y-2">
-              {items.map(item => {
-                 const standCounts = countSheets[activeStandId!] || {};
-                 const count = standCounts[item.id] || { startCount: 0, adds: 0, endCount: 0, spoilage: 0, sold: 0 };
-                 
-                 return (
-                  <AccordionItem key={item.id} value={item.id} className="bg-slate-900/80 border border-slate-700 rounded-lg px-4">
-                    <AccordionTrigger className="hover:no-underline py-3">
-                      <div className="flex items-center gap-3 w-full text-left">
-                        <div className={`p-2 rounded-full ${item.category === 'Beverage' ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400'}`}>
-                          {item.category === 'Beverage' ? <Beer className="h-4 w-4" /> : <UtensilsCrossed className="h-4 w-4" />}
+              <Accordion type="single" collapsible className="w-full space-y-2">
+                {items.map(item => {
+                   const standCounts = countSheets[activeStandId!] || {};
+                   const count = standCounts[item.id] || { startCount: 0, adds: 0, endCount: 0, spoilage: 0, sold: 0 };
+                   
+                   return (
+                    <AccordionItem key={item.id} value={item.id} className="bg-slate-800/40 border border-white/10 rounded-xl px-4">
+                      <AccordionTrigger className="hover:no-underline py-3">
+                        <div className="flex items-center gap-3 w-full text-left">
+                          <div className={cn(
+                            "p-2.5 rounded-xl",
+                            item.category === 'Beverage' 
+                              ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
+                              : 'bg-gradient-to-br from-orange-500 to-orange-600'
+                          )}>
+                            {item.category === 'Beverage' ? <Beer className="h-4 w-4 text-white" /> : <UtensilsCrossed className="h-4 w-4 text-white" />}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-bold text-sm text-slate-200 truncate">{item.name}</div>
+                            <div className="text-xs text-slate-500">Sold: <span className="font-mono font-bold text-cyan-400">{count.sold}</span></div>
+                          </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-bold text-sm text-slate-200 truncate">{item.name}</div>
-                          <div className="text-xs text-slate-500">Sold: <span className="font-mono font-bold text-cyan-400">{count.sold}</span></div>
+                      </AccordionTrigger>
+                      <AccordionContent className="pb-4">
+                        <div className="grid grid-cols-2 gap-4 pt-2">
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-slate-400 uppercase">Start</label>
+                            <Input 
+                              type="number" 
+                              className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-slate-200 rounded-xl" 
+                              value={count.startCount}
+                              onChange={(e) => updateCount(activeStandId!, item.id, 'startCount', parseInt(e.target.value) || 0)}
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-emerald-400 uppercase">Adds</label>
+                            <Input 
+                              type="number" 
+                              className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-emerald-400 rounded-xl" 
+                              value={count.adds}
+                              onChange={(e) => updateCount(activeStandId!, item.id, 'adds', parseInt(e.target.value) || 0)}
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-blue-400 uppercase">End</label>
+                            <Input 
+                              type="number" 
+                              className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-blue-400 rounded-xl" 
+                              value={count.endCount}
+                              onChange={(e) => updateCount(activeStandId!, item.id, 'endCount', parseInt(e.target.value) || 0)}
+                            />
+                          </div>
+                           <div className="space-y-1.5">
+                            <label className="text-xs font-medium text-red-400 uppercase">Spoilage</label>
+                            <Input 
+                              type="number" 
+                              className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-red-400 rounded-xl" 
+                              value={count.spoilage}
+                              onChange={(e) => updateCount(activeStandId!, item.id, 'spoilage', parseInt(e.target.value) || 0)}
+                            />
+                          </div>
                         </div>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="pb-4">
-                      <div className="grid grid-cols-2 gap-4 pt-2">
-                        <div className="space-y-1">
-                          <label className="text-xs font-medium text-slate-400 uppercase">Start</label>
-                          <Input 
-                            type="number" 
-                            className="text-center font-mono text-lg bg-slate-800 border-slate-600 text-slate-200" 
-                            value={count.startCount}
-                            onChange={(e) => updateCount(activeStandId!, item.id, 'startCount', parseInt(e.target.value) || 0)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-medium text-slate-400 uppercase">Adds</label>
-                          <Input 
-                            type="number" 
-                            className="text-center font-mono text-lg bg-slate-800 border-slate-600 text-green-400" 
-                            value={count.adds}
-                            onChange={(e) => updateCount(activeStandId!, item.id, 'adds', parseInt(e.target.value) || 0)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-medium text-slate-400 uppercase">End</label>
-                          <Input 
-                            type="number" 
-                            className="text-center font-mono text-lg bg-slate-800 border-slate-600 text-blue-400" 
-                            value={count.endCount}
-                            onChange={(e) => updateCount(activeStandId!, item.id, 'endCount', parseInt(e.target.value) || 0)}
-                          />
-                        </div>
-                         <div className="space-y-1">
-                          <label className="text-xs font-medium text-slate-400 uppercase">Spoilage</label>
-                          <Input 
-                            type="number" 
-                            className="text-center font-mono text-lg bg-slate-800 border-slate-600 text-red-400" 
-                            value={count.spoilage}
-                            onChange={(e) => updateCount(activeStandId!, item.id, 'spoilage', parseInt(e.target.value) || 0)}
-                          />
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                 )
-              })}
-            </Accordion>
-          </TabsContent>
-          
-          <TabsContent value="compliance">
-            <div className="space-y-4">
-              <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg text-sm text-amber-300">
-                <AlertCircle className="h-4 w-4 inline mr-2" />
-                Ensure all staff have signed the TABC compliance sheet.
-              </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                   )
+                })}
+              </Accordion>
+            </TabsContent>
+            
+            <TabsContent value="compliance" className="p-4 md:p-5">
+              <div className="space-y-4">
+                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-sm text-amber-300 flex items-center gap-3">
+                  <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                  <span>Ensure all staff have signed the TABC compliance sheet.</span>
+                </div>
 
-              <div className="space-y-2">
-                 {supervisorDocs.map(doc => (
-                   <div key={doc.id} className="border border-slate-700 rounded-lg p-4 bg-slate-900/80 flex items-center justify-between">
-                     <div className="flex items-center gap-3">
-                       {doc.category === 'Compliance' ? <AlertCircle className="text-amber-400" /> : 
-                        doc.category === 'Checklist' ? <CheckSquare className="text-green-400" /> :
-                        <FileText className="text-blue-400" />}
-                       <div>
-                         <div className="font-bold text-sm text-slate-200">{doc.title}</div>
-                         <div className="text-xs text-slate-500">{doc.category}</div>
+                <div className="space-y-2">
+                   {supervisorDocs.map(doc => (
+                     <motion.div 
+                       key={doc.id} 
+                       whileHover={{ x: 4 }}
+                       className="border border-white/10 rounded-xl p-4 bg-slate-800/40 flex items-center justify-between"
+                     >
+                       <div className="flex items-center gap-3">
+                         <div className={cn(
+                           "p-2 rounded-lg",
+                           doc.category === 'Compliance' ? 'bg-amber-500/20' : 
+                           doc.category === 'Checklist' ? 'bg-emerald-500/20' : 'bg-blue-500/20'
+                         )}>
+                           {doc.category === 'Compliance' ? <AlertCircle className="text-amber-400 w-4 h-4" /> : 
+                            doc.category === 'Checklist' ? <CheckSquare className="text-emerald-400 w-4 h-4" /> :
+                            <FileText className="text-blue-400 w-4 h-4" />}
+                         </div>
+                         <div>
+                           <div className="font-bold text-sm text-slate-200">{doc.title}</div>
+                           <div className="text-xs text-slate-500">{doc.category}</div>
+                         </div>
                        </div>
-                     </div>
-                     {doc.requiresSignature ? (
-                       <Button size="sm" variant="outline" className="gap-2 border-slate-600">
-                         <PenTool className="w-4 h-4" /> Sign
-                       </Button>
-                     ) : (
-                       <Button size="sm" variant="ghost" className="text-slate-400">View</Button>
-                     )}
-                   </div>
-                 ))}
-              </div>
-
-              {complianceError && (
-                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-md text-sm text-red-400 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4" />
-                  {complianceError}
+                       {doc.requiresSignature ? (
+                         <Button size="sm" variant="outline" className="gap-2 border-white/10 hover:bg-white/5">
+                           <PenTool className="w-3.5 h-3.5" /> Sign
+                         </Button>
+                       ) : (
+                         <Button size="sm" variant="ghost" className="text-slate-400">View</Button>
+                       )}
+                     </motion.div>
+                   ))}
                 </div>
-              )}
 
-              <div className="space-y-2 pt-4 border-t border-slate-700 mt-4">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-slate-300">Supervisor Signature</label>
-                    <Button variant="ghost" size="sm" onClick={clearSignature} disabled={complianceSubmitted} className="text-slate-400">
-                      Clear
-                    </Button>
+                {complianceError && (
+                  <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-sm text-red-400 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4" />
+                    {complianceError}
                   </div>
-                  <div className="border-2 border-slate-600 rounded-lg bg-white overflow-hidden">
-                    <SignatureCanvas
-                      ref={signatureRef}
-                      canvasProps={{
-                        className: 'w-full h-32',
-                        style: { width: '100%', height: '128px' }
-                      }}
-                      backgroundColor="white"
-                    />
-                  </div>
-              </div>
-              
-              {!complianceSubmitted ? (
-                <Button 
-                  className="w-full mt-4 bg-cyan-600 hover:bg-cyan-700"
-                  onClick={submitComplianceSheet}
-                  disabled={complianceSubmitting}
-                  data-testid="submit-compliance"
-                >
-                  {complianceSubmitting ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <Send className="h-4 w-4 mr-2" />
-                  )}
-                  Submit to Operations Manager
-                </Button>
-              ) : (
-                <div className="flex items-center justify-center gap-2 text-green-400 bg-green-500/10 p-3 rounded-lg mt-4 border border-green-500/30">
-                  <CheckCircle2 className="h-5 w-5" />
-                  <span className="font-medium">Submitted to Operations Manager</span>
+                )}
+
+                <div className="space-y-2 pt-4 border-t border-white/10 mt-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-slate-300">Supervisor Signature</label>
+                      <Button variant="ghost" size="sm" onClick={clearSignature} disabled={complianceSubmitted} className="text-slate-400">
+                        Clear
+                      </Button>
+                    </div>
+                    <div className="border-2 border-white/10 rounded-xl bg-white overflow-hidden">
+                      <SignatureCanvas
+                        ref={signatureRef}
+                        canvasProps={{
+                          className: 'w-full h-32',
+                          style: { width: '100%', height: '128px' }
+                        }}
+                        backgroundColor="white"
+                      />
+                    </div>
                 </div>
-              )}
-            </div>
-          </TabsContent>
+                
+                {!complianceSubmitted ? (
+                  <GlowButton 
+                    variant="cyan"
+                    className="w-full mt-4"
+                    onClick={submitComplianceSheet}
+                    disabled={complianceSubmitting}
+                  >
+                    {complianceSubmitting ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                    Submit to Operations Manager
+                  </GlowButton>
+                ) : (
+                  <div className="flex items-center justify-center gap-2 text-emerald-400 bg-emerald-500/10 p-3 rounded-xl mt-4 border border-emerald-500/30">
+                    <CheckCircle2 className="h-5 w-5" />
+                    <span className="font-medium">Submitted to Operations Manager</span>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
 
-          <TabsContent value="closeout">
-            <SupervisorClosingPanel
-              standId={activeStandId!}
-              standName={activeStand?.name || ''}
-              eventDate={new Date().toISOString().split('T')[0]}
-              supervisorId={currentUser?.id || ''}
-              supervisorName={currentUser?.name}
-            />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="closeout" className="p-4 md:p-5">
+              <SupervisorClosingPanel
+                standId={activeStandId!}
+                standName={activeStand?.name || ''}
+                eventDate={new Date().toISOString().split('T')[0]}
+                supervisorId={currentUser?.id || ''}
+                supervisorName={currentUser?.name}
+              />
+            </TabsContent>
+          </Tabs>
+        </GlassCard>
       </main>
       
       <TutorialHelpButton page="supervisor" />
-    </div>
+    </AnimatedBackground>
   );
 }
