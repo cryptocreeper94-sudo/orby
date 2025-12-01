@@ -13,19 +13,73 @@ Orby (getorby.io) is a comprehensive venue operations communications platform de
 - Brand: Aqua theme (#06B6D4), Orby mascot (aqua planet character)
 - Domain: getorby.io
 
-## System Architecture
-Orby is a full-stack PWA utilizing React frontend and Express backend with PostgreSQL/Drizzle ORM. The app is designed around role-based access and hierarchical communication.
+## Organizational Structure (Nissan Stadium Reference)
 
-**Core Roles:**
-- NPO Workers (frontline concessions)
-- Stand Leads (stand-level coordination)
-- Supervisors (section oversight, delivery requests)
-- Management (Ops Manager, Warehouse, Kitchen, IT)
+### Access Levels
+
+| Level | Role | Dashboard Access |
+|-------|------|------------------|
+| **Full (Generally)** | All Managers, Ops Controllers | See everything, do everything |
+| **Department** | Leads | See their queue + communicate up/down |
+| **Field** | Supervisors → Stand Leads → NPO | Scoped to section/stand |
+
+### Executive
+- Brian (RVP)
+- Megan (GM)
+
+### Command Level (Full Access - All-Seeing)
+- David (Ops Manager + IT Manager)
+- Sid (Special Ops Controller)
+- Jason (Dev + Field Ops - same purview as David/Sid)
+
+### Department Managers (Full Access - Generally)
+| Department | Manager(s) | Lead(s) |
+|------------|-----------|---------|
+| **Warehouse** | Jay (Purchasing Mgr - senior, fields event orders), AJ (Warehouse Mgr) | Sharrod |
+| **Kitchen/Culinary** | Chef Deb (Culinary Mgr), Bobby (Kitchen Mgr) | — |
+| **Bar** | Darby | — |
+| **Janitorial** | Shelia (Supervisor/Mgr) | Serena |
+| **IT** | David (also Ops Mgr) | Event IT collective |
+| **HR** | Brooke K | K.D. (Assistant) |
+| **Finance** | Pete | — |
+
+### Special Notes
+- **Brooke** (not Brooke K): Inventory Clerk/Supervisor - works warehouse during week, Stand Supervisor during events
+- **IT Team**: Collective of event-day IT staff, no formal lead - David manages directly
+
+### Field Hierarchy
+```
+Stand Supervisors (section oversight, can request from departments)
+    ↓
+Stand Leads (stand flow only, communicate to Supervisors)
+    ↓
+NPO Workers (frontline concessions)
+```
+
+### Communication Rules
+- **Stand Leads**: NO direct access to Warehouse/Kitchen/IT/Janitorial - must go through Supervisor
+- **Supervisors**: CAN request from all departments
+- **Visibility**: Supervisor controls what Stand Lead sees, but Managers can override
+- **All Managers**: Equal access, can see everything, can intervene anywhere
+
+## System Architecture
+Orby is a full-stack PWA utilizing React frontend and Express backend with PostgreSQL/Drizzle ORM.
+
+**Core Roles in App:**
+- Developer (Jason - unified with Ops Manager view + dev tools)
 - Admin
-- Developer
+- Management (Generally level - all managers)
+- IT
+- Warehouse
+- Kitchen
+- Bar
+- Janitorial
+- Stand Supervisor
+- Stand Lead
+- NPO Worker
 
 **Key Features:**
-1. **Smart Message Routing** - Issues automatically route to the right role (Cooling → Warehouse, Power → IT)
+1. **Smart Message Routing** - Issues automatically route to the right department
 2. **Delivery Tracking** - Full lifecycle: Requested → Approved → Picking → On the Way (ETA) → Delivered
 3. **Status Dashboard** - Ops Manager sees all stands, issues, and deliveries in one view
 4. **Quick Messages** - Pre-built responses for common situations
@@ -35,12 +89,6 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 8. **AI Scanning** - Photo coolers for auto-count, scan handwritten sheets
 9. **Offline Mode** - Works when radio signals don't
 10. **Full Audit Trail** - Everything documented for accountability
-
-**Communication Hierarchy:**
-- Supervisors can request from Warehouse/Kitchen (Stand Leads cannot)
-- Issues route to appropriate management roles based on category
-- Two-way threaded conversations with quick responses
-- Delivery status updates with ETAs
 
 **Technical Stack:**
 - Frontend: React, Wouter (routing), Zustand (state), TailwindCSS
