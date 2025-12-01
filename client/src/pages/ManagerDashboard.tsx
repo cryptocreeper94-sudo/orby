@@ -177,15 +177,15 @@ export default function ManagerDashboard() {
                 </SheetTrigger>
                 <SheetContent side="left" className="bg-slate-900 border-slate-700">
                   <nav className="grid gap-4 text-lg font-medium pt-8">
-                    <Link href="/messages" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
+                    <Link href="/messages" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400" data-testid="nav-messages">
                       <MessageSquare className="h-5 w-5" />
                       Messages
                     </Link>
-                    <Link href="/supervisor" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
+                    <Link href="/supervisor" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400" data-testid="nav-supervisor">
                       <Users className="h-5 w-5" />
                       Supervisor View
                     </Link>
-                    <Link href="/warehouse" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
+                    <Link href="/warehouse" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400" data-testid="nav-warehouse">
                       <Package className="h-5 w-5" />
                       Warehouse
                     </Link>
@@ -267,6 +267,7 @@ export default function ManagerDashboard() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.1 }}
                             className="flex items-center justify-between p-3 bg-red-500/10 rounded-xl border border-red-500/20"
+                            data-testid={`emergency-delivery-${req.id}`}
                           >
                             <div className="flex items-center gap-3">
                               <div className={`p-2 rounded-lg border ${departmentColors[req.department]}`}>
@@ -324,6 +325,7 @@ export default function ManagerDashboard() {
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: idx * 0.05 }}
                               className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+                              data-testid={`delivery-${req.id}`}
                             >
                               <div className="flex items-center gap-3">
                                 <div className={`p-2 rounded-lg border ${departmentColors[req.department]}`}>
@@ -388,6 +390,7 @@ export default function ManagerDashboard() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.1 }}
                         className={`flex items-center justify-between p-3 rounded-xl border ${alert.priority === 'Emergency' ? 'bg-red-500/10 border-red-500/30' : 'bg-cyan-500/10 border-cyan-500/20'}`}
+                        data-testid={`it-alert-${alert.id}`}
                       >
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-lg bg-cyan-500/20">
@@ -439,6 +442,7 @@ export default function ManagerDashboard() {
                           animate={{ opacity: 1 }}
                           transition={{ delay: idx * 0.03 }}
                           className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                          data-testid={`stand-${stand.id}`}
                         >
                           <div className="flex items-center gap-3">
                             <div className={`w-2 h-2 rounded-full ${standStatusColors[stand.status]}`} />
