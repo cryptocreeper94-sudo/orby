@@ -194,11 +194,12 @@ export default function ManagerDashboard() {
         </Sheet>
 
         <div className="flex-1 flex items-center gap-3">
-          <div className="w-8 h-8">
+          <div className="relative w-16 h-16 flex items-center justify-center -my-1">
+            <div className="absolute inset-0 bg-cyan-400/30 rounded-full blur-lg animate-pulse" />
             <img 
-              src="/attached_assets/image_1764551627990.png" 
+              src="/orby-mascot.png" 
               alt="Orby"
-              className="w-full h-full object-contain"
+              className="relative w-16 h-16 object-contain drop-shadow-[0_0_12px_rgba(6,182,212,0.7)]"
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}

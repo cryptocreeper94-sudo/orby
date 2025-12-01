@@ -63,17 +63,19 @@ export default function LoginPage() {
         <div className="w-full p-8 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 shadow-2xl">
           {/* Header with Orby Mascot */}
           <div className="flex flex-col items-center text-center mb-8">
-            <div className="w-24 h-24 mb-6 relative">
+            <div className="w-28 h-28 mb-6 relative flex items-center justify-center">
+              <div className="absolute inset-0 bg-cyan-400/20 rounded-full blur-xl animate-pulse" />
               <img 
-                src="/attached_assets/image_1764551627990.png" 
+                src="/orby-mascot.png" 
                 alt="Orby" 
-                className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.5)]"
+                className="relative w-24 h-24 object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.6)]"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  const fallback = e.currentTarget.parentElement?.querySelector('.fallback-icon');
+                  if (fallback) fallback.classList.remove('hidden');
                 }}
               />
-              <div className="hidden w-20 h-20 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-400/30 absolute inset-0 m-auto">
+              <div className="hidden fallback-icon absolute w-20 h-20 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-400/30">
                 <span className="text-4xl">🪐</span>
               </div>
             </div>
