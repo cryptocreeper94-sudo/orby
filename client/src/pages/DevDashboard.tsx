@@ -26,20 +26,20 @@ function AccordionSection({ title, icon, children, defaultOpen = false, accentCo
   
   const colorClasses: Record<string, string> = {
     cyan: "border-cyan-500/50 bg-cyan-500/10",
-    amber: "border-amber-500/50 bg-amber-500/10",
-    green: "border-green-500/50 bg-green-500/10",
-    red: "border-red-500/50 bg-red-500/10",
-    purple: "border-purple-500/50 bg-purple-500/10",
-    blue: "border-blue-500/50 bg-blue-500/10",
+    teal: "border-teal-500/50 bg-teal-500/10",
+    green: "border-emerald-500/50 bg-emerald-500/10",
+    red: "border-rose-500/50 bg-rose-500/10",
+    purple: "border-violet-500/50 bg-violet-500/10",
+    blue: "border-sky-500/50 bg-sky-500/10",
   };
 
   const textColors: Record<string, string> = {
     cyan: "text-cyan-400",
-    amber: "text-amber-400",
-    green: "text-green-400",
-    red: "text-red-400",
-    purple: "text-purple-400",
-    blue: "text-blue-400",
+    teal: "text-teal-400",
+    green: "text-emerald-400",
+    red: "text-rose-400",
+    purple: "text-violet-400",
+    blue: "text-sky-400",
   };
 
   return (
@@ -93,24 +93,24 @@ interface RoleButtonProps {
 function RoleButton({ name, description, pin, route, icon, color, onClick }: RoleButtonProps) {
   const colorClasses: Record<string, string> = {
     cyan: "hover:border-cyan-500 hover:bg-cyan-500/10",
-    amber: "hover:border-amber-500 hover:bg-amber-500/10",
-    green: "hover:border-green-500 hover:bg-green-500/10",
-    red: "hover:border-red-500 hover:bg-red-500/10",
-    purple: "hover:border-purple-500 hover:bg-purple-500/10",
-    blue: "hover:border-blue-500 hover:bg-blue-500/10",
-    pink: "hover:border-pink-500 hover:bg-pink-500/10",
-    orange: "hover:border-orange-500 hover:bg-orange-500/10",
+    teal: "hover:border-teal-500 hover:bg-teal-500/10",
+    green: "hover:border-emerald-500 hover:bg-emerald-500/10",
+    red: "hover:border-rose-500 hover:bg-rose-500/10",
+    purple: "hover:border-violet-500 hover:bg-violet-500/10",
+    blue: "hover:border-sky-500 hover:bg-sky-500/10",
+    pink: "hover:border-pink-400 hover:bg-pink-400/10",
+    sky: "hover:border-sky-400 hover:bg-sky-400/10",
   };
 
   const textColors: Record<string, string> = {
     cyan: "text-cyan-400",
-    amber: "text-amber-400",
-    green: "text-green-400",
-    red: "text-red-400",
-    purple: "text-purple-400",
-    blue: "text-blue-400",
+    teal: "text-teal-400",
+    green: "text-emerald-400",
+    red: "text-rose-400",
+    purple: "text-violet-400",
+    blue: "text-sky-400",
     pink: "text-pink-400",
-    orange: "text-orange-400",
+    sky: "text-sky-400",
   };
 
   return (
@@ -142,9 +142,9 @@ interface StatCardProps {
 
 function StatCard({ label, value, icon, status = 'good' }: StatCardProps) {
   const statusColors = {
-    good: "text-green-400",
-    warning: "text-amber-400",
-    error: "text-red-400",
+    good: "text-emerald-400",
+    warning: "text-cyan-300",
+    error: "text-rose-400",
   };
 
   return (
@@ -213,13 +213,13 @@ export default function DevDashboard() {
       { name: "Special Ops", description: "Sid's controller view", pin: "2468", route: "/ops-command", icon: <Zap className="h-5 w-5" />, color: "purple" },
     ],
     management: [
-      { name: "Warehouse Mgr", description: "Jay/AJ - purchasing & receiving", pin: "3333", route: "/warehouse", icon: <Package className="h-5 w-5" />, color: "amber" },
-      { name: "Kitchen Mgr", description: "Chef Deb/Bobby - culinary ops", pin: "4444", route: "/kitchen", icon: <ChefHat className="h-5 w-5" />, color: "orange" },
+      { name: "Warehouse Mgr", description: "Jay/AJ - purchasing & receiving", pin: "3333", route: "/warehouse", icon: <Package className="h-5 w-5" />, color: "teal" },
+      { name: "Kitchen Mgr", description: "Chef Deb/Bobby - culinary ops", pin: "4444", route: "/kitchen", icon: <ChefHat className="h-5 w-5" />, color: "sky" },
       { name: "Bar Manager", description: "Darby - beverage operations", pin: "5555", route: "/warehouse", icon: <Wine className="h-5 w-5" />, color: "pink" },
       { name: "IT Manager", description: "David - tech & systems", pin: "9999", route: "/it", icon: <Monitor className="h-5 w-5" />, color: "cyan" },
     ],
     field: [
-      { name: "Supervisor", description: "Section oversight, department requests", pin: "5678", route: "/supervisor", icon: <UserCog className="h-5 w-5" />, color: "amber" },
+      { name: "Supervisor", description: "Section oversight, department requests", pin: "5678", route: "/supervisor", icon: <UserCog className="h-5 w-5" />, color: "teal" },
       { name: "Stand Lead", description: "Stand flow, worker direction", pin: "7777", route: "/standlead", icon: <Users className="h-5 w-5" />, color: "green" },
       { name: "NPO Worker", description: "Frontline concessions", pin: "8888", route: "/npo", icon: <Sparkles className="h-5 w-5" />, color: "blue" },
     ],
@@ -309,7 +309,7 @@ export default function DevDashboard() {
                 : 'All clear - No active incidents'}
             </div>
           </div>
-          <AlertTriangle className={cn("h-4 w-4", systemStats.activeEmergencies > 0 ? "text-yellow-300" : "text-slate-400")} />
+          <AlertTriangle className={cn("h-4 w-4", systemStats.activeEmergencies > 0 ? "text-cyan-300" : "text-slate-400")} />
         </Button>
 
         {/* Role Sections */}
@@ -330,7 +330,7 @@ export default function DevDashboard() {
         <AccordionSection 
           title="Department Managers" 
           icon={<UserCog className="h-5 w-5" />}
-          accentColor="amber"
+          accentColor="teal"
           badge={4}
         >
           <div className="space-y-2">
