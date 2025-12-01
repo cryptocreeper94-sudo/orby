@@ -7,10 +7,12 @@ import {
   Wine, Sparkles, Users, Radio, AlertTriangle, Truck,
   MessageSquare, Activity, ChevronDown, ChevronRight,
   Zap, Eye, RefreshCw, Trash2, Clock, CheckCircle2,
-  XCircle, Wifi, WifiOff, Siren
+  XCircle, Wifi, WifiOff, Siren, FlaskConical
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWebSocket, useWebSocketStore } from "@/lib/websocket";
+import { useMode } from "@/lib/ModeContext";
+import { SandboxStatusCompact } from "@/components/SandboxBanner";
 
 interface AccordionSectionProps {
   title: string;
@@ -165,6 +167,7 @@ export default function DevDashboard() {
   const [, setLocation] = useLocation();
   const { isConnected } = useWebSocket(currentUser?.id ?? undefined);
   const wsStore = useWebSocketStore();
+  const { isSandbox, enterSandbox, exitSandbox } = useMode();
   
   const [systemStats, setSystemStats] = useState({
     activeUsers: 0,
@@ -247,6 +250,7 @@ export default function DevDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <SandboxStatusCompact />
             {isConnected ? (
               <div className="flex items-center gap-1 text-green-400 text-xs">
                 <Wifi className="h-4 w-4" />
@@ -363,6 +367,55 @@ export default function DevDashboard() {
             {roles.admin.map(role => (
               <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
             ))}
+          </div>
+        </AccordionSection>
+
+        {/* Sandbox Mode Toggle */}
+        <AccordionSection 
+          title="Sandbox Mode" 
+          icon={<FlaskConical className="h-5 w-5" />}
+          defaultOpen={isSandbox}
+          accentColor="cyan"
+          badge={isSandbox ? "Active" : undefined}
+        >
+          <div className="space-y-3">
+            <p className="text-xs text-slate-400">
+              Train staff, demo to stakeholders, or test features safely without affecting live operations.
+            </p>
+            {isSandbox ? (
+              <Button 
+                onClick={exitSandbox}
+                className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500"
+                data-testid="button-exit-sandbox"
+              >
+                <FlaskConical className="h-4 w-4 mr-2" />
+                Exit Sandbox Mode
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => enterSandbox('/dev')}
+                variant="outline"
+                className="w-full border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/20"
+                data-testid="button-enter-sandbox"
+              >
+                <FlaskConical className="h-4 w-4 mr-2" />
+                Enter Sandbox Mode
+              </Button>
+            )}
+            <div className="text-[10px] text-slate-500 space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>All changes are simulated - no real data affected</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
+                <span>Demo fixtures loaded automatically</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-violet-500"></span>
+                <span>Clear visual indicator when in sandbox</span>
+              </div>
+            </div>
           </div>
         </AccordionSection>
 

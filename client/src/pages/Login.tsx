@@ -7,7 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, FlaskConical } from "lucide-react";
+import { useMode } from "@/lib/ModeContext";
 
 const loginSchema = z.object({
   pin: z.string().length(4, "PIN must be 4 digits"),
@@ -17,6 +18,7 @@ export default function LoginPage() {
   const [, setLocation] = useLocation();
   const login = useStore((state) => state.login);
   const currentUser = useStore((state) => state.currentUser);
+  const { enterSandbox } = useMode();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -139,7 +141,7 @@ export default function LoginPage() {
                 Verify Identity
               </Button>
               
-              <div className="mt-6 pt-4 border-t border-white/10">
+              <div className="mt-6 pt-4 border-t border-white/10 space-y-3">
                 <Button 
                   type="button"
                   variant="outline"
@@ -152,6 +154,20 @@ export default function LoginPage() {
                 >
                   <ShieldCheck className="mr-2 h-4 w-4" />
                   Dev Login
+                </Button>
+                <Button 
+                  type="button"
+                  variant="outline"
+                  className="w-full h-10 border-teal-500/50 bg-teal-500/10 text-teal-300 hover:bg-teal-500/20 hover:border-teal-400"
+                  onClick={() => {
+                    enterSandbox('/dev');
+                    form.setValue("pin", "0424");
+                    setTimeout(() => form.handleSubmit(onSubmit)(), 100);
+                  }}
+                  data-testid="button-sandbox-login"
+                >
+                  <FlaskConical className="mr-2 h-4 w-4" />
+                  Try Sandbox Mode
                 </Button>
               </div>
               

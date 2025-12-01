@@ -3,6 +3,9 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ModeProvider } from "@/lib/ModeContext";
+import { SandboxBanner } from "@/components/SandboxBanner";
+import { SandboxWelcome } from "@/components/SandboxWelcome";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/Login";
 import SetPinPage from "@/pages/SetPin";
@@ -87,23 +90,27 @@ function TwinklingStars() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-          <TwinklingStars />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <img 
-              src={orbyCommanderImg} 
-              alt="" 
-              className="w-[65vmin] h-[65vmin] object-contain opacity-[0.06] select-none drop-shadow-[0_0_30px_rgba(6,182,212,0.15)]"
-              aria-hidden="true"
-            />
+      <ModeProvider>
+        <TooltipProvider>
+          <SandboxBanner />
+          <SandboxWelcome />
+          <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+            <TwinklingStars />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <img 
+                src={orbyCommanderImg} 
+                alt="" 
+                className="w-[65vmin] h-[65vmin] object-contain opacity-[0.06] select-none drop-shadow-[0_0_30px_rgba(6,182,212,0.15)]"
+                aria-hidden="true"
+              />
+            </div>
           </div>
-        </div>
-        <div className="relative z-10">
-          <Toaster />
-          <Router />
-        </div>
-      </TooltipProvider>
+          <div className="relative z-10 sandbox-content">
+            <Toaster />
+            <Router />
+          </div>
+        </TooltipProvider>
+      </ModeProvider>
     </QueryClientProvider>
   );
 }
