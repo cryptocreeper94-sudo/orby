@@ -7,12 +7,13 @@ import {
   Wine, Sparkles, Users, Radio, AlertTriangle, Truck,
   MessageSquare, Activity, ChevronDown, ChevronRight,
   Zap, Eye, RefreshCw, Trash2, Clock, CheckCircle2,
-  XCircle, Wifi, WifiOff, Siren, FlaskConical
+  XCircle, Wifi, WifiOff, Siren, FlaskConical, ClipboardList
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWebSocket, useWebSocketStore } from "@/lib/websocket";
 import { useMode } from "@/lib/ModeContext";
 import { SandboxStatusCompact } from "@/components/SandboxBanner";
+import { FeatureInventory } from "@/components/FeatureInventory";
 
 interface AccordionSectionProps {
   title: string;
@@ -497,6 +498,17 @@ export default function DevDashboard() {
             <Trash2 className="h-4 w-4 mr-2" />
             Reset All Local Data
           </Button>
+        </AccordionSection>
+
+        {/* Feature Inventory */}
+        <AccordionSection
+          title="Feature Inventory"
+          icon={<ClipboardList className="h-5 w-5" />}
+          defaultOpen={false}
+          accentColor="purple"
+          badge="Track"
+        >
+          <FeatureInventory />
         </AccordionSection>
 
         {/* System Status */}
