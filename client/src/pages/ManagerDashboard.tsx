@@ -298,19 +298,19 @@ export default function ManagerDashboard() {
                       </div>
                       <span className="font-bold text-slate-200">Active Deliveries</span>
                     </div>
-                    <Button variant="ghost" size="sm" className="text-cyan-400 hover:bg-cyan-500/10">
+                    <Button variant="ghost" size="sm" className="text-cyan-400 hover:bg-cyan-500/10" data-testid="button-view-all-deliveries">
                       View All <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
                 </GlassCardHeader>
                 <GlassCardContent className="pt-0">
-                  <Tabs defaultValue="all" className="w-full">
+                  <Tabs defaultValue="all" className="w-full" data-testid="delivery-tabs">
                     <TabsList className="grid grid-cols-5 bg-white/5 mb-4">
-                      <TabsTrigger value="all" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">All</TabsTrigger>
-                      <TabsTrigger value="Warehouse" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">Warehouse</TabsTrigger>
-                      <TabsTrigger value="Kitchen" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">Kitchen</TabsTrigger>
-                      <TabsTrigger value="Bar" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">Bar</TabsTrigger>
-                      <TabsTrigger value="IT" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">IT</TabsTrigger>
+                      <TabsTrigger value="all" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-all">All</TabsTrigger>
+                      <TabsTrigger value="Warehouse" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-warehouse">Warehouse</TabsTrigger>
+                      <TabsTrigger value="Kitchen" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-kitchen">Kitchen</TabsTrigger>
+                      <TabsTrigger value="Bar" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-bar">Bar</TabsTrigger>
+                      <TabsTrigger value="IT" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-it">IT</TabsTrigger>
                     </TabsList>
                     
                     {['all', 'Warehouse', 'Kitchen', 'Bar', 'IT'].map(tab => (
