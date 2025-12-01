@@ -2321,14 +2321,139 @@ Return your response as a JSON object with this exact structure:
 
   app.patch("/api/emergency-alerts/:id/resolve", async (req: Request, res: Response) => {
     try {
-      const { userId, notes } = req.body;
-      await storage.resolveEmergencyAlert(req.params.id, userId, notes);
+      const { userId, notes, resolutionType } = req.body;
+      await storage.resolveEmergencyAlert(req.params.id, userId, notes, resolutionType);
       const updated = await storage.getEmergencyAlert(req.params.id);
+      await createAuditLog(userId, 'EmergencyResolve', 'emergency', req.params.id, { notes, resolutionType }, updated?.standId ?? undefined, req);
       wsServer.broadcastEmergency(updated);
       res.json({ success: true, alert: updated });
     } catch (error) {
       console.error("Error resolving alert:", error);
       res.status(500).json({ error: "Failed to resolve alert" });
+    }
+  });
+
+  app.patch("/api/emergency-alerts/:id/status", async (req: Request, res: Response) => {
+    try {
+      const { status, userId } = req.body;
+      await storage.updateEmergencyAlertStatus(req.params.id, status, userId);
+      const updated = await storage.getEmergencyAlert(req.params.id);
+      wsServer.broadcastEmergency(updated);
+      res.json({ success: true, alert: updated });
+    } catch (error) {
+      console.error("Error updating alert status:", error);
+      res.status(500).json({ error: "Failed to update alert status" });
+    }
+  });
+
+  app.patch("/api/emergency-alerts/:id/assign", async (req: Request, res: Response) => {
+    try {
+      const { responderId, eta, userId } = req.body;
+      await storage.assignResponderToAlert(req.params.id, responderId, eta);
+      const updated = await storage.getEmergencyAlert(req.params.id);
+      await createAuditLog(userId || 'system', 'EmergencyAssign', 'emergency', req.params.id, { responderId, eta }, updated?.standId ?? undefined, req);
+      wsServer.broadcastEmergency(updated);
+      res.json({ success: true, alert: updated });
+    } catch (error) {
+      console.error("Error assigning responder:", error);
+      res.status(500).json({ error: "Failed to assign responder" });
+    }
+  });
+
+  app.patch("/api/emergency-alerts/:id/escalate", async (req: Request, res: Response) => {
+    try {
+      const { toLevel, reason, escalatedBy } = req.body;
+      await storage.escalateEmergencyAlert(req.params.id, toLevel, reason, escalatedBy);
+      const updated = await storage.getEmergencyAlert(req.params.id);
+      await createAuditLog(escalatedBy || 'system', 'EmergencyEscalate', 'emergency', req.params.id, { toLevel, reason }, updated?.standId ?? undefined, req);
+      wsServer.broadcastEmergency(updated);
+      res.json({ success: true, alert: updated });
+    } catch (error) {
+      console.error("Error escalating alert:", error);
+      res.status(500).json({ error: "Failed to escalate alert" });
+    }
+  });
+
+  app.get("/api/emergency-alerts/status/:status", async (req: Request, res: Response) => {
+    try {
+      const alerts = await storage.getEmergencyAlertsByStatus(req.params.status as any);
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching alerts by status:", error);
+      res.status(500).json({ error: "Failed to fetch alerts by status" });
+    }
+  });
+
+  app.get("/api/emergency-alerts/needs-escalation", async (_req: Request, res: Response) => {
+    try {
+      const alerts = await storage.getEmergencyAlertsNeedingEscalation();
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error fetching alerts needing escalation:", error);
+      res.status(500).json({ error: "Failed to fetch alerts needing escalation" });
+    }
+  });
+
+  app.get("/api/emergency-alerts/:id/escalation-history", async (req: Request, res: Response) => {
+    try {
+      const history = await storage.getEscalationHistoryByAlert(req.params.id);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching escalation history:", error);
+      res.status(500).json({ error: "Failed to fetch escalation history" });
+    }
+  });
+
+  // ============ EMERGENCY RESPONDERS ============
+  app.get("/api/emergency-responders", async (_req: Request, res: Response) => {
+    try {
+      const responders = await storage.getOnDutyResponders();
+      res.json(responders);
+    } catch (error) {
+      console.error("Error fetching responders:", error);
+      res.status(500).json({ error: "Failed to fetch responders" });
+    }
+  });
+
+  app.get("/api/emergency-responders/available/:type", async (req: Request, res: Response) => {
+    try {
+      const responders = await storage.getAvailableRespondersForType(req.params.type);
+      res.json(responders);
+    } catch (error) {
+      console.error("Error fetching available responders:", error);
+      res.status(500).json({ error: "Failed to fetch available responders" });
+    }
+  });
+
+  app.post("/api/emergency-responders", async (req: Request, res: Response) => {
+    try {
+      const responder = await storage.createEmergencyResponder(req.body);
+      res.status(201).json(responder);
+    } catch (error) {
+      console.error("Error creating responder:", error);
+      res.status(500).json({ error: "Failed to create responder" });
+    }
+  });
+
+  app.patch("/api/emergency-responders/:id/duty", async (req: Request, res: Response) => {
+    try {
+      const { isOnDuty } = req.body;
+      await storage.updateResponderDutyStatus(req.params.id, isOnDuty);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating responder duty status:", error);
+      res.status(500).json({ error: "Failed to update responder duty status" });
+    }
+  });
+
+  app.patch("/api/emergency-responders/:id/location", async (req: Request, res: Response) => {
+    try {
+      const { location, gpsLat, gpsLng } = req.body;
+      await storage.updateResponderLocation(req.params.id, location, gpsLat, gpsLng);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating responder location:", error);
+      res.status(500).json({ error: "Failed to update responder location" });
     }
   });
 

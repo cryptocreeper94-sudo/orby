@@ -5,7 +5,8 @@ import {
   closingChecklists, closingChecklistTasks, spoilageReports, spoilageItems, voucherReports, DEFAULT_CLOSING_TASKS,
   documentSubmissions, menuBoards, menuSlides,
   warehouseCategories, warehouseProducts, warehouseStock, warehouseParLevels, warehouseRequests, warehouseRequestItems,
-  auditLogs, emergencyAlerts, orbitRosters, orbitShifts, deliveryRequests,
+  auditLogs, emergencyAlerts, emergencyResponders, emergencyEscalationHistory, emergencyAlertNotifications,
+  orbitRosters, orbitShifts, deliveryRequests,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -41,6 +42,9 @@ import {
   type WarehouseRequestItem, type InsertWarehouseRequestItem,
   type AuditLog, type InsertAuditLog,
   type EmergencyAlert, type InsertEmergencyAlert,
+  type EmergencyResponder, type InsertEmergencyResponder,
+  type EmergencyEscalationHistory, type InsertEmergencyEscalationHistory,
+  type EmergencyAlertNotification, type InsertEmergencyAlertNotification,
   type OrbitRoster, type InsertOrbitRoster,
   type OrbitShift, type InsertOrbitShift
 } from "@shared/schema";
@@ -286,13 +290,37 @@ export interface IStorage {
   getAuditLogsByUser(userId: string, limit?: number): Promise<AuditLog[]>;
   getAuditLogsByAction(action: AuditLog['action'], limit?: number): Promise<AuditLog[]>;
 
-  // ============ EMERGENCY ALERTS ============
+  // ============ EMERGENCY COMMAND CENTER ============
   createEmergencyAlert(alert: InsertEmergencyAlert): Promise<EmergencyAlert>;
   getActiveEmergencyAlerts(): Promise<EmergencyAlert[]>;
   getAllEmergencyAlerts(): Promise<EmergencyAlert[]>;
   getEmergencyAlert(id: string): Promise<EmergencyAlert | undefined>;
   acknowledgeEmergencyAlert(id: string, userId: string): Promise<void>;
-  resolveEmergencyAlert(id: string, userId: string, notes?: string): Promise<void>;
+  resolveEmergencyAlert(id: string, userId: string, notes?: string, resolutionType?: string): Promise<void>;
+  updateEmergencyAlertStatus(id: string, status: EmergencyAlert['status'], userId?: string): Promise<void>;
+  assignResponderToAlert(alertId: string, responderId: string, eta?: number): Promise<void>;
+  escalateEmergencyAlert(alertId: string, toLevel: EmergencyAlert['escalationLevel'], reason: string, escalatedBy?: string): Promise<void>;
+  getEmergencyAlertsByStatus(status: EmergencyAlert['status']): Promise<EmergencyAlert[]>;
+  getEmergencyAlertsNeedingEscalation(): Promise<EmergencyAlert[]>;
+  
+  // Emergency Responders
+  createEmergencyResponder(responder: InsertEmergencyResponder): Promise<EmergencyResponder>;
+  getEmergencyResponder(id: string): Promise<EmergencyResponder | undefined>;
+  getEmergencyResponderByUser(userId: string): Promise<EmergencyResponder | undefined>;
+  getOnDutyResponders(): Promise<EmergencyResponder[]>;
+  getAvailableRespondersForType(type: string): Promise<EmergencyResponder[]>;
+  updateResponderDutyStatus(id: string, isOnDuty: boolean): Promise<void>;
+  updateResponderLocation(id: string, location: string, gpsLat?: string, gpsLng?: string): Promise<void>;
+  
+  // Escalation History
+  createEscalationHistory(history: InsertEmergencyEscalationHistory): Promise<EmergencyEscalationHistory>;
+  getEscalationHistoryByAlert(alertId: string): Promise<EmergencyEscalationHistory[]>;
+  
+  // Alert Notifications
+  createAlertNotification(notification: InsertEmergencyAlertNotification): Promise<EmergencyAlertNotification>;
+  getUnreadAlertNotifications(userId: string): Promise<EmergencyAlertNotification[]>;
+  markAlertNotificationRead(id: string): Promise<void>;
+  markAlertNotificationResponded(id: string): Promise<void>;
 
   // ============ ORBIT STAFFING INTEGRATION ============
   createOrbitRoster(roster: InsertOrbitRoster): Promise<OrbitRoster>;
@@ -1526,9 +1554,13 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
-  // ============ EMERGENCY ALERTS ============
+  // ============ EMERGENCY COMMAND CENTER ============
   async createEmergencyAlert(alert: InsertEmergencyAlert): Promise<EmergencyAlert> {
-    const [created] = await db.insert(emergencyAlerts).values(alert).returning();
+    const [created] = await db.insert(emergencyAlerts).values({
+      ...alert,
+      status: 'Reported',
+      escalationLevel: 'Level1'
+    }).returning();
     return created;
   }
 
@@ -1550,17 +1582,165 @@ export class DatabaseStorage implements IStorage {
   async acknowledgeEmergencyAlert(id: string, userId: string): Promise<void> {
     await db.update(emergencyAlerts).set({
       acknowledgedBy: userId,
-      acknowledgedAt: new Date()
+      acknowledgedAt: new Date(),
+      status: 'Dispatched',
+      updatedAt: new Date()
     }).where(eq(emergencyAlerts.id, id));
   }
 
-  async resolveEmergencyAlert(id: string, userId: string, notes?: string): Promise<void> {
+  async resolveEmergencyAlert(id: string, userId: string, notes?: string, resolutionType?: string): Promise<void> {
     await db.update(emergencyAlerts).set({
       isActive: false,
       resolvedBy: userId,
       resolvedAt: new Date(),
-      resolutionNotes: notes
+      resolutionNotes: notes,
+      resolutionType: resolutionType,
+      status: 'Resolved',
+      updatedAt: new Date()
     }).where(eq(emergencyAlerts.id, id));
+  }
+
+  async updateEmergencyAlertStatus(id: string, status: EmergencyAlert['status'], userId?: string): Promise<void> {
+    const updates: any = { status, updatedAt: new Date() };
+    
+    if (status === 'OnScene') {
+      updates.arrivedAt = new Date();
+    } else if (status === 'Stabilized') {
+      updates.stabilizedAt = new Date();
+    }
+    
+    await db.update(emergencyAlerts).set(updates).where(eq(emergencyAlerts.id, id));
+  }
+
+  async assignResponderToAlert(alertId: string, responderId: string, eta?: number): Promise<void> {
+    await db.update(emergencyAlerts).set({
+      assignedResponderId: responderId,
+      assignedAt: new Date(),
+      responderEta: eta,
+      status: 'Dispatched',
+      updatedAt: new Date()
+    }).where(eq(emergencyAlerts.id, alertId));
+  }
+
+  async escalateEmergencyAlert(alertId: string, toLevel: EmergencyAlert['escalationLevel'], reason: string, escalatedBy?: string): Promise<void> {
+    const alert = await this.getEmergencyAlert(alertId);
+    if (!alert) return;
+    
+    await db.update(emergencyAlerts).set({
+      escalationLevel: toLevel,
+      lastEscalatedAt: new Date(),
+      status: 'Escalated',
+      updatedAt: new Date()
+    }).where(eq(emergencyAlerts.id, alertId));
+    
+    await db.insert(emergencyEscalationHistory).values({
+      alertId,
+      fromLevel: alert.escalationLevel || 'Level1',
+      toLevel,
+      reason,
+      escalatedBy
+    });
+  }
+
+  async getEmergencyAlertsByStatus(status: EmergencyAlert['status']): Promise<EmergencyAlert[]> {
+    return await db.select().from(emergencyAlerts)
+      .where(eq(emergencyAlerts.status, status))
+      .orderBy(desc(emergencyAlerts.createdAt));
+  }
+
+  async getEmergencyAlertsNeedingEscalation(): Promise<EmergencyAlert[]> {
+    const alerts = await db.select().from(emergencyAlerts)
+      .where(and(
+        eq(emergencyAlerts.isActive, true),
+        eq(emergencyAlerts.autoEscalate, true)
+      ))
+      .orderBy(asc(emergencyAlerts.createdAt));
+    
+    const now = new Date();
+    return alerts.filter(alert => {
+      if (!alert.createdAt) return false;
+      const slaMinutes = alert.slaTargetMinutes || 5;
+      const createdAt = new Date(alert.createdAt);
+      const elapsedMinutes = (now.getTime() - createdAt.getTime()) / (1000 * 60);
+      const isOverdue = elapsedMinutes > slaMinutes;
+      const notResolved = alert.status !== 'Resolved' && alert.status !== 'Stabilized';
+      return isOverdue && notResolved;
+    });
+  }
+
+  // Emergency Responders
+  async createEmergencyResponder(responder: InsertEmergencyResponder): Promise<EmergencyResponder> {
+    const [created] = await db.insert(emergencyResponders).values(responder).returning();
+    return created;
+  }
+
+  async getEmergencyResponder(id: string): Promise<EmergencyResponder | undefined> {
+    const [responder] = await db.select().from(emergencyResponders).where(eq(emergencyResponders.id, id));
+    return responder || undefined;
+  }
+
+  async getEmergencyResponderByUser(userId: string): Promise<EmergencyResponder | undefined> {
+    const [responder] = await db.select().from(emergencyResponders).where(eq(emergencyResponders.userId, userId));
+    return responder || undefined;
+  }
+
+  async getOnDutyResponders(): Promise<EmergencyResponder[]> {
+    return await db.select().from(emergencyResponders).where(eq(emergencyResponders.isOnDuty, true));
+  }
+
+  async getAvailableRespondersForType(type: string): Promise<EmergencyResponder[]> {
+    const responders = await db.select().from(emergencyResponders).where(eq(emergencyResponders.isOnDuty, true));
+    return responders.filter(r => r.canRespondTo?.includes(type));
+  }
+
+  async updateResponderDutyStatus(id: string, isOnDuty: boolean): Promise<void> {
+    await db.update(emergencyResponders).set({ isOnDuty }).where(eq(emergencyResponders.id, id));
+  }
+
+  async updateResponderLocation(id: string, location: string, gpsLat?: string, gpsLng?: string): Promise<void> {
+    await db.update(emergencyResponders).set({
+      currentLocation: location,
+      gpsLat,
+      gpsLng,
+      lastLocationUpdate: new Date()
+    }).where(eq(emergencyResponders.id, id));
+  }
+
+  // Escalation History
+  async createEscalationHistory(history: InsertEmergencyEscalationHistory): Promise<EmergencyEscalationHistory> {
+    const [created] = await db.insert(emergencyEscalationHistory).values(history).returning();
+    return created;
+  }
+
+  async getEscalationHistoryByAlert(alertId: string): Promise<EmergencyEscalationHistory[]> {
+    return await db.select().from(emergencyEscalationHistory)
+      .where(eq(emergencyEscalationHistory.alertId, alertId))
+      .orderBy(desc(emergencyEscalationHistory.createdAt));
+  }
+
+  // Alert Notifications
+  async createAlertNotification(notification: InsertEmergencyAlertNotification): Promise<EmergencyAlertNotification> {
+    const [created] = await db.insert(emergencyAlertNotifications).values(notification).returning();
+    return created;
+  }
+
+  async getUnreadAlertNotifications(userId: string): Promise<EmergencyAlertNotification[]> {
+    return await db.select().from(emergencyAlertNotifications)
+      .where(and(
+        eq(emergencyAlertNotifications.userId, userId),
+        eq(emergencyAlertNotifications.readAt, null as any)
+      ))
+      .orderBy(desc(emergencyAlertNotifications.sentAt));
+  }
+
+  async markAlertNotificationRead(id: string): Promise<void> {
+    await db.update(emergencyAlertNotifications).set({ readAt: new Date() })
+      .where(eq(emergencyAlertNotifications.id, id));
+  }
+
+  async markAlertNotificationResponded(id: string): Promise<void> {
+    await db.update(emergencyAlertNotifications).set({ respondedAt: new Date() })
+      .where(eq(emergencyAlertNotifications.id, id));
   }
 
   // ============ ORBIT STAFFING INTEGRATION ============
