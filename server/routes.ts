@@ -1726,5 +1726,423 @@ Return your response as a JSON object with this exact structure:
     }
   });
 
+  // ============ WAREHOUSE INVENTORY SYSTEM ============
+  // NOTE: This is a configurable example based on Nissan Stadium operations.
+  // Categories, products, and par levels can be customized to match your specific workflow.
+
+  // Seed example warehouse data
+  app.post("/api/warehouse/seed", async (_req: Request, res: Response) => {
+    try {
+      await storage.seedExampleWarehouseData();
+      res.json({ success: true, message: "Example warehouse data seeded successfully" });
+    } catch (error) {
+      console.error("Error seeding warehouse data:", error);
+      res.status(500).json({ error: "Failed to seed warehouse data" });
+    }
+  });
+
+  // Warehouse Categories
+  app.get("/api/warehouse/categories", async (_req: Request, res: Response) => {
+    try {
+      const categories = await storage.getAllWarehouseCategories();
+      res.json(categories);
+    } catch (error) {
+      console.error("Error fetching warehouse categories:", error);
+      res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
+  const insertWarehouseCategorySchema = z.object({
+    name: z.string().min(1),
+    description: z.string().optional(),
+    color: z.string().optional(),
+    icon: z.string().optional(),
+    sortOrder: z.number().optional()
+  });
+
+  app.post("/api/warehouse/categories", async (req: Request, res: Response) => {
+    try {
+      const validated = insertWarehouseCategorySchema.parse(req.body);
+      const category = await storage.createWarehouseCategory(validated);
+      res.json(category);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      console.error("Error creating category:", error);
+      res.status(500).json({ error: "Failed to create category" });
+    }
+  });
+
+  app.put("/api/warehouse/categories/:id", async (req: Request, res: Response) => {
+    try {
+      const validated = insertWarehouseCategorySchema.partial().parse(req.body);
+      await storage.updateWarehouseCategory(req.params.id, validated);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating category:", error);
+      res.status(500).json({ error: "Failed to update category" });
+    }
+  });
+
+  app.delete("/api/warehouse/categories/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deleteWarehouseCategory(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      res.status(500).json({ error: "Failed to delete category" });
+    }
+  });
+
+  // Warehouse Products
+  app.get("/api/warehouse/products", async (req: Request, res: Response) => {
+    try {
+      const { categoryId } = req.query;
+      let products;
+      if (categoryId && typeof categoryId === 'string') {
+        products = await storage.getWarehouseProductsByCategory(categoryId);
+      } else {
+        products = await storage.getAllWarehouseProducts();
+      }
+      res.json(products);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      res.status(500).json({ error: "Failed to fetch products" });
+    }
+  });
+
+  app.get("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      const product = await storage.getWarehouseProduct(req.params.id);
+      if (!product) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      res.json(product);
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      res.status(500).json({ error: "Failed to fetch product" });
+    }
+  });
+
+  const insertWarehouseProductSchema = z.object({
+    categoryId: z.string().optional(),
+    name: z.string().min(1),
+    sku: z.string().optional(),
+    description: z.string().optional(),
+    unit: z.string().optional(),
+    unitsPerCase: z.number().optional(),
+    costPerUnitCents: z.number().optional(),
+    imageUrl: z.string().optional(),
+    isPerishable: z.boolean().optional(),
+    shelfLifeDays: z.number().optional(),
+    minOrderQty: z.number().optional()
+  });
+
+  app.post("/api/warehouse/products", async (req: Request, res: Response) => {
+    try {
+      const validated = insertWarehouseProductSchema.parse(req.body);
+      const product = await storage.createWarehouseProduct(validated);
+      res.json(product);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      console.error("Error creating product:", error);
+      res.status(500).json({ error: "Failed to create product" });
+    }
+  });
+
+  app.put("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      const validated = insertWarehouseProductSchema.partial().parse(req.body);
+      await storage.updateWarehouseProduct(req.params.id, validated);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(500).json({ error: "Failed to update product" });
+    }
+  });
+
+  app.delete("/api/warehouse/products/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deleteWarehouseProduct(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      res.status(500).json({ error: "Failed to delete product" });
+    }
+  });
+
+  // Warehouse Stock
+  app.get("/api/warehouse/stock", async (_req: Request, res: Response) => {
+    try {
+      const stock = await storage.getAllWarehouseStock();
+      res.json(stock);
+    } catch (error) {
+      console.error("Error fetching stock:", error);
+      res.status(500).json({ error: "Failed to fetch stock" });
+    }
+  });
+
+  app.get("/api/warehouse/stock/:productId", async (req: Request, res: Response) => {
+    try {
+      const stock = await storage.getWarehouseStockByProduct(req.params.productId);
+      res.json(stock);
+    } catch (error) {
+      console.error("Error fetching stock:", error);
+      res.status(500).json({ error: "Failed to fetch stock" });
+    }
+  });
+
+  const updateStockSchema = z.object({
+    quantity: z.number().min(0),
+    userId: z.string().optional()
+  });
+
+  app.put("/api/warehouse/stock/:productId", async (req: Request, res: Response) => {
+    try {
+      const validated = updateStockSchema.parse(req.body);
+      await storage.updateWarehouseStock(req.params.productId, validated.quantity, validated.userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating stock:", error);
+      res.status(500).json({ error: "Failed to update stock" });
+    }
+  });
+
+  // Warehouse Par Levels
+  app.get("/api/warehouse/par-levels", async (req: Request, res: Response) => {
+    try {
+      const { standId, productId } = req.query;
+      let parLevels;
+      if (standId && typeof standId === 'string') {
+        parLevels = await storage.getParLevelsByStand(standId);
+      } else if (productId && typeof productId === 'string') {
+        parLevels = await storage.getParLevelsByProduct(productId);
+      } else {
+        return res.status(400).json({ error: "standId or productId required" });
+      }
+      res.json(parLevels);
+    } catch (error) {
+      console.error("Error fetching par levels:", error);
+      res.status(500).json({ error: "Failed to fetch par levels" });
+    }
+  });
+
+  const insertParLevelSchema = z.object({
+    productId: z.string(),
+    standId: z.string().optional(),
+    standType: z.string().optional(),
+    minQuantity: z.number().min(0),
+    maxQuantity: z.number().optional(),
+    reorderPoint: z.number().optional(),
+    notes: z.string().optional()
+  });
+
+  app.post("/api/warehouse/par-levels", async (req: Request, res: Response) => {
+    try {
+      const validated = insertParLevelSchema.parse(req.body);
+      const parLevel = await storage.createParLevel(validated);
+      res.json(parLevel);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      console.error("Error creating par level:", error);
+      res.status(500).json({ error: "Failed to create par level" });
+    }
+  });
+
+  app.put("/api/warehouse/par-levels/:id", async (req: Request, res: Response) => {
+    try {
+      const validated = insertParLevelSchema.partial().parse(req.body);
+      await storage.updateParLevel(req.params.id, validated);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating par level:", error);
+      res.status(500).json({ error: "Failed to update par level" });
+    }
+  });
+
+  app.delete("/api/warehouse/par-levels/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deleteParLevel(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting par level:", error);
+      res.status(500).json({ error: "Failed to delete par level" });
+    }
+  });
+
+  // Warehouse Requests
+  app.get("/api/warehouse/requests", async (req: Request, res: Response) => {
+    try {
+      const { standId, status } = req.query;
+      let requests;
+      if (standId && typeof standId === 'string') {
+        requests = await storage.getWarehouseRequestsByStand(standId);
+      } else if (status && typeof status === 'string') {
+        requests = await storage.getWarehouseRequestsByStatus(status as any);
+      } else {
+        requests = await storage.getAllWarehouseRequests();
+      }
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching requests:", error);
+      res.status(500).json({ error: "Failed to fetch requests" });
+    }
+  });
+
+  app.get("/api/warehouse/requests/pending", async (_req: Request, res: Response) => {
+    try {
+      const requests = await storage.getPendingWarehouseRequests();
+      res.json(requests);
+    } catch (error) {
+      console.error("Error fetching pending requests:", error);
+      res.status(500).json({ error: "Failed to fetch pending requests" });
+    }
+  });
+
+  app.get("/api/warehouse/requests/:id", async (req: Request, res: Response) => {
+    try {
+      const request = await storage.getWarehouseRequest(req.params.id);
+      if (!request) {
+        return res.status(404).json({ error: "Request not found" });
+      }
+      res.json(request);
+    } catch (error) {
+      console.error("Error fetching request:", error);
+      res.status(500).json({ error: "Failed to fetch request" });
+    }
+  });
+
+  const insertWarehouseRequestSchema = z.object({
+    standId: z.string(),
+    requestedById: z.string(),
+    priority: z.enum(['Normal', 'Rush', 'Emergency']).optional(),
+    notes: z.string().optional()
+  });
+
+  app.post("/api/warehouse/requests", async (req: Request, res: Response) => {
+    try {
+      const validated = insertWarehouseRequestSchema.parse(req.body);
+      const request = await storage.createWarehouseRequest(validated);
+      res.json(request);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      console.error("Error creating request:", error);
+      res.status(500).json({ error: "Failed to create request" });
+    }
+  });
+
+  const updateRequestStatusSchema = z.object({
+    status: z.enum(['Pending', 'Approved', 'Picking', 'InTransit', 'Delivered', 'Confirmed', 'Cancelled']),
+    userId: z.string()
+  });
+
+  app.put("/api/warehouse/requests/:id/status", async (req: Request, res: Response) => {
+    try {
+      const validated = updateRequestStatusSchema.parse(req.body);
+      await storage.updateWarehouseRequestStatus(req.params.id, validated.status, validated.userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating request status:", error);
+      res.status(500).json({ error: "Failed to update request status" });
+    }
+  });
+
+  // Warehouse Request Items
+  app.get("/api/warehouse/requests/:id/items", async (req: Request, res: Response) => {
+    try {
+      const items = await storage.getWarehouseRequestItems(req.params.id);
+      res.json(items);
+    } catch (error) {
+      console.error("Error fetching request items:", error);
+      res.status(500).json({ error: "Failed to fetch request items" });
+    }
+  });
+
+  const insertRequestItemSchema = z.object({
+    requestId: z.string(),
+    productId: z.string(),
+    quantityRequested: z.number().min(1),
+    notes: z.string().optional()
+  });
+
+  app.post("/api/warehouse/requests/:id/items", async (req: Request, res: Response) => {
+    try {
+      const validated = insertRequestItemSchema.parse({
+        ...req.body,
+        requestId: req.params.id
+      });
+      const item = await storage.addWarehouseRequestItem(validated);
+      res.json(item);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid input", details: error.errors });
+      }
+      console.error("Error adding request item:", error);
+      res.status(500).json({ error: "Failed to add request item" });
+    }
+  });
+
+  app.put("/api/warehouse/requests/:requestId/items/:itemId", async (req: Request, res: Response) => {
+    try {
+      const validated = z.object({
+        quantityApproved: z.number().optional(),
+        quantityDelivered: z.number().optional(),
+        notes: z.string().optional()
+      }).parse(req.body);
+      await storage.updateWarehouseRequestItem(req.params.itemId, validated);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating request item:", error);
+      res.status(500).json({ error: "Failed to update request item" });
+    }
+  });
+
+  // Low Stock Alerts
+  app.get("/api/warehouse/low-stock", async (_req: Request, res: Response) => {
+    try {
+      const lowStock = await storage.getLowStockProducts();
+      res.json(lowStock);
+    } catch (error) {
+      console.error("Error fetching low stock:", error);
+      res.status(500).json({ error: "Failed to fetch low stock products" });
+    }
+  });
+
+  // Warehouse Dashboard Stats
+  app.get("/api/warehouse/stats", async (_req: Request, res: Response) => {
+    try {
+      const [categories, products, stock, pendingRequests] = await Promise.all([
+        storage.getAllWarehouseCategories(),
+        storage.getAllWarehouseProducts(),
+        storage.getAllWarehouseStock(),
+        storage.getPendingWarehouseRequests()
+      ]);
+      
+      const totalProducts = products.length;
+      const totalCategories = categories.length;
+      const pendingRequestCount = pendingRequests.length;
+      const lowStockCount = stock.filter(s => s.quantity < 10).length;
+      
+      res.json({
+        totalProducts,
+        totalCategories,
+        pendingRequestCount,
+        lowStockCount,
+        isExampleData: true,
+        configNote: "This warehouse inventory system is a configurable example based on Nissan Stadium operations. Categories, products, and par levels can be customized to match your specific workflow."
+      });
+    } catch (error) {
+      console.error("Error fetching warehouse stats:", error);
+      res.status(500).json({ error: "Failed to fetch warehouse stats" });
+    }
+  });
+
   return httpServer;
 }

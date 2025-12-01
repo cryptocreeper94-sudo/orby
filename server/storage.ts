@@ -258,7 +258,7 @@ export interface IStorage {
   // Warehouse Requests
   getAllWarehouseRequests(): Promise<WarehouseRequest[]>;
   getWarehouseRequestsByStand(standId: string): Promise<WarehouseRequest[]>;
-  getWarehouseRequestsByStatus(status: WarehouseRequest['status']): Promise<WarehouseRequest[]>;
+  getWarehouseRequestsByStatus(status: 'Pending' | 'Approved' | 'Picking' | 'InTransit' | 'Delivered' | 'Confirmed' | 'Cancelled'): Promise<WarehouseRequest[]>;
   getPendingWarehouseRequests(): Promise<WarehouseRequest[]>;
   getWarehouseRequest(id: string): Promise<WarehouseRequest | undefined>;
   createWarehouseRequest(request: InsertWarehouseRequest): Promise<WarehouseRequest>;
@@ -1287,7 +1287,7 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(warehouseRequests.createdAt));
   }
 
-  async getWarehouseRequestsByStatus(status: WarehouseRequest['status']): Promise<WarehouseRequest[]> {
+  async getWarehouseRequestsByStatus(status: 'Pending' | 'Approved' | 'Picking' | 'InTransit' | 'Delivered' | 'Confirmed' | 'Cancelled'): Promise<WarehouseRequest[]> {
     return await db.select().from(warehouseRequests)
       .where(eq(warehouseRequests.status, status))
       .orderBy(desc(warehouseRequests.createdAt));
