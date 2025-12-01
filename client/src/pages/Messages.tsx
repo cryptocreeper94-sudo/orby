@@ -104,8 +104,10 @@ export default function MessagesPage() {
               targetDepartment = 'Bar';
             } else if (content.includes('it') || content.includes('tech') || content.includes('computer') || content.includes('pos')) {
               targetDepartment = 'IT';
-            } else if (content.includes('clean') || content.includes('spill') || content.includes('janitorial')) {
-              targetDepartment = 'Janitorial';
+            } else if (content.includes('clean') || content.includes('spill') || content.includes('ops') || content.includes('operations')) {
+              targetDepartment = 'Operations';
+            } else if (content.includes('hr') || content.includes('payroll') || content.includes('schedule')) {
+              targetDepartment = 'HR';
             }
             
             unanswered.push({

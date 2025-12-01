@@ -26,7 +26,8 @@ const departmentIcons: Record<string, React.ReactNode> = {
   Kitchen: <Utensils className="h-4 w-4" />,
   Bar: <Beer className="h-4 w-4" />,
   IT: <Monitor className="h-4 w-4" />,
-  Janitorial: <Trash2 className="h-4 w-4" />,
+  Operations: <Activity className="h-4 w-4" />,
+  HR: <Users className="h-4 w-4" />,
 };
 
 const departmentColors: Record<string, string> = {
@@ -34,7 +35,8 @@ const departmentColors: Record<string, string> = {
   Kitchen: 'from-orange-600/20 to-orange-800/20 border-orange-500/30',
   Bar: 'from-purple-600/20 to-purple-800/20 border-purple-500/30',
   IT: 'from-cyan-600/20 to-cyan-800/20 border-cyan-500/30',
-  Janitorial: 'from-green-600/20 to-green-800/20 border-green-500/30',
+  Operations: 'from-green-600/20 to-green-800/20 border-green-500/30',
+  HR: 'from-pink-600/20 to-pink-800/20 border-pink-500/30',
 };
 
 const statusColors: Record<string, { bg: string; text: string; glow: string }> = {

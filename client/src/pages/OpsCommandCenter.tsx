@@ -65,7 +65,8 @@ const departmentIcons: Record<string, React.ReactNode> = {
   Kitchen: <Utensils className="h-4 w-4" />,
   Bar: <Beer className="h-4 w-4" />,
   IT: <Monitor className="h-4 w-4" />,
-  Janitorial: <Trash2 className="h-4 w-4" />,
+  Operations: <Activity className="h-4 w-4" />,
+  HR: <Users className="h-4 w-4" />,
 };
 
 const departmentColors: Record<string, string> = {
@@ -73,7 +74,8 @@ const departmentColors: Record<string, string> = {
   Kitchen: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
   Bar: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
   IT: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-  Janitorial: 'bg-green-500/20 text-green-300 border-green-500/30',
+  Operations: 'bg-green-500/20 text-green-300 border-green-500/30',
+  HR: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
 };
 
 const statusConfig: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
@@ -412,7 +414,7 @@ export default function OpsCommandCenter() {
           </CardHeader>
           <CardContent>
             <Accordion type="single" collapsible className="w-full">
-              {['Warehouse', 'Kitchen', 'Bar', 'IT', 'Janitorial'].map((dept) => {
+              {['Warehouse', 'Kitchen', 'Bar', 'IT', 'Operations', 'HR'].map((dept) => {
                 const deptDeliveries = normalDeliveries.filter(d => d.department === dept);
                 if (deptDeliveries.length === 0) return null;
                 

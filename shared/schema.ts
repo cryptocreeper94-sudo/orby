@@ -43,7 +43,7 @@ export const issueStatusEnum = pgEnum('issue_status', ['Open', 'Acknowledged', '
 export const spoilageReasonEnum = pgEnum('spoilage_reason', ['ThrownAway', 'Returned', 'Damaged', 'Expired', 'Other']);
 
 // Department request system enums
-export const departmentEnum = pgEnum('department', ['Warehouse', 'Kitchen', 'Bar', 'IT', 'Janitorial']);
+export const departmentEnum = pgEnum('department', ['Warehouse', 'Kitchen', 'Bar', 'IT', 'Operations', 'HR']);
 export const requestPriorityEnum = pgEnum('request_priority', ['Normal', 'Emergency']);
 export const deliveryStatusEnum = pgEnum('delivery_status', ['Requested', 'Acknowledged', 'InProgress', 'OnTheWay', 'Delivered', 'Cancelled']);
 
@@ -54,7 +54,7 @@ export const users = pgTable("users", {
   pin: varchar("pin", { length: 4 }).notNull().unique(),
   role: userRoleEnum("role").notNull().default('NPOWorker'),
   managementType: managementTypeEnum("management_type"), // Only for ManagementCore role
-  department: departmentEnum("department"), // For department staff (Warehouse, Kitchen, Bar, IT, Janitorial)
+  department: departmentEnum("department"), // For department staff (Warehouse, Kitchen, Bar, IT, Operations, HR)
   requiresPinReset: boolean("requires_pin_reset").default(true), // First login requires PIN change
   pinSetAt: timestamp("pin_set_at"), // When user set their personal PIN
   isOnline: boolean("is_online").default(false),

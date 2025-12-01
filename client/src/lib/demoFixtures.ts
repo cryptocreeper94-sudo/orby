@@ -76,7 +76,7 @@ export const demoEmergencies = [
     priority: 'medium',
     reportedBy: 'Stand 202 - Mike B.',
     reportedAt: new Date(Date.now() - 2 * 60000).toISOString(),
-    assignedTo: 'Janitorial - Serena'
+    assignedTo: 'Operations - Serena'
   }
 ];
 
@@ -130,7 +130,7 @@ export const demoUsers = [
   { id: 4, name: 'Jay', role: 'Purchasing Manager', status: 'online', location: 'Warehouse' },
   { id: 5, name: 'Chef Deb', role: 'Culinary Manager', status: 'online', location: 'Kitchen' },
   { id: 6, name: 'Darby', role: 'Bar Manager', status: 'online', location: 'Field' },
-  { id: 7, name: 'Shelia', role: 'Janitorial Manager', status: 'online', location: 'Field' },
+  { id: 7, name: 'Shelia', role: 'Operations Manager', status: 'online', location: 'Field' },
   { id: 8, name: 'James R.', role: 'Stand Supervisor', status: 'online', location: 'Section B' },
   { id: 9, name: 'Marcus T.', role: 'Stand Lead', status: 'online', location: 'Stand 101' },
   { id: 10, name: 'Sarah K.', role: 'Stand Lead', status: 'online', location: 'Stand 102' },

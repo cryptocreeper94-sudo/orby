@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { WeatherWidget, WeatherAlertBanner } from '@/components/WeatherWidget';
 import { LiveSalesWidget } from '@/components/LiveSalesWidget';
 import {
-  LogOut, Menu, Bell, MessageSquare, Package, Utensils, Beer, Monitor, Trash2,
+  LogOut, Menu, Bell, MessageSquare, Package, Utensils, Beer, Monitor, Activity,
   AlertTriangle, CheckCircle2, Clock, MapPin, Users, Radio, TrendingUp, 
   ChevronRight, RefreshCw, Eye, Send, ArrowRight, Truck, Zap
 } from 'lucide-react';
@@ -23,7 +23,7 @@ interface DeliveryRequest {
   id: string;
   standId: string;
   standName: string;
-  department: 'Warehouse' | 'Kitchen' | 'Bar' | 'IT' | 'Janitorial';
+  department: 'Warehouse' | 'Kitchen' | 'Bar' | 'IT' | 'Operations' | 'HR';
   priority: 'Normal' | 'Emergency';
   status: 'Requested' | 'Acknowledged' | 'InProgress' | 'OnTheWay' | 'Delivered';
   description: string;
@@ -84,7 +84,8 @@ const departmentIcons: Record<string, React.ReactNode> = {
   Kitchen: <Utensils className="h-4 w-4" />,
   Bar: <Beer className="h-4 w-4" />,
   IT: <Monitor className="h-4 w-4" />,
-  Janitorial: <Trash2 className="h-4 w-4" />,
+  Operations: <Activity className="h-4 w-4" />,
+  HR: <Users className="h-4 w-4" />,
 };
 
 const departmentColors: Record<string, string> = {
@@ -92,7 +93,8 @@ const departmentColors: Record<string, string> = {
   Kitchen: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
   Bar: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
   IT: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-  Janitorial: 'bg-green-500/20 text-green-300 border-green-500/30',
+  Operations: 'bg-green-500/20 text-green-300 border-green-500/30',
+  HR: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
 };
 
 const statusColors: Record<string, string> = {

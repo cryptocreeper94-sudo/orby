@@ -38,7 +38,7 @@ Orby (getorby.io) is a comprehensive venue operations communications platform de
 | **Warehouse** | Jay (Purchasing Mgr - senior, fields event orders), AJ (Warehouse Mgr) | Sharrod |
 | **Kitchen/Culinary** | Chef Deb (Culinary Mgr), Bobby (Kitchen Mgr) | — |
 | **Bar** | Darby | — |
-| **Janitorial** | Shelia (Supervisor/Mgr) | Serena |
+| **Operations** | Shelia (Supervisor/Mgr) | Serena |
 | **IT** | David (also Ops Mgr) | Event IT collective |
 | **HR** | Brooke K | K.D. (Assistant) |
 | **Finance** | Pete | — |
@@ -57,7 +57,7 @@ NPO Workers (frontline concessions)
 ```
 
 ### Communication Rules
-- **Stand Leads**: NO direct access to Warehouse/Kitchen/IT/Janitorial - must go through Supervisor
+- **Stand Leads**: NO direct access to Warehouse/Kitchen/IT/Operations - must go through Supervisor
 - **Supervisors**: CAN request from all departments
 - **Visibility**: Supervisor controls what Stand Lead sees, but Managers can override
 - **All Managers**: Equal access, can see everything, can intervene anywhere
@@ -73,8 +73,9 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 - Warehouse
 - Kitchen
 - Bar
-- Janitorial
-- Stand Supervisor
+- Operations
+- HR
+- Stand Supervisor (full dashboard access)
 - Stand Lead
 - NPO Worker
 
