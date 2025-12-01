@@ -265,7 +265,7 @@ function IncidentCard({
       </Card>
 
       <Dialog open={showResolveDialog} onOpenChange={setShowResolveDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700">
+        <DialogContent className="bg-slate-900 border-slate-700" data-testid={`dialog-resolve-${alert.id}`}>
           <DialogHeader>
             <DialogTitle className="text-white">Resolve Incident</DialogTitle>
           </DialogHeader>
@@ -273,14 +273,14 @@ function IncidentCard({
             <div>
               <Label className="text-slate-300">Resolution Type</Label>
               <Select value={resolutionType} onValueChange={setResolutionType}>
-                <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                <SelectTrigger className="bg-slate-800 border-slate-600 text-white" data-testid={`select-resolution-type-${alert.id}`}>
                   <SelectValue placeholder="How was it resolved?" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-600">
-                  <SelectItem value="Handled Internally">Handled Internally</SelectItem>
-                  <SelectItem value="External Services Called">External Services Called</SelectItem>
-                  <SelectItem value="False Alarm">False Alarm</SelectItem>
-                  <SelectItem value="Deferred">Deferred/Referred</SelectItem>
+                  <SelectItem value="Handled Internally" data-testid="option-handled-internally">Handled Internally</SelectItem>
+                  <SelectItem value="External Services Called" data-testid="option-external-services">External Services Called</SelectItem>
+                  <SelectItem value="False Alarm" data-testid="option-false-alarm">False Alarm</SelectItem>
+                  <SelectItem value="Deferred" data-testid="option-deferred">Deferred/Referred</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -291,15 +291,17 @@ function IncidentCard({
                 placeholder="Describe how the incident was resolved..."
                 value={resolveNotes}
                 onChange={(e) => setResolveNotes(e.target.value)}
+                data-testid={`input-resolution-notes-${alert.id}`}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowResolveDialog(false)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setShowResolveDialog(false)} data-testid={`button-cancel-resolve-${alert.id}`}>Cancel</Button>
             <Button 
               className="bg-green-600 hover:bg-green-700"
               onClick={handleResolve}
               disabled={!resolutionType}
+              data-testid={`button-confirm-resolve-${alert.id}`}
             >
               Resolve Incident
             </Button>
@@ -308,7 +310,7 @@ function IncidentCard({
       </Dialog>
 
       <Dialog open={showEscalateDialog} onOpenChange={setShowEscalateDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700">
+        <DialogContent className="bg-slate-900 border-slate-700" data-testid={`dialog-escalate-${alert.id}`}>
           <DialogHeader>
             <DialogTitle className="text-white">Escalate Incident</DialogTitle>
           </DialogHeader>
@@ -316,13 +318,13 @@ function IncidentCard({
             <div>
               <Label className="text-slate-300">Escalate To</Label>
               <Select value={nextLevel} onValueChange={setNextLevel}>
-                <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                <SelectTrigger className="bg-slate-800 border-slate-600 text-white" data-testid={`select-escalation-level-${alert.id}`}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-600">
-                  <SelectItem value="Level2">Level 2 - Manager</SelectItem>
-                  <SelectItem value="Level3">Level 3 - Executive</SelectItem>
-                  <SelectItem value="Level4">Level 4 - External Services</SelectItem>
+                  <SelectItem value="Level2" data-testid="option-level2">Level 2 - Manager</SelectItem>
+                  <SelectItem value="Level3" data-testid="option-level3">Level 3 - Executive</SelectItem>
+                  <SelectItem value="Level4" data-testid="option-level4">Level 4 - External Services</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -333,15 +335,17 @@ function IncidentCard({
                 placeholder="Why does this need escalation?"
                 value={escalateReason}
                 onChange={(e) => setEscalateReason(e.target.value)}
+                data-testid={`input-escalation-reason-${alert.id}`}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowEscalateDialog(false)}>Cancel</Button>
+            <Button variant="ghost" onClick={() => setShowEscalateDialog(false)} data-testid={`button-cancel-escalate-${alert.id}`}>Cancel</Button>
             <Button 
               className="bg-orange-600 hover:bg-orange-700"
               onClick={handleEscalate}
               disabled={!escalateReason}
+              data-testid={`button-confirm-escalate-${alert.id}`}
             >
               Escalate
             </Button>
@@ -474,11 +478,11 @@ export default function CommandCenter() {
           </div>
           <div className="flex items-center gap-2">
             {criticalAlerts.length > 0 && (
-              <Badge variant="destructive" className="animate-pulse">
+              <Badge variant="destructive" className="animate-pulse" data-testid="badge-critical-count">
                 {criticalAlerts.length} Critical
               </Badge>
             )}
-            <Badge variant="outline" className="border-slate-600 text-slate-300">
+            <Badge variant="outline" className="border-slate-600 text-slate-300" data-testid="badge-active-count">
               {activeAlerts.length} Active
             </Badge>
           </div>
@@ -644,7 +648,7 @@ export default function CommandCenter() {
       </main>
 
       <Dialog open={showNewIncident} onOpenChange={setShowNewIncident}>
-        <DialogContent className="bg-slate-900 border-slate-700 max-w-md">
+        <DialogContent className="bg-slate-900 border-slate-700 max-w-md" data-testid="dialog-new-incident">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               {selectedType && (() => {
@@ -668,6 +672,7 @@ export default function CommandCenter() {
                 placeholder="Brief description of the emergency"
                 value={newIncident.title}
                 onChange={(e) => setNewIncident({...newIncident, title: e.target.value})}
+                data-testid="input-incident-title"
               />
             </div>
             
@@ -677,12 +682,12 @@ export default function CommandCenter() {
                 value={newIncident.standId} 
                 onValueChange={(v) => setNewIncident({...newIncident, standId: v})}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                <SelectTrigger className="bg-slate-800 border-slate-600 text-white" data-testid="select-incident-location">
                   <SelectValue placeholder="Select location" />
                 </SelectTrigger>
                 <SelectContent className="bg-slate-800 border-slate-600 max-h-60">
                   {(stands as Stand[]).map(stand => (
-                    <SelectItem key={stand.id} value={stand.id}>
+                    <SelectItem key={stand.id} value={stand.id} data-testid={`option-stand-${stand.id}`}>
                       {stand.name} - {stand.section}
                     </SelectItem>
                   ))}
@@ -697,6 +702,7 @@ export default function CommandCenter() {
                 placeholder="e.g., Near Section 115 entrance"
                 value={newIncident.locationDetails}
                 onChange={(e) => setNewIncident({...newIncident, locationDetails: e.target.value})}
+                data-testid="input-location-details"
               />
             </div>
             
@@ -708,6 +714,7 @@ export default function CommandCenter() {
                 value={newIncident.description}
                 onChange={(e) => setNewIncident({...newIncident, description: e.target.value})}
                 rows={3}
+                data-testid="input-incident-description"
               />
             </div>
           </div>
@@ -719,6 +726,7 @@ export default function CommandCenter() {
                 setShowNewIncident(false);
                 setSelectedType(null);
               }}
+              data-testid="button-cancel-new-incident"
             >
               Cancel
             </Button>
