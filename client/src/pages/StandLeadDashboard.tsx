@@ -129,6 +129,16 @@ export default function StandLeadDashboard() {
         setActiveSession(session);
         setShowCounterLogin(false);
         setShowCountSheet(true);
+        
+        const countsRes = await fetch(`/api/count-sessions/${session.id}/counts`);
+        if (countsRes.ok) {
+          const existingCounts = await countsRes.json();
+          const countsMap: Record<string, number> = {};
+          existingCounts.forEach((c: { itemId: string; quantity: number }) => {
+            countsMap[c.itemId] = c.quantity;
+          });
+          setCounts(countsMap);
+        }
       } else {
         const error = await response.json();
         alert(error.error || 'Failed to start count session');
@@ -139,23 +149,23 @@ export default function StandLeadDashboard() {
     }
   };
 
-  const handleSaveCount = async (itemId: string, count: number) => {
+  const handleSaveCount = async (itemId: string, quantity: number) => {
     if (!activeSession) return;
     
     try {
-      await fetch('/api/inventory/counts', {
+      await fetch('/api/inventory-counts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           standId: activeSession.standId,
           itemId,
           eventDate: activeSession.eventDate,
-          sessionId: activeSession.id,
-          startCount: activeSession.stage === 'PreEvent' ? count : 0,
-          endCount: activeSession.stage === 'PostEvent' ? count : 0
+          stage: activeSession.stage,
+          quantity,
+          counterId: activeSession.id
         })
       });
-      setCounts(prev => ({ ...prev, [itemId]: count }));
+      setCounts(prev => ({ ...prev, [itemId]: quantity }));
     } catch (err) {
       console.error('Failed to save count:', err);
     }
@@ -166,12 +176,12 @@ export default function StandLeadDashboard() {
     
     try {
       const response = await fetch(`/api/count-sessions/${activeSession.id}/complete`, {
-        method: 'PATCH'
+        method: 'POST'
       });
       
       if (response.ok) {
-        const updatedSession = await response.json();
-        setActiveSession(updatedSession);
+        setActiveSession(null);
+        setCounts({});
         alert('Count completed successfully!');
         setShowCountSheet(false);
       }

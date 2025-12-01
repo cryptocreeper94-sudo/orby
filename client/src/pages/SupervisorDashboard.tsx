@@ -1,7 +1,7 @@
 import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck, Send } from "lucide-react";
+import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck, Send, Package, Warehouse, Plus, Minus, Truck } from "lucide-react";
 import { useLocation } from "wouter";
 import SignatureCanvas from 'react-signature-canvas';
 import jsPDF from 'jspdf';
@@ -12,6 +12,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useState, useEffect, useRef } from "react";
 import Webcam from "react-webcam";
@@ -21,6 +23,24 @@ import { InteractiveMap } from "@/components/InteractiveMap";
 import { SupervisorPack } from "@/components/SupervisorPack";
 import { SupervisorClosingPanel } from "@/components/SupervisorClosingPanel";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+type WarehouseProduct = {
+  id: string;
+  categoryId: string | null;
+  name: string;
+  sku: string | null;
+  unit: string | null;
+};
+
+type WarehouseCategory = {
+  id: string;
+  name: string;
+  color: string | null;
+};
 
 export default function SupervisorDashboard() {
   const logout = useStore((state) => state.logout);
@@ -33,6 +53,7 @@ export default function SupervisorDashboard() {
   const countSheets = useStore((state) => state.countSheets);
   const fetchAll = useStore((state) => state.fetchAll);
   const isLoading = useStore((state) => state.isLoading);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (stands.length === 0) {
@@ -47,12 +68,84 @@ export default function SupervisorDashboard() {
   const [activeTab, setActiveTab] = useState("inventory");
   const [showMap, setShowMap] = useState(false);
   const [showSupervisorPack, setShowSupervisorPack] = useState(false);
+  const [showWarehouseRequest, setShowWarehouseRequest] = useState(false);
   
   // Compliance sheet state
   const signatureRef = useRef<SignatureCanvas>(null);
   const [complianceSubmitting, setComplianceSubmitting] = useState(false);
   const [complianceSubmitted, setComplianceSubmitted] = useState(false);
   const [complianceError, setComplianceError] = useState<string | null>(null);
+
+  // Warehouse request state
+  const [requestItems, setRequestItems] = useState<Record<string, number>>({});
+  const [requestPriority, setRequestPriority] = useState<'Normal' | 'Rush' | 'Emergency'>('Normal');
+  const [requestNotes, setRequestNotes] = useState('');
+  const [selectedStandForRequest, setSelectedStandForRequest] = useState<string>('');
+
+  const { data: warehouseProducts = [] } = useQuery<WarehouseProduct[]>({
+    queryKey: ['warehouse-products'],
+    queryFn: async () => {
+      const res = await fetch('/api/warehouse/products');
+      if (!res.ok) return [];
+      return res.json();
+    }
+  });
+
+  const { data: warehouseCategories = [] } = useQuery<WarehouseCategory[]>({
+    queryKey: ['warehouse-categories'],
+    queryFn: async () => {
+      const res = await fetch('/api/warehouse/categories');
+      if (!res.ok) return [];
+      return res.json();
+    }
+  });
+
+  const createRequestMutation = useMutation({
+    mutationFn: async () => {
+      const standId = selectedStandForRequest || myStands[0]?.id;
+      if (!standId) throw new Error('No stand selected');
+      
+      const res = await fetch('/api/warehouse/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          standId,
+          requestedById: currentUser?.id,
+          priority: requestPriority,
+          notes: requestNotes
+        })
+      });
+      if (!res.ok) throw new Error('Failed to create request');
+      return res.json();
+    },
+    onSuccess: async (request) => {
+      const itemEntries = Object.entries(requestItems).filter(([_, qty]) => qty > 0);
+      for (const [productId, qty] of itemEntries) {
+        await fetch(`/api/warehouse/requests/${request.id}/items`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId,
+            quantityRequested: qty
+          })
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ['warehouse-requests'] });
+      alert('Warehouse request submitted successfully! The warehouse team has been notified.');
+      setShowWarehouseRequest(false);
+      setRequestItems({});
+      setRequestPriority('Normal');
+      setRequestNotes('');
+    }
+  });
+
+  const getTotalItemsInRequest = () => {
+    return Object.values(requestItems).reduce((sum, qty) => sum + qty, 0);
+  };
+
+  const getCategoryName = (categoryId: string | null) => {
+    return warehouseCategories.find(c => c.id === categoryId)?.name ?? 'Other';
+  };
 
   const handleLogout = () => {
     logout();
@@ -247,7 +340,173 @@ export default function SupervisorDashboard() {
               <Map className="h-5 w-5 text-blue-600" />
               <span className="text-xs">Stadium Map</span>
             </Button>
+            <Button 
+              variant="outline" 
+              className="h-16 flex flex-col gap-1 border-amber-200 hover:bg-amber-50"
+              onClick={() => setShowWarehouseRequest(true)}
+              data-testid="open-warehouse-request"
+            >
+              <Warehouse className="h-5 w-5 text-amber-600" />
+              <span className="text-xs">Request Supplies</span>
+            </Button>
           </div>
+
+          <Dialog open={showWarehouseRequest} onOpenChange={setShowWarehouseRequest}>
+            <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Warehouse className="h-5 w-5 text-amber-600" />
+                  Request from Warehouse
+                </DialogTitle>
+              </DialogHeader>
+              
+              <div className="flex-1 overflow-hidden flex flex-col space-y-4">
+                {myStands.length > 1 && (
+                  <div>
+                    <Label>For Stand</Label>
+                    <Select 
+                      value={selectedStandForRequest || myStands[0]?.id} 
+                      onValueChange={setSelectedStandForRequest}
+                    >
+                      <SelectTrigger data-testid="select-stand-for-request">
+                        <SelectValue placeholder="Select stand..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {myStands.map(stand => (
+                          <SelectItem key={stand.id} value={stand.id}>{stand.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                <div>
+                  <Label>Priority</Label>
+                  <Select value={requestPriority} onValueChange={(v) => setRequestPriority(v as typeof requestPriority)}>
+                    <SelectTrigger data-testid="select-request-priority">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Normal">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                          Normal
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Rush">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                          Rush (High Priority)
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="Emergency">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                          Emergency
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex-1 overflow-hidden">
+                  <Label className="mb-2 block">Select Items ({getTotalItemsInRequest()} items selected)</Label>
+                  {warehouseProducts.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                      <p className="text-sm">No products available</p>
+                      <p className="text-xs">The warehouse inventory needs to be set up first.</p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[200px] border rounded-md p-2">
+                      <div className="space-y-2">
+                        {warehouseCategories.map(category => {
+                          const categoryProducts = warehouseProducts.filter(p => p.categoryId === category.id);
+                          if (categoryProducts.length === 0) return null;
+                          return (
+                            <div key={category.id}>
+                              <div className="text-xs font-semibold text-muted-foreground uppercase mb-1 sticky top-0 bg-white py-1">
+                                {category.name}
+                              </div>
+                              {categoryProducts.map(product => (
+                                <div 
+                                  key={product.id} 
+                                  className="flex items-center justify-between p-2 rounded hover:bg-slate-50"
+                                >
+                                  <div className="flex-1 min-w-0">
+                                    <span className="text-sm truncate block">{product.name}</span>
+                                    <span className="text-xs text-muted-foreground">{product.unit}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      onClick={() => setRequestItems(prev => ({
+                                        ...prev,
+                                        [product.id]: Math.max(0, (prev[product.id] || 0) - 1)
+                                      }))}
+                                      disabled={(requestItems[product.id] || 0) === 0}
+                                    >
+                                      <Minus className="h-3 w-3" />
+                                    </Button>
+                                    <span className="w-8 text-center font-mono text-sm">
+                                      {requestItems[product.id] || 0}
+                                    </span>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-7 w-7"
+                                      onClick={() => setRequestItems(prev => ({
+                                        ...prev,
+                                        [product.id]: (prev[product.id] || 0) + 1
+                                      }))}
+                                    >
+                                      <Plus className="h-3 w-3" />
+                                    </Button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </ScrollArea>
+                  )}
+                </div>
+
+                <div>
+                  <Label>Notes (optional)</Label>
+                  <Textarea
+                    placeholder="Any special instructions..."
+                    value={requestNotes}
+                    onChange={(e) => setRequestNotes(e.target.value)}
+                    rows={2}
+                    data-testid="input-request-notes"
+                  />
+                </div>
+              </div>
+
+              <DialogFooter className="gap-2 mt-4">
+                <Button variant="outline" onClick={() => setShowWarehouseRequest(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => createRequestMutation.mutate()}
+                  disabled={createRequestMutation.isPending || getTotalItemsInRequest() === 0}
+                  className={requestPriority === 'Emergency' ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'}
+                  data-testid="button-submit-warehouse-request"
+                >
+                  {createRequestMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Truck className="h-4 w-4 mr-2" />
+                  )}
+                  Submit Request
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           {showMap && (
             <div className="fixed inset-0 z-50 bg-background">
