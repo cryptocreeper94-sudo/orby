@@ -88,6 +88,7 @@ export async function registerRoutes(
       await storage.updateUserOnlineStatus(user.id, true);
       res.json({ user });
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ error: "Login failed" });
     }
   });
