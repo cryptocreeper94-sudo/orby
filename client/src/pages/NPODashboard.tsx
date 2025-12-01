@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useStore } from "@/lib/mockData";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -23,6 +22,8 @@ import {
   STADIUM_LOCATION,
   GEOFENCE_RADIUS_FEET 
 } from "@/components/LocationAcknowledgement";
+import { motion } from "framer-motion";
+import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, PageHeader, GlowButton } from "@/components/ui/premium";
 
 type CountSession = {
   id: string;
@@ -184,293 +185,291 @@ export default function NPODashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-20">
-      <LocationAcknowledgement 
-        onAccept={() => setLocationAccepted(true)}
-        onDecline={() => setLocation("/")}
-        storageKey="npo-location-acknowledged"
-      />
-
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-indigo-600 text-white px-4 shadow-md">
-        <div className="flex items-center gap-2">
-          <Users className="h-6 w-6" />
-          <span className="font-bold text-lg">NPO Staff</span>
-        </div>
-        <div className="flex-1" />
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-white hover:bg-indigo-700"
-          onClick={() => setShowMap(true)}
-        >
-          <Map className="h-5 w-5" />
-        </Button>
-        <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white hover:bg-indigo-700">
-          <LogOut className="h-5 w-5" />
-        </Button>
-      </header>
-
-      {showMap && (
-        <div className="fixed inset-0 z-50 bg-background">
-          <InteractiveMap 
-            onClose={() => setShowMap(false)} 
-            showNavigation={true}
-            userLocation={location ? { lat: location.coords.latitude, lng: location.coords.longitude } : null}
-          />
-        </div>
-      )}
-
-      {showDirections && (
-        <div className="fixed inset-0 z-50 bg-background p-4">
-          <WalkingDirections 
-            onClose={() => setShowDirections(false)}
-            userLocation={location ? { lat: location.coords.latitude, lng: location.coords.longitude } : null}
-            defaultDestination="105"
-          />
-        </div>
-      )}
-
-      {showCounterLogin && (
-        <div className="fixed inset-0 z-50 bg-background p-4">
-          <CounterLogin
-            standId={assignedSection.standId}
-            standName={`${assignedSection.name} - ${assignedSection.stand}`}
-            eventDate={new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-            allowedStages={['PreEvent']}
-            defaultStage="PreEvent"
-            onStartSession={handleStartCountSession}
-            onClose={() => setShowCounterLogin(false)}
-          />
-        </div>
-      )}
-
-      {showCountSheet && activeSession && (
-        <div className="fixed inset-0 z-50 bg-background p-4">
-          <CountSheet
-            session={activeSession}
-            standName={`${assignedSection.name} - ${assignedSection.stand}`}
-            items={items}
-            existingCounts={counts}
-            onSaveCount={handleSaveCount}
-            onCompleteSession={handleCompleteSession}
-            onClose={() => setShowCountSheet(false)}
-          />
-        </div>
-      )}
-
-      {showQuickScan && (
-        <QuickScanModal
-          onClose={() => setShowQuickScan(false)}
-          standName={`${assignedSection.name} - ${assignedSection.stand}`}
-          onScanComplete={(items) => {
-            console.log('Scanned items:', items);
-          }}
+    <AnimatedBackground>
+      <div className="min-h-screen pb-20">
+        <LocationAcknowledgement 
+          onAccept={() => setLocationAccepted(true)}
+          onDecline={() => setLocation("/")}
+          storageKey="npo-location-acknowledged"
         />
-      )}
 
-      <main className="p-4 sm:px-6 space-y-6 max-w-4xl mx-auto mt-4">
-        <div className="text-center py-4">
-          <h1 className="text-2xl font-black text-slate-200">
-            Welcome, {currentUser?.name || 'NPO Staff'}
-          </h1>
-          <p className="text-muted-foreground">Non-Profit Organization Dashboard</p>
-        </div>
-
-        <Card className={`border-2 ${isOnSite ? 'border-green-500 bg-green-950/40' : 'border-amber-500 bg-amber-950/40'}`}>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base flex items-center gap-2 text-slate-200">
-              <MapPin className={`h-5 w-5 ${isOnSite ? 'text-green-500' : 'text-amber-500'}`} />
-              Location Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div>
-                {isLoading ? (
-                  <p className="text-sm text-muted-foreground">Checking location...</p>
-                ) : error ? (
-                  <p className="text-sm text-red-400">{error}</p>
-                ) : isOnSite ? (
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    <span className="text-green-400 font-medium">You are on-site at the stadium</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-amber-500" />
-                    <span className="text-amber-400 font-medium">
-                      You are outside the stadium geofence (100ft)
-                    </span>
-                  </div>
-                )}
-              </div>
+        <PageHeader
+          title="NPO Staff"
+          subtitle={`Welcome, ${currentUser?.name || 'NPO Staff'}`}
+          icon={<Users className="h-5 w-5" />}
+          iconColor="purple"
+          actions={
+            <div className="flex items-center gap-2">
               <Button 
-                size="sm" 
-                variant="outline" 
-                onClick={requestLocation}
-                disabled={isLoading}
+                variant="ghost" 
+                size="icon" 
+                className="text-slate-300 hover:bg-white/10"
+                onClick={() => setShowMap(true)}
               >
-                <Navigation className="h-4 w-4 mr-1" />
-                Refresh
+                <Map className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-300 hover:bg-white/10">
+                <LogOut className="h-5 w-5" />
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          }
+        />
 
-        {!checkedIn ? (
-          <Card className="border-2 border-indigo-500/40 bg-indigo-950/40">
-            <CardContent className="p-6 text-center space-y-4">
-              <Clock className="h-12 w-12 text-indigo-400 mx-auto" />
-              <div>
-                <h3 className="text-lg font-bold text-indigo-200">Ready to Check In?</h3>
-                <p className="text-sm text-indigo-300">
-                  {isOnSite 
-                    ? "You're at the stadium. Tap below to start your shift."
-                    : "Please arrive at the stadium to check in (geofence: 100ft radius)."
-                  }
-                </p>
-              </div>
-              <Button 
-                className="w-full bg-indigo-600 hover:bg-indigo-700"
-                disabled={!isOnSite && process.env.NODE_ENV !== 'development'}
-                onClick={handleCheckIn}
-                data-testid="check-in-btn"
-              >
-                <CheckCircle2 className="h-5 w-5 mr-2" />
-                Check In Now
-              </Button>
-              {process.env.NODE_ENV === 'development' && !isOnSite && (
-                <p className="text-xs text-muted-foreground">(Dev mode: Check-in available regardless of location)</p>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <>
-            <Card className="border-2 border-green-500/40 bg-green-950/40">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-900/50 rounded-full">
-                      <CheckCircle2 className="h-6 w-6 text-green-500" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-green-200">Checked In</p>
-                      <p className="text-sm text-green-400">
-                        {checkInTime?.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge className="bg-green-600">Active</Badge>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-slate-700 bg-slate-900/80">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2 text-slate-200">
-                  <Building2 className="h-5 w-5 text-indigo-400" />
-                  Your Assignment
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
-                    <p className="text-xs text-muted-foreground uppercase">Section</p>
-                    <p className="font-bold text-slate-200">{assignedSection.name}</p>
-                  </div>
-                  <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
-                    <p className="text-xs text-muted-foreground uppercase">Floor</p>
-                    <p className="font-bold text-slate-200">{assignedSection.floor}</p>
-                  </div>
-                  <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
-                    <p className="text-xs text-muted-foreground uppercase">Stand</p>
-                    <p className="font-bold text-slate-200">{assignedSection.stand}</p>
-                  </div>
-                  <div className="p-3 bg-slate-800 rounded-lg border border-slate-700">
-                    <p className="text-xs text-muted-foreground uppercase">Supervisor</p>
-                    <p className="font-bold text-slate-200">{assignedSection.supervisor}</p>
-                  </div>
-                </div>
-                <Button 
-                  className="w-full h-14 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg mb-3"
-                  onClick={() => setShowQuickScan(true)}
-                  data-testid="quick-scan-btn"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-white/20 rounded-lg">
-                      <ScanLine className="h-5 w-5" />
-                    </div>
-                    <div className="text-left">
-                      <div className="font-bold flex items-center gap-1">
-                        <Sparkles className="h-4 w-4" />
-                        Quick AI Scan
-                      </div>
-                      <div className="text-xs text-white/80">Scan cooler or paper sheet</div>
-                    </div>
-                  </div>
-                </Button>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button 
-                    className="bg-blue-600 hover:bg-blue-700 text-white" 
-                    onClick={() => setShowDirections(true)}
-                  >
-                    <Route className="h-4 w-4 mr-2" />
-                    Directions
-                  </Button>
-                  <Button 
-                    className="bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => setShowCounterLogin(true)}
-                    data-testid="start-pre-event-count"
-                  >
-                    <ClipboardList className="h-4 w-4 mr-2" />
-                    Pre-Event Count
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </>
+        {showMap && (
+          <div className="fixed inset-0 z-50 bg-slate-950">
+            <InteractiveMap 
+              onClose={() => setShowMap(false)} 
+              showNavigation={true}
+              userLocation={location ? { lat: location.coords.latitude, lng: location.coords.longitude } : null}
+            />
+          </div>
         )}
 
-        <div className="grid grid-cols-3 gap-3">
-          <Card 
-            className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer" 
-            onClick={() => setShowMap(true)}
-          >
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-              <div className="p-3 rounded-full bg-blue-900/30">
-                <Map className="h-6 w-6 text-blue-400" />
-              </div>
-              <div className="font-bold text-xs text-slate-200">Map</div>
-            </CardContent>
-          </Card>
-          <Card 
-            className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => setShowDirections(true)}
-          >
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-              <div className="p-3 rounded-full bg-green-900/30">
-                <Route className="h-6 w-6 text-green-400" />
-              </div>
-              <div className="font-bold text-xs text-slate-200">Directions</div>
-            </CardContent>
-          </Card>
-          <Card 
-            className="border-slate-700 bg-slate-900/80 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => setLocation('/messages')}
-          >
-            <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-              <div className="p-3 rounded-full bg-indigo-900/30">
-                <MessageSquare className="h-6 w-6 text-indigo-400" />
-              </div>
-              <div className="font-bold text-xs text-slate-200">Messages</div>
-            </CardContent>
-          </Card>
-        </div>
+        {showDirections && (
+          <div className="fixed inset-0 z-50 bg-slate-950 p-4">
+            <WalkingDirections 
+              onClose={() => setShowDirections(false)}
+              userLocation={location ? { lat: location.coords.latitude, lng: location.coords.longitude } : null}
+              defaultDestination="105"
+            />
+          </div>
+        )}
 
-        <Notepad storageKey="npo-notes" title="My Shift Notes" />
-      </main>
-      
-      <TutorialHelpButton page="npo" />
-    </div>
+        {showCounterLogin && (
+          <div className="fixed inset-0 z-50 bg-slate-950 p-4">
+            <CounterLogin
+              standId={assignedSection.standId}
+              standName={`${assignedSection.name} - ${assignedSection.stand}`}
+              eventDate={new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+              allowedStages={['PreEvent']}
+              defaultStage="PreEvent"
+              onStartSession={handleStartCountSession}
+              onClose={() => setShowCounterLogin(false)}
+            />
+          </div>
+        )}
+
+        {showCountSheet && activeSession && (
+          <div className="fixed inset-0 z-50 bg-slate-950 p-4">
+            <CountSheet
+              session={activeSession}
+              standName={`${assignedSection.name} - ${assignedSection.stand}`}
+              items={items}
+              existingCounts={counts}
+              onSaveCount={handleSaveCount}
+              onCompleteSession={handleCompleteSession}
+              onClose={() => setShowCountSheet(false)}
+            />
+          </div>
+        )}
+
+        {showQuickScan && (
+          <QuickScanModal
+            onClose={() => setShowQuickScan(false)}
+            standName={`${assignedSection.name} - ${assignedSection.stand}`}
+            onScanComplete={(items) => {
+              console.log('Scanned items:', items);
+            }}
+          />
+        )}
+
+        <main className="p-4 sm:px-6 space-y-4 max-w-4xl mx-auto">
+          <GlassCard className={`border-2 ${isOnSite ? 'border-emerald-500/40' : 'border-amber-500/40'}`}>
+            <GlassCardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <div className={`p-1.5 rounded-lg ${isOnSite ? 'bg-emerald-500/20' : 'bg-amber-500/20'}`}>
+                  <MapPin className={`h-4 w-4 ${isOnSite ? 'text-emerald-400' : 'text-amber-400'}`} />
+                </div>
+                <span className="font-bold text-sm text-slate-200">Location Status</span>
+              </div>
+            </GlassCardHeader>
+            <GlassCardContent className="pt-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  {isLoading ? (
+                    <p className="text-sm text-slate-400">Checking location...</p>
+                  ) : error ? (
+                    <p className="text-sm text-red-400">{error}</p>
+                  ) : isOnSite ? (
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                      <span className="text-emerald-400 font-medium text-sm">You are on-site at the stadium</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-amber-400" />
+                      <span className="text-amber-400 font-medium text-sm">Outside stadium geofence</span>
+                    </div>
+                  )}
+                </div>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  onClick={requestLocation}
+                  disabled={isLoading}
+                  className="bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
+                >
+                  <Navigation className="h-4 w-4 mr-1" />
+                  Refresh
+                </Button>
+              </div>
+            </GlassCardContent>
+          </GlassCard>
+
+          {!checkedIn ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <GlassCard className="border-2 border-violet-500/40" glow>
+                <GlassCardContent className="p-6 text-center space-y-4">
+                  <div className="p-4 rounded-2xl bg-violet-500/20 w-fit mx-auto">
+                    <Clock className="h-10 w-10 text-violet-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-violet-200">Ready to Check In?</h3>
+                    <p className="text-sm text-violet-300/80">
+                      {isOnSite 
+                        ? "You're at the stadium. Tap below to start your shift."
+                        : "Please arrive at the stadium to check in (geofence: 100ft radius)."
+                      }
+                    </p>
+                  </div>
+                  <GlowButton 
+                    className="w-full"
+                    disabled={!isOnSite && process.env.NODE_ENV !== 'development'}
+                    onClick={handleCheckIn}
+                    data-testid="check-in-btn"
+                  >
+                    <CheckCircle2 className="h-5 w-5 mr-2" />
+                    Check In Now
+                  </GlowButton>
+                  {process.env.NODE_ENV === 'development' && !isOnSite && (
+                    <p className="text-xs text-slate-500">(Dev mode: Check-in available regardless of location)</p>
+                  )}
+                </GlassCardContent>
+              </GlassCard>
+            </motion.div>
+          ) : (
+            <>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                <GlassCard className="border-2 border-emerald-500/40">
+                  <GlassCardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-emerald-500/20 rounded-xl">
+                          <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-emerald-200">Checked In</p>
+                          <p className="text-sm text-emerald-400/80">
+                            {checkInTime?.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Active</Badge>
+                    </div>
+                  </GlassCardContent>
+                </GlassCard>
+              </motion.div>
+
+              <GlassCard>
+                <GlassCardHeader className="pb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-violet-500/20">
+                      <Building2 className="h-4 w-4 text-violet-400" />
+                    </div>
+                    <span className="font-bold text-sm text-slate-200">Your Assignment</span>
+                  </div>
+                </GlassCardHeader>
+                <GlassCardContent className="space-y-3 pt-0">
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: 'Section', value: assignedSection.name },
+                      { label: 'Floor', value: assignedSection.floor },
+                      { label: 'Stand', value: assignedSection.stand },
+                      { label: 'Supervisor', value: assignedSection.supervisor },
+                    ].map((item) => (
+                      <div key={item.label} className="p-3 bg-white/5 rounded-xl border border-white/10">
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wider">{item.label}</p>
+                        <p className="font-bold text-sm text-slate-200">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full p-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25"
+                    onClick={() => setShowQuickScan(true)}
+                    data-testid="quick-scan-btn"
+                  >
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="p-2 bg-white/20 rounded-lg">
+                        <ScanLine className="h-5 w-5" />
+                      </div>
+                      <div className="text-left">
+                        <div className="font-bold flex items-center gap-1">
+                          <Sparkles className="h-4 w-4" />
+                          Quick AI Scan
+                        </div>
+                        <div className="text-xs text-white/80">Scan cooler or paper sheet</div>
+                      </div>
+                    </div>
+                  </motion.button>
+                  
+                  <div className="grid grid-cols-2 gap-2">
+                    <GlowButton 
+                      onClick={() => setShowDirections(true)}
+                      className="bg-gradient-to-r from-blue-500 to-blue-600"
+                    >
+                      <Route className="h-4 w-4 mr-2" />
+                      Directions
+                    </GlowButton>
+                    <GlowButton 
+                      onClick={() => setShowCounterLogin(true)}
+                      className="bg-gradient-to-r from-emerald-500 to-emerald-600"
+                      data-testid="start-pre-event-count"
+                    >
+                      <ClipboardList className="h-4 w-4 mr-2" />
+                      Pre-Event Count
+                    </GlowButton>
+                  </div>
+                </GlassCardContent>
+              </GlassCard>
+            </>
+          )}
+
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: 'Map', icon: Map, color: 'blue', onClick: () => setShowMap(true) },
+              { label: 'Directions', icon: Route, color: 'emerald', onClick: () => setShowDirections(true) },
+              { label: 'Messages', icon: MessageSquare, color: 'violet', onClick: () => setLocation('/messages') },
+            ].map((item) => (
+              <motion.div key={item.label} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <GlassCard 
+                  className={`cursor-pointer hover:border-${item.color}-500/30 transition-colors`}
+                  onClick={item.onClick}
+                >
+                  <GlassCardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
+                    <div className={`p-3 rounded-xl bg-${item.color}-500/20`}>
+                      <item.icon className={`h-5 w-5 text-${item.color}-400`} />
+                    </div>
+                    <div className="font-bold text-xs text-slate-200">{item.label}</div>
+                  </GlassCardContent>
+                </GlassCard>
+              </motion.div>
+            ))}
+          </div>
+
+          <Notepad storageKey="npo-notes" title="My Shift Notes" />
+        </main>
+        
+        <TutorialHelpButton page="npo" />
+      </div>
+    </AnimatedBackground>
   );
 }

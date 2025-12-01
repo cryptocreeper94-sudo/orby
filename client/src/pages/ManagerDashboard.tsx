@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'wouter';
 import { useStore } from '@/lib/mockData';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,13 +10,15 @@ import { LiveSalesWidget } from '@/components/LiveSalesWidget';
 import {
   LogOut, Menu, Bell, MessageSquare, Package, Utensils, Beer, Monitor, Activity,
   AlertTriangle, CheckCircle2, Clock, MapPin, Users, Radio, TrendingUp, 
-  ChevronRight, RefreshCw, Eye, Send, ArrowRight, Truck, Zap
+  ChevronRight, Truck, Zap
 } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader } from '@/components/ui/premium';
 
 interface DeliveryRequest {
   id: string;
@@ -66,19 +67,6 @@ const MOCK_IT_ALERTS: ITAlert[] = [
   { id: '2', standId: '105', standName: 'Stand 105', issueType: 'Network', priority: 'Normal', status: 'Acknowledged', description: 'Slow credit card processing', reporterName: 'Sarah Johnson', createdAt: new Date(Date.now() - 30 * 60000).toISOString() },
 ];
 
-const MOCK_STAND_STATUSES: StandStatus[] = [
-  { id: '101', name: 'Stand 101', section: '2 East', status: 'Open', supervisorName: 'Sarah Johnson', activeIssues: 0, pendingDeliveries: 0 },
-  { id: '102', name: 'Stand 102', section: '2 East', status: 'Open', supervisorName: 'Sarah Johnson', activeIssues: 0, pendingDeliveries: 1 },
-  { id: '105', name: 'Stand 105', section: '2 East', status: 'Open', supervisorName: 'Sarah Johnson', activeIssues: 1, pendingDeliveries: 1 },
-  { id: '110', name: 'Stand 110', section: '2 West', status: 'Open', supervisorName: 'Mike Smith', activeIssues: 0, pendingDeliveries: 0 },
-  { id: '118', name: 'Stand 118', section: '2 West', status: 'Open', supervisorName: 'Mike Smith', activeIssues: 0, pendingDeliveries: 1 },
-  { id: '201', name: 'Stand 201', section: '7 East', status: 'Hot Spot', supervisorName: 'Chris Williams', activeIssues: 0, pendingDeliveries: 0 },
-  { id: '212', name: 'Stand 212', section: '7 East', status: 'Open', supervisorName: 'Chris Williams', activeIssues: 2, pendingDeliveries: 1 },
-  { id: '301', name: 'Stand 301', section: '7 West', status: 'Open', supervisorName: 'Amy Brown', activeIssues: 0, pendingDeliveries: 1 },
-  { id: '305', name: 'Stand 305', section: '7 West', status: 'Closed', activeIssues: 0, pendingDeliveries: 0 },
-  { id: '310', name: 'Stand 310', section: '7 West', status: 'Spare', activeIssues: 0, pendingDeliveries: 0 },
-];
-
 const departmentIcons: Record<string, React.ReactNode> = {
   Warehouse: <Package className="h-4 w-4" />,
   Kitchen: <Utensils className="h-4 w-4" />,
@@ -89,28 +77,28 @@ const departmentIcons: Record<string, React.ReactNode> = {
 };
 
 const departmentColors: Record<string, string> = {
-  Warehouse: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  Kitchen: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
-  Bar: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-  IT: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
-  Operations: 'bg-green-500/20 text-green-300 border-green-500/30',
-  HR: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
+  Warehouse: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  Kitchen: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+  Bar: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  IT: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+  Operations: 'bg-green-500/20 text-green-400 border-green-500/30',
+  HR: 'bg-pink-500/20 text-pink-400 border-pink-500/30',
 };
 
 const statusColors: Record<string, string> = {
-  Requested: 'bg-yellow-500/20 text-yellow-300',
-  Acknowledged: 'bg-blue-500/20 text-blue-300',
-  InProgress: 'bg-purple-500/20 text-purple-300',
-  OnTheWay: 'bg-green-500/20 text-green-300',
-  Delivered: 'bg-gray-500/20 text-gray-300',
-  Resolved: 'bg-gray-500/20 text-gray-300',
+  Requested: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  Acknowledged: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+  InProgress: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  OnTheWay: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  Delivered: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+  Resolved: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
 };
 
 const standStatusColors: Record<string, string> = {
-  Open: 'bg-green-500',
-  Closed: 'bg-gray-500',
+  Open: 'bg-emerald-500',
+  Closed: 'bg-slate-500',
   'Needs Power': 'bg-red-500',
-  Spare: 'bg-yellow-500',
+  Spare: 'bg-amber-500',
   'Hot Spot': 'bg-orange-500',
 };
 
@@ -161,323 +149,366 @@ export default function ManagerDashboard() {
   const openStands = standStatuses.filter(s => s.status === 'Open' || s.status === 'Hot Spot');
   const standsWithIssues = standStatuses.filter(s => s.activeIssues > 0);
 
-  const stats = [
-    { label: 'Stands Open', value: openStands.length, total: standStatuses.length, icon: <MapPin className="h-5 w-5" />, color: 'text-green-400' },
-    { label: 'Active Deliveries', value: activeDeliveries.length, emergency: emergencyDeliveries.length, icon: <Truck className="h-5 w-5" />, color: 'text-blue-400' },
-    { label: 'IT Alerts', value: activeITAlerts.length, emergency: emergencyITAlerts.length, icon: <Zap className="h-5 w-5" />, color: 'text-cyan-400' },
-    { label: 'Stands with Issues', value: standsWithIssues.length, icon: <AlertTriangle className="h-5 w-5" />, color: standsWithIssues.length > 0 ? 'text-amber-400' : 'text-green-400' },
-  ];
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-white" data-testid="manager-dashboard">
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-cyan-500/20 bg-slate-950/95 backdrop-blur-sm px-4">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button size="icon" variant="ghost" className="md:hidden text-white">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="bg-slate-900 border-slate-700">
-            <nav className="grid gap-4 text-lg font-medium pt-8">
-              <Link href="/messages" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
-                <MessageSquare className="h-5 w-5" />
-                Messages
-              </Link>
-              <Link href="/supervisor" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
-                <Users className="h-5 w-5" />
-                Supervisor View
-              </Link>
-              <Link href="/warehouse" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
-                <Package className="h-5 w-5" />
-                Warehouse
-              </Link>
-            </nav>
-          </SheetContent>
-        </Sheet>
+    <AnimatedBackground>
+      <div className="min-h-screen" data-testid="manager-dashboard">
+        <PageHeader
+          title="Orby Command"
+          subtitle="Operations Dashboard"
+          icon={
+            <div className="relative w-8 h-8">
+              <div className="absolute inset-0 bg-cyan-400/30 rounded-full blur-md animate-pulse" />
+              <img 
+                src="/orby-mascot.png" 
+                alt="Orby"
+                className="relative w-8 h-8 object-contain"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            </div>
+          }
+          iconColor="cyan"
+          actions={
+            <div className="flex items-center gap-2">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button size="icon" variant="ghost" className="md:hidden text-slate-300 hover:bg-white/10">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="bg-slate-900 border-slate-700">
+                  <nav className="grid gap-4 text-lg font-medium pt-8">
+                    <Link href="/messages" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
+                      <MessageSquare className="h-5 w-5" />
+                      Messages
+                    </Link>
+                    <Link href="/supervisor" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
+                      <Users className="h-5 w-5" />
+                      Supervisor View
+                    </Link>
+                    <Link href="/warehouse" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
+                      <Package className="h-5 w-5" />
+                      Warehouse
+                    </Link>
+                  </nav>
+                </SheetContent>
+              </Sheet>
 
-        <div className="flex-1 flex items-center gap-3">
-          <div className="relative w-16 h-16 flex items-center justify-center -my-1">
-            <div className="absolute inset-0 bg-cyan-400/30 rounded-full blur-lg animate-pulse" />
-            <img 
-              src="/orby-mascot.png" 
-              alt="Orby"
-              className="relative w-16 h-16 object-contain drop-shadow-[0_0_12px_rgba(6,182,212,0.7)]"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
+              <Button variant="ghost" size="icon" className="relative text-slate-300 hover:bg-white/10" data-testid="button-notifications">
+                <Bell className="h-5 w-5" />
+                {(emergencyDeliveries.length + emergencyITAlerts.length) > 0 && (
+                  <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center animate-pulse">
+                    {emergencyDeliveries.length + emergencyITAlerts.length}
+                  </span>
+                )}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-300 hover:bg-white/10" data-testid="button-logout">
+                <LogOut className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Logout</span>
+              </Button>
+            </div>
+          }
+        />
+
+        <main className="p-4 space-y-4 max-w-7xl mx-auto">
+          <WeatherAlertBanner />
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <StatCard
+              icon={<MapPin className="h-5 w-5" />}
+              label="Stands Open"
+              value={`${openStands.length}/${standStatuses.length}`}
+              color="green"
+            />
+            <StatCard
+              icon={<Truck className="h-5 w-5" />}
+              label="Active Deliveries"
+              value={activeDeliveries.length}
+              subValue={emergencyDeliveries.length > 0 ? `${emergencyDeliveries.length} urgent` : undefined}
+              color="blue"
+            />
+            <StatCard
+              icon={<Zap className="h-5 w-5" />}
+              label="IT Alerts"
+              value={activeITAlerts.length}
+              subValue={emergencyITAlerts.length > 0 ? `${emergencyITAlerts.length} urgent` : undefined}
+              color="cyan"
+            />
+            <StatCard
+              icon={<AlertTriangle className="h-5 w-5" />}
+              label="Issues"
+              value={standsWithIssues.length}
+              color={standsWithIssues.length > 0 ? "amber" : "green"}
             />
           </div>
-          <div>
-            <h1 className="text-lg font-bold text-cyan-400">Orby Command</h1>
-            <p className="text-xs text-cyan-200/60">Operations Dashboard</p>
-          </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative text-white" data-testid="button-notifications">
-            <Bell className="h-5 w-5" />
-            {(emergencyDeliveries.length + emergencyITAlerts.length) > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center">
-                {emergencyDeliveries.length + emergencyITAlerts.length}
-              </span>
-            )}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white" data-testid="button-logout">
-            <LogOut className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline">Logout</span>
-          </Button>
-        </div>
-      </header>
-
-      <main className="p-4 space-y-4 max-w-7xl mx-auto">
-        <WeatherAlertBanner />
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {stats.map((stat, i) => (
-            <Card key={i} className="bg-white/5 border-white/10" data-testid={`stat-${stat.label.toLowerCase().replace(/\s/g, '-')}`}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className={stat.color}>{stat.icon}</div>
-                  {stat.emergency !== undefined && stat.emergency > 0 && (
-                    <Badge variant="destructive" className="text-xs">
-                      {stat.emergency} urgent
-                    </Badge>
-                  )}
-                </div>
-                <div className="mt-2">
-                  <div className="text-2xl font-bold">
-                    {stat.value}
-                    {stat.total && <span className="text-sm text-white/50">/{stat.total}</span>}
-                  </div>
-                  <div className="text-xs text-white/60">{stat.label}</div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2 space-y-4">
-            {emergencyDeliveries.length > 0 && (
-              <Card className="bg-red-500/10 border-red-500/30" data-testid="emergency-deliveries">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-red-400 flex items-center gap-2 text-lg">
-                    <AlertTriangle className="h-5 w-5" />
-                    Emergency Requests
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {emergencyDeliveries.map(req => (
-                    <div key={req.id} className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${departmentColors[req.department]}`}>
-                          {departmentIcons[req.department]}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2 space-y-4">
+              <AnimatePresence>
+                {emergencyDeliveries.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                  >
+                    <GlassCard className="border-red-500/30" glow data-testid="emergency-deliveries">
+                      <GlassCardHeader>
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 rounded-lg bg-red-500/20">
+                            <AlertTriangle className="h-4 w-4 text-red-400" />
+                          </div>
+                          <span className="font-bold text-red-400">Emergency Requests</span>
                         </div>
-                        <div>
-                          <div className="font-medium">{req.standName}</div>
-                          <div className="text-sm text-white/70">{req.description}</div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge className={statusColors[req.status]}>{req.status}</Badge>
-                        <div className="text-xs text-white/50 mt-1">{formatTimeAgo(req.createdAt)}</div>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
-            <Card className="bg-white/5 border-white/10" data-testid="active-deliveries">
-              <CardHeader className="pb-2">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-white flex items-center gap-2 text-lg">
-                    <Truck className="h-5 w-5 text-blue-400" />
-                    Active Deliveries
-                  </CardTitle>
-                  <Button variant="ghost" size="sm" className="text-cyan-400">
-                    View All <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Tabs defaultValue="all" className="w-full">
-                  <TabsList className="grid grid-cols-5 bg-white/5 mb-4">
-                    <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
-                    <TabsTrigger value="Warehouse" className="text-xs">Warehouse</TabsTrigger>
-                    <TabsTrigger value="Kitchen" className="text-xs">Kitchen</TabsTrigger>
-                    <TabsTrigger value="Bar" className="text-xs">Bar</TabsTrigger>
-                    <TabsTrigger value="IT" className="text-xs">IT</TabsTrigger>
-                  </TabsList>
-                  
-                  {['all', 'Warehouse', 'Kitchen', 'Bar', 'IT'].map(tab => (
-                    <TabsContent key={tab} value={tab} className="space-y-2">
-                      {activeDeliveries
-                        .filter(d => tab === 'all' || d.department === tab)
-                        .map(req => (
-                          <div key={req.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                      </GlassCardHeader>
+                      <GlassCardContent className="space-y-2 pt-0">
+                        {emergencyDeliveries.map((req, idx) => (
+                          <motion.div 
+                            key={req.id} 
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                            className="flex items-center justify-between p-3 bg-red-500/10 rounded-xl border border-red-500/20"
+                          >
                             <div className="flex items-center gap-3">
                               <div className={`p-2 rounded-lg border ${departmentColors[req.department]}`}>
                                 {departmentIcons[req.department]}
                               </div>
                               <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium">{req.standName}</span>
-                                  <Badge variant="outline" className="text-xs border-white/20">
-                                    {req.department}
-                                  </Badge>
-                                  {req.priority === 'Emergency' && (
-                                    <Badge variant="destructive" className="text-xs">Urgent</Badge>
-                                  )}
-                                </div>
-                                <div className="text-sm text-white/60">{req.description}</div>
-                                <div className="text-xs text-white/40 mt-1">
-                                  Requested by {req.requesterName} • {formatTimeAgo(req.createdAt)}
-                                </div>
+                                <div className="font-medium text-slate-200">{req.standName}</div>
+                                <div className="text-sm text-slate-400">{req.description}</div>
                               </div>
                             </div>
                             <div className="text-right">
-                              <Badge className={statusColors[req.status]}>
-                                {req.status === 'OnTheWay' ? 'On the Way' : req.status}
-                              </Badge>
-                              {req.eta && req.status === 'OnTheWay' && (
-                                <div className="text-sm text-green-400 mt-1 flex items-center gap-1 justify-end">
-                                  <Clock className="h-3 w-3" />
-                                  {req.eta} min
+                              <Badge className={`border ${statusColors[req.status]}`}>{req.status}</Badge>
+                              <div className="text-xs text-slate-500 mt-1">{formatTimeAgo(req.createdAt)}</div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </GlassCardContent>
+                    </GlassCard>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <GlassCard data-testid="active-deliveries">
+                <GlassCardHeader>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-blue-500/20">
+                        <Truck className="h-4 w-4 text-blue-400" />
+                      </div>
+                      <span className="font-bold text-slate-200">Active Deliveries</span>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-cyan-400 hover:bg-cyan-500/10">
+                      View All <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                </GlassCardHeader>
+                <GlassCardContent className="pt-0">
+                  <Tabs defaultValue="all" className="w-full">
+                    <TabsList className="grid grid-cols-5 bg-white/5 mb-4">
+                      <TabsTrigger value="all" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">All</TabsTrigger>
+                      <TabsTrigger value="Warehouse" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">Warehouse</TabsTrigger>
+                      <TabsTrigger value="Kitchen" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">Kitchen</TabsTrigger>
+                      <TabsTrigger value="Bar" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">Bar</TabsTrigger>
+                      <TabsTrigger value="IT" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">IT</TabsTrigger>
+                    </TabsList>
+                    
+                    {['all', 'Warehouse', 'Kitchen', 'Bar', 'IT'].map(tab => (
+                      <TabsContent key={tab} value={tab} className="space-y-2">
+                        {activeDeliveries
+                          .filter(d => tab === 'all' || d.department === tab)
+                          .map((req, idx) => (
+                            <motion.div 
+                              key={req.id} 
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: idx * 0.05 }}
+                              className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={`p-2 rounded-lg border ${departmentColors[req.department]}`}>
+                                  {departmentIcons[req.department]}
                                 </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-slate-200">{req.standName}</span>
+                                    <Badge variant="outline" className="text-xs border-white/20 text-slate-400">
+                                      {req.department}
+                                    </Badge>
+                                    {req.priority === 'Emergency' && (
+                                      <Badge className="text-xs bg-red-500/20 text-red-400 border border-red-500/30">Urgent</Badge>
+                                    )}
+                                  </div>
+                                  <div className="text-sm text-slate-400">{req.description}</div>
+                                  <div className="text-xs text-slate-500 mt-1">
+                                    Requested by {req.requesterName} • {formatTimeAgo(req.createdAt)}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <Badge className={`border ${statusColors[req.status]}`}>
+                                  {req.status === 'OnTheWay' ? 'On the Way' : req.status}
+                                </Badge>
+                                {req.eta && req.status === 'OnTheWay' && (
+                                  <div className="text-sm text-emerald-400 mt-1 flex items-center gap-1 justify-end">
+                                    <Clock className="h-3 w-3" />
+                                    {req.eta} min
+                                  </div>
+                                )}
+                              </div>
+                            </motion.div>
+                          ))}
+                        {activeDeliveries.filter(d => tab === 'all' || d.department === tab).length === 0 && (
+                          <div className="text-center py-8 text-slate-500">
+                            <CheckCircle2 className="h-8 w-8 mx-auto mb-2" />
+                            <p>No active {tab === 'all' ? 'deliveries' : `${tab} requests`}</p>
+                          </div>
+                        )}
+                      </TabsContent>
+                    ))}
+                  </Tabs>
+                </GlassCardContent>
+              </GlassCard>
+
+              {activeITAlerts.length > 0 && (
+                <GlassCard className="border-cyan-500/20" data-testid="it-alerts">
+                  <GlassCardHeader>
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-cyan-500/20">
+                        <Zap className="h-4 w-4 text-cyan-400" />
+                      </div>
+                      <span className="font-bold text-cyan-400">IT Alerts</span>
+                    </div>
+                  </GlassCardHeader>
+                  <GlassCardContent className="space-y-2 pt-0">
+                    {activeITAlerts.map((alert, idx) => (
+                      <motion.div 
+                        key={alert.id} 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                        className={`flex items-center justify-between p-3 rounded-xl border ${alert.priority === 'Emergency' ? 'bg-red-500/10 border-red-500/30' : 'bg-cyan-500/10 border-cyan-500/20'}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-cyan-500/20">
+                            <Monitor className="h-4 w-4 text-cyan-400" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-slate-200">{alert.standName}</span>
+                              <Badge variant="outline" className="text-xs border-white/20 text-slate-400">{alert.issueType}</Badge>
+                              {alert.priority === 'Emergency' && (
+                                <Badge className="text-xs bg-red-500/20 text-red-400 border border-red-500/30">Urgent</Badge>
                               )}
                             </div>
-                          </div>
-                        ))}
-                      {activeDeliveries.filter(d => tab === 'all' || d.department === tab).length === 0 && (
-                        <div className="text-center py-8 text-white/40">
-                          <CheckCircle2 className="h-8 w-8 mx-auto mb-2" />
-                          <p>No active {tab === 'all' ? 'deliveries' : `${tab} requests`}</p>
-                        </div>
-                      )}
-                    </TabsContent>
-                  ))}
-                </Tabs>
-              </CardContent>
-            </Card>
-
-            {activeITAlerts.length > 0 && (
-              <Card className="bg-white/5 border-cyan-500/20" data-testid="it-alerts">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-cyan-400 flex items-center gap-2 text-lg">
-                    <Zap className="h-5 w-5" />
-                    IT Alerts
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {activeITAlerts.map(alert => (
-                    <div key={alert.id} className={`flex items-center justify-between p-3 rounded-lg border ${alert.priority === 'Emergency' ? 'bg-red-500/10 border-red-500/30' : 'bg-cyan-500/10 border-cyan-500/20'}`}>
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-cyan-500/20">
-                          <Monitor className="h-4 w-4 text-cyan-400" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{alert.standName}</span>
-                            <Badge variant="outline" className="text-xs">{alert.issueType}</Badge>
-                            {alert.priority === 'Emergency' && (
-                              <Badge variant="destructive" className="text-xs">Urgent</Badge>
-                            )}
-                          </div>
-                          <div className="text-sm text-white/60">{alert.description}</div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge className={statusColors[alert.status]}>{alert.status}</Badge>
-                        <div className="text-xs text-white/50 mt-1">{formatTimeAgo(alert.createdAt)}</div>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <LiveSalesWidget compact className="w-full" />
-            
-            <WeatherWidget compact className="w-full" />
-
-            <Card className="bg-white/5 border-white/10" data-testid="stand-overview">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-white flex items-center gap-2 text-lg">
-                  <MapPin className="h-5 w-5 text-green-400" />
-                  Stand Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[300px]">
-                  <div className="space-y-2">
-                    {standStatuses.map(stand => (
-                      <div key={stand.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full ${standStatusColors[stand.status]}`} />
-                          <div>
-                            <div className="font-medium text-sm">{stand.name}</div>
-                            <div className="text-xs text-white/50">{stand.section}</div>
+                            <div className="text-sm text-slate-400">{alert.description}</div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {stand.activeIssues > 0 && (
-                            <Badge variant="destructive" className="text-xs">
-                              {stand.activeIssues} issue{stand.activeIssues > 1 ? 's' : ''}
-                            </Badge>
-                          )}
-                          {stand.pendingDeliveries > 0 && (
-                            <Badge variant="outline" className="text-xs border-blue-500/50 text-blue-300">
-                              {stand.pendingDeliveries} pending
-                            </Badge>
-                          )}
-                          <Badge variant="outline" className="text-xs border-white/20">
-                            {stand.status}
-                          </Badge>
+                        <div className="text-right">
+                          <Badge className={`border ${statusColors[alert.status]}`}>{alert.status}</Badge>
+                          <div className="text-xs text-slate-500 mt-1">{formatTimeAgo(alert.createdAt)}</div>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
+                  </GlassCardContent>
+                </GlassCard>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <LiveSalesWidget compact className="w-full" />
+              
+              <WeatherWidget compact className="w-full" />
+
+              <GlassCard data-testid="stand-overview">
+                <GlassCardHeader>
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-emerald-500/20">
+                      <MapPin className="h-4 w-4 text-emerald-400" />
+                    </div>
+                    <span className="font-bold text-slate-200">Stand Overview</span>
                   </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                </GlassCardHeader>
+                <GlassCardContent className="pt-0">
+                  <ScrollArea className="h-[300px]">
+                    <div className="space-y-2">
+                      {standStatuses.map((stand, idx) => (
+                        <motion.div 
+                          key={stand.id} 
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: idx * 0.03 }}
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${standStatusColors[stand.status]}`} />
+                            <div>
+                              <div className="font-medium text-sm text-slate-200">{stand.name}</div>
+                              <div className="text-xs text-slate-500">{stand.section}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {stand.activeIssues > 0 && (
+                              <Badge className="text-xs bg-red-500/20 text-red-400 border border-red-500/30">
+                                {stand.activeIssues} issue{stand.activeIssues > 1 ? 's' : ''}
+                              </Badge>
+                            )}
+                            {stand.pendingDeliveries > 0 && (
+                              <Badge variant="outline" className="text-xs border-blue-500/30 text-blue-400">
+                                {stand.pendingDeliveries} pending
+                              </Badge>
+                            )}
+                            <Badge variant="outline" className="text-xs border-white/20 text-slate-400">
+                              {stand.status}
+                            </Badge>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </GlassCardContent>
+              </GlassCard>
 
-            <Card className="bg-white/5 border-white/10" data-testid="quick-actions">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-white text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-2">
-                <Button variant="outline" className="h-auto py-3 flex flex-col items-center gap-1 bg-white/5 border-white/20 hover:bg-white/10" data-testid="button-broadcast">
-                  <Radio className="h-5 w-5 text-cyan-400" />
-                  <span className="text-xs">Broadcast</span>
-                </Button>
-                <Link href="/messages">
-                  <Button variant="outline" className="h-auto py-3 flex flex-col items-center gap-1 bg-white/5 border-white/20 hover:bg-white/10 w-full" data-testid="button-view-messages">
-                    <MessageSquare className="h-5 w-5 text-blue-400" />
-                    <span className="text-xs">Messages</span>
-                  </Button>
-                </Link>
-                <Link href="/warehouse">
-                  <Button variant="outline" className="h-auto py-3 flex flex-col items-center gap-1 bg-white/5 border-white/20 hover:bg-white/10 w-full" data-testid="button-warehouse">
-                    <Package className="h-5 w-5 text-orange-400" />
-                    <span className="text-xs">Warehouse</span>
-                  </Button>
-                </Link>
-                <Button variant="outline" className="h-auto py-3 flex flex-col items-center gap-1 bg-white/5 border-white/20 hover:bg-white/10" data-testid="button-reports">
-                  <TrendingUp className="h-5 w-5 text-green-400" />
-                  <span className="text-xs">Reports</span>
-                </Button>
-              </CardContent>
-            </Card>
+              <GlassCard data-testid="quick-actions">
+                <GlassCardHeader>
+                  <span className="font-bold text-slate-200">Quick Actions</span>
+                </GlassCardHeader>
+                <GlassCardContent className="grid grid-cols-2 gap-2 pt-0">
+                  {[
+                    { icon: Radio, label: 'Broadcast', color: 'cyan', testId: 'button-broadcast' },
+                    { icon: MessageSquare, label: 'Messages', color: 'blue', href: '/messages', testId: 'button-view-messages' },
+                    { icon: Package, label: 'Warehouse', color: 'orange', href: '/warehouse', testId: 'button-warehouse' },
+                    { icon: TrendingUp, label: 'Reports', color: 'green', testId: 'button-reports' },
+                  ].map((action) => {
+                    const content = (
+                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                        <Button 
+                          variant="outline" 
+                          className={`h-auto py-3 flex flex-col items-center gap-1 bg-white/5 border-white/10 hover:bg-white/10 w-full`}
+                          data-testid={action.testId}
+                        >
+                          <action.icon className={`h-5 w-5 text-${action.color}-400`} />
+                          <span className="text-xs text-slate-300">{action.label}</span>
+                        </Button>
+                      </motion.div>
+                    );
+                    return action.href ? (
+                      <Link key={action.label} href={action.href}>{content}</Link>
+                    ) : (
+                      <div key={action.label}>{content}</div>
+                    );
+                  })}
+                </GlassCardContent>
+              </GlassCard>
+            </div>
           </div>
-        </div>
 
-        <LiveSalesWidget className="w-full" />
-        
-        <WeatherWidget className="w-full" />
-      </main>
-    </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <LiveSalesWidget className="w-full" />
+            <WeatherWidget className="w-full" />
+          </div>
+        </main>
+      </div>
+    </AnimatedBackground>
   );
 }

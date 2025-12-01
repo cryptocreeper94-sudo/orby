@@ -1,7 +1,7 @@
 import { useStore } from "@/lib/mockData";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, Package, Users, ClipboardCheck, FileBarChart, Menu, MessageSquare, LayoutDashboard, Map } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { LogOut, Package, Users, ClipboardCheck, FileBarChart, Menu, MessageSquare, LayoutDashboard, Map, Settings, Shield, Activity } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
 import {
@@ -9,17 +9,19 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StaffingGrid } from "@/components/StaffingGrid";
 import { useEffect, useState } from "react";
 import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
+import { motion, AnimatePresence } from "framer-motion";
+import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader, GlowButton } from "@/components/ui/premium";
 
 export default function AdminDashboard() {
   const logout = useStore((state) => state.logout);
   const [, setLocation] = useLocation();
   const stands = useStore((state) => state.stands);
   const fetchAll = useStore((state) => state.fetchAll);
+  const [activeTab, setActiveTab] = useState<'grid' | 'list' | 'reports' | 'map'>('grid');
 
   useEffect(() => {
     if (stands.length === 0) {
@@ -32,15 +34,6 @@ export default function AdminDashboard() {
     setLocation("/");
   };
 
-  const [showMap, setShowMap] = useState(false);
-
-  const stats = [
-    { label: "Open Stands", value: stands.filter(s => s.status === 'Open').length, icon: Package, color: "text-green-600" },
-    { label: "Staff Active", value: 42, icon: Users, color: "text-blue-600" },
-    { label: "Pending Audits", value: 3, icon: ClipboardCheck, color: "text-orange-600" },
-    { label: "Total Revenue", value: "$12,450", icon: FileBarChart, color: "text-purple-600" },
-  ];
-
   const supervisors = [
     { id: '1', name: 'Jason (You)' },
     { id: '2', name: 'Mike Smith' },
@@ -48,152 +41,214 @@ export default function AdminDashboard() {
     { id: '4', name: 'Chris Williams' },
   ];
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Open': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+      case 'Closed': return 'bg-red-500/20 text-red-400 border-red-500/30';
+      default: return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-20">
-      {/* Mobile Header */}
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-cyan-500/20 bg-slate-950/95 backdrop-blur-sm px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 shadow-sm sm:shadow-none">
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button size="icon" variant="outline" className="sm:hidden">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle Menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="sm:max-w-xs">
-            <nav className="grid gap-6 text-lg font-medium">
-              <div className="flex items-center gap-2 text-lg font-semibold">
-                <Package className="h-6 w-6" />
-                <span className="sr-only">Orby</span>
-              </div>
-              <a href="#" className="flex items-center gap-4 px-2.5 text-foreground hover:text-foreground">
-                <LayoutDashboard className="h-5 w-5" />
-                Dashboard
-              </a>
-              <a href="#" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                <Users className="h-5 w-5" />
-                Roster
-              </a>
-              <Link href="/messages" className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground">
-                <MessageSquare className="h-5 w-5" />
-                Messages
-              </Link>
-            </nav>
-          </SheetContent>
-        </Sheet>
-        <div className="flex-1 font-semibold text-lg flex items-center justify-between">
-          Admin Control
-          <Link href="/messages">
-             <Button variant="ghost" size="icon" className="sm:hidden text-muted-foreground">
-               <MessageSquare className="h-5 w-5" />
-             </Button>
-          </Link>
-        </div>
-        <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground">
-          <LogOut className="h-5 w-5" />
-        </Button>
-      </header>
-
-      <main className="p-4 sm:px-6 sm:py-0 space-y-6 max-w-6xl mx-auto mt-4">
-        
-        {/* Quick Stats */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {stats.map((stat, i) => (
-            <Card key={i} className="overflow-hidden border-slate-700 bg-slate-900/80 shadow-sm">
-              <CardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-                <stat.icon className={`h-8 w-8 ${stat.color} opacity-80`} />
-                <div className="text-2xl font-bold tracking-tighter">{stat.value}</div>
-                <div className="text-xs text-muted-foreground uppercase font-semibold tracking-wider">{stat.label}</div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="grid" className="w-full">
-          <TabsList className="w-full justify-start border-b rounded-none bg-transparent h-auto p-0 mb-4 space-x-6">
-            <TabsTrigger 
-              value="grid" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2 font-bold"
-            >
-              Staffing Grid
-            </TabsTrigger>
-            <TabsTrigger 
-              value="list" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2 font-bold"
-            >
-              List View
-            </TabsTrigger>
-             <TabsTrigger 
-              value="reports" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2 font-bold"
-            >
-              Reports
-            </TabsTrigger>
-            <TabsTrigger 
-              value="map" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-4 py-2 font-bold"
-            >
-              <Map className="h-4 w-4 mr-1" />
-              Stadium Map
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="grid">
-            <StaffingGrid />
-          </TabsContent>
-
-          <TabsContent value="list">
-            <Card className="border-slate-700 bg-slate-900/80 shadow-sm">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg font-semibold text-slate-200">Live Stand Status</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 gap-2">
-                  {stands.map(stand => (
-                    <div key={stand.id} className="flex items-center justify-between p-3 bg-slate-800/80 rounded-lg border border-slate-700 shadow-sm">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-sm">{stand.name}</span>
-                        <span className="text-xs text-muted-foreground">Supervisor: {stand.supervisorId ? 'Assigned' : 'Unassigned'}</span>
-                      </div>
-                      <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${stand.status === 'Open' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200'}`}>
-                        {stand.status}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="reports">
-             <div className="grid grid-cols-2 gap-4">
-               <Link href="/roster-builder">
-                  <Button variant="outline" className="w-full h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-600 hover:border-cyan-500 hover:bg-slate-800/50 cursor-pointer text-slate-200">
-                    <Users className="h-6 w-6" />
-                    Roster & Group Builder
+    <AnimatedBackground>
+      <div className="min-h-screen pb-20">
+        <PageHeader
+          title="Admin Control"
+          subtitle="System administration dashboard"
+          icon={<Shield className="h-5 w-5" />}
+          iconColor="cyan"
+          actions={
+            <div className="flex items-center gap-2">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button size="icon" variant="ghost" className="md:hidden text-slate-300 hover:bg-white/10">
+                    <Menu className="h-5 w-5" />
                   </Button>
-               </Link>
-               <Button variant="outline" className="h-24 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-slate-600 hover:border-cyan-500 hover:bg-slate-800/50 text-slate-200">
-                  <FileBarChart className="h-6 w-6" />
-                  Export Inventory CSV
-               </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="bg-slate-900 border-slate-700">
+                  <nav className="grid gap-6 text-lg font-medium pt-8">
+                    <div className="flex items-center gap-2 text-lg font-semibold text-cyan-400">
+                      <Package className="h-6 w-6" />
+                      Orby Admin
+                    </div>
+                    <Link href="#" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
+                      <LayoutDashboard className="h-5 w-5" />
+                      Dashboard
+                    </Link>
+                    <Link href="#" className="flex items-center gap-4 px-2.5 text-slate-400 hover:text-white">
+                      <Users className="h-5 w-5" />
+                      Roster
+                    </Link>
+                    <Link href="/messages" className="flex items-center gap-4 px-2.5 text-slate-400 hover:text-white">
+                      <MessageSquare className="h-5 w-5" />
+                      Messages
+                    </Link>
+                  </nav>
+                </SheetContent>
+              </Sheet>
+              <Link href="/messages">
+                <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-white/10">
+                  <MessageSquare className="h-5 w-5" />
+                </Button>
+              </Link>
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-300 hover:bg-white/10">
+                <LogOut className="h-5 w-5" />
+              </Button>
             </div>
-          </TabsContent>
+          }
+        />
 
-          <TabsContent value="map" className="h-[500px]">
-            <InteractiveMap 
-              isManager={true}
-              supervisors={supervisors}
-              onSectionAssign={(section) => console.log('Section assigned:', section)}
+        <main className="p-4 sm:px-6 space-y-4 max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <StatCard
+              icon={<Package className="h-5 w-5" />}
+              label="Open Stands"
+              value={stands.filter(s => s.status === 'Open').length}
+              color="green"
             />
-          </TabsContent>
-        </Tabs>
+            <StatCard
+              icon={<Users className="h-5 w-5" />}
+              label="Staff Active"
+              value={42}
+              color="blue"
+            />
+            <StatCard
+              icon={<ClipboardCheck className="h-5 w-5" />}
+              label="Pending Audits"
+              value={3}
+              color="amber"
+            />
+            <StatCard
+              icon={<FileBarChart className="h-5 w-5" />}
+              label="Total Revenue"
+              value="$12,450"
+              color="purple"
+            />
+          </div>
 
-        <Notepad storageKey="admin-notes" />
+          <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+            {[
+              { id: 'grid', label: 'Staffing Grid', icon: LayoutDashboard },
+              { id: 'list', label: 'List View', icon: Activity },
+              { id: 'reports', label: 'Reports', icon: FileBarChart },
+              { id: 'map', label: 'Stadium Map', icon: Map },
+            ].map((tab) => (
+              <motion.button
+                key={tab.id}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2 transition-all whitespace-nowrap ${
+                  activeTab === tab.id 
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/25' 
+                    : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
+                }`}
+                data-testid={`tab-${tab.id}`}
+              >
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+              </motion.button>
+            ))}
+          </div>
 
-      </main>
-      
-      <TutorialHelpButton page="admin" />
-    </div>
+          <AnimatePresence mode="wait">
+            {activeTab === 'grid' && (
+              <motion.div
+                key="grid"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <StaffingGrid />
+              </motion.div>
+            )}
+
+            {activeTab === 'list' && (
+              <motion.div
+                key="list"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+              >
+                <GlassCard>
+                  <GlassCardHeader>
+                    <span className="font-bold text-slate-200">Live Stand Status</span>
+                  </GlassCardHeader>
+                  <GlassCardContent className="space-y-2 pt-0">
+                    {stands.map((stand, idx) => (
+                      <motion.div 
+                        key={stand.id} 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-bold text-sm text-slate-200">{stand.name}</span>
+                          <span className="text-xs text-slate-500">
+                            Supervisor: {stand.supervisorId ? 'Assigned' : 'Unassigned'}
+                          </span>
+                        </div>
+                        <Badge className={`border ${getStatusColor(stand.status)}`}>
+                          {stand.status}
+                        </Badge>
+                      </motion.div>
+                    ))}
+                  </GlassCardContent>
+                </GlassCard>
+              </motion.div>
+            )}
+
+            {activeTab === 'reports' && (
+              <motion.div
+                key="reports"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="grid grid-cols-2 gap-4"
+              >
+                <Link href="/roster-builder">
+                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                    <GlassCard className="cursor-pointer hover:border-cyan-500/30 transition-colors h-full">
+                      <GlassCardContent className="p-6 h-24 flex flex-col items-center justify-center gap-2">
+                        <Users className="h-6 w-6 text-cyan-400" />
+                        <span className="text-sm font-medium text-slate-200">Roster & Group Builder</span>
+                      </GlassCardContent>
+                    </GlassCard>
+                  </motion.div>
+                </Link>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <GlassCard className="cursor-pointer hover:border-cyan-500/30 transition-colors h-full">
+                    <GlassCardContent className="p-6 h-24 flex flex-col items-center justify-center gap-2">
+                      <FileBarChart className="h-6 w-6 text-cyan-400" />
+                      <span className="text-sm font-medium text-slate-200">Export Inventory CSV</span>
+                    </GlassCardContent>
+                  </GlassCard>
+                </motion.div>
+              </motion.div>
+            )}
+
+            {activeTab === 'map' && (
+              <motion.div
+                key="map"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="h-[500px] rounded-xl overflow-hidden border border-white/10"
+              >
+                <InteractiveMap 
+                  isManager={true}
+                  supervisors={supervisors}
+                  onSectionAssign={(section) => console.log('Section assigned:', section)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <Notepad storageKey="admin-notes" />
+        </main>
+        
+        <TutorialHelpButton page="admin" />
+      </div>
+    </AnimatedBackground>
   );
 }
