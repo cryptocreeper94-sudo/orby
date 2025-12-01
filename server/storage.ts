@@ -4,6 +4,7 @@ import {
   standIssues, standIssueNotifications, managerAssignments, geofenceEvents, ISSUE_ROUTING_RULES,
   closingChecklists, closingChecklistTasks, spoilageReports, spoilageItems, voucherReports, DEFAULT_CLOSING_TASKS,
   documentSubmissions, menuBoards, menuSlides,
+  warehouseCategories, warehouseProducts, warehouseStock, warehouseParLevels, warehouseRequests, warehouseRequestItems,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -30,7 +31,13 @@ import {
   type VoucherReport, type InsertVoucherReport,
   type DocumentSubmission, type InsertDocumentSubmission,
   type MenuBoard, type InsertMenuBoard,
-  type MenuSlide, type InsertMenuSlide
+  type MenuSlide, type InsertMenuSlide,
+  type WarehouseCategory, type InsertWarehouseCategory,
+  type WarehouseProduct, type InsertWarehouseProduct,
+  type WarehouseStock, type InsertWarehouseStock,
+  type WarehouseParLevel, type InsertWarehouseParLevel,
+  type WarehouseRequest, type InsertWarehouseRequest,
+  type WarehouseRequestItem, type InsertWarehouseRequestItem
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
@@ -215,6 +222,58 @@ export interface IStorage {
   // Menu Slides
   getMenuSlides(boardId: string): Promise<MenuSlide[]>;
   saveMenuSlides(boardId: string, slides: Array<{ title: string; backgroundColor: string; backgroundImage?: string; content: any; slideOrder: number }>): Promise<MenuSlide[]>;
+
+  // ============ WAREHOUSE INVENTORY SYSTEM ============
+  // NOTE: This is a configurable example based on Nissan Stadium operations.
+  // Categories, products, and par levels can be customized to match your specific workflow.
+
+  // Warehouse Categories
+  getAllWarehouseCategories(): Promise<WarehouseCategory[]>;
+  getWarehouseCategory(id: string): Promise<WarehouseCategory | undefined>;
+  createWarehouseCategory(category: InsertWarehouseCategory): Promise<WarehouseCategory>;
+  updateWarehouseCategory(id: string, updates: Partial<InsertWarehouseCategory>): Promise<void>;
+  deleteWarehouseCategory(id: string): Promise<void>;
+
+  // Warehouse Products
+  getAllWarehouseProducts(): Promise<WarehouseProduct[]>;
+  getWarehouseProductsByCategory(categoryId: string): Promise<WarehouseProduct[]>;
+  getWarehouseProduct(id: string): Promise<WarehouseProduct | undefined>;
+  createWarehouseProduct(product: InsertWarehouseProduct): Promise<WarehouseProduct>;
+  updateWarehouseProduct(id: string, updates: Partial<InsertWarehouseProduct>): Promise<void>;
+  deleteWarehouseProduct(id: string): Promise<void>;
+
+  // Warehouse Stock
+  getWarehouseStockByProduct(productId: string): Promise<WarehouseStock[]>;
+  getAllWarehouseStock(): Promise<WarehouseStock[]>;
+  updateWarehouseStock(productId: string, quantity: number, userId?: string): Promise<void>;
+  createWarehouseStock(stock: InsertWarehouseStock): Promise<WarehouseStock>;
+
+  // Warehouse Par Levels
+  getParLevelsByStand(standId: string): Promise<WarehouseParLevel[]>;
+  getParLevelsByProduct(productId: string): Promise<WarehouseParLevel[]>;
+  createParLevel(parLevel: InsertWarehouseParLevel): Promise<WarehouseParLevel>;
+  updateParLevel(id: string, updates: Partial<InsertWarehouseParLevel>): Promise<void>;
+  deleteParLevel(id: string): Promise<void>;
+
+  // Warehouse Requests
+  getAllWarehouseRequests(): Promise<WarehouseRequest[]>;
+  getWarehouseRequestsByStand(standId: string): Promise<WarehouseRequest[]>;
+  getWarehouseRequestsByStatus(status: WarehouseRequest['status']): Promise<WarehouseRequest[]>;
+  getPendingWarehouseRequests(): Promise<WarehouseRequest[]>;
+  getWarehouseRequest(id: string): Promise<WarehouseRequest | undefined>;
+  createWarehouseRequest(request: InsertWarehouseRequest): Promise<WarehouseRequest>;
+  updateWarehouseRequestStatus(id: string, status: WarehouseRequest['status'], userId: string): Promise<void>;
+
+  // Warehouse Request Items
+  getWarehouseRequestItems(requestId: string): Promise<WarehouseRequestItem[]>;
+  addWarehouseRequestItem(item: InsertWarehouseRequestItem): Promise<WarehouseRequestItem>;
+  updateWarehouseRequestItem(id: string, updates: Partial<InsertWarehouseRequestItem>): Promise<void>;
+
+  // Low Stock Alerts
+  getLowStockProducts(): Promise<Array<{ product: WarehouseProduct; stock: WarehouseStock; parLevel?: WarehouseParLevel }>>;
+
+  // Seed example data
+  seedExampleWarehouseData(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1087,6 +1146,321 @@ export class DatabaseStorage implements IStorage {
     const created = await db.insert(menuSlides).values(slidesToInsert).returning();
     await db.update(menuBoards).set({ updatedAt: new Date() }).where(eq(menuBoards.id, boardId));
     return created;
+  }
+
+  // ============ WAREHOUSE INVENTORY SYSTEM ============
+  // NOTE: This is a configurable example based on Nissan Stadium operations.
+  // Categories, products, and par levels can be customized to match your specific workflow.
+
+  // Warehouse Categories
+  async getAllWarehouseCategories(): Promise<WarehouseCategory[]> {
+    return await db.select().from(warehouseCategories)
+      .where(eq(warehouseCategories.isActive, true))
+      .orderBy(asc(warehouseCategories.sortOrder));
+  }
+
+  async getWarehouseCategory(id: string): Promise<WarehouseCategory | undefined> {
+    const [category] = await db.select().from(warehouseCategories).where(eq(warehouseCategories.id, id));
+    return category || undefined;
+  }
+
+  async createWarehouseCategory(category: InsertWarehouseCategory): Promise<WarehouseCategory> {
+    const [created] = await db.insert(warehouseCategories).values(category).returning();
+    return created;
+  }
+
+  async updateWarehouseCategory(id: string, updates: Partial<InsertWarehouseCategory>): Promise<void> {
+    await db.update(warehouseCategories).set(updates).where(eq(warehouseCategories.id, id));
+  }
+
+  async deleteWarehouseCategory(id: string): Promise<void> {
+    await db.update(warehouseCategories).set({ isActive: false }).where(eq(warehouseCategories.id, id));
+  }
+
+  // Warehouse Products
+  async getAllWarehouseProducts(): Promise<WarehouseProduct[]> {
+    return await db.select().from(warehouseProducts)
+      .where(eq(warehouseProducts.isActive, true))
+      .orderBy(asc(warehouseProducts.name));
+  }
+
+  async getWarehouseProductsByCategory(categoryId: string): Promise<WarehouseProduct[]> {
+    return await db.select().from(warehouseProducts)
+      .where(and(
+        eq(warehouseProducts.categoryId, categoryId),
+        eq(warehouseProducts.isActive, true)
+      ))
+      .orderBy(asc(warehouseProducts.name));
+  }
+
+  async getWarehouseProduct(id: string): Promise<WarehouseProduct | undefined> {
+    const [product] = await db.select().from(warehouseProducts).where(eq(warehouseProducts.id, id));
+    return product || undefined;
+  }
+
+  async createWarehouseProduct(product: InsertWarehouseProduct): Promise<WarehouseProduct> {
+    const [created] = await db.insert(warehouseProducts).values(product).returning();
+    return created;
+  }
+
+  async updateWarehouseProduct(id: string, updates: Partial<InsertWarehouseProduct>): Promise<void> {
+    await db.update(warehouseProducts)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(warehouseProducts.id, id));
+  }
+
+  async deleteWarehouseProduct(id: string): Promise<void> {
+    await db.update(warehouseProducts).set({ isActive: false }).where(eq(warehouseProducts.id, id));
+  }
+
+  // Warehouse Stock
+  async getWarehouseStockByProduct(productId: string): Promise<WarehouseStock[]> {
+    return await db.select().from(warehouseStock)
+      .where(eq(warehouseStock.productId, productId));
+  }
+
+  async getAllWarehouseStock(): Promise<WarehouseStock[]> {
+    return await db.select().from(warehouseStock);
+  }
+
+  async updateWarehouseStock(productId: string, quantity: number, userId?: string): Promise<void> {
+    const [existing] = await db.select().from(warehouseStock)
+      .where(eq(warehouseStock.productId, productId));
+    
+    if (existing) {
+      await db.update(warehouseStock)
+        .set({ 
+          quantity, 
+          updatedAt: new Date(),
+          lastCountedAt: new Date(),
+          lastCountedBy: userId || null
+        })
+        .where(eq(warehouseStock.productId, productId));
+    } else {
+      await db.insert(warehouseStock).values({
+        productId,
+        quantity,
+        lastCountedAt: new Date(),
+        lastCountedBy: userId || null
+      });
+    }
+  }
+
+  async createWarehouseStock(stock: InsertWarehouseStock): Promise<WarehouseStock> {
+    const [created] = await db.insert(warehouseStock).values(stock).returning();
+    return created;
+  }
+
+  // Warehouse Par Levels
+  async getParLevelsByStand(standId: string): Promise<WarehouseParLevel[]> {
+    return await db.select().from(warehouseParLevels)
+      .where(eq(warehouseParLevels.standId, standId));
+  }
+
+  async getParLevelsByProduct(productId: string): Promise<WarehouseParLevel[]> {
+    return await db.select().from(warehouseParLevels)
+      .where(eq(warehouseParLevels.productId, productId));
+  }
+
+  async createParLevel(parLevel: InsertWarehouseParLevel): Promise<WarehouseParLevel> {
+    const [created] = await db.insert(warehouseParLevels).values(parLevel).returning();
+    return created;
+  }
+
+  async updateParLevel(id: string, updates: Partial<InsertWarehouseParLevel>): Promise<void> {
+    await db.update(warehouseParLevels).set(updates).where(eq(warehouseParLevels.id, id));
+  }
+
+  async deleteParLevel(id: string): Promise<void> {
+    await db.delete(warehouseParLevels).where(eq(warehouseParLevels.id, id));
+  }
+
+  // Warehouse Requests
+  async getAllWarehouseRequests(): Promise<WarehouseRequest[]> {
+    return await db.select().from(warehouseRequests)
+      .orderBy(desc(warehouseRequests.createdAt));
+  }
+
+  async getWarehouseRequestsByStand(standId: string): Promise<WarehouseRequest[]> {
+    return await db.select().from(warehouseRequests)
+      .where(eq(warehouseRequests.standId, standId))
+      .orderBy(desc(warehouseRequests.createdAt));
+  }
+
+  async getWarehouseRequestsByStatus(status: WarehouseRequest['status']): Promise<WarehouseRequest[]> {
+    return await db.select().from(warehouseRequests)
+      .where(eq(warehouseRequests.status, status))
+      .orderBy(desc(warehouseRequests.createdAt));
+  }
+
+  async getPendingWarehouseRequests(): Promise<WarehouseRequest[]> {
+    return await db.select().from(warehouseRequests)
+      .where(or(
+        eq(warehouseRequests.status, 'Pending'),
+        eq(warehouseRequests.status, 'Approved'),
+        eq(warehouseRequests.status, 'Picking'),
+        eq(warehouseRequests.status, 'InTransit')
+      ))
+      .orderBy(desc(warehouseRequests.createdAt));
+  }
+
+  async getWarehouseRequest(id: string): Promise<WarehouseRequest | undefined> {
+    const [request] = await db.select().from(warehouseRequests)
+      .where(eq(warehouseRequests.id, id));
+    return request || undefined;
+  }
+
+  async createWarehouseRequest(request: InsertWarehouseRequest): Promise<WarehouseRequest> {
+    const [created] = await db.insert(warehouseRequests).values(request).returning();
+    return created;
+  }
+
+  async updateWarehouseRequestStatus(id: string, status: WarehouseRequest['status'], userId: string): Promise<void> {
+    const updates: Partial<WarehouseRequest> = { status };
+    const now = new Date();
+    
+    switch (status) {
+      case 'Approved':
+        updates.approvedAt = now;
+        updates.approvedById = userId;
+        break;
+      case 'Picking':
+        updates.pickedAt = now;
+        updates.pickedById = userId;
+        break;
+      case 'InTransit':
+        updates.deliveredAt = now;
+        updates.deliveredById = userId;
+        break;
+      case 'Delivered':
+        updates.deliveredAt = now;
+        updates.deliveredById = userId;
+        break;
+      case 'Confirmed':
+        updates.confirmedAt = now;
+        updates.confirmedById = userId;
+        break;
+    }
+    
+    await db.update(warehouseRequests).set(updates).where(eq(warehouseRequests.id, id));
+  }
+
+  // Warehouse Request Items
+  async getWarehouseRequestItems(requestId: string): Promise<WarehouseRequestItem[]> {
+    return await db.select().from(warehouseRequestItems)
+      .where(eq(warehouseRequestItems.requestId, requestId));
+  }
+
+  async addWarehouseRequestItem(item: InsertWarehouseRequestItem): Promise<WarehouseRequestItem> {
+    const [created] = await db.insert(warehouseRequestItems).values(item).returning();
+    return created;
+  }
+
+  async updateWarehouseRequestItem(id: string, updates: Partial<InsertWarehouseRequestItem>): Promise<void> {
+    await db.update(warehouseRequestItems).set(updates).where(eq(warehouseRequestItems.id, id));
+  }
+
+  // Low Stock Alerts
+  async getLowStockProducts(): Promise<Array<{ product: WarehouseProduct; stock: WarehouseStock; parLevel?: WarehouseParLevel }>> {
+    const allProducts = await this.getAllWarehouseProducts();
+    const allStock = await this.getAllWarehouseStock();
+    const allParLevels = await db.select().from(warehouseParLevels);
+    
+    const lowStockItems: Array<{ product: WarehouseProduct; stock: WarehouseStock; parLevel?: WarehouseParLevel }> = [];
+    
+    for (const product of allProducts) {
+      const stockEntry = allStock.find(s => s.productId === product.id);
+      if (!stockEntry) continue;
+      
+      const parLevel = allParLevels.find(p => p.productId === product.id && !p.standId);
+      
+      if (parLevel && stockEntry.quantity <= parLevel.reorderPoint!) {
+        lowStockItems.push({ product, stock: stockEntry, parLevel });
+      }
+    }
+    
+    return lowStockItems;
+  }
+
+  // Seed example warehouse data based on Nissan Stadium ordering cheat sheet
+  async seedExampleWarehouseData(): Promise<void> {
+    const existingCategories = await db.select().from(warehouseCategories);
+    if (existingCategories.length > 0) return;
+
+    const categoryData = [
+      { name: 'Beverages - Canned', description: 'Canned drinks including beer and soda', color: '#3B82F6', icon: 'Beer', sortOrder: 1 },
+      { name: 'Beverages - Bottled', description: 'Bottled water and specialty drinks', color: '#0EA5E9', icon: 'Droplet', sortOrder: 2 },
+      { name: 'Beverages - Fountain/BIB', description: 'Bag-in-box fountain drinks', color: '#06B6D4', icon: 'Coffee', sortOrder: 3 },
+      { name: 'Beverages - Draft Beer', description: 'Kegs and draft equipment', color: '#F59E0B', icon: 'Beer', sortOrder: 4 },
+      { name: 'Beverages - Wine & Liquor', description: 'Wine, liquor, and bar mixers', color: '#8B5CF6', icon: 'Wine', sortOrder: 5 },
+      { name: 'Food - Hot Dogs & Buns', description: 'Hot dogs, hamburger buns, sausages', color: '#EF4444', icon: 'Sandwich', sortOrder: 6 },
+      { name: 'Food - Nachos & Cheese', description: 'Nacho chips and cheese sauce', color: '#F97316', icon: 'Pizza', sortOrder: 7 },
+      { name: 'Food - Pretzels & Snacks', description: 'Pretzels, candy, chips', color: '#84CC16', icon: 'Cookie', sortOrder: 8 },
+      { name: 'Food - Fried Items', description: 'Fries, corn dogs, chicken tenders', color: '#EAB308', icon: 'Flame', sortOrder: 9 },
+      { name: 'Paper Goods', description: 'Cups, boats, trays, boxes, foil wrap', color: '#6B7280', icon: 'Package', sortOrder: 10 },
+      { name: 'Condiments', description: 'Ketchup, mustard, mayo, ranch, BBQ', color: '#10B981', icon: 'Droplet', sortOrder: 11 },
+      { name: 'Supplies', description: 'Fryer oil, popcorn supplies, etc.', color: '#64748B', icon: 'Wrench', sortOrder: 12 },
+    ];
+
+    for (const cat of categoryData) {
+      await this.createWarehouseCategory(cat);
+    }
+
+    const categories = await this.getAllWarehouseCategories();
+    const findCat = (name: string) => categories.find(c => c.name === name)?.id;
+
+    const productData = [
+      { categoryId: findCat('Beverages - Canned'), name: 'Bud Light 16oz', sku: 'BL-16', unit: 'case', unitsPerCase: 24 },
+      { categoryId: findCat('Beverages - Canned'), name: 'Miller Lite 16oz', sku: 'ML-16', unit: 'case', unitsPerCase: 24 },
+      { categoryId: findCat('Beverages - Canned'), name: 'Michelob Ultra 16oz', sku: 'MU-16', unit: 'case', unitsPerCase: 24 },
+      { categoryId: findCat('Beverages - Canned'), name: 'Coca-Cola 12oz', sku: 'CC-12', unit: 'case', unitsPerCase: 24 },
+      { categoryId: findCat('Beverages - Canned'), name: 'Diet Coke 12oz', sku: 'DC-12', unit: 'case', unitsPerCase: 24 },
+      { categoryId: findCat('Beverages - Canned'), name: 'Sprite 12oz', sku: 'SP-12', unit: 'case', unitsPerCase: 24 },
+      { categoryId: findCat('Beverages - Bottled'), name: 'Dasani Water 20oz', sku: 'DW-20', unit: 'case', unitsPerCase: 24 },
+      { categoryId: findCat('Beverages - Fountain/BIB'), name: 'Coca-Cola BIB 5gal', sku: 'CC-BIB', unit: 'box', unitsPerCase: 1 },
+      { categoryId: findCat('Beverages - Fountain/BIB'), name: 'Diet Coke BIB 5gal', sku: 'DC-BIB', unit: 'box', unitsPerCase: 1 },
+      { categoryId: findCat('Beverages - Draft Beer'), name: 'Bud Light Keg 1/2 BBL', sku: 'BL-KEG', unit: 'keg', unitsPerCase: 1 },
+      { categoryId: findCat('Beverages - Wine & Liquor'), name: 'House Red Wine', sku: 'HRW', unit: 'bottle', unitsPerCase: 12 },
+      { categoryId: findCat('Beverages - Wine & Liquor'), name: 'Jack Daniels 750ml', sku: 'JD-750', unit: 'bottle', unitsPerCase: 12 },
+      { categoryId: findCat('Food - Hot Dogs & Buns'), name: 'All-Beef Hot Dogs', sku: 'HD-BEEF', unit: 'pack', unitsPerCase: 48, isPerishable: true, shelfLifeDays: 14 },
+      { categoryId: findCat('Food - Hot Dogs & Buns'), name: 'Hot Dog Buns', sku: 'HD-BUN', unit: 'pack', unitsPerCase: 48, isPerishable: true, shelfLifeDays: 5 },
+      { categoryId: findCat('Food - Hot Dogs & Buns'), name: 'Hamburger Patties', sku: 'HB-PAT', unit: 'case', unitsPerCase: 80, isPerishable: true, shelfLifeDays: 7 },
+      { categoryId: findCat('Food - Nachos & Cheese'), name: 'Nacho Chips Bulk', sku: 'NC-BULK', unit: 'bag', unitsPerCase: 6 },
+      { categoryId: findCat('Food - Nachos & Cheese'), name: 'Nacho Cheese Sauce', sku: 'NC-SAUCE', unit: 'bag', unitsPerCase: 4, isPerishable: true, shelfLifeDays: 30 },
+      { categoryId: findCat('Food - Pretzels & Snacks'), name: 'Soft Pretzels', sku: 'PRET', unit: 'case', unitsPerCase: 50, isPerishable: true, shelfLifeDays: 3 },
+      { categoryId: findCat('Food - Pretzels & Snacks'), name: 'Candy Bars Assorted', sku: 'CANDY', unit: 'box', unitsPerCase: 48 },
+      { categoryId: findCat('Food - Fried Items'), name: 'French Fries Frozen', sku: 'FF-FRZ', unit: 'bag', unitsPerCase: 6, isPerishable: true, shelfLifeDays: 90 },
+      { categoryId: findCat('Food - Fried Items'), name: 'Chicken Tenders', sku: 'CT', unit: 'case', unitsPerCase: 40, isPerishable: true, shelfLifeDays: 7 },
+      { categoryId: findCat('Food - Fried Items'), name: 'Corn Dogs', sku: 'CDOG', unit: 'case', unitsPerCase: 48, isPerishable: true, shelfLifeDays: 14 },
+      { categoryId: findCat('Paper Goods'), name: 'Cups 16oz', sku: 'CUP-16', unit: 'sleeve', unitsPerCase: 50 },
+      { categoryId: findCat('Paper Goods'), name: 'Cups 22oz', sku: 'CUP-22', unit: 'sleeve', unitsPerCase: 50 },
+      { categoryId: findCat('Paper Goods'), name: 'Food Boats Large', sku: 'BOAT-L', unit: 'pack', unitsPerCase: 250 },
+      { categoryId: findCat('Paper Goods'), name: 'Nacho Trays', sku: 'TRAY-N', unit: 'pack', unitsPerCase: 500 },
+      { categoryId: findCat('Paper Goods'), name: 'Clamshell Boxes', sku: 'CLAM', unit: 'pack', unitsPerCase: 200 },
+      { categoryId: findCat('Condiments'), name: 'Ketchup Packets', sku: 'KETCH-PKT', unit: 'case', unitsPerCase: 500 },
+      { categoryId: findCat('Condiments'), name: 'Mustard Packets', sku: 'MUST-PKT', unit: 'case', unitsPerCase: 500 },
+      { categoryId: findCat('Condiments'), name: 'Mayo Packets', sku: 'MAYO-PKT', unit: 'case', unitsPerCase: 500 },
+      { categoryId: findCat('Condiments'), name: 'Ranch Cups', sku: 'RANCH', unit: 'case', unitsPerCase: 100 },
+      { categoryId: findCat('Supplies'), name: 'Fryer Oil 35lb', sku: 'OIL-35', unit: 'jug', unitsPerCase: 1 },
+      { categoryId: findCat('Supplies'), name: 'Popcorn Kernels', sku: 'POP-KERN', unit: 'bag', unitsPerCase: 50 },
+      { categoryId: findCat('Supplies'), name: 'Popcorn Salt', sku: 'POP-SALT', unit: 'box', unitsPerCase: 1 },
+    ];
+
+    for (const prod of productData) {
+      if (prod.categoryId) {
+        await this.createWarehouseProduct(prod);
+      }
+    }
+
+    const products = await this.getAllWarehouseProducts();
+    for (const product of products) {
+      const randomQty = Math.floor(Math.random() * 50) + 10;
+      await this.createWarehouseStock({
+        productId: product.id,
+        quantity: randomQty,
+        location: 'Main Warehouse'
+      });
+    }
   }
 }
 
