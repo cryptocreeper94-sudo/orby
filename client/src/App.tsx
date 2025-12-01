@@ -21,6 +21,7 @@ import ManagerDashboard from "./pages/ManagerDashboard";
 import MenuBoardCreator from "@/pages/MenuBoardCreator";
 import OpsCommandCenter from "@/pages/OpsCommandCenter";
 import CommandCenter from "@/pages/CommandCenter";
+import orbyCommanderImg from "@assets/generated_images/orby_commander_planet_mascot.png";
 
 function Router() {
   return (
@@ -55,8 +56,18 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <div className="fixed inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
+          <img 
+            src={orbyCommanderImg} 
+            alt="" 
+            className="w-[70vmin] h-[70vmin] object-contain opacity-[0.04] select-none"
+            aria-hidden="true"
+          />
+        </div>
+        <div className="relative z-10">
+          <Toaster />
+          <Router />
+        </div>
       </TooltipProvider>
     </QueryClientProvider>
   );
