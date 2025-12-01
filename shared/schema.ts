@@ -42,6 +42,11 @@ export const issueSeverityEnum = pgEnum('issue_severity', ['Emergency', 'High', 
 export const issueStatusEnum = pgEnum('issue_status', ['Open', 'Acknowledged', 'InProgress', 'Resolved', 'Closed']);
 export const spoilageReasonEnum = pgEnum('spoilage_reason', ['ThrownAway', 'Returned', 'Damaged', 'Expired', 'Other']);
 
+// Department request system enums
+export const departmentEnum = pgEnum('department', ['Warehouse', 'Kitchen', 'Bar', 'IT', 'Janitorial']);
+export const requestPriorityEnum = pgEnum('request_priority', ['Normal', 'Emergency']);
+export const deliveryStatusEnum = pgEnum('delivery_status', ['Requested', 'Acknowledged', 'InProgress', 'OnTheWay', 'Delivered', 'Cancelled']);
+
 // Users table
 export const users = pgTable("users", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
@@ -49,11 +54,15 @@ export const users = pgTable("users", {
   pin: varchar("pin", { length: 4 }).notNull().unique(),
   role: userRoleEnum("role").notNull().default('NPOWorker'),
   managementType: managementTypeEnum("management_type"), // Only for ManagementCore role
+  department: departmentEnum("department"), // For department staff (Warehouse, Kitchen, Bar, IT, Janitorial)
   requiresPinReset: boolean("requires_pin_reset").default(true), // First login requires PIN change
   pinSetAt: timestamp("pin_set_at"), // When user set their personal PIN
   isOnline: boolean("is_online").default(false),
   assignedStandId: varchar("assigned_stand_id", { length: 20 }), // Current stand assignment
   standLeadId: varchar("stand_lead_id", { length: 36 }), // NPO Worker's assigned Stand Lead
+  hasDualRole: boolean("has_dual_role").default(false), // For users like Brooke with dual roles
+  secondaryRole: userRoleEnum("secondary_role"), // Alternate role (e.g., StandSupervisor for event days)
+  activeRole: userRoleEnum("active_role"), // Currently active role (for dual-role users)
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -320,6 +329,46 @@ export const spoilageItems = pgTable("spoilage_items", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Delivery Requests - requests from Supervisors to departments
+export const deliveryRequests = pgTable("delivery_requests", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  requesterId: varchar("requester_id", { length: 36 }).references(() => users.id).notNull(),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  department: departmentEnum("department").notNull(),
+  priority: requestPriorityEnum("priority").notNull().default('Normal'),
+  status: deliveryStatusEnum("status").notNull().default('Requested'),
+  description: text("description").notNull(),
+  items: text("items"), // Comma-separated or JSON list of requested items
+  quantity: text("quantity"), // Quantity info
+  eta: integer("eta"), // Estimated minutes until arrival
+  assignedTo: varchar("assigned_to", { length: 36 }).references(() => users.id),
+  acknowledgedBy: varchar("acknowledged_by", { length: 36 }).references(() => users.id),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  deliveredAt: timestamp("delivered_at"),
+  deliveredBy: varchar("delivered_by", { length: 36 }).references(() => users.id),
+  notes: text("notes"),
+  visibleToStandLead: boolean("visible_to_stand_lead").default(false), // Supervisor controls Stand Lead visibility
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// IT Alerts - broadcasts to IT collective
+export const itAlerts = pgTable("it_alerts", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  reporterId: varchar("reporter_id", { length: 36 }).references(() => users.id).notNull(),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  priority: requestPriorityEnum("priority").notNull().default('Normal'),
+  issueType: text("issue_type").notNull(), // POS, Register, Network, Display, Other
+  description: text("description").notNull(),
+  status: deliveryStatusEnum("status").notNull().default('Requested'),
+  claimedBy: varchar("claimed_by", { length: 36 }).references(() => users.id),
+  claimedAt: timestamp("claimed_at"),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedBy: varchar("resolved_by", { length: 36 }).references(() => users.id),
+  resolutionNotes: text("resolution_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Voucher Reports - tracks employee meal vouchers collected
 export const voucherReports = pgTable("voucher_reports", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
@@ -536,6 +585,8 @@ export const insertClosingChecklistTaskSchema = createInsertSchema(closingCheckl
 export const insertSpoilageReportSchema = createInsertSchema(spoilageReports).omit({ id: true, createdAt: true, submittedAt: true });
 export const insertSpoilageItemSchema = createInsertSchema(spoilageItems).omit({ id: true, createdAt: true });
 export const insertVoucherReportSchema = createInsertSchema(voucherReports).omit({ id: true, createdAt: true, submittedAt: true });
+export const insertDeliveryRequestSchema = createInsertSchema(deliveryRequests).omit({ id: true, createdAt: true, updatedAt: true, acknowledgedAt: true, deliveredAt: true });
+export const insertItAlertSchema = createInsertSchema(itAlerts).omit({ id: true, createdAt: true, claimedAt: true, resolvedAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -586,6 +637,10 @@ export type SpoilageItem = typeof spoilageItems.$inferSelect;
 export type InsertSpoilageItem = z.infer<typeof insertSpoilageItemSchema>;
 export type VoucherReport = typeof voucherReports.$inferSelect;
 export type InsertVoucherReport = z.infer<typeof insertVoucherReportSchema>;
+export type DeliveryRequest = typeof deliveryRequests.$inferSelect;
+export type InsertDeliveryRequest = z.infer<typeof insertDeliveryRequestSchema>;
+export type ItAlert = typeof itAlerts.$inferSelect;
+export type InsertItAlert = z.infer<typeof insertItAlertSchema>;
 
 // Default closing checklist tasks
 export const DEFAULT_CLOSING_TASKS = [
@@ -746,7 +801,6 @@ export const warehouseParLevels = pgTable("warehouse_par_levels", {
 });
 
 export const requestStatusEnum = pgEnum('request_status', ['Pending', 'Approved', 'Picking', 'InTransit', 'Delivered', 'Confirmed', 'Cancelled']);
-export const requestPriorityEnum = pgEnum('request_priority', ['Normal', 'Rush', 'Emergency']);
 
 export const warehouseRequests = pgTable("warehouse_requests", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),

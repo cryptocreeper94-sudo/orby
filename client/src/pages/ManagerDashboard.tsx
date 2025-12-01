@@ -1,427 +1,475 @@
-import { useState, useEffect } from "react";
-import { useStore } from "@/lib/mockData";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { 
-  LogOut, AlertTriangle, CheckCircle2, Clock, ClipboardList,
-  Building2, Users, Thermometer, Zap, Tv, UtensilsCrossed, Wrench,
-  HelpCircle, Bell, Eye, Check, LayoutGrid
-} from "lucide-react";
-import { useLocation } from "wouter";
-import { TutorialHelpButton } from "@/components/TutorialCoach";
+import { useState, useEffect } from 'react';
+import { useLocation, Link } from 'wouter';
+import { useStore } from '@/lib/mockData';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { WeatherWidget, WeatherAlertBanner } from '@/components/WeatherWidget';
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+  LogOut, Menu, Bell, MessageSquare, Package, Utensils, Beer, Monitor, Trash2,
+  AlertTriangle, CheckCircle2, Clock, MapPin, Users, Radio, TrendingUp, 
+  ChevronRight, RefreshCw, Eye, Send, ArrowRight, Truck, Zap
+} from 'lucide-react';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 
-type StandIssue = {
+interface DeliveryRequest {
   id: string;
-  reporterId: string;
   standId: string;
-  category: string;
-  severity: 'Emergency' | 'High' | 'Normal' | 'Low';
-  title: string;
+  standName: string;
+  department: 'Warehouse' | 'Kitchen' | 'Bar' | 'IT' | 'Janitorial';
+  priority: 'Normal' | 'Emergency';
+  status: 'Requested' | 'Acknowledged' | 'InProgress' | 'OnTheWay' | 'Delivered';
   description: string;
-  status: 'Open' | 'Acknowledged' | 'InProgress' | 'Resolved' | 'Closed';
-  routedTo: string;
-  location: string;
+  requesterName: string;
+  eta?: number;
   createdAt: string;
-  acknowledgedAt?: string;
-  resolvedAt?: string;
-  resolutionNotes?: string;
+}
+
+interface ITAlert {
+  id: string;
+  standId: string;
+  standName: string;
+  issueType: string;
+  priority: 'Normal' | 'Emergency';
+  status: 'Requested' | 'Acknowledged' | 'InProgress' | 'Resolved';
+  description: string;
+  reporterName: string;
+  createdAt: string;
+}
+
+interface StandStatus {
+  id: string;
+  name: string;
+  section: string;
+  status: 'Open' | 'Closed' | 'Needs Power' | 'Spare' | 'Hot Spot';
+  supervisorName?: string;
+  activeIssues: number;
+  pendingDeliveries: number;
+}
+
+const MOCK_DELIVERY_REQUESTS: DeliveryRequest[] = [
+  { id: '1', standId: '105', standName: 'Stand 105', department: 'Warehouse', priority: 'Normal', status: 'OnTheWay', description: 'Need 2 cases Bud Light, 1 case Michelob Ultra', requesterName: 'Sarah Johnson', eta: 8, createdAt: new Date(Date.now() - 15 * 60000).toISOString() },
+  { id: '2', standId: '212', standName: 'Stand 212', department: 'Kitchen', priority: 'Emergency', status: 'InProgress', description: 'Out of hot dog buns - urgent', requesterName: 'Mike Smith', createdAt: new Date(Date.now() - 5 * 60000).toISOString() },
+  { id: '3', standId: '118', standName: 'Stand 118', department: 'Warehouse', priority: 'Normal', status: 'Acknowledged', description: 'Low on ice - need 3 bags', requesterName: 'Chris Williams', createdAt: new Date(Date.now() - 25 * 60000).toISOString() },
+  { id: '4', standId: '301', standName: 'Stand 301', department: 'Bar', priority: 'Normal', status: 'Requested', description: 'Need more cocktail mixers', requesterName: 'Amy Brown', createdAt: new Date(Date.now() - 2 * 60000).toISOString() },
+];
+
+const MOCK_IT_ALERTS: ITAlert[] = [
+  { id: '1', standId: '212', standName: 'Stand 212', issueType: 'POS', priority: 'Emergency', status: 'InProgress', description: 'Register 2 frozen - cannot process transactions', reporterName: 'Mike Smith', createdAt: new Date(Date.now() - 10 * 60000).toISOString() },
+  { id: '2', standId: '105', standName: 'Stand 105', issueType: 'Network', priority: 'Normal', status: 'Acknowledged', description: 'Slow credit card processing', reporterName: 'Sarah Johnson', createdAt: new Date(Date.now() - 30 * 60000).toISOString() },
+];
+
+const MOCK_STAND_STATUSES: StandStatus[] = [
+  { id: '101', name: 'Stand 101', section: '2 East', status: 'Open', supervisorName: 'Sarah Johnson', activeIssues: 0, pendingDeliveries: 0 },
+  { id: '102', name: 'Stand 102', section: '2 East', status: 'Open', supervisorName: 'Sarah Johnson', activeIssues: 0, pendingDeliveries: 1 },
+  { id: '105', name: 'Stand 105', section: '2 East', status: 'Open', supervisorName: 'Sarah Johnson', activeIssues: 1, pendingDeliveries: 1 },
+  { id: '110', name: 'Stand 110', section: '2 West', status: 'Open', supervisorName: 'Mike Smith', activeIssues: 0, pendingDeliveries: 0 },
+  { id: '118', name: 'Stand 118', section: '2 West', status: 'Open', supervisorName: 'Mike Smith', activeIssues: 0, pendingDeliveries: 1 },
+  { id: '201', name: 'Stand 201', section: '7 East', status: 'Hot Spot', supervisorName: 'Chris Williams', activeIssues: 0, pendingDeliveries: 0 },
+  { id: '212', name: 'Stand 212', section: '7 East', status: 'Open', supervisorName: 'Chris Williams', activeIssues: 2, pendingDeliveries: 1 },
+  { id: '301', name: 'Stand 301', section: '7 West', status: 'Open', supervisorName: 'Amy Brown', activeIssues: 0, pendingDeliveries: 1 },
+  { id: '305', name: 'Stand 305', section: '7 West', status: 'Closed', activeIssues: 0, pendingDeliveries: 0 },
+  { id: '310', name: 'Stand 310', section: '7 West', status: 'Spare', activeIssues: 0, pendingDeliveries: 0 },
+];
+
+const departmentIcons: Record<string, React.ReactNode> = {
+  Warehouse: <Package className="h-4 w-4" />,
+  Kitchen: <Utensils className="h-4 w-4" />,
+  Bar: <Beer className="h-4 w-4" />,
+  IT: <Monitor className="h-4 w-4" />,
+  Janitorial: <Trash2 className="h-4 w-4" />,
 };
 
-const CATEGORY_ICONS: Record<string, any> = {
-  Cooling: Thermometer,
-  Beverage: UtensilsCrossed,
-  Power: Zap,
-  AV: Tv,
-  Menu: ClipboardList,
-  FoodSafety: UtensilsCrossed,
-  Equipment: Wrench,
-  Staffing: Users,
-  Other: HelpCircle,
+const departmentColors: Record<string, string> = {
+  Warehouse: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+  Kitchen: 'bg-orange-500/20 text-orange-300 border-orange-500/30',
+  Bar: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
+  IT: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+  Janitorial: 'bg-green-500/20 text-green-300 border-green-500/30',
 };
 
-const SEVERITY_COLORS: Record<string, string> = {
-  Emergency: 'bg-red-100 text-red-800 border-red-200',
-  High: 'bg-orange-100 text-orange-800 border-orange-200',
-  Normal: 'bg-blue-100 text-blue-800 border-blue-200',
-  Low: 'bg-gray-100 text-gray-800 border-gray-200',
+const statusColors: Record<string, string> = {
+  Requested: 'bg-yellow-500/20 text-yellow-300',
+  Acknowledged: 'bg-blue-500/20 text-blue-300',
+  InProgress: 'bg-purple-500/20 text-purple-300',
+  OnTheWay: 'bg-green-500/20 text-green-300',
+  Delivered: 'bg-gray-500/20 text-gray-300',
+  Resolved: 'bg-gray-500/20 text-gray-300',
 };
 
-const STATUS_COLORS: Record<string, string> = {
-  Open: 'bg-red-500',
-  Acknowledged: 'bg-yellow-500',
-  InProgress: 'bg-blue-500',
-  Resolved: 'bg-green-500',
+const standStatusColors: Record<string, string> = {
+  Open: 'bg-green-500',
   Closed: 'bg-gray-500',
+  'Needs Power': 'bg-red-500',
+  Spare: 'bg-yellow-500',
+  'Hot Spot': 'bg-orange-500',
 };
+
+function formatTimeAgo(isoString: string): string {
+  const diff = Date.now() - new Date(isoString).getTime();
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours}h ago`;
+}
 
 export default function ManagerDashboard() {
   const logout = useStore((state) => state.logout);
-  const [location, setLocation] = useLocation();
   const currentUser = useStore((state) => state.currentUser);
-  const [issues, setIssues] = useState<StandIssue[]>([]);
-  const [selectedIssue, setSelectedIssue] = useState<StandIssue | null>(null);
-  const [showIssueDetails, setShowIssueDetails] = useState(false);
-  const [resolutionNotes, setResolutionNotes] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const stands = useStore((state) => state.stands);
+  const fetchAll = useStore((state) => state.fetchAll);
+  const [, setLocation] = useLocation();
 
-  const fetchIssues = async () => {
-    try {
-      const response = await fetch('/api/stand-issues/open');
-      if (response.ok) {
-        const data = await response.json();
-        setIssues(data);
-      }
-    } catch (err) {
-      console.error('Failed to fetch issues:', err);
-    }
-  };
+  const [deliveryRequests] = useState<DeliveryRequest[]>(MOCK_DELIVERY_REQUESTS);
+  const [itAlerts] = useState<ITAlert[]>(MOCK_IT_ALERTS);
 
   useEffect(() => {
-    fetchIssues();
-    const interval = setInterval(fetchIssues, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    if (stands.length === 0) {
+      fetchAll();
+    }
+  }, [stands.length, fetchAll]);
 
   const handleLogout = () => {
     logout();
-    setLocation("/");
+    setLocation('/');
   };
 
-  const handleAcknowledge = async (issueId: string) => {
-    if (!currentUser) return;
-    setIsSubmitting(true);
-    try {
-      await fetch(`/api/stand-issues/${issueId}/acknowledge`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentUser.id })
-      });
-      fetchIssues();
-      setShowIssueDetails(false);
-    } catch (err) {
-      console.error('Failed to acknowledge:', err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const standStatuses: StandStatus[] = stands.map(s => ({
+    id: s.id,
+    name: s.name,
+    section: s.section,
+    status: s.status as 'Open' | 'Closed' | 'Needs Power' | 'Spare' | 'Hot Spot',
+    supervisorName: undefined,
+    activeIssues: 0,
+    pendingDeliveries: 0,
+  }));
 
-  const handleResolve = async (issueId: string) => {
-    if (!currentUser) return;
-    setIsSubmitting(true);
-    try {
-      await fetch(`/api/stand-issues/${issueId}/resolve`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: currentUser.id, notes: resolutionNotes })
-      });
-      fetchIssues();
-      setShowIssueDetails(false);
-      setResolutionNotes('');
-    } catch (err) {
-      console.error('Failed to resolve:', err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const activeDeliveries = deliveryRequests.filter(d => d.status !== 'Delivered');
+  const emergencyDeliveries = deliveryRequests.filter(d => d.priority === 'Emergency' && d.status !== 'Delivered');
+  const activeITAlerts = itAlerts.filter(a => a.status !== 'Resolved');
+  const emergencyITAlerts = itAlerts.filter(a => a.priority === 'Emergency' && a.status !== 'Resolved');
+  const openStands = standStatuses.filter(s => s.status === 'Open' || s.status === 'Hot Spot');
+  const standsWithIssues = standStatuses.filter(s => s.activeIssues > 0);
 
-  const getRoleTitle = () => {
-    switch (location) {
-      case '/warehouse-manager': return 'Warehouse Manager';
-      case '/kitchen-manager': return 'Kitchen Manager';
-      case '/operations': return 'Operations Manager';
-      case '/manager': return 'General Manager';
-      case '/executive': return 'Regional VP';
-      default: return 'Manager';
-    }
-  };
-
-  const emergencyIssues = issues.filter(i => i.severity === 'Emergency');
-  const highPriorityIssues = issues.filter(i => i.severity === 'High');
-  const normalIssues = issues.filter(i => i.severity === 'Normal' || i.severity === 'Low');
-
-  const openIssue = (issue: StandIssue) => {
-    setSelectedIssue(issue);
-    setShowIssueDetails(true);
-  };
+  const stats = [
+    { label: 'Stands Open', value: openStands.length, total: standStatuses.length, icon: <MapPin className="h-5 w-5" />, color: 'text-green-400' },
+    { label: 'Active Deliveries', value: activeDeliveries.length, emergency: emergencyDeliveries.length, icon: <Truck className="h-5 w-5" />, color: 'text-blue-400' },
+    { label: 'IT Alerts', value: activeITAlerts.length, emergency: emergencyITAlerts.length, icon: <Zap className="h-5 w-5" />, color: 'text-cyan-400' },
+    { label: 'Stands with Issues', value: standsWithIssues.length, icon: <AlertTriangle className="h-5 w-5" />, color: standsWithIssues.length > 0 ? 'text-amber-400' : 'text-green-400' },
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-      <header className="sticky top-0 z-10 bg-gradient-to-r from-slate-700 to-slate-800 text-white px-4 h-14 flex items-center justify-between shadow-md">
-        <div className="font-bold text-lg">{getRoleTitle()}</div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white" data-testid="manager-dashboard">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b border-white/10 bg-slate-900/80 backdrop-blur-md px-4">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button size="icon" variant="ghost" className="md:hidden text-white">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="bg-slate-900 border-slate-700">
+            <nav className="grid gap-4 text-lg font-medium pt-8">
+              <Link href="/messages" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
+                <MessageSquare className="h-5 w-5" />
+                Messages
+              </Link>
+              <Link href="/supervisor" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
+                <Users className="h-5 w-5" />
+                Supervisor View
+              </Link>
+              <Link href="/warehouse" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
+                <Package className="h-5 w-5" />
+                Warehouse
+              </Link>
+            </nav>
+          </SheetContent>
+        </Sheet>
+
+        <div className="flex-1 flex items-center gap-3">
+          <div className="w-8 h-8">
+            <img 
+              src="/attached_assets/image_1764551627990.png" 
+              alt="Orby"
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-cyan-400">Orby Command</h1>
+            <p className="text-xs text-cyan-200/60">Operations Dashboard</p>
+          </div>
+        </div>
+
         <div className="flex items-center gap-2">
-          {emergencyIssues.length > 0 && (
-            <Badge className="bg-red-600 animate-pulse">
-              <Bell className="h-3 w-3 mr-1" />
-              {emergencyIssues.length} Emergency
-            </Badge>
-          )}
-          <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white hover:bg-white/20">
-            <LogOut className="h-5 w-5" />
+          <Button variant="ghost" size="icon" className="relative text-white" data-testid="button-notifications">
+            <Bell className="h-5 w-5" />
+            {(emergencyDeliveries.length + emergencyITAlerts.length) > 0 && (
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center">
+                {emergencyDeliveries.length + emergencyITAlerts.length}
+              </span>
+            )}
+          </Button>
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white" data-testid="button-logout">
+            <LogOut className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline">Logout</span>
           </Button>
         </div>
       </header>
 
-      <Dialog open={showIssueDetails} onOpenChange={setShowIssueDetails}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          {selectedIssue && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  {CATEGORY_ICONS[selectedIssue.category] && 
-                    (() => { const Icon = CATEGORY_ICONS[selectedIssue.category]; return <Icon className="h-5 w-5" />; })()
-                  }
-                  {selectedIssue.title}
-                </DialogTitle>
-              </DialogHeader>
-              
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Badge className={SEVERITY_COLORS[selectedIssue.severity]}>
-                    {selectedIssue.severity}
-                  </Badge>
-                  <Badge variant="outline">
-                    {selectedIssue.category}
-                  </Badge>
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <span className={`w-2 h-2 rounded-full ${STATUS_COLORS[selectedIssue.status]}`}></span>
-                    {selectedIssue.status}
-                  </Badge>
-                </div>
+      <main className="p-4 space-y-4 max-w-7xl mx-auto">
+        <WeatherAlertBanner />
 
-                <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg">
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Location</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">{selectedIssue.location || selectedIssue.standId}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {stats.map((stat, i) => (
+            <Card key={i} className="bg-white/5 border-white/10" data-testid={`stat-${stat.label.toLowerCase().replace(/\s/g, '-')}`}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className={stat.color}>{stat.icon}</div>
+                  {stat.emergency !== undefined && stat.emergency > 0 && (
+                    <Badge variant="destructive" className="text-xs">
+                      {stat.emergency} urgent
+                    </Badge>
+                  )}
                 </div>
-
-                <div>
-                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Description</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">{selectedIssue.description}</p>
-                </div>
-
-                <div className="text-xs text-muted-foreground">
-                  Reported: {new Date(selectedIssue.createdAt).toLocaleString()}
-                </div>
-
-                {selectedIssue.status === 'Acknowledged' && (
-                  <div>
-                    <p className="text-sm font-medium mb-2">Resolution Notes</p>
-                    <Textarea
-                      placeholder="Describe how the issue was resolved..."
-                      value={resolutionNotes}
-                      onChange={(e) => setResolutionNotes(e.target.value)}
-                      rows={3}
-                    />
+                <div className="mt-2">
+                  <div className="text-2xl font-bold">
+                    {stat.value}
+                    {stat.total && <span className="text-sm text-white/50">/{stat.total}</span>}
                   </div>
-                )}
-              </div>
-
-              <DialogFooter className="gap-2 mt-4">
-                {selectedIssue.status === 'Open' && (
-                  <Button 
-                    onClick={() => handleAcknowledge(selectedIssue.id)}
-                    disabled={isSubmitting}
-                    className="bg-yellow-600 hover:bg-yellow-700"
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Acknowledge
-                  </Button>
-                )}
-                {selectedIssue.status === 'Acknowledged' && (
-                  <Button 
-                    onClick={() => handleResolve(selectedIssue.id)}
-                    disabled={isSubmitting}
-                    className="bg-green-600 hover:bg-green-700"
-                  >
-                    <Check className="h-4 w-4 mr-2" />
-                    Mark Resolved
-                  </Button>
-                )}
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <main className="p-4 sm:px-6 space-y-6 max-w-4xl mx-auto mt-4">
-        <div className="text-center py-4">
-          <h1 className="text-2xl font-black text-slate-800 dark:text-slate-200">
-            Welcome, {currentUser?.name || getRoleTitle()}
-          </h1>
-          <p className="text-muted-foreground">{getRoleTitle()} Dashboard</p>
+                  <div className="text-xs text-white/60">{stat.label}</div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
-        {/* Operations Manager Quick Actions */}
-        {location === '/operations' && (
-          <Card className="border-blue-300 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-blue-800 dark:text-blue-200">Menu Board Creator</h3>
-                  <p className="text-sm text-blue-600 dark:text-blue-400">Create and manage digital menu displays</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 space-y-4">
+            {emergencyDeliveries.length > 0 && (
+              <Card className="bg-red-500/10 border-red-500/30" data-testid="emergency-deliveries">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-red-400 flex items-center gap-2 text-lg">
+                    <AlertTriangle className="h-5 w-5" />
+                    Emergency Requests
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {emergencyDeliveries.map(req => (
+                    <div key={req.id} className="flex items-center justify-between p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${departmentColors[req.department]}`}>
+                          {departmentIcons[req.department]}
+                        </div>
+                        <div>
+                          <div className="font-medium">{req.standName}</div>
+                          <div className="text-sm text-white/70">{req.description}</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge className={statusColors[req.status]}>{req.status}</Badge>
+                        <div className="text-xs text-white/50 mt-1">{formatTimeAgo(req.createdAt)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            <Card className="bg-white/5 border-white/10" data-testid="active-deliveries">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-white flex items-center gap-2 text-lg">
+                    <Truck className="h-5 w-5 text-blue-400" />
+                    Active Deliveries
+                  </CardTitle>
+                  <Button variant="ghost" size="sm" className="text-cyan-400">
+                    View All <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
                 </div>
-                <Button 
-                  onClick={() => setLocation('/menu-board-creator')}
-                  className="bg-blue-600 hover:bg-blue-700"
-                  data-testid="menu-board-creator-btn"
-                >
-                  <LayoutGrid className="h-4 w-4 mr-2" />
-                  Open Creator
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="all" className="w-full">
+                  <TabsList className="grid grid-cols-5 bg-white/5 mb-4">
+                    <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
+                    <TabsTrigger value="Warehouse" className="text-xs">Warehouse</TabsTrigger>
+                    <TabsTrigger value="Kitchen" className="text-xs">Kitchen</TabsTrigger>
+                    <TabsTrigger value="Bar" className="text-xs">Bar</TabsTrigger>
+                    <TabsTrigger value="IT" className="text-xs">IT</TabsTrigger>
+                  </TabsList>
+                  
+                  {['all', 'Warehouse', 'Kitchen', 'Bar', 'IT'].map(tab => (
+                    <TabsContent key={tab} value={tab} className="space-y-2">
+                      {activeDeliveries
+                        .filter(d => tab === 'all' || d.department === tab)
+                        .map(req => (
+                          <div key={req.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer">
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-lg border ${departmentColors[req.department]}`}>
+                                {departmentIcons[req.department]}
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-medium">{req.standName}</span>
+                                  <Badge variant="outline" className="text-xs border-white/20">
+                                    {req.department}
+                                  </Badge>
+                                  {req.priority === 'Emergency' && (
+                                    <Badge variant="destructive" className="text-xs">Urgent</Badge>
+                                  )}
+                                </div>
+                                <div className="text-sm text-white/60">{req.description}</div>
+                                <div className="text-xs text-white/40 mt-1">
+                                  Requested by {req.requesterName} • {formatTimeAgo(req.createdAt)}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <Badge className={statusColors[req.status]}>
+                                {req.status === 'OnTheWay' ? 'On the Way' : req.status}
+                              </Badge>
+                              {req.eta && req.status === 'OnTheWay' && (
+                                <div className="text-sm text-green-400 mt-1 flex items-center gap-1 justify-end">
+                                  <Clock className="h-3 w-3" />
+                                  {req.eta} min
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      {activeDeliveries.filter(d => tab === 'all' || d.department === tab).length === 0 && (
+                        <div className="text-center py-8 text-white/40">
+                          <CheckCircle2 className="h-8 w-8 mx-auto mb-2" />
+                          <p>No active {tab === 'all' ? 'deliveries' : `${tab} requests`}</p>
+                        </div>
+                      )}
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </CardContent>
+            </Card>
+
+            {activeITAlerts.length > 0 && (
+              <Card className="bg-white/5 border-cyan-500/20" data-testid="it-alerts">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-cyan-400 flex items-center gap-2 text-lg">
+                    <Zap className="h-5 w-5" />
+                    IT Alerts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {activeITAlerts.map(alert => (
+                    <div key={alert.id} className={`flex items-center justify-between p-3 rounded-lg border ${alert.priority === 'Emergency' ? 'bg-red-500/10 border-red-500/30' : 'bg-cyan-500/10 border-cyan-500/20'}`}>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-lg bg-cyan-500/20">
+                          <Monitor className="h-4 w-4 text-cyan-400" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{alert.standName}</span>
+                            <Badge variant="outline" className="text-xs">{alert.issueType}</Badge>
+                            {alert.priority === 'Emergency' && (
+                              <Badge variant="destructive" className="text-xs">Urgent</Badge>
+                            )}
+                          </div>
+                          <div className="text-sm text-white/60">{alert.description}</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <Badge className={statusColors[alert.status]}>{alert.status}</Badge>
+                        <div className="text-xs text-white/50 mt-1">{formatTimeAgo(alert.createdAt)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <WeatherWidget compact className="w-full" />
+
+            <Card className="bg-white/5 border-white/10" data-testid="stand-overview">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-white flex items-center gap-2 text-lg">
+                  <MapPin className="h-5 w-5 text-green-400" />
+                  Stand Overview
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-2">
+                    {standStatuses.map(stand => (
+                      <div key={stand.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-2 h-2 rounded-full ${standStatusColors[stand.status]}`} />
+                          <div>
+                            <div className="font-medium text-sm">{stand.name}</div>
+                            <div className="text-xs text-white/50">{stand.section}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {stand.activeIssues > 0 && (
+                            <Badge variant="destructive" className="text-xs">
+                              {stand.activeIssues} issue{stand.activeIssues > 1 ? 's' : ''}
+                            </Badge>
+                          )}
+                          {stand.pendingDeliveries > 0 && (
+                            <Badge variant="outline" className="text-xs border-blue-500/50 text-blue-300">
+                              {stand.pendingDeliveries} pending
+                            </Badge>
+                          )}
+                          <Badge variant="outline" className="text-xs border-white/20">
+                            {stand.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white/5 border-white/10" data-testid="quick-actions">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-white text-lg">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 gap-2">
+                <Button variant="outline" className="h-auto py-3 flex flex-col items-center gap-1 bg-white/5 border-white/20 hover:bg-white/10" data-testid="button-broadcast">
+                  <Radio className="h-5 w-5 text-cyan-400" />
+                  <span className="text-xs">Broadcast</span>
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-red-600">{emergencyIssues.length}</div>
-              <div className="text-xs text-red-700">Emergency</div>
-            </CardContent>
-          </Card>
-          <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/20">
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-orange-600">{highPriorityIssues.length}</div>
-              <div className="text-xs text-orange-700">High Priority</div>
-            </CardContent>
-          </Card>
-          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
-            <CardContent className="p-4 text-center">
-              <div className="text-3xl font-bold text-blue-600">{normalIssues.length}</div>
-              <div className="text-xs text-blue-700">Normal</div>
-            </CardContent>
-          </Card>
+                <Link href="/messages">
+                  <Button variant="outline" className="h-auto py-3 flex flex-col items-center gap-1 bg-white/5 border-white/20 hover:bg-white/10 w-full" data-testid="button-view-messages">
+                    <MessageSquare className="h-5 w-5 text-blue-400" />
+                    <span className="text-xs">Messages</span>
+                  </Button>
+                </Link>
+                <Link href="/warehouse">
+                  <Button variant="outline" className="h-auto py-3 flex flex-col items-center gap-1 bg-white/5 border-white/20 hover:bg-white/10 w-full" data-testid="button-warehouse">
+                    <Package className="h-5 w-5 text-orange-400" />
+                    <span className="text-xs">Warehouse</span>
+                  </Button>
+                </Link>
+                <Button variant="outline" className="h-auto py-3 flex flex-col items-center gap-1 bg-white/5 border-white/20 hover:bg-white/10" data-testid="button-reports">
+                  <TrendingUp className="h-5 w-5 text-green-400" />
+                  <span className="text-xs">Reports</span>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
-        <Accordion type="multiple" defaultValue={['emergency', 'high']} className="w-full">
-          {emergencyIssues.length > 0 && (
-            <AccordionItem value="emergency" className="border-red-200 bg-red-50/50">
-              <AccordionTrigger className="px-4 hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-600 animate-pulse" />
-                  <span className="font-bold text-red-800">Emergency Issues ({emergencyIssues.length})</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 space-y-2">
-                {emergencyIssues.map(issue => (
-                  <Card 
-                    key={issue.id} 
-                    className="cursor-pointer hover:shadow-md transition-shadow border-red-200"
-                    onClick={() => openIssue(issue)}
-                    data-testid={`issue-card-${issue.id}`}
-                  >
-                    <CardContent className="p-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="font-medium">{issue.title}</div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {issue.location || issue.standId} • {issue.category}
-                          </div>
-                        </div>
-                        <Badge className={`${STATUS_COLORS[issue.status]} text-white text-xs`}>
-                          {issue.status}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-          )}
-
-          {highPriorityIssues.length > 0 && (
-            <AccordionItem value="high" className="border-orange-200 bg-orange-50/50">
-              <AccordionTrigger className="px-4 hover:no-underline">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-orange-600" />
-                  <span className="font-bold text-orange-800">High Priority ({highPriorityIssues.length})</span>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="px-4 space-y-2">
-                {highPriorityIssues.map(issue => (
-                  <Card 
-                    key={issue.id} 
-                    className="cursor-pointer hover:shadow-md transition-shadow border-orange-200"
-                    onClick={() => openIssue(issue)}
-                    data-testid={`issue-card-${issue.id}`}
-                  >
-                    <CardContent className="p-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="font-medium">{issue.title}</div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {issue.location || issue.standId} • {issue.category}
-                          </div>
-                        </div>
-                        <Badge className={`${STATUS_COLORS[issue.status]} text-white text-xs`}>
-                          {issue.status}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </AccordionContent>
-            </AccordionItem>
-          )}
-
-          <AccordionItem value="normal">
-            <AccordionTrigger className="px-4 hover:no-underline">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-blue-600" />
-                <span className="font-medium">Other Issues ({normalIssues.length})</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-4 space-y-2">
-              {normalIssues.length === 0 ? (
-                <div className="text-center text-muted-foreground py-4">
-                  <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-green-500" />
-                  No pending issues
-                </div>
-              ) : (
-                normalIssues.map(issue => (
-                  <Card 
-                    key={issue.id} 
-                    className="cursor-pointer hover:shadow-md transition-shadow"
-                    onClick={() => openIssue(issue)}
-                    data-testid={`issue-card-${issue.id}`}
-                  >
-                    <CardContent className="p-3">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="font-medium">{issue.title}</div>
-                          <div className="text-xs text-muted-foreground mt-1">
-                            {issue.location || issue.standId} • {issue.category}
-                          </div>
-                        </div>
-                        <Badge className={`${STATUS_COLORS[issue.status]} text-white text-xs`}>
-                          {issue.status}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <WeatherWidget className="w-full" />
       </main>
-      
-      <TutorialHelpButton page="manager" />
     </div>
   );
 }
