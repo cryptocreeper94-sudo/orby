@@ -1,13 +1,205 @@
+import { useState, useEffect } from "react";
 import { useStore } from "@/lib/mockData";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { Shield, UserCog, Monitor, LogOut, LayoutDashboard, Database, RefreshCw } from "lucide-react";
+import { 
+  Shield, UserCog, Monitor, LogOut, ChefHat, Package, 
+  Wine, Sparkles, Users, Radio, AlertTriangle, Truck,
+  MessageSquare, Activity, ChevronDown, ChevronRight,
+  Zap, Eye, RefreshCw, Trash2, Clock, CheckCircle2,
+  XCircle, Wifi, WifiOff
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useWebSocket, useWebSocketStore } from "@/lib/websocket";
+
+interface AccordionSectionProps {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  accentColor?: string;
+  badge?: string | number;
+}
+
+function AccordionSection({ title, icon, children, defaultOpen = false, accentColor = "cyan", badge }: AccordionSectionProps) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+  
+  const colorClasses: Record<string, string> = {
+    cyan: "border-cyan-500/50 bg-cyan-500/10",
+    amber: "border-amber-500/50 bg-amber-500/10",
+    green: "border-green-500/50 bg-green-500/10",
+    red: "border-red-500/50 bg-red-500/10",
+    purple: "border-purple-500/50 bg-purple-500/10",
+    blue: "border-blue-500/50 bg-blue-500/10",
+  };
+
+  const textColors: Record<string, string> = {
+    cyan: "text-cyan-400",
+    amber: "text-amber-400",
+    green: "text-green-400",
+    red: "text-red-400",
+    purple: "text-purple-400",
+    blue: "text-blue-400",
+  };
+
+  return (
+    <div className={cn(
+      "rounded-lg border overflow-hidden transition-all duration-200",
+      isOpen ? colorClasses[accentColor] : "border-slate-700/50 bg-slate-900/50"
+    )}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-4 py-3 flex items-center justify-between text-left"
+        data-testid={`accordion-${title.toLowerCase().replace(/\s+/g, '-')}`}
+      >
+        <div className="flex items-center gap-3">
+          <span className={textColors[accentColor]}>{icon}</span>
+          <span className="font-semibold text-slate-200">{title}</span>
+          {badge !== undefined && (
+            <span className={cn(
+              "px-2 py-0.5 rounded-full text-xs font-bold",
+              colorClasses[accentColor],
+              textColors[accentColor]
+            )}>
+              {badge}
+            </span>
+          )}
+        </div>
+        {isOpen ? (
+          <ChevronDown className="h-5 w-5 text-slate-400" />
+        ) : (
+          <ChevronRight className="h-5 w-5 text-slate-400" />
+        )}
+      </button>
+      {isOpen && (
+        <div className="px-4 pb-4 space-y-2">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface RoleButtonProps {
+  name: string;
+  description: string;
+  pin: string;
+  route: string;
+  icon: React.ReactNode;
+  color: string;
+  onClick: (pin: string, route: string) => void;
+}
+
+function RoleButton({ name, description, pin, route, icon, color, onClick }: RoleButtonProps) {
+  const colorClasses: Record<string, string> = {
+    cyan: "hover:border-cyan-500 hover:bg-cyan-500/10",
+    amber: "hover:border-amber-500 hover:bg-amber-500/10",
+    green: "hover:border-green-500 hover:bg-green-500/10",
+    red: "hover:border-red-500 hover:bg-red-500/10",
+    purple: "hover:border-purple-500 hover:bg-purple-500/10",
+    blue: "hover:border-blue-500 hover:bg-blue-500/10",
+    pink: "hover:border-pink-500 hover:bg-pink-500/10",
+    orange: "hover:border-orange-500 hover:bg-orange-500/10",
+  };
+
+  const textColors: Record<string, string> = {
+    cyan: "text-cyan-400",
+    amber: "text-amber-400",
+    green: "text-green-400",
+    red: "text-red-400",
+    purple: "text-purple-400",
+    blue: "text-blue-400",
+    pink: "text-pink-400",
+    orange: "text-orange-400",
+  };
+
+  return (
+    <button
+      onClick={() => onClick(pin, route)}
+      className={cn(
+        "w-full p-3 rounded-lg border border-slate-700/50 bg-slate-800/50",
+        "flex items-center gap-3 text-left transition-all duration-200",
+        colorClasses[color]
+      )}
+      data-testid={`role-${name.toLowerCase().replace(/\s+/g, '-')}`}
+    >
+      <span className={textColors[color]}>{icon}</span>
+      <div className="flex-1 min-w-0">
+        <div className="font-medium text-slate-200 text-sm">{name}</div>
+        <div className="text-xs text-slate-500 truncate">{description}</div>
+      </div>
+      <span className="text-xs text-slate-600 font-mono">{pin}</span>
+    </button>
+  );
+}
+
+interface StatCardProps {
+  label: string;
+  value: string | number;
+  icon: React.ReactNode;
+  status?: 'good' | 'warning' | 'error';
+}
+
+function StatCard({ label, value, icon, status = 'good' }: StatCardProps) {
+  const statusColors = {
+    good: "text-green-400",
+    warning: "text-amber-400",
+    error: "text-red-400",
+  };
+
+  return (
+    <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/30">
+      <span className={statusColors[status]}>{icon}</span>
+      <div>
+        <div className="text-lg font-bold text-slate-200">{value}</div>
+        <div className="text-xs text-slate-500">{label}</div>
+      </div>
+    </div>
+  );
+}
 
 export default function DevDashboard() {
   const login = useStore((state) => state.login);
   const logout = useStore((state) => state.logout);
+  const currentUser = useStore((state) => state.currentUser);
   const [, setLocation] = useLocation();
+  const { isConnected } = useWebSocket(currentUser?.id ?? undefined);
+  const wsStore = useWebSocketStore();
+  
+  const [systemStats, setSystemStats] = useState({
+    activeUsers: 0,
+    pendingDeliveries: 0,
+    activeEmergencies: 0,
+    messagesLast24h: 0
+  });
+
+  useEffect(() => {
+    loadSystemStats();
+  }, []);
+
+  async function loadSystemStats() {
+    try {
+      const [deliveriesRes, emergenciesRes] = await Promise.all([
+        fetch('/api/delivery-requests'),
+        fetch('/api/emergency-alerts/active')
+      ]);
+      
+      if (deliveriesRes.ok) {
+        const deliveries = await deliveriesRes.json();
+        const pending = deliveries.filter((d: any) => 
+          ['requested', 'acknowledged', 'picking', 'on_the_way'].includes(d.status)
+        ).length;
+        setSystemStats(prev => ({ ...prev, pendingDeliveries: pending }));
+      }
+      
+      if (emergenciesRes.ok) {
+        const emergencies = await emergenciesRes.json();
+        setSystemStats(prev => ({ ...prev, activeEmergencies: emergencies.length }));
+      }
+    } catch (error) {
+      console.error('Failed to load stats:', error);
+    }
+  }
 
   const handleRoleSwitch = (pin: string, route: string) => {
     logout();
@@ -15,111 +207,259 @@ export default function DevDashboard() {
     setLocation(route);
   };
 
+  const roles = {
+    command: [
+      { name: "Ops Manager", description: "David's view - full ops control", pin: "1234", route: "/ops-command", icon: <Radio className="h-5 w-5" />, color: "cyan" },
+      { name: "Special Ops", description: "Sid's controller view", pin: "2468", route: "/ops-command", icon: <Zap className="h-5 w-5" />, color: "purple" },
+    ],
+    management: [
+      { name: "Warehouse Mgr", description: "Jay/AJ - purchasing & receiving", pin: "3333", route: "/warehouse", icon: <Package className="h-5 w-5" />, color: "amber" },
+      { name: "Kitchen Mgr", description: "Chef Deb/Bobby - culinary ops", pin: "4444", route: "/kitchen", icon: <ChefHat className="h-5 w-5" />, color: "orange" },
+      { name: "Bar Manager", description: "Darby - beverage operations", pin: "5555", route: "/warehouse", icon: <Wine className="h-5 w-5" />, color: "pink" },
+      { name: "IT Manager", description: "David - tech & systems", pin: "9999", route: "/it", icon: <Monitor className="h-5 w-5" />, color: "cyan" },
+    ],
+    field: [
+      { name: "Supervisor", description: "Section oversight, department requests", pin: "5678", route: "/supervisor", icon: <UserCog className="h-5 w-5" />, color: "amber" },
+      { name: "Stand Lead", description: "Stand flow, worker direction", pin: "7777", route: "/standlead", icon: <Users className="h-5 w-5" />, color: "green" },
+      { name: "NPO Worker", description: "Frontline concessions", pin: "8888", route: "/npo", icon: <Sparkles className="h-5 w-5" />, color: "blue" },
+    ],
+    admin: [
+      { name: "Admin", description: "Full system access", pin: "1234", route: "/admin", icon: <Shield className="h-5 w-5" />, color: "red" },
+      { name: "Executive", description: "Brian/Megan - high-level view", pin: "0000", route: "/executive", icon: <Eye className="h-5 w-5" />, color: "purple" },
+    ]
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 p-8 font-mono">
-      <header className="mb-8 flex justify-between items-center border-b border-slate-800 pb-4">
-        <div>
-          <h1 className="text-3xl font-black text-green-400 flex items-center gap-3">
-            <Database className="h-8 w-8" />
-            DEV_GOD_MODE
-          </h1>
-          <p className="text-slate-400 mt-1">Rapid Role Switching & State Inspection</p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      {/* Compact Header */}
+      <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+                <Radio className="h-5 w-5 text-white" />
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-slate-950 animate-pulse" />
+            </div>
+            <div>
+              <h1 className="text-lg font-bold text-cyan-400">Orby Command</h1>
+              <p className="text-xs text-slate-500">Developer Console</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {isConnected ? (
+              <div className="flex items-center gap-1 text-green-400 text-xs">
+                <Wifi className="h-4 w-4" />
+                <span className="hidden sm:inline">Live</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-red-400 text-xs">
+                <WifiOff className="h-4 w-4" />
+                <span className="hidden sm:inline">Offline</span>
+              </div>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setLocation("/")} 
+              className="text-slate-400 hover:text-white"
+              data-testid="button-exit"
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-        <Button variant="outline" onClick={() => setLocation("/")} className="border-slate-700 hover:bg-slate-800 text-slate-300">
-          <LogOut className="mr-2 h-4 w-4" /> Exit to Login
-        </Button>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Admin Role */}
-        <Card className="bg-slate-900 border-slate-800 hover:border-blue-500 transition-colors cursor-pointer group" onClick={() => handleRoleSwitch('1234', '/admin')}>
-          <CardHeader>
-            <CardTitle className="text-blue-400 flex items-center gap-2 group-hover:text-blue-300">
-              <Shield className="h-5 w-5" /> Admin / Manager
-            </CardTitle>
-            <CardDescription className="text-slate-500">Full system access, roster building, grid view</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xs bg-slate-950 p-2 rounded border border-slate-800 text-slate-400">
-              PIN: 1234
-            </div>
-          </CardContent>
-        </Card>
+      {/* Main Content */}
+      <main className="px-4 py-4 space-y-4 max-w-lg mx-auto pb-24">
+        {/* Quick Stats Row */}
+        <div className="grid grid-cols-2 gap-3">
+          <StatCard 
+            label="Active Deliveries" 
+            value={systemStats.pendingDeliveries} 
+            icon={<Truck className="h-5 w-5" />}
+            status={systemStats.pendingDeliveries > 5 ? 'warning' : 'good'}
+          />
+          <StatCard 
+            label="Emergencies" 
+            value={systemStats.activeEmergencies} 
+            icon={<AlertTriangle className="h-5 w-5" />}
+            status={systemStats.activeEmergencies > 0 ? 'error' : 'good'}
+          />
+        </div>
 
-        {/* Supervisor Role */}
-        <Card className="bg-slate-900 border-slate-800 hover:border-amber-500 transition-colors cursor-pointer group" onClick={() => handleRoleSwitch('5678', '/supervisor')}>
-          <CardHeader>
-            <CardTitle className="text-amber-400 flex items-center gap-2 group-hover:text-amber-300">
-              <UserCog className="h-5 w-5" /> Supervisor
-            </CardTitle>
-            <CardDescription className="text-slate-500">Stand management, inventory counts, compliance</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xs bg-slate-950 p-2 rounded border border-slate-800 text-slate-400">
-              PIN: 5678
-            </div>
-          </CardContent>
-        </Card>
+        {/* Role Sections */}
+        <AccordionSection 
+          title="Command Center" 
+          icon={<Radio className="h-5 w-5" />}
+          defaultOpen={true}
+          accentColor="cyan"
+          badge={2}
+        >
+          <div className="space-y-2">
+            {roles.command.map(role => (
+              <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
+            ))}
+          </div>
+        </AccordionSection>
 
-        {/* IT Role */}
-        <Card className="bg-slate-900 border-slate-800 hover:border-cyan-500 transition-colors cursor-pointer group" onClick={() => handleRoleSwitch('9999', '/it')}>
-          <CardHeader>
-            <CardTitle className="text-cyan-400 flex items-center gap-2 group-hover:text-cyan-300">
-              <Monitor className="h-5 w-5" /> IT Support
-            </CardTitle>
-            <CardDescription className="text-slate-500">Asset tracking, ticket management, system status</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xs bg-slate-950 p-2 rounded border border-slate-800 text-slate-400">
-              PIN: 9999
-            </div>
-          </CardContent>
-        </Card>
+        <AccordionSection 
+          title="Department Managers" 
+          icon={<UserCog className="h-5 w-5" />}
+          accentColor="amber"
+          badge={4}
+        >
+          <div className="space-y-2">
+            {roles.management.map(role => (
+              <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
+            ))}
+          </div>
+        </AccordionSection>
 
-        {/* Worker Role (Placeholder) */}
-        <Card className="bg-slate-900 border-slate-800 opacity-50">
-          <CardHeader>
-            <CardTitle className="text-slate-400 flex items-center gap-2">
-              <LayoutDashboard className="h-5 w-5" /> Worker (N/A)
-            </CardTitle>
-            <CardDescription className="text-slate-600">Standard worker view (Not yet implemented)</CardDescription>
-          </CardHeader>
-        </Card>
+        <AccordionSection 
+          title="Field Operations" 
+          icon={<Users className="h-5 w-5" />}
+          accentColor="green"
+          badge={3}
+        >
+          <div className="space-y-2">
+            {roles.field.map(role => (
+              <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
+            ))}
+          </div>
+        </AccordionSection>
+
+        <AccordionSection 
+          title="Admin & Executive" 
+          icon={<Shield className="h-5 w-5" />}
+          accentColor="purple"
+          badge={2}
+        >
+          <div className="space-y-2">
+            {roles.admin.map(role => (
+              <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
+            ))}
+          </div>
+        </AccordionSection>
+
+        {/* Quick Actions */}
+        <AccordionSection 
+          title="Developer Tools" 
+          icon={<Zap className="h-5 w-5" />}
+          accentColor="red"
+        >
+          <div className="grid grid-cols-2 gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="border-slate-700 text-slate-300 text-xs justify-start"
+              onClick={() => window.location.reload()}
+              data-testid="button-refresh"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="border-slate-700 text-slate-300 text-xs justify-start"
+              onClick={() => loadSystemStats()}
+              data-testid="button-reload-stats"
+            >
+              <Activity className="h-4 w-4 mr-2" />
+              Reload Stats
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="border-green-800 text-green-400 text-xs justify-start"
+              onClick={() => {
+                localStorage.setItem("stadiumops_dev_bypass", "true");
+              }}
+              data-testid="button-enable-bypass"
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Auto-Bypass
+            </Button>
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="border-red-800 text-red-400 text-xs justify-start"
+              onClick={() => {
+                localStorage.removeItem("stadiumops_dev_bypass");
+              }}
+              data-testid="button-disable-bypass"
+            >
+              <XCircle className="h-4 w-4 mr-2" />
+              Clear Bypass
+            </Button>
+          </div>
+          <Button 
+            variant="destructive" 
+            size="sm"
+            className="w-full mt-2 text-xs"
+            onClick={() => { localStorage.clear(); window.location.reload(); }}
+            data-testid="button-reset-all"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Reset All Local Data
+          </Button>
+        </AccordionSection>
+
+        {/* System Status */}
+        <div className="rounded-lg border border-slate-700/30 bg-slate-900/30 p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Activity className="h-4 w-4 text-cyan-400" />
+            <span className="text-sm font-medium text-slate-300">System Status</span>
+          </div>
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500">WebSocket</span>
+              <span className={isConnected ? "text-green-400" : "text-red-400"}>
+                {isConnected ? "Connected" : "Disconnected"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500">Messages</span>
+              <span className="text-slate-400">
+                {wsStore.messages.length > 0 ? `${wsStore.messages.length} received` : "—"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500">Database</span>
+              <span className="text-green-400">Online</span>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-6 right-6">
+        <Button
+          size="lg"
+          className="rounded-full w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 shadow-lg shadow-cyan-500/40"
+          onClick={() => setLocation("/ops-command")}
+          data-testid="button-ops-command"
+        >
+          <Radio className="h-6 w-6" />
+        </Button>
       </div>
 
-      <div className="mt-8 p-6 bg-slate-900 rounded-lg border border-slate-800">
-        <h3 className="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
-          <RefreshCw className="h-5 w-5 text-green-500" />
-          Session Utilities
-        </h3>
-        <div className="flex gap-4">
-          <Button variant="secondary" onClick={() => window.location.reload()}>
-            Force Refresh App
-          </Button>
-          <Button 
-            variant="outline" 
-            className="border-green-800 text-green-400 hover:bg-green-900/20"
-            onClick={() => {
-              localStorage.setItem("stadiumops_dev_bypass", "true");
-              alert("Auto-Bypass Enabled! Next time you visit Login, you will be redirected here.");
+      {/* Twinkling Stars Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute w-1 h-1 bg-white rounded-full animate-pulse"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 3}s`,
+              opacity: Math.random() * 0.5 + 0.2
             }}
-          >
-            Enable Auto-Bypass
-          </Button>
-          <Button 
-            variant="outline" 
-            className="border-red-800 text-red-400 hover:bg-red-900/20"
-            onClick={() => {
-              localStorage.removeItem("stadiumops_dev_bypass");
-              alert("Auto-Bypass Disabled.");
-            }}
-          >
-            Disable Auto-Bypass
-          </Button>
-          <Button variant="destructive" onClick={() => { localStorage.clear(); window.location.reload(); }}>
-            Clear Local Storage & Reset
-          </Button>
-        </div>
+          />
+        ))}
       </div>
     </div>
   );
