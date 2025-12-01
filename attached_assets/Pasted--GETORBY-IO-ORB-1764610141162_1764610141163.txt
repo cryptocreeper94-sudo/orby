@@ -1,0 +1,131 @@
+================================================================================
+🛸 GETORBY.IO (ORBY COMMAND CENTER) - HANDOFF FROM ORBIT STAFFING OS
+================================================================================
+
+FROM: ORBIT Agent (orbitstaffing.io)
+TO: Orby Command Center Agent (getorby.io)
+OWNER: Jason (cryptocreeper94-sudo)
+RELATIONSHIP: Sister apps - Orby is the managerial command center for ORBIT ecosystem
+
+--------------------------------------------------------------------------------
+WHAT IS ORBY COMMAND CENTER?
+--------------------------------------------------------------------------------
+- Managerial hierarchy system
+- Command center extension of ORBIT Staffing OS
+- Named after shared mascot "Orby" (cute cyan Saturn character)
+- URL: getorby.io
+
+--------------------------------------------------------------------------------
+SHARED BRANDING
+--------------------------------------------------------------------------------
+MASCOT: Cyan Saturn character with rings, friendly face
+COLORS: 
+  - Primary: Cyan #06b6d4, Teal #14b8a6
+  - Background: Dark slate #0f1419
+  - Accents: Purple (secondary), Green (success)
+FONTS: Space Grotesk (headings), Inter (body)
+THEME: Dark industrial with glowing cyan accents
+
+--------------------------------------------------------------------------------
+SANDBOX SYSTEM (COPY FROM ORBIT)
+--------------------------------------------------------------------------------
+ORBIT has a complete Live/Sandbox mode system ready to implement. Core files:
+
+1. ModeContext.tsx - Provider with useMode() hook
+   - Tracks 'live' vs 'sandbox' mode
+   - Persists to sessionStorage
+   - Supports URL param ?mode=sandbox
+   - enterSandbox(returnPath) / exitSandbox() functions
+
+2. SandboxBanner.tsx - Visual indicators (4 variants)
+   - SandboxBanner: Full-width cyan top bar
+   - SandboxStatusCard: Glowing card with effects
+   - SandboxStatusCompact: Small inline badge
+   - SandboxBadge: Tiny "Demo" pill
+
+3. SandboxWelcome.tsx - First-time welcome dialog
+   - Shows on first sandbox entry
+   - Role-based greeting
+   - "Start Tour" or "Explore" options
+   - Remembers if seen via sessionStorage
+
+4. SandboxShiftCode.tsx - Go-live protection (OPTIONAL)
+   - Daily rotating codes: ORBIT-XXXX
+   - Supervisors can view/share codes
+   - Users must enter code to exit sandbox
+   - Set REQUIRE_SHIFT_CODE = true to enable
+
+5. simulation.ts - Demo behaviors
+   - Auto-response messages for actions
+   - Page-specific contextual tips
+   - Simulated notifications
+
+6. useSandboxData.ts - Data switching hooks
+   - useSandboxData(liveData, demoData)
+   - useSandboxDataWithFallback(liveData, demoData, isLoading)
+   - useSandboxAction(liveAction, sandboxAction)
+
+--------------------------------------------------------------------------------
+IMPLEMENTATION PATTERN
+--------------------------------------------------------------------------------
+// Wrap your app
+<ModeProvider>
+  <SandboxBanner />
+  <SandboxWelcome userName={user?.name} userRole={user?.role} />
+  <YourApp />
+</ModeProvider>
+
+// In any component
+const { isSandbox, isLive, enterSandbox, exitSandbox } = useMode();
+
+// Switch data based on mode
+const workers = useSandboxData(realApiData, demoFixtures);
+
+// Show empty state in live mode, demo data in sandbox
+{isLive && !data?.length && <EmptyState title="No data yet" />}
+{isSandbox && <SandboxBadge />}
+
+--------------------------------------------------------------------------------
+MANAGERIAL HIERARCHY NOTES
+--------------------------------------------------------------------------------
+Since Orby is a hierarchy/command system, consider:
+- Role-based sandbox access (managers can grant sandbox codes)
+- Hierarchy-aware welcome messages
+- Command-level permissions for exiting sandbox
+- Cross-app mode sync with ORBIT via URL params
+
+--------------------------------------------------------------------------------
+CROSS-APP INTEGRATION
+--------------------------------------------------------------------------------
+Users may jump between ORBIT and Orby. To maintain consistency:
+- Share ?mode=sandbox URL param convention
+- Same cyan color scheme for sandbox indicators
+- Orby mascot appears in both apps
+- Consider shared sessionStorage keys if same domain
+
+--------------------------------------------------------------------------------
+HALLMARK SYSTEM (FROM ORBIT)
+--------------------------------------------------------------------------------
+ORBIT has a digital hallmark/verification system with Orby mascot:
+- Serial format: #000000001-00 (9 digits + 2 digit sub)
+- Orby holds certificate with QR code
+- Twinkling stars animation
+- Blockchain verification via Solana
+- Component: OrbyHallmark.tsx
+
+--------------------------------------------------------------------------------
+OPENAI INTEGRATION (AVAILABLE)
+--------------------------------------------------------------------------------
+ORBIT uses Replit AI Integrations for OpenAI access:
+- No API key needed - billed to Replit credits
+- Environment vars: AI_INTEGRATIONS_OPENAI_API_KEY, AI_INTEGRATIONS_OPENAI_BASE_URL
+- Can power Orby chat assistant with real AI
+
+--------------------------------------------------------------------------------
+FULL DOCUMENTATION
+--------------------------------------------------------------------------------
+See ORBIT repo: docs/SANDBOX_MODE_IMPLEMENTATION_GUIDE.md
+
+================================================================================
+END HANDOFF - Ready when you push getorby.io GitHub for review!
+================================================================================
