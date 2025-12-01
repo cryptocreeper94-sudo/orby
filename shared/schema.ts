@@ -435,22 +435,122 @@ export const orbitShifts = pgTable("orbit_shifts", {
   gpsVerified: boolean("gps_verified").default(false),
 });
 
-// Emergency Alerts - priority escalation system
+// Emergency Alert Types
+export const emergencyTypeEnum = pgEnum('emergency_type', [
+  'Medical',      // Person down, injury, illness
+  'Security',     // Fight, threat, suspicious activity
+  'Fire',         // Fire, smoke, gas leak
+  'Equipment',    // Critical equipment failure
+  'Weather',      // Severe weather, lightning
+  'Crowd',        // Crowd control, evacuation
+  'Other'
+]);
+
+// Escalation levels for auto-escalation
+export const escalationLevelEnum = pgEnum('escalation_level', [
+  'Level1',  // Initial - Stand Lead/Supervisor
+  'Level2',  // Department Manager
+  'Level3',  // Operations Manager
+  'Level4'   // Executive/External (911)
+]);
+
+// Command Center Incident Status
+export const commandIncidentStatusEnum = pgEnum('command_incident_status', [
+  'Reported',      // Just reported, no response yet
+  'Dispatched',    // Responder assigned and en route
+  'OnScene',       // Responder arrived
+  'Stabilized',    // Situation under control
+  'Resolved',      // Incident closed
+  'Escalated'      // Bumped to higher level
+]);
+
+// Emergency Alerts - priority escalation system (enhanced for Command Center)
 export const emergencyAlerts = pgTable("emergency_alerts", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   reporterId: varchar("reporter_id", { length: 36 }).references(() => users.id).notNull(),
   standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
-  alertType: text("alert_type").notNull(), // 'medical', 'security', 'fire', 'equipment', 'other'
+  alertType: emergencyTypeEnum("alert_type").notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),
   location: text("location"),
+  locationDetails: text("location_details"), // "Near Gate 5", "Row 12 Seat 4"
+  gpsLat: text("gps_lat"),
+  gpsLng: text("gps_lng"),
+  
+  // Status tracking
+  status: commandIncidentStatusEnum("status").notNull().default('Reported'),
   isActive: boolean("is_active").default(true),
+  
+  // SLA & Escalation
+  escalationLevel: escalationLevelEnum("escalation_level").notNull().default('Level1'),
+  slaTargetMinutes: integer("sla_target_minutes").default(5), // Response time target
+  lastEscalatedAt: timestamp("last_escalated_at"),
+  autoEscalate: boolean("auto_escalate").default(true),
+  
+  // Responder assignment
+  assignedResponderId: varchar("assigned_responder_id", { length: 36 }).references(() => users.id),
+  assignedAt: timestamp("assigned_at"),
+  responderEta: integer("responder_eta"), // Minutes
+  
+  // Acknowledgement
   acknowledgedBy: varchar("acknowledged_by", { length: 36 }).references(() => users.id),
   acknowledgedAt: timestamp("acknowledged_at"),
+  
+  // On-scene tracking
+  arrivedAt: timestamp("arrived_at"),
+  stabilizedAt: timestamp("stabilized_at"),
+  
+  // Resolution
   resolvedBy: varchar("resolved_by", { length: 36 }).references(() => users.id),
   resolvedAt: timestamp("resolved_at"),
   resolutionNotes: text("resolution_notes"),
+  resolutionType: text("resolution_type"), // 'handled_internally', 'ems_called', 'police_called', 'false_alarm'
+  
+  // External services
+  externalServicesContacted: text("external_services_contacted").array(), // ['911', 'EMS', 'Police', 'Fire']
+  externalCaseNumber: text("external_case_number"),
+  
+  // Media/evidence
+  mediaUrls: text("media_urls").array(),
+  
   createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Emergency Responders - tracks who can respond to emergencies
+export const emergencyResponders = pgTable("emergency_responders", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id).notNull(),
+  responderType: text("responder_type").notNull(), // 'security', 'medical', 'supervisor', 'manager', 'it'
+  isOnDuty: boolean("is_on_duty").default(false),
+  currentLocation: text("current_location"),
+  gpsLat: text("gps_lat"),
+  gpsLng: text("gps_lng"),
+  lastLocationUpdate: timestamp("last_location_update"),
+  canRespondTo: text("can_respond_to").array(), // ['Medical', 'Security', 'Fire', etc.]
+});
+
+// Emergency Escalation History - tracks all escalation events
+export const emergencyEscalationHistory = pgTable("emergency_escalation_history", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  alertId: varchar("alert_id", { length: 36 }).references(() => emergencyAlerts.id).notNull(),
+  fromLevel: escalationLevelEnum("from_level").notNull(),
+  toLevel: escalationLevelEnum("to_level").notNull(),
+  reason: text("reason").notNull(), // 'auto_timeout', 'manual', 'severity_increase'
+  escalatedBy: varchar("escalated_by", { length: 36 }).references(() => users.id),
+  notifiedUsers: text("notified_users").array(), // User IDs who were notified
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Emergency Alert Notifications - who has been notified
+export const emergencyAlertNotifications = pgTable("emergency_alert_notifications", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  alertId: varchar("alert_id", { length: 36 }).references(() => emergencyAlerts.id).notNull(),
+  userId: varchar("user_id", { length: 36 }).references(() => users.id).notNull(),
+  notificationType: text("notification_type").notNull(), // 'push', 'sms', 'in_app'
+  sentAt: timestamp("sent_at").defaultNow(),
+  readAt: timestamp("read_at"),
+  respondedAt: timestamp("responded_at"),
 });
 
 // Communication ACL - defines who can contact whom
@@ -943,7 +1043,10 @@ export const EXAMPLE_WAREHOUSE_CATEGORIES = [
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({ id: true, createdAt: true });
 export const insertOrbitRosterSchema = createInsertSchema(orbitRosters).omit({ id: true, createdAt: true });
 export const insertOrbitShiftSchema = createInsertSchema(orbitShifts).omit({ id: true });
-export const insertEmergencyAlertSchema = createInsertSchema(emergencyAlerts).omit({ id: true, createdAt: true });
+export const insertEmergencyAlertSchema = createInsertSchema(emergencyAlerts).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertEmergencyResponderSchema = createInsertSchema(emergencyResponders).omit({ id: true });
+export const insertEmergencyEscalationHistorySchema = createInsertSchema(emergencyEscalationHistory).omit({ id: true, createdAt: true });
+export const insertEmergencyAlertNotificationSchema = createInsertSchema(emergencyAlertNotifications).omit({ id: true, sentAt: true });
 
 // Types
 export type AuditLog = typeof auditLogs.$inferSelect;
@@ -954,3 +1057,9 @@ export type OrbitShift = typeof orbitShifts.$inferSelect;
 export type InsertOrbitShift = z.infer<typeof insertOrbitShiftSchema>;
 export type EmergencyAlert = typeof emergencyAlerts.$inferSelect;
 export type InsertEmergencyAlert = z.infer<typeof insertEmergencyAlertSchema>;
+export type EmergencyResponder = typeof emergencyResponders.$inferSelect;
+export type InsertEmergencyResponder = z.infer<typeof insertEmergencyResponderSchema>;
+export type EmergencyEscalationHistory = typeof emergencyEscalationHistory.$inferSelect;
+export type InsertEmergencyEscalationHistory = z.infer<typeof insertEmergencyEscalationHistorySchema>;
+export type EmergencyAlertNotification = typeof emergencyAlertNotifications.$inferSelect;
+export type InsertEmergencyAlertNotification = z.infer<typeof insertEmergencyAlertNotificationSchema>;
