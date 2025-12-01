@@ -20,6 +20,7 @@ import DevDashboard from "@/pages/DevDashboard";
 import ManagerDashboard from "./pages/ManagerDashboard";
 import MenuBoardCreator from "@/pages/MenuBoardCreator";
 import OpsCommandCenter from "@/pages/OpsCommandCenter";
+import CommandCenter from "@/pages/CommandCenter";
 
 function Router() {
   return (
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/roster-builder" component={RosterBuilder} />
       <Route path="/menu-board-creator" component={MenuBoardCreator} />
       <Route path="/ops-command" component={OpsCommandCenter} />
+      <Route path="/command-center" component={CommandCenter} />
       <Route component={NotFound} />
     </Switch>
   );

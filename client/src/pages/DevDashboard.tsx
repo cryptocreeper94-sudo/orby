@@ -7,7 +7,7 @@ import {
   Wine, Sparkles, Users, Radio, AlertTriangle, Truck,
   MessageSquare, Activity, ChevronDown, ChevronRight,
   Zap, Eye, RefreshCw, Trash2, Clock, CheckCircle2,
-  XCircle, Wifi, WifiOff
+  XCircle, Wifi, WifiOff, Siren
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWebSocket, useWebSocketStore } from "@/lib/websocket";
@@ -288,6 +288,29 @@ export default function DevDashboard() {
             status={systemStats.activeEmergencies > 0 ? 'error' : 'good'}
           />
         </div>
+
+        {/* Emergency Command Center Quick Access */}
+        <Button
+          onClick={() => setLocation('/command-center')}
+          className={cn(
+            "w-full py-4 text-left justify-start gap-3 font-bold",
+            systemStats.activeEmergencies > 0 
+              ? "bg-red-600 hover:bg-red-700 animate-pulse" 
+              : "bg-gradient-to-r from-red-900/50 to-red-800/50 border border-red-700/50 hover:from-red-800/60 hover:to-red-700/60"
+          )}
+          data-testid="button-command-center"
+        >
+          <Siren className="h-5 w-5" />
+          <div className="flex-1">
+            <div className="text-sm">Emergency Command Center</div>
+            <div className="text-xs text-white/70 font-normal">
+              {systemStats.activeEmergencies > 0 
+                ? `${systemStats.activeEmergencies} active incident${systemStats.activeEmergencies > 1 ? 's' : ''}` 
+                : 'All clear - No active incidents'}
+            </div>
+          </div>
+          <AlertTriangle className={cn("h-4 w-4", systemStats.activeEmergencies > 0 ? "text-yellow-300" : "text-slate-400")} />
+        </Button>
 
         {/* Role Sections */}
         <AccordionSection 
