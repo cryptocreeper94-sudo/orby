@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
   LogOut, Map, MessageSquare, Navigation, MapPin, 
-  CheckCircle2, AlertTriangle, Clock, Users, Building2, Route, ClipboardList 
+  CheckCircle2, AlertTriangle, Clock, Users, Building2, Route, ClipboardList,
+  ScanLine, Sparkles
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Notepad } from "@/components/Notepad";
@@ -13,6 +14,7 @@ import { InteractiveMap } from "@/components/InteractiveMap";
 import { WalkingDirections } from "@/components/WalkingDirections";
 import { CounterLogin } from "@/components/CounterLogin";
 import { CountSheet } from "@/components/CountSheet";
+import { QuickScanModal } from "@/components/QuickScanModal";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
 import { 
   LocationAcknowledgement, 
@@ -50,6 +52,7 @@ export default function NPODashboard() {
   const [showDirections, setShowDirections] = useState(false);
   const [showCounterLogin, setShowCounterLogin] = useState(false);
   const [showCountSheet, setShowCountSheet] = useState(false);
+  const [showQuickScan, setShowQuickScan] = useState(false);
   const [activeSession, setActiveSession] = useState<CountSession | null>(null);
   const [items, setItems] = useState<Item[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -255,6 +258,16 @@ export default function NPODashboard() {
         </div>
       )}
 
+      {showQuickScan && (
+        <QuickScanModal
+          onClose={() => setShowQuickScan(false)}
+          standName={`${assignedSection.name} - ${assignedSection.stand}`}
+          onScanComplete={(items) => {
+            console.log('Scanned items:', items);
+          }}
+        />
+      )}
+
       <main className="p-4 sm:px-6 space-y-6 max-w-4xl mx-auto mt-4">
         <div className="text-center py-4">
           <h1 className="text-2xl font-black text-slate-800 dark:text-slate-200">
@@ -378,6 +391,24 @@ export default function NPODashboard() {
                     <p className="font-bold">{assignedSection.supervisor}</p>
                   </div>
                 </div>
+                <Button 
+                  className="w-full h-14 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg mb-3"
+                  onClick={() => setShowQuickScan(true)}
+                  data-testid="quick-scan-btn"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/20 rounded-lg">
+                      <ScanLine className="h-5 w-5" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-bold flex items-center gap-1">
+                        <Sparkles className="h-4 w-4" />
+                        Quick AI Scan
+                      </div>
+                      <div className="text-xs text-white/80">Scan cooler or paper sheet</div>
+                    </div>
+                  </div>
+                </Button>
                 <div className="grid grid-cols-2 gap-2">
                   <Button 
                     className="bg-blue-600 hover:bg-blue-700 text-white" 

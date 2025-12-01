@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { 
   LogOut, Map, MessageSquare, ClipboardList, AlertTriangle, 
   CheckCircle2, Building2, Route, X, Send, Thermometer, Zap,
-  Tv, UtensilsCrossed, Wrench, Users, HelpCircle
+  Tv, UtensilsCrossed, Wrench, Users, HelpCircle, ScanLine, Sparkles
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Notepad } from "@/components/Notepad";
@@ -17,6 +17,7 @@ import { InteractiveMap } from "@/components/InteractiveMap";
 import { WalkingDirections } from "@/components/WalkingDirections";
 import { CounterLogin } from "@/components/CounterLogin";
 import { CountSheet } from "@/components/CountSheet";
+import { QuickScanModal } from "@/components/QuickScanModal";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
 import {
   Select,
@@ -75,6 +76,7 @@ export default function StandLeadDashboard() {
   const [showDirections, setShowDirections] = useState(false);
   const [showCounterLogin, setShowCounterLogin] = useState(false);
   const [showCountSheet, setShowCountSheet] = useState(false);
+  const [showQuickScan, setShowQuickScan] = useState(false);
   const [showIssueForm, setShowIssueForm] = useState(false);
   const [activeSession, setActiveSession] = useState<CountSession | null>(null);
   const [items, setItems] = useState<Item[]>([]);
@@ -288,6 +290,16 @@ export default function StandLeadDashboard() {
         </div>
       )}
 
+      {showQuickScan && (
+        <QuickScanModal
+          onClose={() => setShowQuickScan(false)}
+          standName={`${assignedSection.name} - ${assignedSection.stand}`}
+          onScanComplete={(items) => {
+            console.log('Scanned items:', items);
+          }}
+        />
+      )}
+
       <Dialog open={showIssueForm} onOpenChange={setShowIssueForm}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -451,6 +463,25 @@ export default function StandLeadDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        <Button 
+          className="w-full h-16 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg mb-3"
+          onClick={() => setShowQuickScan(true)}
+          data-testid="quick-scan-btn"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-white/20 rounded-lg">
+              <ScanLine className="h-6 w-6" />
+            </div>
+            <div className="text-left">
+              <div className="font-bold flex items-center gap-1">
+                <Sparkles className="h-4 w-4" />
+                Quick AI Scan
+              </div>
+              <div className="text-xs text-white/80">Scan cooler or paper sheet</div>
+            </div>
+          </div>
+        </Button>
 
         <div className="grid grid-cols-2 gap-3">
           <Button 

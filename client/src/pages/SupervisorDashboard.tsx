@@ -1,7 +1,7 @@
 import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck, Send, Package, Warehouse, Plus, Minus, Truck } from "lucide-react";
+import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck, Send, Package, Warehouse, Plus, Minus, Truck, ScanLine, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import SignatureCanvas from 'react-signature-canvas';
 import jsPDF from 'jspdf';
@@ -22,6 +22,7 @@ import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
 import { SupervisorPack } from "@/components/SupervisorPack";
 import { SupervisorClosingPanel } from "@/components/SupervisorClosingPanel";
+import { QuickScanModal } from "@/components/QuickScanModal";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -69,6 +70,7 @@ export default function SupervisorDashboard() {
   const [showMap, setShowMap] = useState(false);
   const [showSupervisorPack, setShowSupervisorPack] = useState(false);
   const [showWarehouseRequest, setShowWarehouseRequest] = useState(false);
+  const [showQuickScan, setShowQuickScan] = useState(false);
   
   // Compliance sheet state
   const signatureRef = useRef<SignatureCanvas>(null);
@@ -526,6 +528,35 @@ export default function SupervisorDashboard() {
               />
             </div>
           )}
+
+          {showQuickScan && (
+            <QuickScanModal
+              onClose={() => setShowQuickScan(false)}
+              standName="Spot Check"
+              onScanComplete={(items) => {
+                console.log('Supervisor scanned items:', items);
+              }}
+            />
+          )}
+
+          <Button 
+            className="w-full h-14 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg mb-4"
+            onClick={() => setShowQuickScan(true)}
+            data-testid="quick-scan-btn"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <ScanLine className="h-5 w-5" />
+              </div>
+              <div className="text-left">
+                <div className="font-bold flex items-center gap-1">
+                  <Sparkles className="h-4 w-4" />
+                  Quick AI Scan
+                </div>
+                <div className="text-xs text-white/80">Spot check any cooler</div>
+              </div>
+            </div>
+          </Button>
 
           <div className="space-y-4">
             <div className="text-sm text-muted-foreground mb-2 uppercase font-bold tracking-wider">Select a Stand</div>
