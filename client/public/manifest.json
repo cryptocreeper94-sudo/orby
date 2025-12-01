@@ -1,11 +1,11 @@
 {
-  "name": "StadiumOps",
-  "short_name": "StadiumOps",
-  "description": "Stadium inventory and staffing management system",
+  "name": "Orby",
+  "short_name": "Orby",
+  "description": "Real-time communications and operations management for venues",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
-  "theme_color": "#3b82f6",
+  "theme_color": "#06B6D4",
   "orientation": "portrait",
   "icons": [
     {
@@ -21,7 +21,7 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "productivity"],
+  "categories": ["business", "productivity", "communication"],
   "screenshots": [],
   "shortcuts": [
     {
@@ -33,6 +33,11 @@
       "name": "Supervisor View",
       "url": "/supervisor",
       "description": "Access supervisor dashboard"
+    },
+    {
+      "name": "Messages",
+      "url": "/messages",
+      "description": "View communications"
     }
   ]
 }
