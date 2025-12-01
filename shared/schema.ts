@@ -688,3 +688,129 @@ export type MenuElement = {
   textAlign?: 'left' | 'center' | 'right';
   imageUrl?: string;
 };
+
+// ============ WAREHOUSE INVENTORY SYSTEM ============
+// NOTE: This is a configurable example based on Nissan Stadium operations.
+// Categories, products, and par levels can be customized to match your specific workflow.
+
+export const warehouseCategories = pgTable("warehouse_categories", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description"),
+  color: varchar("color", { length: 20 }).default('#3B82F6'),
+  icon: varchar("icon", { length: 50 }).default('Package'),
+  sortOrder: integer("sort_order").default(0),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const warehouseProducts = pgTable("warehouse_products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categoryId: varchar("category_id").references(() => warehouseCategories.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  sku: varchar("sku", { length: 50 }),
+  description: text("description"),
+  unit: varchar("unit", { length: 50 }).default('each'),
+  unitsPerCase: integer("units_per_case").default(1),
+  costPerUnit: integer("cost_per_unit_cents"),
+  imageUrl: text("image_url"),
+  isPerishable: boolean("is_perishable").default(false),
+  shelfLifeDays: integer("shelf_life_days"),
+  minOrderQty: integer("min_order_qty").default(1),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const warehouseStock = pgTable("warehouse_stock", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => warehouseProducts.id).notNull(),
+  quantity: integer("quantity").notNull().default(0),
+  lotNumber: varchar("lot_number", { length: 100 }),
+  expirationDate: timestamp("expiration_date"),
+  location: varchar("location", { length: 100 }),
+  lastCountedAt: timestamp("last_counted_at"),
+  lastCountedBy: varchar("last_counted_by").references(() => users.id),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const warehouseParLevels = pgTable("warehouse_par_levels", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").references(() => warehouseProducts.id).notNull(),
+  standId: varchar("stand_id").references(() => stands.id),
+  standType: varchar("stand_type", { length: 50 }),
+  minQuantity: integer("min_quantity").notNull().default(0),
+  maxQuantity: integer("max_quantity"),
+  reorderPoint: integer("reorder_point"),
+  notes: text("notes"),
+});
+
+export const requestStatusEnum = pgEnum('request_status', ['Pending', 'Approved', 'Picking', 'InTransit', 'Delivered', 'Confirmed', 'Cancelled']);
+export const requestPriorityEnum = pgEnum('request_priority', ['Normal', 'Rush', 'Emergency']);
+
+export const warehouseRequests = pgTable("warehouse_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  standId: varchar("stand_id").references(() => stands.id).notNull(),
+  requestedById: varchar("requested_by_id").references(() => users.id).notNull(),
+  status: requestStatusEnum("status").default('Pending'),
+  priority: requestPriorityEnum("priority").default('Normal'),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  approvedAt: timestamp("approved_at"),
+  approvedById: varchar("approved_by_id").references(() => users.id),
+  pickedAt: timestamp("picked_at"),
+  pickedById: varchar("picked_by_id").references(() => users.id),
+  deliveredAt: timestamp("delivered_at"),
+  deliveredById: varchar("delivered_by_id").references(() => users.id),
+  confirmedAt: timestamp("confirmed_at"),
+  confirmedById: varchar("confirmed_by_id").references(() => users.id),
+});
+
+export const warehouseRequestItems = pgTable("warehouse_request_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  requestId: varchar("request_id").references(() => warehouseRequests.id).notNull(),
+  productId: varchar("product_id").references(() => warehouseProducts.id).notNull(),
+  quantityRequested: integer("quantity_requested").notNull(),
+  quantityApproved: integer("quantity_approved"),
+  quantityDelivered: integer("quantity_delivered"),
+  notes: text("notes"),
+});
+
+// Insert schemas
+export const insertWarehouseCategorySchema = createInsertSchema(warehouseCategories).omit({ id: true, createdAt: true });
+export const insertWarehouseProductSchema = createInsertSchema(warehouseProducts).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertWarehouseStockSchema = createInsertSchema(warehouseStock).omit({ id: true, updatedAt: true });
+export const insertWarehouseParLevelSchema = createInsertSchema(warehouseParLevels).omit({ id: true });
+export const insertWarehouseRequestSchema = createInsertSchema(warehouseRequests).omit({ id: true, createdAt: true });
+export const insertWarehouseRequestItemSchema = createInsertSchema(warehouseRequestItems).omit({ id: true });
+
+// Types
+export type WarehouseCategory = typeof warehouseCategories.$inferSelect;
+export type InsertWarehouseCategory = z.infer<typeof insertWarehouseCategorySchema>;
+export type WarehouseProduct = typeof warehouseProducts.$inferSelect;
+export type InsertWarehouseProduct = z.infer<typeof insertWarehouseProductSchema>;
+export type WarehouseStock = typeof warehouseStock.$inferSelect;
+export type InsertWarehouseStock = z.infer<typeof insertWarehouseStockSchema>;
+export type WarehouseParLevel = typeof warehouseParLevels.$inferSelect;
+export type InsertWarehouseParLevel = z.infer<typeof insertWarehouseParLevelSchema>;
+export type WarehouseRequest = typeof warehouseRequests.$inferSelect;
+export type InsertWarehouseRequest = z.infer<typeof insertWarehouseRequestSchema>;
+export type WarehouseRequestItem = typeof warehouseRequestItems.$inferSelect;
+export type InsertWarehouseRequestItem = z.infer<typeof insertWarehouseRequestItemSchema>;
+
+// Example categories based on Nissan Stadium ordering cheat sheet
+// These are configurable and can be modified to match your specific operations
+export const EXAMPLE_WAREHOUSE_CATEGORIES = [
+  { name: 'Beverages - Canned', color: '#3B82F6', icon: 'Beer' },
+  { name: 'Beverages - Bottled', color: '#0EA5E9', icon: 'Bottle' },
+  { name: 'Beverages - Fountain/BIB', color: '#06B6D4', icon: 'Coffee' },
+  { name: 'Beverages - Draft Beer', color: '#F59E0B', icon: 'Beer' },
+  { name: 'Beverages - Wine & Liquor', color: '#8B5CF6', icon: 'Wine' },
+  { name: 'Food - Hot Dogs & Buns', color: '#EF4444', icon: 'Sandwich' },
+  { name: 'Food - Nachos & Cheese', color: '#F97316', icon: 'Pizza' },
+  { name: 'Food - Pretzels & Snacks', color: '#84CC16', icon: 'Cookie' },
+  { name: 'Food - Fried Items', color: '#EAB308', icon: 'Flame' },
+  { name: 'Paper Goods', color: '#6B7280', icon: 'Package' },
+  { name: 'Condiments', color: '#10B981', icon: 'Droplet' },
+  { name: 'Supplies', color: '#64748B', icon: 'Wrench' },
+];
