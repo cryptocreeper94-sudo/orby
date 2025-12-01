@@ -1,7 +1,7 @@
 import { useStore } from "@/lib/mockData";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck, Send, Package, Warehouse, Plus, Minus, Truck, ScanLine, Sparkles } from "lucide-react";
+import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, Phone, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck, Send, Package, Warehouse, Plus, Minus, Truck, ScanLine, Sparkles, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import SignatureCanvas from 'react-signature-canvas';
 import jsPDF from 'jspdf';
@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import Webcam from "react-webcam";
 import { Badge } from "@/components/ui/badge";
 import { Notepad } from "@/components/Notepad";
@@ -28,6 +28,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
 
 type WarehouseProduct = {
   id: string;
@@ -42,6 +43,17 @@ type WarehouseCategory = {
   name: string;
   color: string | null;
 };
+
+function getStandSection(standName: string): string {
+  if (standName.startsWith('1')) return '100 Level';
+  if (standName.startsWith('2')) return '200 Level';
+  if (standName.startsWith('3')) return '300 Level';
+  if (standName.startsWith('OA') || standName.toLowerCase().includes('tailgate')) return 'Outdoor Areas';
+  if (standName.toLowerCase().includes('bar')) return 'Bars';
+  if (standName.toLowerCase().includes('suite') || standName.toLowerCase().includes('club')) return 'Premium';
+  if (standName.toLowerCase().includes('vend')) return 'Vending';
+  return 'Other Locations';
+}
 
 export default function SupervisorDashboard() {
   const logout = useStore((state) => state.logout);
@@ -62,8 +74,6 @@ export default function SupervisorDashboard() {
     }
   }, [stands.length, fetchAll]);
   
-  // Filter stands for this supervisor
-  const myStands = stands.filter(s => s.supervisorId === currentUser?.id);
   const [activeStandId, setActiveStandId] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [activeTab, setActiveTab] = useState("inventory");
@@ -71,18 +81,46 @@ export default function SupervisorDashboard() {
   const [showSupervisorPack, setShowSupervisorPack] = useState(false);
   const [showWarehouseRequest, setShowWarehouseRequest] = useState(false);
   const [showQuickScan, setShowQuickScan] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
-  // Compliance sheet state
   const signatureRef = useRef<SignatureCanvas>(null);
   const [complianceSubmitting, setComplianceSubmitting] = useState(false);
   const [complianceSubmitted, setComplianceSubmitted] = useState(false);
   const [complianceError, setComplianceError] = useState<string | null>(null);
 
-  // Warehouse request state
   const [requestItems, setRequestItems] = useState<Record<string, number>>({});
   const [requestPriority, setRequestPriority] = useState<'Normal' | 'Rush' | 'Emergency'>('Normal');
   const [requestNotes, setRequestNotes] = useState('');
   const [selectedStandForRequest, setSelectedStandForRequest] = useState<string>('');
+
+  const groupedStands = useMemo(() => {
+    const filtered = searchQuery 
+      ? stands.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
+      : stands;
+    
+    const groups: Record<string, typeof stands> = {};
+    filtered.forEach(stand => {
+      const section = getStandSection(stand.name);
+      if (!groups[section]) groups[section] = [];
+      groups[section].push(stand);
+    });
+    
+    Object.keys(groups).forEach(key => {
+      groups[key].sort((a, b) => a.name.localeCompare(b.name));
+    });
+    
+    return groups;
+  }, [stands, searchQuery]);
+
+  const sectionOrder = ['100 Level', '200 Level', '300 Level', 'Bars', 'Premium', 'Outdoor Areas', 'Vending', 'Other Locations'];
+  const sortedSections = Object.keys(groupedStands).sort((a, b) => {
+    const aIdx = sectionOrder.indexOf(a);
+    const bIdx = sectionOrder.indexOf(b);
+    if (aIdx === -1 && bIdx === -1) return a.localeCompare(b);
+    if (aIdx === -1) return 1;
+    if (bIdx === -1) return -1;
+    return aIdx - bIdx;
+  });
 
   const { data: warehouseProducts = [] } = useQuery<WarehouseProduct[]>({
     queryKey: ['warehouse-products'],
@@ -104,7 +142,7 @@ export default function SupervisorDashboard() {
 
   const createRequestMutation = useMutation({
     mutationFn: async () => {
-      const standId = selectedStandForRequest || myStands[0]?.id;
+      const standId = selectedStandForRequest || stands[0]?.id;
       if (!standId) throw new Error('No stand selected');
       
       const res = await fetch('/api/warehouse/requests', {
@@ -133,7 +171,7 @@ export default function SupervisorDashboard() {
         });
       }
       queryClient.invalidateQueries({ queryKey: ['warehouse-requests'] });
-      alert('Warehouse request submitted successfully! The warehouse team has been notified.');
+      alert('Warehouse request submitted successfully!');
       setShowWarehouseRequest(false);
       setRequestItems({});
       setRequestPriority('Normal');
@@ -143,10 +181,6 @@ export default function SupervisorDashboard() {
 
   const getTotalItemsInRequest = () => {
     return Object.values(requestItems).reduce((sum, qty) => sum + qty, 0);
-  };
-
-  const getCategoryName = (categoryId: string | null) => {
-    return warehouseCategories.find(c => c.id === categoryId)?.name ?? 'Other';
   };
 
   const handleLogout = () => {
@@ -187,7 +221,6 @@ export default function SupervisorDashboard() {
     doc.text('• Proper wristband verification for alcohol purchases', 25, 126);
     doc.text('• No alcohol service after designated cutoff time', 25, 134);
     
-    // Add signature if available
     if (signatureRef.current && !signatureRef.current.isEmpty()) {
       const signatureData = signatureRef.current.getTrimmedCanvas().toDataURL('image/png');
       doc.text('Supervisor Signature:', 20, 160);
@@ -243,346 +276,346 @@ export default function SupervisorDashboard() {
 
   if (!activeStandId) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-20">
-        <header className="sticky top-0 z-10 bg-white dark:bg-slate-900 border-b px-4 h-14 flex items-center justify-between shadow-sm">
-          <div className="font-bold text-lg truncate">My Stands</div>
-          <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground">
-            <LogOut className="h-5 w-5" />
-          </Button>
+      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-24">
+        <header className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <ClipboardList className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-amber-400">Supervisor</h1>
+                <p className="text-xs text-slate-500">{stands.length} stands available</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-400 hover:text-white">
+              <LogOut className="h-5 w-5" />
+            </Button>
+          </div>
         </header>
-        <main className="p-4 space-y-6">
-          {/* Supervisor Pack Section */}
-          <Card className="bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800">
-             <CardHeader className="pb-2">
-               <CardTitle className="text-lg flex items-center gap-2 text-blue-800 dark:text-blue-200">
-                 <FileText className="w-5 h-5" />
-                 Supervisor Pack
-               </CardTitle>
-               <CardDescription className="text-blue-600 dark:text-blue-300 text-xs">
-                 Quick access to essential documents and checklists
-               </CardDescription>
-             </CardHeader>
-             <CardContent>
-               <Accordion type="single" collapsible className="w-full bg-white dark:bg-slate-900 rounded-lg shadow-sm border">
-                 {/* Compliance Docs */}
-                 <AccordionItem value="compliance" className="px-4">
-                   <AccordionTrigger className="hover:no-underline">
-                     <div className="flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 text-amber-500" />
-                        <span>Compliance & Safety</span>
-                     </div>
-                   </AccordionTrigger>
-                   <AccordionContent className="space-y-2 pt-2">
-                     {supervisorDocs.filter(d => d.category === 'Compliance').map(doc => (
-                       <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-md border">
-                         <span className="text-sm font-medium">{doc.title}</span>
-                         {doc.requiresSignature && (
-                           <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 gap-1">
-                             <PenTool className="w-3 h-3" /> Sign
-                           </Badge>
-                         )}
-                       </div>
-                     ))}
-                   </AccordionContent>
-                 </AccordionItem>
 
-                 {/* Checklists */}
-                 <AccordionItem value="checklists" className="px-4">
-                   <AccordionTrigger className="hover:no-underline">
-                     <div className="flex items-center gap-2">
-                        <CheckSquare className="w-4 h-4 text-green-500" />
-                        <span>Operational Checklists</span>
-                     </div>
-                   </AccordionTrigger>
-                   <AccordionContent className="space-y-2 pt-2">
-                      {supervisorDocs.filter(d => d.category === 'Checklist').map(doc => (
-                       <div key={doc.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-md border">
-                         <span className="text-sm font-medium">{doc.title}</span>
-                         <Button size="sm" variant="ghost" className="h-6 text-xs">View</Button>
-                       </div>
-                     ))}
-                   </AccordionContent>
-                 </AccordionItem>
+        <main className="px-4 py-4 space-y-4 max-w-lg mx-auto">
+          {/* Quick Actions */}
+          <div className="grid grid-cols-2 gap-3">
+            <Button 
+              className="h-14 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white shadow-lg shadow-cyan-500/20"
+              onClick={() => setShowQuickScan(true)}
+              data-testid="quick-scan-btn"
+            >
+              <ScanLine className="h-5 w-5 mr-2" />
+              <span className="text-sm">AI Scan</span>
+            </Button>
+            <Button 
+              className="h-14 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white shadow-lg shadow-amber-500/20"
+              onClick={() => setShowSupervisorPack(true)}
+              data-testid="open-supervisor-pack"
+            >
+              <FileText className="h-5 w-5 mr-2" />
+              <span className="text-sm">Pack</span>
+            </Button>
+          </div>
 
-                 {/* Contacts */}
-                 <AccordionItem value="contacts" className="px-4 border-b-0">
-                   <AccordionTrigger className="hover:no-underline">
-                     <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-blue-500" />
-                        <span>Important Contacts</span>
-                     </div>
-                   </AccordionTrigger>
-                   <AccordionContent className="pt-2">
-                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-md border text-sm whitespace-pre-line font-mono">
-                        {supervisorDocs.find(d => d.category === 'Contact')?.content || 'No contacts available'}
-                      </div>
-                   </AccordionContent>
-                 </AccordionItem>
-               </Accordion>
-             </CardContent>
-          </Card>
-
-          <Button 
-            className="w-full h-14 bg-amber-600 hover:bg-amber-700 text-white font-bold"
-            onClick={() => setShowSupervisorPack(true)}
-            data-testid="open-supervisor-pack"
-          >
-            <ClipboardList className="h-5 w-5 mr-2" />
-            Open Full Supervisor Pack
-          </Button>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Notepad storageKey="supervisor-notes" className="col-span-2" />
+          <div className="grid grid-cols-2 gap-3">
             <Button 
               variant="outline" 
-              className="h-16 flex flex-col gap-1"
+              className="h-12 border-slate-700 bg-slate-900/50 text-slate-300 hover:bg-slate-800"
               onClick={() => setShowMap(true)}
               data-testid="open-map"
             >
-              <Map className="h-5 w-5 text-blue-600" />
-              <span className="text-xs">Stadium Map</span>
+              <Map className="h-4 w-4 mr-2 text-blue-400" />
+              <span className="text-sm">Map</span>
             </Button>
             <Button 
               variant="outline" 
-              className="h-16 flex flex-col gap-1 border-amber-200 hover:bg-amber-50"
+              className="h-12 border-slate-700 bg-slate-900/50 text-slate-300 hover:bg-slate-800"
               onClick={() => setShowWarehouseRequest(true)}
               data-testid="open-warehouse-request"
             >
-              <Warehouse className="h-5 w-5 text-amber-600" />
-              <span className="text-xs">Request Supplies</span>
+              <Warehouse className="h-4 w-4 mr-2 text-amber-400" />
+              <span className="text-sm">Supplies</span>
             </Button>
           </div>
 
-          <Dialog open={showWarehouseRequest} onOpenChange={setShowWarehouseRequest}>
-            <DialogContent className="max-w-md max-h-[90vh] flex flex-col">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Warehouse className="h-5 w-5 text-amber-600" />
-                  Request from Warehouse
-                </DialogTitle>
-              </DialogHeader>
-              
-              <div className="flex-1 overflow-hidden flex flex-col space-y-4">
-                {myStands.length > 1 && (
-                  <div>
-                    <Label>For Stand</Label>
-                    <Select 
-                      value={selectedStandForRequest || myStands[0]?.id} 
-                      onValueChange={setSelectedStandForRequest}
-                    >
-                      <SelectTrigger data-testid="select-stand-for-request">
-                        <SelectValue placeholder="Select stand..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {myStands.map(stand => (
-                          <SelectItem key={stand.id} value={stand.id}>{stand.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
+          {/* Search */}
+          <div className="relative">
+            <Input
+              placeholder="Search stands..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-slate-900/50 border-slate-700 text-slate-200 placeholder:text-slate-500 pl-4 pr-10"
+              data-testid="input-search-stands"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+              >
+                ×
+              </button>
+            )}
+          </div>
 
+          {/* Grouped Stands Accordion */}
+          <Accordion type="multiple" className="space-y-2" defaultValue={['100 Level']}>
+            {sortedSections.map(section => (
+              <AccordionItem 
+                key={section} 
+                value={section}
+                className="rounded-lg border border-slate-700/50 bg-slate-900/50 overflow-hidden"
+              >
+                <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-slate-800/50">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold",
+                      section === '100 Level' && "bg-green-500/20 text-green-400",
+                      section === '200 Level' && "bg-blue-500/20 text-blue-400",
+                      section === '300 Level' && "bg-purple-500/20 text-purple-400",
+                      section === 'Bars' && "bg-pink-500/20 text-pink-400",
+                      section === 'Premium' && "bg-amber-500/20 text-amber-400",
+                      section === 'Outdoor Areas' && "bg-cyan-500/20 text-cyan-400",
+                      section === 'Vending' && "bg-orange-500/20 text-orange-400",
+                      section === 'Other Locations' && "bg-slate-500/20 text-slate-400"
+                    )}>
+                      {groupedStands[section].length}
+                    </div>
+                    <span className="text-slate-200 font-medium">{section}</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-2 pb-2">
+                  <div className="space-y-1">
+                    {groupedStands[section].map(stand => (
+                      <button
+                        key={stand.id}
+                        onClick={() => setActiveStandId(stand.id)}
+                        className={cn(
+                          "w-full px-3 py-2.5 rounded-lg flex items-center justify-between",
+                          "bg-slate-800/50 hover:bg-slate-700/50 transition-colors",
+                          "border-l-2",
+                          stand.status === 'Open' ? "border-l-green-500" : "border-l-red-500"
+                        )}
+                        data-testid={`stand-${stand.id}`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-slate-200 font-medium text-sm truncate">{stand.name}</span>
+                          <Badge 
+                            variant="outline" 
+                            className={cn(
+                              "text-xs px-1.5 py-0",
+                              stand.status === 'Open' 
+                                ? "border-green-500/50 text-green-400 bg-green-500/10" 
+                                : "border-red-500/50 text-red-400 bg-red-500/10"
+                            )}
+                          >
+                            {stand.status}
+                          </Badge>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-slate-500 flex-shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+
+          {stands.length === 0 && (
+            <div className="text-center py-10 text-slate-500">
+              <ClipboardList className="h-12 w-12 mx-auto mb-3 opacity-30" />
+              <p>No stands available</p>
+            </div>
+          )}
+
+          <Notepad storageKey="supervisor-notes" className="bg-slate-900/50 border-slate-700" />
+        </main>
+
+        {/* Modals */}
+        <Dialog open={showWarehouseRequest} onOpenChange={setShowWarehouseRequest}>
+          <DialogContent className="max-w-md max-h-[90vh] flex flex-col bg-slate-900 border-slate-700 text-slate-200">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-400">
+                <Warehouse className="h-5 w-5" />
+                Request from Warehouse
+              </DialogTitle>
+            </DialogHeader>
+            
+            <div className="flex-1 overflow-hidden flex flex-col space-y-4">
+              {stands.length > 1 && (
                 <div>
-                  <Label>Priority</Label>
-                  <Select value={requestPriority} onValueChange={(v) => setRequestPriority(v as typeof requestPriority)}>
-                    <SelectTrigger data-testid="select-request-priority">
-                      <SelectValue />
+                  <Label className="text-slate-300">For Stand</Label>
+                  <Select 
+                    value={selectedStandForRequest || stands[0]?.id} 
+                    onValueChange={setSelectedStandForRequest}
+                  >
+                    <SelectTrigger className="bg-slate-800 border-slate-600" data-testid="select-stand-for-request">
+                      <SelectValue placeholder="Select stand..." />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Normal">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                          Normal
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="Rush">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-                          Rush (High Priority)
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="Emergency">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                          Emergency
-                        </div>
-                      </SelectItem>
+                    <SelectContent className="bg-slate-800 border-slate-600">
+                      {stands.map(stand => (
+                        <SelectItem key={stand.id} value={stand.id}>{stand.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
+              )}
 
-                <div className="flex-1 overflow-hidden">
-                  <Label className="mb-2 block">Select Items ({getTotalItemsInRequest()} items selected)</Label>
-                  {warehouseProducts.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm">No products available</p>
-                      <p className="text-xs">The warehouse inventory needs to be set up first.</p>
-                    </div>
-                  ) : (
-                    <ScrollArea className="h-[200px] border rounded-md p-2">
-                      <div className="space-y-2">
-                        {warehouseCategories.map(category => {
-                          const categoryProducts = warehouseProducts.filter(p => p.categoryId === category.id);
-                          if (categoryProducts.length === 0) return null;
-                          return (
-                            <div key={category.id}>
-                              <div className="text-xs font-semibold text-muted-foreground uppercase mb-1 sticky top-0 bg-white py-1">
-                                {category.name}
-                              </div>
-                              {categoryProducts.map(product => (
-                                <div 
-                                  key={product.id} 
-                                  className="flex items-center justify-between p-2 rounded hover:bg-slate-50"
-                                >
-                                  <div className="flex-1 min-w-0">
-                                    <span className="text-sm truncate block">{product.name}</span>
-                                    <span className="text-xs text-muted-foreground">{product.unit}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1">
-                                    <Button
-                                      variant="outline"
-                                      size="icon"
-                                      className="h-7 w-7"
-                                      onClick={() => setRequestItems(prev => ({
-                                        ...prev,
-                                        [product.id]: Math.max(0, (prev[product.id] || 0) - 1)
-                                      }))}
-                                      disabled={(requestItems[product.id] || 0) === 0}
-                                    >
-                                      <Minus className="h-3 w-3" />
-                                    </Button>
-                                    <span className="w-8 text-center font-mono text-sm">
-                                      {requestItems[product.id] || 0}
-                                    </span>
-                                    <Button
-                                      variant="outline"
-                                      size="icon"
-                                      className="h-7 w-7"
-                                      onClick={() => setRequestItems(prev => ({
-                                        ...prev,
-                                        [product.id]: (prev[product.id] || 0) + 1
-                                      }))}
-                                    >
-                                      <Plus className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          );
-                        })}
+              <div>
+                <Label className="text-slate-300">Priority</Label>
+                <Select value={requestPriority} onValueChange={(v) => setRequestPriority(v as typeof requestPriority)}>
+                  <SelectTrigger className="bg-slate-800 border-slate-600" data-testid="select-request-priority">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-slate-800 border-slate-600">
+                    <SelectItem value="Normal">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                        Normal
                       </div>
-                    </ScrollArea>
-                  )}
-                </div>
-
-                <div>
-                  <Label>Notes (optional)</Label>
-                  <Textarea
-                    placeholder="Any special instructions..."
-                    value={requestNotes}
-                    onChange={(e) => setRequestNotes(e.target.value)}
-                    rows={2}
-                    data-testid="input-request-notes"
-                  />
-                </div>
+                    </SelectItem>
+                    <SelectItem value="Rush">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+                        Rush
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Emergency">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                        Emergency
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              <DialogFooter className="gap-2 mt-4">
-                <Button variant="outline" onClick={() => setShowWarehouseRequest(false)}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={() => createRequestMutation.mutate()}
-                  disabled={createRequestMutation.isPending || getTotalItemsInRequest() === 0}
-                  className={requestPriority === 'Emergency' ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'}
-                  data-testid="button-submit-warehouse-request"
-                >
-                  {createRequestMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  ) : (
-                    <Truck className="h-4 w-4 mr-2" />
-                  )}
-                  Submit Request
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
-          {showMap && (
-            <div className="fixed inset-0 z-50 bg-background">
-              <InteractiveMap 
-                onClose={() => setShowMap(false)} 
-                showNavigation={true}
-              />
-            </div>
-          )}
-
-          {showSupervisorPack && (
-            <div className="fixed inset-0 z-50 bg-background">
-              <SupervisorPack 
-                onClose={() => setShowSupervisorPack(false)}
-                supervisorName={currentUser?.name}
-                standName={myStands[0]?.name || 'My Stand'}
-              />
-            </div>
-          )}
-
-          {showQuickScan && (
-            <QuickScanModal
-              onClose={() => setShowQuickScan(false)}
-              standName="Spot Check"
-              onScanComplete={(items) => {
-                console.log('Supervisor scanned items:', items);
-              }}
-            />
-          )}
-
-          <Button 
-            className="w-full h-14 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg mb-4"
-            onClick={() => setShowQuickScan(true)}
-            data-testid="quick-scan-btn"
-          >
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <ScanLine className="h-5 w-5" />
-              </div>
-              <div className="text-left">
-                <div className="font-bold flex items-center gap-1">
-                  <Sparkles className="h-4 w-4" />
-                  Quick AI Scan
-                </div>
-                <div className="text-xs text-white/80">Spot check any cooler</div>
-              </div>
-            </div>
-          </Button>
-
-          <div className="space-y-4">
-            <div className="text-sm text-muted-foreground mb-2 uppercase font-bold tracking-wider">Select a Stand</div>
-            {myStands.map(stand => (
-              <Card 
-                key={stand.id} 
-                className={`border-l-4 shadow-sm active:scale-98 transition-transform cursor-pointer ${stand.status === 'Open' ? 'border-l-green-500' : 'border-l-red-500'}`}
-                onClick={() => setActiveStandId(stand.id)}
-              >
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div>
-                    <div className="font-bold text-lg">{stand.name}</div>
-                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                      {stand.status === 'Open' ? <CheckCircle2 className="w-3 h-3 text-green-600"/> : <AlertCircle className="w-3 h-3 text-red-600"/>}
-                      {stand.status}
-                    </div>
+              <div className="flex-1 overflow-hidden">
+                <Label className="text-slate-300 mb-2 block">Items ({getTotalItemsInRequest()} selected)</Label>
+                {warehouseProducts.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No products available</p>
                   </div>
-                  <ChevronRight className="text-slate-300" />
-                </CardContent>
-              </Card>
-            ))}
-            {myStands.length === 0 && (
-              <div className="text-center py-10 text-muted-foreground">No stands assigned.</div>
-            )}
+                ) : (
+                  <ScrollArea className="h-[200px] border border-slate-700 rounded-md p-2 bg-slate-800/50">
+                    <div className="space-y-2">
+                      {warehouseCategories.map(category => {
+                        const categoryProducts = warehouseProducts.filter(p => p.categoryId === category.id);
+                        if (categoryProducts.length === 0) return null;
+                        return (
+                          <div key={category.id}>
+                            <div className="text-xs font-semibold text-slate-400 uppercase mb-1 sticky top-0 bg-slate-800 py-1">
+                              {category.name}
+                            </div>
+                            {categoryProducts.map(product => (
+                              <div 
+                                key={product.id} 
+                                className="flex items-center justify-between p-2 rounded hover:bg-slate-700/50"
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <span className="text-sm text-slate-200 truncate block">{product.name}</span>
+                                  <span className="text-xs text-slate-500">{product.unit}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-7 w-7 border-slate-600"
+                                    onClick={() => setRequestItems(prev => ({
+                                      ...prev,
+                                      [product.id]: Math.max(0, (prev[product.id] || 0) - 1)
+                                    }))}
+                                    disabled={(requestItems[product.id] || 0) === 0}
+                                  >
+                                    <Minus className="h-3 w-3" />
+                                  </Button>
+                                  <span className="w-8 text-center font-mono text-sm text-slate-200">
+                                    {requestItems[product.id] || 0}
+                                  </span>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-7 w-7 border-slate-600"
+                                    onClick={() => setRequestItems(prev => ({
+                                      ...prev,
+                                      [product.id]: (prev[product.id] || 0) + 1
+                                    }))}
+                                  >
+                                    <Plus className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
+                )}
+              </div>
+
+              <div>
+                <Label className="text-slate-300">Notes</Label>
+                <Textarea
+                  placeholder="Special instructions..."
+                  value={requestNotes}
+                  onChange={(e) => setRequestNotes(e.target.value)}
+                  rows={2}
+                  className="bg-slate-800 border-slate-600 text-slate-200"
+                  data-testid="input-request-notes"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowWarehouseRequest(false)} className="border-slate-600">
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => createRequestMutation.mutate()}
+                disabled={createRequestMutation.isPending || getTotalItemsInRequest() === 0}
+                className={requestPriority === 'Emergency' ? 'bg-red-600 hover:bg-red-700' : 'bg-amber-600 hover:bg-amber-700'}
+                data-testid="button-submit-warehouse-request"
+              >
+                {createRequestMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Truck className="h-4 w-4 mr-2" />
+                )}
+                Submit
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {showMap && (
+          <div className="fixed inset-0 z-50 bg-slate-950">
+            <InteractiveMap 
+              onClose={() => setShowMap(false)} 
+              showNavigation={true}
+            />
           </div>
-        </main>
+        )}
+
+        {showSupervisorPack && (
+          <div className="fixed inset-0 z-50 bg-slate-950">
+            <SupervisorPack 
+              onClose={() => setShowSupervisorPack(false)}
+              supervisorName={currentUser?.name}
+              standName={stands[0]?.name || 'All Stands'}
+            />
+          </div>
+        )}
+
+        {showQuickScan && (
+          <QuickScanModal
+            onClose={() => setShowQuickScan(false)}
+            standName="Spot Check"
+            onScanComplete={(items) => {
+              console.log('Supervisor scanned items:', items);
+            }}
+          />
+        )}
+
+        <TutorialHelpButton page="supervisor" />
       </div>
     );
   }
@@ -590,15 +623,26 @@ export default function SupervisorDashboard() {
   const activeStand = stands.find(s => s.id === activeStandId);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
-      <header className="sticky top-0 z-20 bg-white dark:bg-slate-900 border-b px-4 h-14 flex items-center gap-3 shadow-sm">
-        <Button variant="ghost" size="icon" onClick={() => setActiveStandId(null)} className="-ml-2">
-          <ChevronLeft className="h-6 w-6" />
-        </Button>
-        <div className="font-bold text-lg truncate flex-1">{activeStand?.name}</div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-24">
+      <header className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => setActiveStandId(null)} className="text-slate-400 hover:text-white -ml-2">
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-bold text-lg text-slate-200 truncate">{activeStand?.name}</h1>
+            <p className="text-xs text-slate-500">
+              {activeStand?.status === 'Open' ? (
+                <span className="text-green-400">● Open</span>
+              ) : (
+                <span className="text-red-400">● Closed</span>
+              )}
+            </p>
+          </div>
+        </div>
       </header>
 
-      <main className="p-4">
+      <main className="p-4 max-w-lg mx-auto">
         {showScanner && (
            <div className="fixed inset-0 z-50 bg-black flex flex-col">
              <div className="relative flex-1 bg-black">
@@ -614,26 +658,25 @@ export default function SupervisorDashboard() {
              </div>
              <div className="p-6 bg-black flex justify-between items-center">
                <Button variant="secondary" onClick={() => setShowScanner(false)}>Cancel</Button>
-               <Button onClick={() => setShowScanner(false)} className="bg-primary text-primary-foreground">Capture</Button>
+               <Button onClick={() => setShowScanner(false)} className="bg-cyan-600 text-white">Capture</Button>
              </div>
            </div>
         )}
 
         <Tabs defaultValue="inventory" className="w-full" onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="inventory">Inventory</TabsTrigger>
-            <TabsTrigger value="compliance">Docs</TabsTrigger>
-            <TabsTrigger value="closeout" data-testid="tab-closeout">
+          <TabsList className="grid w-full grid-cols-3 mb-4 bg-slate-800/50">
+            <TabsTrigger value="inventory" className="data-[state=active]:bg-slate-700">Inventory</TabsTrigger>
+            <TabsTrigger value="compliance" className="data-[state=active]:bg-slate-700">Docs</TabsTrigger>
+            <TabsTrigger value="closeout" className="data-[state=active]:bg-slate-700" data-testid="tab-closeout">
               <ClipboardCheck className="h-3 w-3 mr-1" />
-              Closeout
+              Close
             </TabsTrigger>
           </TabsList>
           
           <TabsContent value="inventory" className="space-y-4">
-            
             <div className="flex gap-2 mb-4">
-              <Button className="flex-1" variant="outline" onClick={() => setShowScanner(true)}>
-                <QrCode className="mr-2 h-4 w-4" /> Scan Item
+              <Button className="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700" variant="outline" onClick={() => setShowScanner(true)}>
+                <QrCode className="mr-2 h-4 w-4 text-cyan-400" /> Scan Item
               </Button>
             </div>
 
@@ -643,52 +686,52 @@ export default function SupervisorDashboard() {
                  const count = standCounts[item.id] || { startCount: 0, adds: 0, endCount: 0, spoilage: 0, sold: 0 };
                  
                  return (
-                  <AccordionItem key={item.id} value={item.id} className="bg-white dark:bg-slate-900 border rounded-lg px-4 shadow-sm">
+                  <AccordionItem key={item.id} value={item.id} className="bg-slate-900/80 border border-slate-700 rounded-lg px-4">
                     <AccordionTrigger className="hover:no-underline py-3">
                       <div className="flex items-center gap-3 w-full text-left">
-                        <div className={`p-2 rounded-full ${item.category === 'Beverage' ? 'bg-blue-100 text-blue-600' : 'bg-orange-100 text-orange-600'}`}>
+                        <div className={`p-2 rounded-full ${item.category === 'Beverage' ? 'bg-blue-500/20 text-blue-400' : 'bg-orange-500/20 text-orange-400'}`}>
                           {item.category === 'Beverage' ? <Beer className="h-4 w-4" /> : <UtensilsCrossed className="h-4 w-4" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-bold text-sm truncate">{item.name}</div>
-                          <div className="text-xs text-muted-foreground">Sold: <span className="font-mono font-bold text-foreground">{count.sold}</span></div>
+                          <div className="font-bold text-sm text-slate-200 truncate">{item.name}</div>
+                          <div className="text-xs text-slate-500">Sold: <span className="font-mono font-bold text-cyan-400">{count.sold}</span></div>
                         </div>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="pb-4">
                       <div className="grid grid-cols-2 gap-4 pt-2">
                         <div className="space-y-1">
-                          <label className="text-xs font-medium text-muted-foreground uppercase">Start</label>
+                          <label className="text-xs font-medium text-slate-400 uppercase">Start</label>
                           <Input 
                             type="number" 
-                            className="text-center font-mono text-lg" 
+                            className="text-center font-mono text-lg bg-slate-800 border-slate-600 text-slate-200" 
                             value={count.startCount}
                             onChange={(e) => updateCount(activeStandId!, item.id, 'startCount', parseInt(e.target.value) || 0)}
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-xs font-medium text-muted-foreground uppercase">Adds</label>
+                          <label className="text-xs font-medium text-slate-400 uppercase">Adds</label>
                           <Input 
                             type="number" 
-                            className="text-center font-mono text-lg text-green-600" 
+                            className="text-center font-mono text-lg bg-slate-800 border-slate-600 text-green-400" 
                             value={count.adds}
                             onChange={(e) => updateCount(activeStandId!, item.id, 'adds', parseInt(e.target.value) || 0)}
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-xs font-medium text-muted-foreground uppercase">End</label>
+                          <label className="text-xs font-medium text-slate-400 uppercase">End</label>
                           <Input 
                             type="number" 
-                            className="text-center font-mono text-lg text-blue-600" 
+                            className="text-center font-mono text-lg bg-slate-800 border-slate-600 text-blue-400" 
                             value={count.endCount}
                             onChange={(e) => updateCount(activeStandId!, item.id, 'endCount', parseInt(e.target.value) || 0)}
                           />
                         </div>
                          <div className="space-y-1">
-                          <label className="text-xs font-medium text-muted-foreground uppercase">Spoilage</label>
+                          <label className="text-xs font-medium text-slate-400 uppercase">Spoilage</label>
                           <Input 
                             type="number" 
-                            className="text-center font-mono text-lg text-red-600" 
+                            className="text-center font-mono text-lg bg-slate-800 border-slate-600 text-red-400" 
                             value={count.spoilage}
                             onChange={(e) => updateCount(activeStandId!, item.id, 'spoilage', parseInt(e.target.value) || 0)}
                           />
@@ -702,90 +745,82 @@ export default function SupervisorDashboard() {
           </TabsContent>
           
           <TabsContent value="compliance">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Stand Documentation</CardTitle>
-                <CardDescription>Required sheets for {activeStand?.name}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                
-                <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800 mb-4">
-                  <AlertCircle className="h-4 w-4 inline mr-2" />
-                  Ensure all staff have signed the TABC compliance sheet.
-                </div>
+            <div className="space-y-4">
+              <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg text-sm text-amber-300">
+                <AlertCircle className="h-4 w-4 inline mr-2" />
+                Ensure all staff have signed the TABC compliance sheet.
+              </div>
 
-                <div className="grid gap-4">
-                   {supervisorDocs.map(doc => (
-                     <div key={doc.id} className="border rounded-lg p-4 bg-white dark:bg-slate-900 flex items-center justify-between shadow-sm">
-                       <div className="flex items-center gap-3">
-                         {doc.category === 'Compliance' ? <AlertCircle className="text-amber-500" /> : 
-                          doc.category === 'Checklist' ? <CheckSquare className="text-green-500" /> :
-                          <FileText className="text-blue-500" />}
-                         <div>
-                           <div className="font-bold text-sm">{doc.title}</div>
-                           <div className="text-xs text-muted-foreground">{doc.category}</div>
-                         </div>
+              <div className="space-y-2">
+                 {supervisorDocs.map(doc => (
+                   <div key={doc.id} className="border border-slate-700 rounded-lg p-4 bg-slate-900/80 flex items-center justify-between">
+                     <div className="flex items-center gap-3">
+                       {doc.category === 'Compliance' ? <AlertCircle className="text-amber-400" /> : 
+                        doc.category === 'Checklist' ? <CheckSquare className="text-green-400" /> :
+                        <FileText className="text-blue-400" />}
+                       <div>
+                         <div className="font-bold text-sm text-slate-200">{doc.title}</div>
+                         <div className="text-xs text-slate-500">{doc.category}</div>
                        </div>
-                       {doc.requiresSignature ? (
-                         <Button size="sm" variant="outline" className="gap-2">
-                           <PenTool className="w-4 h-4" /> Sign
-                         </Button>
-                       ) : (
-                         <Button size="sm" variant="ghost">View</Button>
-                       )}
                      </div>
-                   ))}
-                </div>
+                     {doc.requiresSignature ? (
+                       <Button size="sm" variant="outline" className="gap-2 border-slate-600">
+                         <PenTool className="w-4 h-4" /> Sign
+                       </Button>
+                     ) : (
+                       <Button size="sm" variant="ghost" className="text-slate-400">View</Button>
+                     )}
+                   </div>
+                 ))}
+              </div>
 
-                {complianceError && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600 flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4" />
-                    {complianceError}
-                  </div>
-                )}
-
-                {/* Signature Pad */}
-                <div className="space-y-2 pt-4 border-t mt-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium">Supervisor Signature</label>
-                      <Button variant="ghost" size="sm" onClick={clearSignature} disabled={complianceSubmitted}>
-                        Clear
-                      </Button>
-                    </div>
-                    <div className="border-2 border-slate-300 rounded-lg bg-white overflow-hidden">
-                      <SignatureCanvas
-                        ref={signatureRef}
-                        canvasProps={{
-                          className: 'w-full h-32',
-                          style: { width: '100%', height: '128px' }
-                        }}
-                        backgroundColor="white"
-                      />
-                    </div>
+              {complianceError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-md text-sm text-red-400 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  {complianceError}
                 </div>
-                
-                {!complianceSubmitted ? (
-                  <Button 
-                    className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
-                    onClick={submitComplianceSheet}
-                    disabled={complianceSubmitting}
-                    data-testid="submit-compliance"
-                  >
-                    {complianceSubmitting ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <Send className="h-4 w-4 mr-2" />
-                    )}
-                    Submit to Operations Manager
-                  </Button>
-                ) : (
-                  <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg mt-4">
-                    <CheckCircle2 className="h-5 w-5" />
-                    <span className="font-medium">Submitted to Operations Manager</span>
+              )}
+
+              <div className="space-y-2 pt-4 border-t border-slate-700 mt-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-slate-300">Supervisor Signature</label>
+                    <Button variant="ghost" size="sm" onClick={clearSignature} disabled={complianceSubmitted} className="text-slate-400">
+                      Clear
+                    </Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
+                  <div className="border-2 border-slate-600 rounded-lg bg-white overflow-hidden">
+                    <SignatureCanvas
+                      ref={signatureRef}
+                      canvasProps={{
+                        className: 'w-full h-32',
+                        style: { width: '100%', height: '128px' }
+                      }}
+                      backgroundColor="white"
+                    />
+                  </div>
+              </div>
+              
+              {!complianceSubmitted ? (
+                <Button 
+                  className="w-full mt-4 bg-cyan-600 hover:bg-cyan-700"
+                  onClick={submitComplianceSheet}
+                  disabled={complianceSubmitting}
+                  data-testid="submit-compliance"
+                >
+                  {complianceSubmitting ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : (
+                    <Send className="h-4 w-4 mr-2" />
+                  )}
+                  Submit to Operations Manager
+                </Button>
+              ) : (
+                <div className="flex items-center justify-center gap-2 text-green-400 bg-green-500/10 p-3 rounded-lg mt-4 border border-green-500/30">
+                  <CheckCircle2 className="h-5 w-5" />
+                  <span className="font-medium">Submitted to Operations Manager</span>
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="closeout">
