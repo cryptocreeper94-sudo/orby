@@ -472,6 +472,134 @@ export async function registerRoutes(
     }
   });
 
+  app.delete("/api/items/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deleteItem(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete item" });
+    }
+  });
+
+  // ============ STAND ITEMS (Inventory Templates) ============
+  app.get("/api/stand-items/:standId", async (req: Request, res: Response) => {
+    try {
+      const standItems = await storage.getStandItems(req.params.standId);
+      res.json(standItems);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stand items" });
+    }
+  });
+
+  app.get("/api/stand-items", async (_req: Request, res: Response) => {
+    try {
+      const standIds = await storage.getStandsWithItems();
+      res.json(standIds);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stands with items" });
+    }
+  });
+
+  app.post("/api/stand-items/:standId", async (req: Request, res: Response) => {
+    try {
+      const { itemId, sortOrder, isChargeable } = req.body;
+      const standItem = await storage.addStandItem({
+        standId: req.params.standId,
+        itemId,
+        sortOrder: sortOrder || 0,
+        isChargeable: isChargeable !== false
+      });
+      res.status(201).json(standItem);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to add stand item" });
+    }
+  });
+
+  app.post("/api/stand-items/:standId/bulk", async (req: Request, res: Response) => {
+    try {
+      const { itemIds, clearExisting } = req.body;
+      
+      if (clearExisting) {
+        await storage.clearStandItems(req.params.standId);
+      }
+      
+      if (itemIds && itemIds.length > 0) {
+        await storage.bulkAddStandItems(req.params.standId, itemIds);
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to bulk add stand items" });
+    }
+  });
+
+  app.delete("/api/stand-items/:standId/:itemId", async (req: Request, res: Response) => {
+    try {
+      await storage.removeStandItem(req.params.standId, req.params.itemId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to remove stand item" });
+    }
+  });
+
+  app.delete("/api/stand-items/:standId", async (req: Request, res: Response) => {
+    try {
+      await storage.clearStandItems(req.params.standId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to clear stand items" });
+    }
+  });
+
+  // ============ MANAGER DOCUMENTS HUB ============
+  app.get("/api/manager-documents", async (req: Request, res: Response) => {
+    try {
+      const { category, standId, eventDate } = req.query;
+      const filters: { category?: string; standId?: string; eventDate?: string } = {};
+      
+      if (category && typeof category === 'string') filters.category = category;
+      if (standId && typeof standId === 'string') filters.standId = standId;
+      if (eventDate && typeof eventDate === 'string') filters.eventDate = eventDate;
+      
+      const docs = await storage.getManagerDocuments(
+        Object.keys(filters).length > 0 ? filters : undefined
+      );
+      res.json(docs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch manager documents" });
+    }
+  });
+
+  app.get("/api/manager-documents/:id", async (req: Request, res: Response) => {
+    try {
+      const doc = await storage.getManagerDocument(req.params.id);
+      if (!doc) {
+        return res.status(404).json({ error: "Document not found" });
+      }
+      res.json(doc);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch document" });
+    }
+  });
+
+  app.post("/api/manager-documents", async (req: Request, res: Response) => {
+    try {
+      const doc = await storage.createManagerDocument(req.body);
+      res.status(201).json(doc);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create document" });
+    }
+  });
+
+  app.delete("/api/manager-documents/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deleteManagerDocument(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete document" });
+    }
+  });
+
   // ============ INVENTORY COUNTS ============
   app.get("/api/inventory/:standId/:eventDate", async (req: Request, res: Response) => {
     try {
