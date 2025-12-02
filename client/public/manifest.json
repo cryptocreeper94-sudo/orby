@@ -35,14 +35,14 @@
       "description": "Operations Manager dashboard"
     },
     {
-      "name": "Deliveries",
-      "url": "/deliveries",
-      "description": "Track deliveries"
+      "name": "Warehouse",
+      "url": "/warehouse",
+      "description": "Warehouse and deliveries"
     },
     {
-      "name": "Inventory Counts",
-      "url": "/manager-dashboard",
-      "description": "Three-phase inventory counting"
+      "name": "Manager Dashboard",
+      "url": "/manager",
+      "description": "Manager operations view"
     },
     {
       "name": "Document Hub",
@@ -61,7 +61,7 @@
     },
     {
       "name": "Check-in Assistant",
-      "url": "/checkin-assistant",
+      "url": "/check-in-assistant",
       "description": "Guest services and incidents"
     },
     {
@@ -71,7 +71,7 @@
     },
     {
       "name": "Team Management",
-      "url": "/team-leads",
+      "url": "/team-management",
       "description": "Manage team leads"
     },
     {
@@ -80,9 +80,9 @@
       "description": "Team communications"
     },
     {
-      "name": "Stadium Map",
-      "url": "/stadium-map",
-      "description": "Interactive map with directions"
+      "name": "Reports",
+      "url": "/reports",
+      "description": "Ultimate Reporting Dashboard"
     }
   ]
 }
