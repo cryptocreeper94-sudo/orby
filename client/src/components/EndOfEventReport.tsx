@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,9 +9,10 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { 
-  FileText, Download, Printer, ClipboardList, AlertTriangle, 
+  FileText, ClipboardList, AlertTriangle, 
   CheckCircle2, User, Package, Clock, Calendar, MapPin, XCircle
 } from 'lucide-react';
+import { PDFActionButtons } from './PDFActionButtons';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -111,8 +112,6 @@ export function EndOfEventReport({
   signatures,
   onClose
 }: EndOfEventReportProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
-
   const sortedSessions = [...countSessions].sort(
     (a, b) => STAGE_ORDER[a.stage] - STAGE_ORDER[b.stage]
   );
@@ -151,10 +150,7 @@ export function EndOfEventReport({
     }
   };
 
-  const generatePDF = () => {
-    setIsGenerating(true);
-    
-    try {
+  const generatePDF = useCallback(() => {
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
       
@@ -311,13 +307,8 @@ export function EndOfEventReport({
         );
       }
 
-      doc.save(`${standId}_${eventDate}_report.pdf`);
-    } catch (error) {
-      console.error('PDF generation error:', error);
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+      return doc;
+  }, [sortedSessions, inventoryCounts, issues, signatures, eventDate, standId, standName, section, supervisorName, formatDate, formatTime]);
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">

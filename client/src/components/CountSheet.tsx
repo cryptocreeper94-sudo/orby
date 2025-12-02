@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ClipboardList, User, Phone, Clock, Check, Save, 
-  Package, Plus, Minus, AlertCircle, X, ChevronDown, ChevronUp, ScanLine, FileText, Download, Printer
+  Package, Plus, Minus, AlertCircle, X, ChevronDown, ChevronUp, ScanLine, FileText
 } from 'lucide-react';
 import {
   Accordion,
@@ -16,7 +16,8 @@ import {
 } from "@/components/ui/accordion";
 import { AIScanner } from './AIScanner';
 import { PaperCountSheetScanner } from './PaperCountSheetScanner';
-import { generateCountSessionPDF, downloadPDF, printPDF } from '@/lib/pdfUtils';
+import { PDFActionButtons } from './PDFActionButtons';
+import { generateCountSessionPDF } from '@/lib/pdfUtils';
 
 type CountStage = 'PreEvent' | 'PostEvent' | 'DayAfter';
 type CounterRole = 'NPOLead' | 'StandLead' | 'Supervisor' | 'Manager' | 'ManagerAssistant';
@@ -200,14 +201,14 @@ export function CountSheet({
     });
   };
 
-  const handleDownloadPDF = () => {
+  const generatePDF = useCallback(() => {
     const countItems = items.map(item => ({
       itemName: item.name,
       category: item.category,
       count: counts[item.id] || 0
     }));
     
-    const pdf = generateCountSessionPDF({
+    return generateCountSessionPDF({
       standName,
       eventDate: session.eventDate,
       stage: STAGE_LABELS[session.stage],
@@ -218,31 +219,7 @@ export function CountSheet({
       completedAt: session.completedAt,
       items: countItems
     });
-    
-    downloadPDF(pdf, `count-sheet-${session.stage.toLowerCase()}-${session.standId}-${session.eventDate.replace(/\//g, '-')}.pdf`);
-  };
-
-  const handlePrintPDF = () => {
-    const countItems = items.map(item => ({
-      itemName: item.name,
-      category: item.category,
-      count: counts[item.id] || 0
-    }));
-    
-    const pdf = generateCountSessionPDF({
-      standName,
-      eventDate: session.eventDate,
-      stage: STAGE_LABELS[session.stage],
-      counterName: session.counterName,
-      counterRole: ROLE_LABELS[session.counterRole],
-      counterAffiliation: 'Legends',
-      startedAt: session.startedAt,
-      completedAt: session.completedAt,
-      items: countItems
-    });
-    
-    printPDF(pdf);
-  };
+  }, [items, counts, standName, session]);
 
   return (
     <Card className="h-full flex flex-col" data-testid="count-sheet">
@@ -335,27 +312,13 @@ export function CountSheet({
           </div>
         )}
 
-        <div className="mt-3 flex gap-2">
-          <Button
-            onClick={handleDownloadPDF}
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            data-testid="button-download-pdf"
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download PDF
-          </Button>
-          <Button
-            onClick={handlePrintPDF}
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            data-testid="button-print-pdf"
-          >
-            <Printer className="w-4 h-4 mr-2" />
-            Print
-          </Button>
+        <div className="mt-3">
+          <PDFActionButtons
+            generatePDF={generatePDF}
+            filename={`count-sheet-${session.stage.toLowerCase()}-${session.standId}-${session.eventDate.replace(/\//g, '-')}.pdf`}
+            title={`Count Sheet - ${standName}`}
+            variant="compact"
+          />
         </div>
       </CardHeader>
 
