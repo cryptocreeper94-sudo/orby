@@ -7,7 +7,7 @@ import {
   warehouseCategories, warehouseProducts, warehouseStock, warehouseParLevels, warehouseRequests, warehouseRequestItems,
   auditLogs, emergencyAlerts, emergencyResponders, emergencyEscalationHistory, emergencyAlertNotifications,
   orbitRosters, orbitShifts, deliveryRequests, departmentContacts, alcoholViolations,
-  standItems, managerDocuments,
+  standItems, managerDocuments, releases,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,

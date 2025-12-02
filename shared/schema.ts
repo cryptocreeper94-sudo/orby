@@ -1184,6 +1184,25 @@ export const EXAMPLE_WAREHOUSE_CATEGORIES = [
   { name: 'Supplies', color: '#64748B', icon: 'Wrench' },
 ];
 
+// ============ RELEASE VERSION TRACKING ============
+export const releases = pgTable("releases", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  version: varchar("version", { length: 20 }).notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  description: text("description"),
+  changes: jsonb("changes").$type<string[]>().default([]),
+  releasedById: varchar("released_by_id").references(() => users.id),
+  releasedAt: timestamp("released_at").defaultNow(),
+  solanaTransactionHash: varchar("solana_transaction_hash", { length: 100 }),
+  solanaNetwork: varchar("solana_network", { length: 20 }).default('devnet'),
+  isPublished: boolean("is_published").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertReleaseSchema = createInsertSchema(releases).omit({ id: true, createdAt: true, releasedAt: true });
+export type Release = typeof releases.$inferSelect;
+export type InsertRelease = z.infer<typeof insertReleaseSchema>;
+
 // ============ AUDIT LOG, ORBIT INTEGRATION & EMERGENCY ALERTS ============
 // Insert schemas
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({ id: true, createdAt: true });
