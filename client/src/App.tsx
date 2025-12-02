@@ -14,6 +14,7 @@ import FloatingWeatherButton from "@/components/FloatingWeatherButton";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/Login";
 import SetPinPage from "@/pages/SetPin";
+import FirstTimeRegistration from "@/pages/FirstTimeRegistration";
 import AdminDashboard from "@/pages/AdminDashboard";
 import SupervisorDashboard from "@/pages/SupervisorDashboard";
 import ITDashboard from "@/pages/ITDashboard";
@@ -48,6 +49,7 @@ function Router() {
     <Switch>
       <Route path="/" component={LoginPage} />
       <Route path="/set-pin" component={SetPinPage} />
+      <Route path="/register" component={FirstTimeRegistration} />
       <Route path="/admin" component={AdminDashboard} />
       <Route path="/supervisor" component={SupervisorDashboard} />
       <Route path="/it" component={ITDashboard} />

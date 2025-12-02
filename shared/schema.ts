@@ -663,6 +663,8 @@ export const INITIAL_PINS: Record<string, string> = {
   ManagementCore: '4444',
   ManagementAssistant: '4444',
   AlcoholCompliance: '5555',
+  CheckInAssistant: '6666',
+  FirstTimeRegistration: '9999', // Universal PIN for new Legends staff to self-register (geofenced)
 };
 
 // Relations

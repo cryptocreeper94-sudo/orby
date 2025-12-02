@@ -115,6 +115,12 @@ export async function registerRoutes(
       if (!pin || typeof pin !== 'string') {
         return res.status(400).json({ error: "PIN required" });
       }
+      
+      // Block 9999 - it's the registration PIN, not a login PIN
+      if (pin === '9999') {
+        return res.status(400).json({ error: "Use the registration flow for first-time login" });
+      }
+      
       const user = await storage.getUserByPin(pin);
       if (!user) {
         return res.status(401).json({ error: "Invalid PIN" });
@@ -136,6 +142,104 @@ export async function registerRoutes(
       res.json({ success: true });
     } catch (error) {
       res.status(500).json({ error: "Logout failed" });
+    }
+  });
+
+  // First-time staff registration (9999 flow) with server-side geofence enforcement
+  app.post("/api/auth/register-staff", async (req: Request, res: Response) => {
+    try {
+      const { name, department, pin, gpsCoords } = req.body;
+      
+      // Nissan Stadium geofence constants
+      const STADIUM_LAT = 36.1665;
+      const STADIUM_LNG = -86.7713;
+      const GEOFENCE_RADIUS_FEET = 2000;
+      
+      // Validate required fields
+      if (!name || !department || !pin) {
+        return res.status(400).json({ error: "Name, department, and PIN are required" });
+      }
+      
+      // Server-side geofence enforcement
+      if (!gpsCoords || !gpsCoords.lat || !gpsCoords.lng) {
+        return res.status(400).json({ error: "Location verification required. Please enable GPS." });
+      }
+      
+      // Calculate distance from stadium (Haversine formula simplified for short distances)
+      const toRad = (deg: number) => deg * (Math.PI / 180);
+      const R = 20902231; // Earth's radius in feet
+      const dLat = toRad(gpsCoords.lat - STADIUM_LAT);
+      const dLng = toRad(gpsCoords.lng - STADIUM_LNG);
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(toRad(STADIUM_LAT)) * Math.cos(toRad(gpsCoords.lat)) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      const distanceFeet = R * c;
+      
+      if (distanceFeet > GEOFENCE_RADIUS_FEET) {
+        return res.status(403).json({ error: "Registration is only available at Nissan Stadium" });
+      }
+      
+      // Validate name
+      if (typeof name !== 'string' || name.trim().length < 2) {
+        return res.status(400).json({ error: "Name must be at least 2 characters" });
+      }
+      
+      // Validate department against the enum values
+      const validDepartments = ['Warehouse', 'Kitchen', 'Bar', 'Operations', 'IT', 'HR'];
+      if (!validDepartments.includes(department)) {
+        return res.status(400).json({ error: "Invalid department" });
+      }
+      
+      // Validate PIN format
+      if (!/^\d{4}$/.test(pin)) {
+        return res.status(400).json({ error: "PIN must be 4 digits" });
+      }
+      
+      // Prevent using registration PIN as personal PIN
+      if (pin === '9999') {
+        return res.status(400).json({ error: "Cannot use the registration PIN as your personal PIN" });
+      }
+      
+      // Check if PIN is already in use
+      const existingUser = await storage.getUserByPin(pin);
+      if (existingUser) {
+        return res.status(400).json({ error: "This PIN is already in use. Please choose a different PIN." });
+      }
+      
+      // Create user with default worker role and department
+      // All self-registered staff start as NPOWorker with their department set
+      // Admins can elevate roles later if needed
+      const user = await storage.createUser({
+        name: name.trim(),
+        pin,
+        role: 'NPOWorker', // Default low-privilege role for self-registration
+        department: department as any, // Set department for routing
+        requiresPinReset: false, // They just set their PIN
+        pinSetAt: new Date(),
+        isOnline: false,
+      });
+      
+      // Create audit log for registration with GPS coords for traceability
+      await createAuditLog(
+        user.id,
+        'StaffRegistered',
+        'User',
+        user.id,
+        { 
+          department, 
+          registeredVia: 'first-time-registration',
+          gpsCoords: gpsCoords || null, // Log GPS for audit trail
+          clientGeofenceVerified: true 
+        },
+        undefined,
+        req
+      );
+      
+      res.status(201).json({ success: true, message: "Registration successful" });
+    } catch (error) {
+      console.error("Staff registration error:", error);
+      res.status(500).json({ error: "Registration failed. Please try again." });
     }
   });
 
@@ -1535,7 +1639,7 @@ Return your response as a JSON object with this exact structure:
         { name: 'Admin User', pin: '1234', role: 'Admin' as const, isOnline: false, requiresPinReset: false },
         { name: 'Sup. Sarah', pin: '3333', role: 'StandSupervisor' as const, isOnline: false, requiresPinReset: true },
         { name: 'Sup. Mike', pin: '3334', role: 'StandSupervisor' as const, isOnline: false, requiresPinReset: true },
-        { name: 'IT Support', pin: '9999', role: 'IT' as const, isOnline: false, requiresPinReset: false },
+        { name: 'IT Support', pin: '7777', role: 'IT' as const, isOnline: false, requiresPinReset: false },
         { name: 'Developer', pin: '0424', role: 'Developer' as const, isOnline: false, requiresPinReset: false },
         { name: 'NPO Worker 1', pin: '1111', role: 'NPOWorker' as const, isOnline: false, requiresPinReset: true },
         { name: 'Stand Lead 1', pin: '2222', role: 'StandLead' as const, isOnline: false, requiresPinReset: true },

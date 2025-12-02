@@ -42,23 +42,40 @@ export default function LoginPage() {
       }
 
       const role = currentUser.role as string;
+      const department = currentUser.department as string | undefined;
+      
       if (currentUser.name === 'Developer' || currentUser.pin === '0424') setLocation("/dev");
       else if (role === 'OperationsManager' || role === 'GeneralManager' || role === 'RegionalVP') setLocation("/command-center");
       else if (role === 'Admin') setLocation("/admin");
       else if (role === 'IT') setLocation("/it");
-      else if (role === 'NPOWorker' || role === 'NPO') setLocation("/npo");
       else if (role === 'StandLead') setLocation("/standlead");
       else if (role === 'StandSupervisor' || role === 'Supervisor') setLocation("/supervisor");
       else if (role === 'AlcoholCompliance') setLocation("/alcohol-compliance");
       else if (role === 'CheckInAssistant') setLocation("/check-in-assistant");
+      else if (role === 'ManagementCore' || role === 'ManagementAssistant' || role === 'OperationsAssistant') setLocation("/manager");
+      // For workers (NPOWorker), route by department if set
+      else if (role === 'NPOWorker' || role === 'NPO') {
+        if (department === 'Warehouse') setLocation("/warehouse");
+        else if (department === 'Kitchen') setLocation("/kitchen");
+        else if (department === 'Bar') setLocation("/npo"); // Bar workers use NPO dashboard until bar-specific is built
+        else if (department === 'Operations') setLocation("/operations"); // Operations workers
+        else if (department === 'IT') setLocation("/it");
+        else if (department === 'HR') setLocation("/manager"); // HR assistants go to manager view
+        else setLocation("/npo"); // Default NPO dashboard for unassigned
+      }
       else if (role === 'Warehouse' || role === 'WarehouseManager' || role === 'WarehouseWorker') setLocation("/warehouse");
       else if (role === 'Kitchen' || role === 'KitchenManager' || role === 'KitchenWorker') setLocation("/kitchen");
-      else if (role === 'ManagementCore' || role === 'ManagementAssistant' || role === 'OperationsAssistant') setLocation("/manager");
       else setLocation("/supervisor");
     }
   }, [currentUser, setLocation, login]);
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
+    // Handle 9999 as first-time registration PIN
+    if (values.pin === '9999') {
+      setLocation('/register');
+      return;
+    }
+    
     const success = await login(values.pin);
     if (!success) {
       form.setError("pin", { message: "Invalid PIN" });
