@@ -117,7 +117,6 @@ function App() {
             <FeatureSlideshow />
             <OnboardingHelpButton />
             <FloatingHelpButton />
-            <FloatingWeatherButton />
             <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
               <TwinklingStars />
               <div className="absolute inset-0 flex items-center justify-center">
@@ -132,6 +131,7 @@ function App() {
             <SandboxContentWrapper>
               <Toaster />
               <Router />
+              <FloatingWeatherButton />
             </SandboxContentWrapper>
           </TooltipProvider>
         </OnboardingProvider>
