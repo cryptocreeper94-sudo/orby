@@ -5,6 +5,12 @@ import { Loader2, X, Wind, Droplets, Eye, Thermometer, Sunrise, Sunset, ChevronR
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import sunnyIcon from "@assets/generated_images/sunny_day_floating_icon.png";
+import cloudyDayIcon from "@assets/generated_images/cloudy_day_floating_icon.png";
+import rainyDayIcon from "@assets/generated_images/rainy_day_floating_icon.png";
+import stormyDayIcon from "@assets/generated_images/stormy_day_floating_icon.png";
+import snowyDayIcon from "@assets/generated_images/snowy_day_floating_icon.png";
+import foggyDayIcon from "@assets/generated_images/foggy_day_floating_icon.png";
+import partlyCloudyDayIcon from "@assets/generated_images/partly_cloudy_day_icon.png";
 import clearNightIcon from "@assets/generated_images/clear_night_moon_icon.png";
 import partlyCloudyNightIcon from "@assets/generated_images/partly_cloudy_night_icon.png";
 import cloudyNightIcon from "@assets/generated_images/cloudy_overcast_night_icon.png";
@@ -97,15 +103,25 @@ function getGlowGradient(desc: string, isNight: boolean): string {
 }
 
 function getWeatherIcon(desc: string, isNight: boolean): string {
-  if (!isNight) return sunnyIcon;
   const d = desc.toLowerCase();
-  if (d.includes('thunder') || d.includes('storm')) return stormyNightIcon;
-  if (d.includes('rain') || d.includes('drizzle') || d.includes('shower')) return rainyNightIcon;
-  if (d.includes('snow') || d.includes('sleet') || d.includes('ice')) return snowyNightIcon;
-  if (d.includes('fog') || d.includes('mist') || d.includes('haze')) return foggyNightIcon;
-  if (d.includes('overcast')) return cloudyNightIcon;
-  if (d.includes('cloud') || d.includes('partly')) return partlyCloudyNightIcon;
-  return clearNightIcon;
+  
+  if (isNight) {
+    if (d.includes('thunder') || d.includes('storm')) return stormyNightIcon;
+    if (d.includes('rain') || d.includes('drizzle') || d.includes('shower')) return rainyNightIcon;
+    if (d.includes('snow') || d.includes('sleet') || d.includes('ice')) return snowyNightIcon;
+    if (d.includes('fog') || d.includes('mist') || d.includes('haze')) return foggyNightIcon;
+    if (d.includes('overcast')) return cloudyNightIcon;
+    if (d.includes('cloud') || d.includes('partly')) return partlyCloudyNightIcon;
+    return clearNightIcon;
+  }
+  
+  if (d.includes('thunder') || d.includes('storm')) return stormyDayIcon;
+  if (d.includes('rain') || d.includes('drizzle') || d.includes('shower')) return rainyDayIcon;
+  if (d.includes('snow') || d.includes('sleet') || d.includes('ice')) return snowyDayIcon;
+  if (d.includes('fog') || d.includes('mist') || d.includes('haze')) return foggyDayIcon;
+  if (d.includes('overcast')) return cloudyDayIcon;
+  if (d.includes('cloud') || d.includes('partly')) return partlyCloudyDayIcon;
+  return sunnyIcon;
 }
 
 export default function FloatingWeatherButton() {
