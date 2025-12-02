@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -56,30 +57,52 @@ export function FeatureSlideshow() {
 
   const slide = slides[currentSlide];
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[10000] overflow-hidden"
-        style={{ touchAction: 'none' }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 99999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '16px',
+          touchAction: 'none',
+        }}
       >
         <div 
-          className="absolute inset-0 bg-black/80 backdrop-blur-md"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            backdropFilter: 'blur(8px)',
+          }}
           onClick={closeSlideshow}
         />
 
-        {/* Centering wrapper - doesn't animate */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="pointer-events-auto w-full max-w-sm"
-          >
-            <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-cyan-500/30 shadow-2xl shadow-cyan-500/20 overflow-hidden w-full" data-testid="feature-slideshow">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            width: '100%',
+            maxWidth: '380px',
+          }}
+        >
+          <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-cyan-500/30 shadow-2xl shadow-cyan-500/20 overflow-hidden w-full" data-testid="feature-slideshow">
             <div className="absolute top-0 left-0 right-0 h-1 bg-slate-700">
               <motion.div
                 className="h-full bg-gradient-to-r from-cyan-400 to-blue-500"
@@ -203,9 +226,10 @@ export function FeatureSlideshow() {
               </div>
             </CardContent>
           </Card>
-          </motion.div>
-        </div>
+        </motion.div>
       </motion.div>
     </AnimatePresence>
   );
+
+  return createPortal(modalContent, document.body);
 }
