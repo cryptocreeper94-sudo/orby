@@ -132,7 +132,7 @@ export function FacilityIssuePanel({
       title: string;
       description: string;
       location?: string;
-      routedTo: 'Operations';
+      routedTo: 'ManagementCore';
     }) => {
       const res = await fetch('/api/stand-issues', {
         method: 'POST',
@@ -179,7 +179,7 @@ export function FacilityIssuePanel({
       title,
       description,
       location: location || undefined,
-      routedTo: 'Operations'
+      routedTo: 'ManagementCore'
     });
   };
 

@@ -1154,13 +1154,18 @@ Return your response as a JSON object with this exact structure:
       
       // Create notifications based on routing rules
       const isEmergency = parsed.severity === 'Emergency';
-      await storage.createStandIssueNotifications(issue.id, parsed.category, isEmergency);
+      try {
+        await storage.createStandIssueNotifications(issue.id, parsed.category, isEmergency);
+      } catch (notificationError) {
+        console.warn('Failed to create notifications but issue was created:', notificationError);
+      }
       
       res.status(201).json(issue);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }
+      console.error('Failed to create stand issue:', error);
       res.status(500).json({ error: "Failed to create issue" });
     }
   });
