@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  FileText, TrendingDown, TrendingUp, Package, X, Download, 
-  AlertCircle, Loader2, Check, Printer
+  FileText, TrendingDown, TrendingUp, Package, X,
+  AlertCircle, Loader2
 } from 'lucide-react';
 import {
   Accordion,

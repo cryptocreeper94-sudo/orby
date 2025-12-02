@@ -326,16 +326,13 @@ export function EndOfEventReport({
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={generatePDF}
-                disabled={isGenerating}
-                className="btn-3d"
-                data-testid="button-download-pdf"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                {isGenerating ? 'Generating...' : 'Download PDF'}
-              </Button>
+            <div className="flex gap-2 items-center">
+              <PDFActionButtons
+                generatePDF={generatePDF}
+                filename={`${standId}_${eventDate}_report.pdf`}
+                title="End-of-Event Report"
+                variant="compact"
+              />
               <Button variant="outline" onClick={onClose} data-testid="button-close-report">
                 <XCircle className="w-4 h-4" />
               </Button>
