@@ -7,10 +7,13 @@ import {
   warehouseCategories, warehouseProducts, warehouseStock, warehouseParLevels, warehouseRequests, warehouseRequestItems,
   auditLogs, emergencyAlerts, emergencyResponders, emergencyEscalationHistory, emergencyAlertNotifications,
   orbitRosters, orbitShifts, deliveryRequests, departmentContacts, alcoholViolations,
+  standItems, managerDocuments,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
   type Item, type InsertItem,
+  type StandItem, type InsertStandItem,
+  type ManagerDocument, type InsertManagerDocument,
   type Message, type InsertMessage,
   type NPO, type InsertNPO,
   type StaffingGroup, type InsertStaffingGroup,
@@ -96,6 +99,21 @@ export interface IStorage {
   getItem(id: string): Promise<Item | undefined>;
   getAllItems(): Promise<Item[]>;
   createItem(item: InsertItem): Promise<Item>;
+  deleteItem(id: string): Promise<void>;
+
+  // Stand Items (inventory templates per stand)
+  getStandItems(standId: string): Promise<Array<StandItem & { item: Item }>>;
+  addStandItem(standItem: InsertStandItem): Promise<StandItem>;
+  removeStandItem(standId: string, itemId: string): Promise<void>;
+  clearStandItems(standId: string): Promise<void>;
+  bulkAddStandItems(standId: string, itemIds: string[]): Promise<void>;
+  getStandsWithItems(): Promise<string[]>;
+
+  // Manager Documents Hub
+  getManagerDocument(id: string): Promise<ManagerDocument | undefined>;
+  getManagerDocuments(filters?: { category?: string; standId?: string; eventDate?: string }): Promise<ManagerDocument[]>;
+  createManagerDocument(doc: InsertManagerDocument): Promise<ManagerDocument>;
+  deleteManagerDocument(id: string): Promise<void>;
 
   // Messages
   getMessage(id: string): Promise<Message | undefined>;
@@ -539,6 +557,97 @@ export class DatabaseStorage implements IStorage {
   async createItem(insertItem: InsertItem): Promise<Item> {
     const [item] = await db.insert(items).values(insertItem).returning();
     return item;
+  }
+
+  async deleteItem(id: string): Promise<void> {
+    await db.delete(standItems).where(eq(standItems.itemId, id));
+    await db.delete(items).where(eq(items.id, id));
+  }
+
+  // Stand Items (inventory templates per stand)
+  async getStandItems(standId: string): Promise<Array<StandItem & { item: Item }>> {
+    const results = await db
+      .select()
+      .from(standItems)
+      .innerJoin(items, eq(standItems.itemId, items.id))
+      .where(eq(standItems.standId, standId))
+      .orderBy(asc(standItems.sortOrder));
+    
+    return results.map(r => ({
+      ...r.stand_items,
+      item: r.items
+    }));
+  }
+
+  async addStandItem(standItem: InsertStandItem): Promise<StandItem> {
+    const [result] = await db.insert(standItems).values(standItem).returning();
+    return result;
+  }
+
+  async removeStandItem(standId: string, itemId: string): Promise<void> {
+    await db.delete(standItems).where(
+      and(eq(standItems.standId, standId), eq(standItems.itemId, itemId))
+    );
+  }
+
+  async clearStandItems(standId: string): Promise<void> {
+    await db.delete(standItems).where(eq(standItems.standId, standId));
+  }
+
+  async bulkAddStandItems(standId: string, itemIds: string[]): Promise<void> {
+    if (itemIds.length === 0) return;
+    
+    const inserts = itemIds.map((itemId, index) => ({
+      standId,
+      itemId,
+      sortOrder: index,
+      isChargeable: true
+    }));
+    
+    await db.insert(standItems).values(inserts);
+  }
+
+  async getStandsWithItems(): Promise<string[]> {
+    const results = await db
+      .selectDistinct({ standId: standItems.standId })
+      .from(standItems);
+    return results.map(r => r.standId);
+  }
+
+  // Manager Documents Hub
+  async getManagerDocument(id: string): Promise<ManagerDocument | undefined> {
+    const [doc] = await db.select().from(managerDocuments).where(eq(managerDocuments.id, id));
+    return doc;
+  }
+
+  async getManagerDocuments(filters?: { category?: string; standId?: string; eventDate?: string }): Promise<ManagerDocument[]> {
+    let query = db.select().from(managerDocuments);
+    
+    const conditions = [];
+    if (filters?.category) {
+      conditions.push(eq(managerDocuments.category, filters.category));
+    }
+    if (filters?.standId) {
+      conditions.push(eq(managerDocuments.standId, filters.standId));
+    }
+    if (filters?.eventDate) {
+      conditions.push(eq(managerDocuments.eventDate, filters.eventDate));
+    }
+    
+    if (conditions.length > 0) {
+      return await db.select().from(managerDocuments).where(and(...conditions)).orderBy(desc(managerDocuments.createdAt));
+    }
+    
+    return await db.select().from(managerDocuments).orderBy(desc(managerDocuments.createdAt));
+  }
+
+  async createManagerDocument(doc: InsertManagerDocument): Promise<ManagerDocument> {
+    const [result] = await db.insert(managerDocuments).values(doc).returning();
+    return result;
+  }
+
+  async deleteManagerDocument(id: string): Promise<void> {
+    await db.delete(managerDocuments).where(eq(managerDocuments.id, id));
   }
 
   // Messages
