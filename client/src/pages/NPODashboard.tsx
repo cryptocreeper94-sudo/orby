@@ -24,6 +24,7 @@ import {
 } from "@/components/LocationAcknowledgement";
 import { motion } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, PageHeader, GlowButton } from "@/components/ui/premium";
+import { TeamLeadCard } from "@/components/TeamLeadCard";
 
 type CountSession = {
   id: string;
@@ -464,6 +465,8 @@ export default function NPODashboard() {
               </motion.div>
             ))}
           </div>
+
+          <TeamLeadCard />
 
           <Notepad storageKey="npo-notes" title="My Shift Notes" />
         </main>

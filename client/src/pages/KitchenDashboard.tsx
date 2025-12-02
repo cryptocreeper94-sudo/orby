@@ -7,6 +7,7 @@ import { TutorialHelpButton } from "@/components/TutorialCoach";
 import { useEffect, useState } from "react";
 import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
+import { TeamLeadCard } from "@/components/TeamLeadCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader } from "@/components/ui/premium";
 
@@ -127,6 +128,8 @@ export default function KitchenDashboard() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          <TeamLeadCard department="Kitchen" />
 
           <Notepad storageKey="kitchen-notes" />
 

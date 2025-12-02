@@ -77,6 +77,8 @@ export const users = pgTable("users", {
   isOnline: boolean("is_online").default(false),
   assignedStandId: varchar("assigned_stand_id", { length: 20 }), // Current stand assignment
   standLeadId: varchar("stand_lead_id", { length: 36 }), // NPO Worker's assigned Stand Lead
+  teamLeadId: varchar("team_lead_id", { length: 36 }), // Department worker's assigned Team Lead (Warehouse/Kitchen/Operations)
+  isTeamLead: boolean("is_team_lead").default(false), // Is this user a Team Lead?
   hasDualRole: boolean("has_dual_role").default(false), // For users like Brooke with dual roles
   secondaryRole: userRoleEnum("secondary_role"), // Alternate role (e.g., StandSupervisor for event days)
   activeRole: userRoleEnum("active_role"), // Currently active role (for dual-role users)

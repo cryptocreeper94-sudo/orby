@@ -9,6 +9,7 @@ import { TutorialHelpButton } from "@/components/TutorialCoach";
 import { useEffect, useState } from "react";
 import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
+import { TeamLeadCard } from "@/components/TeamLeadCard";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader, GlowButton } from "@/components/ui/premium";
@@ -372,6 +373,8 @@ export default function WarehouseDashboard() {
                     data-testid="stat-low-stock"
                   />
                 </div>
+
+                <TeamLeadCard department="Warehouse" />
 
                 <Notepad storageKey="warehouse-notes" />
 
