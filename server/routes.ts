@@ -1077,11 +1077,17 @@ Return your response as a JSON object with this exact structure:
   });
 
   // ============ STAND ISSUES ============
-  // Get all stand issues
-  app.get("/api/stand-issues", async (_req: Request, res: Response) => {
+  // Get all stand issues (with optional standId filter)
+  app.get("/api/stand-issues", async (req: Request, res: Response) => {
     try {
-      const issues = await storage.getAllStandIssues();
-      res.json(issues);
+      const { standId } = req.query;
+      if (standId) {
+        const issues = await storage.getStandIssuesByStand(standId as string);
+        res.json(issues);
+      } else {
+        const issues = await storage.getAllStandIssues();
+        res.json(issues);
+      }
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch stand issues" });
     }
