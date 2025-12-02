@@ -34,6 +34,7 @@ import ReportingDashboard from "@/pages/ReportingDashboard";
 import AlcoholComplianceDashboard from "@/pages/AlcoholComplianceDashboard";
 import CheckInAssistantDashboard from "@/pages/CheckInAssistantDashboard";
 import TeamManagement from "@/pages/TeamManagement";
+import BarScheduler from "@/pages/BarScheduler";
 import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
@@ -74,6 +75,7 @@ function Router() {
       <Route path="/alcohol-compliance" component={AlcoholComplianceDashboard} />
       <Route path="/check-in-assistant" component={CheckInAssistantDashboard} />
       <Route path="/team-management" component={TeamManagement} />
+      <Route path="/bar-scheduler" component={BarScheduler} />
       <Route component={NotFound} />
     </Switch>
   );
