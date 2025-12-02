@@ -62,7 +62,7 @@ export function FeatureSlideshow() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[10000] flex items-center justify-center p-4"
+        className="fixed inset-0 z-[10000] flex items-center justify-center p-4 overflow-hidden"
       >
         <div 
           className="absolute inset-0 bg-black/80 backdrop-blur-md"
@@ -74,7 +74,7 @@ export function FeatureSlideshow() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative z-10 w-full max-w-lg"
+          className="relative z-10 w-[calc(100%-2rem)] max-w-lg mx-auto"
         >
           <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-cyan-500/30 shadow-2xl shadow-cyan-500/20 overflow-hidden" data-testid="feature-slideshow">
             <div className="absolute top-0 left-0 right-0 h-1 bg-slate-700">
