@@ -12,6 +12,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { PDFActionButtons } from './PDFActionButtons';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
@@ -152,23 +153,6 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
     return doc;
   };
 
-  const downloadPDF = () => {
-    const doc = generatePDF();
-    doc.save(`variance-report-${standId}-${eventDate.replace(/\//g, '-')}.pdf`);
-  };
-
-  const printPDF = () => {
-    const doc = generatePDF();
-    const pdfBlob = doc.output('blob');
-    const pdfUrl = URL.createObjectURL(pdfBlob);
-    const printWindow = window.open(pdfUrl, '_blank');
-    if (printWindow) {
-      printWindow.onload = () => {
-        printWindow.print();
-      };
-    }
-  };
-
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-white">
@@ -181,26 +165,14 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={downloadPDF}
-              disabled={isLoading || report.length === 0}
-              data-testid="button-download-pdf"
-            >
-              <Download className="w-4 h-4 mr-1" />
-              PDF
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={printPDF}
-              disabled={isLoading || report.length === 0}
-              data-testid="button-print-report"
-            >
-              <Printer className="w-4 h-4 mr-1" />
-              Print
-            </Button>
+            {!isLoading && report.length > 0 && (
+              <PDFActionButtons
+                generatePDF={generatePDF}
+                filename={`variance-report-${standId}-${eventDate.replace(/\//g, '-')}.pdf`}
+                title="Inventory Variance Report"
+                variant="compact"
+              />
+            )}
             <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-report">
               <X className="w-5 h-5" />
             </Button>
