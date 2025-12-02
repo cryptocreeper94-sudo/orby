@@ -22,6 +22,7 @@ import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
 import { SupervisorPack } from "@/components/SupervisorPack";
 import { SupervisorClosingPanel } from "@/components/SupervisorClosingPanel";
+import { FacilityIssuePanel } from "@/components/FacilityIssuePanel";
 import { QuickScanModal } from "@/components/QuickScanModal";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -870,7 +871,14 @@ export default function SupervisorDashboard() {
               </div>
             </TabsContent>
 
-            <TabsContent value="closeout" className="p-4 md:p-5">
+            <TabsContent value="closeout" className="p-4 md:p-5 space-y-4">
+              <FacilityIssuePanel
+                standId={activeStandId!}
+                standName={activeStand?.name || ''}
+                reporterId={currentUser?.id || ''}
+                reporterName={currentUser?.name}
+                eventDate={new Date().toISOString().split('T')[0]}
+              />
               <SupervisorClosingPanel
                 standId={activeStandId!}
                 standName={activeStand?.name || ''}
