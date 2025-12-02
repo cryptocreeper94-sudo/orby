@@ -1,17 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
   MessageSquare, Send, UserCircle, LogOut, Camera, Video,
   Clock, CheckCircle2, AlertCircle, Users, Map, Navigation,
-  AlertTriangle, Phone, MapPin, X, Upload, Locate, ArrowRight
+  AlertTriangle, MapPin, X, Locate, Headphones, Shield,
+  HelpCircle, Sparkles
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -20,10 +20,22 @@ import {
   STADIUM_LOCATION,
   GEOFENCE_RADIUS_FEET 
 } from '@/components/LocationAcknowledgement';
-import { InteractiveMap, STADIUM_SECTIONS, STADIUM_ZONES } from '@/components/InteractiveMap';
+import { InteractiveMap } from '@/components/InteractiveMap';
 import { WalkingDirections } from '@/components/WalkingDirections';
 import { useStore } from '@/lib/mockData';
 import { toast } from 'sonner';
+import {
+  AnimatedBackground,
+  GlassCard,
+  GlassCardHeader,
+  GlassCardContent,
+  GlowButton,
+  StatusBadge,
+  StatCard,
+  PageHeader,
+  AnimatedList,
+  SectionHeader
+} from '@/components/ui/premium';
 
 interface Message {
   id: string;
@@ -37,6 +49,7 @@ interface Manager {
   id: string;
   name: string;
   role: string;
+  department: string;
   isOnline: boolean;
 }
 
@@ -51,23 +64,23 @@ interface Incident {
 }
 
 const MANAGERS: Manager[] = [
-  { id: '1', name: 'Brooke K', role: 'HR Manager', isOnline: true },
-  { id: '2', name: 'David', role: 'Operations', isOnline: true },
-  { id: '3', name: 'Jay', role: 'Warehouse', isOnline: false },
-  { id: '4', name: 'Chef Deb', role: 'Kitchen', isOnline: true },
-  { id: '5', name: 'Darby', role: 'Bar Manager', isOnline: false },
-  { id: '6', name: 'Shelia', role: 'Operations', isOnline: true },
-  { id: '7', name: 'Megan', role: 'Manager', isOnline: true },
+  { id: '1', name: 'Brooke K', role: 'HR Manager', department: 'HR Manager', isOnline: true },
+  { id: '2', name: 'David', role: 'Operations Manager', department: 'Operations', isOnline: true },
+  { id: '3', name: 'Jay', role: 'Purchasing Manager', department: 'Warehouse', isOnline: false },
+  { id: '4', name: 'Chef Deb', role: 'Culinary Manager', department: 'Kitchen', isOnline: true },
+  { id: '5', name: 'Darby', role: 'Beverage Manager', department: 'Bar Manager', isOnline: false },
+  { id: '6', name: 'Shelia', role: 'Operations Supervisor', department: 'Operations', isOnline: true },
+  { id: '7', name: 'Megan', role: 'General Manager', department: 'Manager', isOnline: true },
 ];
 
 const INCIDENT_TYPES = [
-  { id: 'customer_complaint', label: 'Customer Complaint', icon: '😤' },
-  { id: 'lost_item', label: 'Lost & Found', icon: '🔍' },
-  { id: 'safety_hazard', label: 'Safety Hazard', icon: '⚠️' },
-  { id: 'medical', label: 'Medical Issue', icon: '🏥' },
-  { id: 'spill', label: 'Spill/Cleanup', icon: '🧹' },
-  { id: 'disturbance', label: 'Guest Disturbance', icon: '🚨' },
-  { id: 'other', label: 'Other', icon: '📝' },
+  { id: 'customer_complaint', label: 'Customer Complaint', icon: AlertCircle, color: 'from-rose-500 to-rose-600' },
+  { id: 'lost_item', label: 'Lost & Found', icon: HelpCircle, color: 'from-blue-500 to-blue-600' },
+  { id: 'safety_hazard', label: 'Safety Hazard', icon: AlertTriangle, color: 'from-amber-500 to-amber-600' },
+  { id: 'medical', label: 'Medical Issue', icon: Shield, color: 'from-red-500 to-red-600' },
+  { id: 'spill', label: 'Spill/Cleanup', icon: Sparkles, color: 'from-cyan-500 to-cyan-600' },
+  { id: 'disturbance', label: 'Guest Disturbance', icon: Users, color: 'from-purple-500 to-purple-600' },
+  { id: 'other', label: 'Other', icon: MessageSquare, color: 'from-slate-500 to-slate-600' },
 ];
 
 const QUICK_LOCATIONS = [
@@ -222,18 +235,27 @@ export default function CheckInAssistantDashboard() {
     }
   };
 
+  const onlineManagers = MANAGERS.filter(m => m.isOnline).length;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <header className="bg-slate-800/80 backdrop-blur-lg border-b border-slate-700/50 sticky top-0 z-40">
+    <AnimatedBackground>
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-900/80 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-              <UserCircle className="h-5 w-5 text-white" />
-            </div>
+            <motion.div 
+              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/30"
+              whileHover={{ scale: 1.05, rotate: 5 }}
+            >
+              <Headphones className="h-6 w-6 text-white" />
+            </motion.div>
             <div>
               <h1 className="text-lg font-bold text-white">Check-in Assistant</h1>
               <div className="flex items-center gap-2">
-                <span className={`w-2 h-2 rounded-full ${isOnSite ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                <motion.span 
+                  className={`w-2 h-2 rounded-full ${isOnSite ? 'bg-emerald-400' : 'bg-amber-400'}`}
+                  animate={isOnSite ? { scale: [1, 1.2, 1] } : {}}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                />
                 <p className="text-xs text-slate-400">
                   {isOnSite ? 'On Site' : gpsLoading ? 'Locating...' : 'Location pending'}
                 </p>
@@ -244,7 +266,7 @@ export default function CheckInAssistantDashboard() {
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="text-slate-400 hover:text-white"
+            className="text-slate-400 hover:text-white hover:bg-white/10"
             data-testid="button-logout"
           >
             <LogOut className="h-4 w-4" />
@@ -252,50 +274,106 @@ export default function CheckInAssistantDashboard() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-4">
+      <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        <div className="grid grid-cols-3 gap-3">
+          <StatCard
+            icon={<Users className="h-5 w-5" />}
+            label="Managers Online"
+            value={onlineManagers}
+            subValue={`of ${MANAGERS.length}`}
+            color="cyan"
+            size="compact"
+          />
+          <StatCard
+            icon={<MessageSquare className="h-5 w-5" />}
+            label="Messages Sent"
+            value={messages.length}
+            color="blue"
+            size="compact"
+          />
+          <StatCard
+            icon={<AlertTriangle className="h-5 w-5" />}
+            label="Incidents"
+            value={incidents.length}
+            color="amber"
+            size="compact"
+          />
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid grid-cols-3 bg-slate-800/50 border border-slate-700/50">
-            <TabsTrigger value="messages" className="data-[state=active]:bg-cyan-500/20" data-testid="tab-messages">
+          <TabsList className="grid grid-cols-3 bg-slate-800/50 border border-white/10 rounded-xl p-1">
+            <TabsTrigger 
+              value="messages" 
+              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-blue-500/20 data-[state=active]:text-cyan-400 data-[state=active]:border-cyan-500/30 transition-all"
+              data-testid="tab-messages"
+            >
               <MessageSquare className="h-4 w-4 mr-2" />
               Messages
             </TabsTrigger>
-            <TabsTrigger value="incidents" className="data-[state=active]:bg-cyan-500/20" data-testid="tab-incidents">
+            <TabsTrigger 
+              value="incidents" 
+              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:text-amber-400 data-[state=active]:border-amber-500/30 transition-all"
+              data-testid="tab-incidents"
+            >
               <AlertTriangle className="h-4 w-4 mr-2" />
               Report
             </TabsTrigger>
-            <TabsTrigger value="map" className="data-[state=active]:bg-cyan-500/20" data-testid="tab-map">
+            <TabsTrigger 
+              value="map" 
+              className="rounded-lg data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500/20 data-[state=active]:to-cyan-500/20 data-[state=active]:text-emerald-400 data-[state=active]:border-emerald-500/30 transition-all"
+              data-testid="tab-map"
+            >
               <Map className="h-4 w-4 mr-2" />
               Map
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="messages" className="space-y-4">
-            <Card className="bg-slate-800/50 border-cyan-500/20 backdrop-blur-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-white flex items-center gap-2 text-base">
-                  <Users className="h-5 w-5 text-cyan-400" />
-                  Contact a Manager
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-2">
+            <GlassCard gradient glow>
+              <GlassCardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600">
+                    <Users className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Contact a Manager</h3>
+                    <p className="text-sm text-slate-400">Select who you need to reach</p>
+                  </div>
+                </div>
+              </GlassCardHeader>
+              <GlassCardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
                   {MANAGERS.map((manager) => (
                     <motion.button
                       key={manager.id}
+                      whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setSelectedManager(manager)}
-                      className={`p-3 rounded-xl border transition-all text-left ${
+                      className={`relative p-4 rounded-xl border overflow-hidden text-left transition-all ${
                         selectedManager?.id === manager.id
-                          ? 'bg-cyan-500/20 border-cyan-500/50'
-                          : 'bg-slate-700/30 border-slate-600/30 active:border-slate-500/50'
+                          ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-cyan-500/50 shadow-lg shadow-cyan-500/20'
+                          : 'bg-slate-800/50 border-white/10 hover:border-white/20'
                       }`}
                       data-testid={`manager-${manager.id}`}
                     >
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`w-2 h-2 rounded-full ${manager.isOnline ? 'bg-emerald-400' : 'bg-slate-500'}`} />
-                        <span className="text-sm font-medium text-white truncate">{manager.name}</span>
+                      <div className="flex items-center gap-2 mb-2">
+                        <motion.span 
+                          className={`w-2.5 h-2.5 rounded-full ${manager.isOnline ? 'bg-emerald-400' : 'bg-slate-500'}`}
+                          animate={manager.isOnline ? { scale: [1, 1.3, 1], opacity: [1, 0.7, 1] } : {}}
+                          transition={{ repeat: Infinity, duration: 2 }}
+                        />
+                        <span className="text-sm font-semibold text-white">{manager.name}</span>
                       </div>
-                      <p className="text-xs text-slate-400 truncate">{manager.role}</p>
+                      <p className="text-xs text-slate-400">{manager.role}</p>
+                      {selectedManager?.id === manager.id && (
+                        <motion.div 
+                          className="absolute top-2 right-2"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                        >
+                          <CheckCircle2 className="h-4 w-4 text-cyan-400" />
+                        </motion.div>
+                      )}
                     </motion.button>
                   ))}
                 </div>
@@ -306,33 +384,34 @@ export default function CheckInAssistantDashboard() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="space-y-3"
+                      className="space-y-4 overflow-hidden"
                     >
-                      <div className="flex items-center gap-2 text-sm text-cyan-400">
-                        <Send className="h-4 w-4" />
-                        <span>To: {selectedManager.name}</span>
+                      <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30">
+                        <Send className="h-4 w-4 text-cyan-400" />
+                        <span className="text-sm text-cyan-400">To: {selectedManager.name} ({selectedManager.role})</span>
                       </div>
                       <Textarea
-                        placeholder="Describe the situation..."
+                        placeholder="Describe the situation or ask a question..."
                         value={messageContent}
                         onChange={(e) => setMessageContent(e.target.value)}
-                        className="min-h-[80px] bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-500"
+                        className="min-h-[100px] bg-slate-800/50 border-white/10 text-white placeholder:text-slate-500 focus:border-cyan-500/50 resize-none"
                         data-testid="message-input"
                       />
-                      <div className="flex gap-2">
-                        <Button
+                      <div className="flex gap-3">
+                        <GlowButton
                           onClick={handleSendMessage}
                           disabled={!messageContent.trim() || isSending}
-                          className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600"
-                          data-testid="button-send"
+                          variant="cyan"
+                          className="flex-1"
+                          data-testid="button-send-message"
                         >
-                          <Send className="h-4 w-4 mr-2" />
-                          Send
-                        </Button>
+                          <Send className="h-4 w-4" />
+                          Send Message
+                        </GlowButton>
                         <Button
                           variant="outline"
                           onClick={() => setSelectedManager(null)}
-                          className="border-slate-600 text-slate-300"
+                          className="border-white/10 text-slate-300 hover:bg-white/5"
                           data-testid="button-cancel"
                         >
                           Cancel
@@ -341,92 +420,109 @@ export default function CheckInAssistantDashboard() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </CardContent>
-            </Card>
+              </GlassCardContent>
+            </GlassCard>
 
             {messages.length > 0 && (
-              <Card className="bg-slate-800/50 border-slate-700/50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-white text-sm flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-slate-400" />
-                    Recent Messages
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {messages.map((message) => (
-                    <div key={message.id} className="p-3 bg-slate-700/30 rounded-lg border border-slate-600/30" data-testid={`message-item-${message.id}`}>
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <Badge variant="outline" className="bg-cyan-500/10 text-cyan-400 border-cyan-500/30 text-xs">
-                          To: {message.recipient}
-                        </Badge>
-                        <div className="flex items-center gap-1 text-xs text-slate-500">
-                          {getStatusIcon(message.status)}
-                          <span>{message.sentAt}</span>
+              <GlassCard>
+                <GlassCardHeader>
+                  <SectionHeader icon={<Clock className="h-4 w-4" />} title="Recent Messages" />
+                </GlassCardHeader>
+                <GlassCardContent>
+                  <AnimatedList>
+                    {messages.map((message) => (
+                      <motion.div 
+                        key={message.id} 
+                        className="p-4 bg-slate-800/30 rounded-xl border border-white/5"
+                        whileHover={{ x: 4 }}
+                        data-testid={`message-item-${message.id}`}
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
+                            To: {message.recipient}
+                          </Badge>
+                          <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                            {getStatusIcon(message.status)}
+                            <span>{message.sentAt}</span>
+                          </div>
                         </div>
-                      </div>
-                      <p className="text-sm text-slate-300">{message.content}</p>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                        <p className="text-sm text-slate-300">{message.content}</p>
+                      </motion.div>
+                    ))}
+                  </AnimatedList>
+                </GlassCardContent>
+              </GlassCard>
             )}
           </TabsContent>
 
           <TabsContent value="incidents" className="space-y-4">
-            <Card className="bg-slate-800/50 border-cyan-500/20">
-              <CardHeader className="pb-3">
+            <GlassCard gradient glow>
+              <GlassCardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-white flex items-center gap-2 text-base">
-                    <AlertTriangle className="h-5 w-5 text-amber-400" />
-                    Report an Incident
-                  </CardTitle>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600">
+                      <AlertTriangle className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">Report an Incident</h3>
+                      <p className="text-sm text-slate-400">Document issues with photos & details</p>
+                    </div>
+                  </div>
                   {!showIncidentForm && (
-                    <Button
+                    <GlowButton
                       onClick={() => setShowIncidentForm(true)}
+                      variant="amber"
                       size="sm"
-                      className="bg-amber-500 hover:bg-amber-400"
                       data-testid="button-new-incident"
                     >
                       New Report
-                    </Button>
+                    </GlowButton>
                   )}
                 </div>
-              </CardHeader>
-              <CardContent>
-                <AnimatePresence>
+              </GlassCardHeader>
+              <GlassCardContent>
+                <AnimatePresence mode="wait">
                   {showIncidentForm ? (
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="space-y-4"
+                      key="form"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="space-y-5"
                     >
                       <div>
-                        <label className="text-xs text-slate-400 mb-2 block">Incident Type</label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {INCIDENT_TYPES.map((type) => (
-                            <button
-                              key={type.id}
-                              onClick={() => setIncidentType(type.id)}
-                              className={`p-2 rounded-lg border text-center transition-all ${
-                                incidentType === type.id
-                                  ? 'bg-amber-500/20 border-amber-500/50'
-                                  : 'bg-slate-700/30 border-slate-600/30'
-                              }`}
-                              data-testid={`incident-type-${type.id}`}
-                            >
-                              <span className="text-xl block mb-1">{type.icon}</span>
-                              <span className="text-xs text-slate-300">{type.label}</span>
-                            </button>
-                          ))}
+                        <label className="text-xs text-slate-400 mb-3 block font-medium">Incident Type</label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                          {INCIDENT_TYPES.map((type) => {
+                            const TypeIcon = type.icon;
+                            return (
+                              <motion.button
+                                key={type.id}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => setIncidentType(type.id)}
+                                className={`p-3 rounded-xl border text-center transition-all ${
+                                  incidentType === type.id
+                                    ? 'bg-gradient-to-br border-amber-500/50 shadow-lg shadow-amber-500/20 ' + type.color.replace('from-', 'from-').replace(' to-', '/20 to-') + '/10'
+                                    : 'bg-slate-800/50 border-white/10 hover:border-white/20'
+                                }`}
+                                data-testid={`incident-type-${type.id}`}
+                              >
+                                <div className={`w-10 h-10 rounded-lg mx-auto mb-2 flex items-center justify-center bg-gradient-to-br ${type.color}`}>
+                                  <TypeIcon className="h-5 w-5 text-white" />
+                                </div>
+                                <span className="text-xs text-slate-300 font-medium">{type.label}</span>
+                              </motion.button>
+                            );
+                          })}
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-xs text-slate-400 mb-2 block">Location</label>
+                        <label className="text-xs text-slate-400 mb-2 block font-medium">Location</label>
                         <div className="flex gap-2">
                           <Select value={incidentLocation} onValueChange={setIncidentLocation}>
-                            <SelectTrigger className="flex-1 bg-slate-700/50 border-slate-600" data-testid="select-incident-location">
+                            <SelectTrigger className="flex-1 bg-slate-800/50 border-white/10" data-testid="select-incident-location">
                               <SelectValue placeholder="Select location..." />
                             </SelectTrigger>
                             <SelectContent>
@@ -439,33 +535,37 @@ export default function CheckInAssistantDashboard() {
                             variant="outline"
                             size="icon"
                             onClick={requestLocation}
-                            className="border-slate-600"
+                            className="border-white/10 hover:bg-white/5"
                             data-testid="button-use-gps"
                           >
                             <Locate className="h-4 w-4" />
                           </Button>
                         </div>
                         {currentLocation && (
-                          <p className="text-xs text-emerald-400 mt-1">
-                            <MapPin className="h-3 w-3 inline mr-1" />
+                          <motion.p 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="text-xs text-emerald-400 mt-2 flex items-center gap-1"
+                          >
+                            <MapPin className="h-3 w-3" />
                             GPS: {currentLocation}
-                          </p>
+                          </motion.p>
                         )}
                       </div>
 
                       <div>
-                        <label className="text-xs text-slate-400 mb-2 block">Description</label>
+                        <label className="text-xs text-slate-400 mb-2 block font-medium">Description</label>
                         <Textarea
-                          placeholder="Describe what happened..."
+                          placeholder="Describe what happened in detail..."
                           value={incidentDescription}
                           onChange={(e) => setIncidentDescription(e.target.value)}
-                          className="min-h-[80px] bg-slate-700/50 border-slate-600 text-white"
+                          className="min-h-[100px] bg-slate-800/50 border-white/10 text-white placeholder:text-slate-500 resize-none"
                           data-testid="incident-description"
                         />
                       </div>
 
                       <div>
-                        <label className="text-xs text-slate-400 mb-2 block">Add Photo/Video</label>
+                        <label className="text-xs text-slate-400 mb-2 block font-medium">Add Photo/Video Evidence</label>
                         <div className="flex gap-2">
                           <input
                             type="file"
@@ -479,7 +579,7 @@ export default function CheckInAssistantDashboard() {
                           <Button
                             variant="outline"
                             onClick={() => fileInputRef.current?.click()}
-                            className="flex-1 border-slate-600"
+                            className="flex-1 border-white/10 hover:bg-white/5"
                             data-testid="button-add-media"
                           >
                             <Camera className="h-4 w-4 mr-2" />
@@ -493,7 +593,7 @@ export default function CheckInAssistantDashboard() {
                                 fileInputRef.current.click();
                               }
                             }}
-                            className="flex-1 border-slate-600"
+                            className="flex-1 border-white/10 hover:bg-white/5"
                             data-testid="button-add-video"
                           >
                             <Video className="h-4 w-4 mr-2" />
@@ -501,31 +601,37 @@ export default function CheckInAssistantDashboard() {
                           </Button>
                         </div>
                         {capturedMedia.length > 0 && (
-                          <div className="flex gap-2 mt-2 overflow-x-auto">
+                          <div className="flex gap-2 mt-3 overflow-x-auto pb-2">
                             {capturedMedia.map((media, idx) => (
-                              <div key={idx} className="relative w-16 h-16 flex-shrink-0">
-                                <img src={media} className="w-full h-full object-cover rounded-lg" />
+                              <motion.div 
+                                key={idx} 
+                                className="relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden border-2 border-white/10"
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                              >
+                                <img src={media} className="w-full h-full object-cover" />
                                 <button
                                   onClick={() => setCapturedMedia(prev => prev.filter((_, i) => i !== idx))}
-                                  className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center"
+                                  className="absolute top-1 right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-lg"
                                 >
                                   <X className="h-3 w-3 text-white" />
                                 </button>
-                              </div>
+                              </motion.div>
                             ))}
                           </div>
                         )}
                       </div>
 
-                      <div className="flex gap-2 pt-2">
-                        <Button
+                      <div className="flex gap-3 pt-2">
+                        <GlowButton
                           onClick={handleSubmitIncident}
                           disabled={!incidentType || !incidentDescription}
-                          className="flex-1 bg-amber-500 hover:bg-amber-400"
+                          variant="amber"
+                          className="flex-1"
                           data-testid="button-submit-incident"
                         >
                           Submit Report
-                        </Button>
+                        </GlowButton>
                         <Button
                           variant="outline"
                           onClick={() => {
@@ -534,7 +640,7 @@ export default function CheckInAssistantDashboard() {
                             setIncidentDescription('');
                             setCapturedMedia([]);
                           }}
-                          className="border-slate-600"
+                          className="border-white/10 text-slate-300 hover:bg-white/5"
                           data-testid="button-cancel-incident"
                         >
                           Cancel
@@ -542,100 +648,123 @@ export default function CheckInAssistantDashboard() {
                       </div>
                     </motion.div>
                   ) : (
-                    <div className="text-center py-6 text-slate-500">
-                      <AlertTriangle className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                      <p className="text-sm">Tap "New Report" to report an incident</p>
-                    </div>
+                    <motion.div 
+                      key="empty"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-center py-8"
+                    >
+                      <div className="w-16 h-16 rounded-2xl bg-slate-800/50 mx-auto mb-4 flex items-center justify-center">
+                        <AlertTriangle className="h-8 w-8 text-slate-600" />
+                      </div>
+                      <p className="text-slate-500">Tap "New Report" to document an incident</p>
+                    </motion.div>
                   )}
                 </AnimatePresence>
-              </CardContent>
-            </Card>
+              </GlassCardContent>
+            </GlassCard>
 
             {incidents.length > 0 && (
-              <Card className="bg-slate-800/50 border-slate-700/50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-white text-sm">Your Reports</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {incidents.map((incident) => (
-                    <div key={incident.id} className="p-3 bg-slate-700/30 rounded-lg border border-slate-600/30" data-testid={`incident-item-${incident.id}`}>
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
-                              {incident.type}
-                            </Badge>
-                            {incident.hasMedia && (
-                              <Camera className="h-3 w-3 text-slate-400" />
-                            )}
+              <GlassCard>
+                <GlassCardHeader>
+                  <SectionHeader icon={<AlertCircle className="h-4 w-4" />} title="Your Reports" />
+                </GlassCardHeader>
+                <GlassCardContent>
+                  <AnimatedList>
+                    {incidents.map((incident) => (
+                      <motion.div 
+                        key={incident.id} 
+                        className="p-4 bg-slate-800/30 rounded-xl border border-white/5"
+                        whileHover={{ x: 4 }}
+                        data-testid={`incident-item-${incident.id}`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <StatusBadge status={incident.status} pulse={incident.status === 'reported'} />
+                              {incident.hasMedia && (
+                                <Badge variant="outline" className="text-xs">
+                                  <Camera className="h-3 w-3 mr-1" />
+                                  Media
+                                </Badge>
+                              )}
+                            </div>
+                            <h4 className="font-semibold text-white mb-1">{incident.type}</h4>
+                            <p className="text-sm text-slate-400 mb-2">{incident.description}</p>
+                            <p className="text-xs text-slate-500 flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {incident.location}
+                            </p>
                           </div>
-                          <p className="text-sm text-slate-300">{incident.description}</p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            <MapPin className="h-3 w-3 inline mr-1" />
-                            {incident.location}
-                          </p>
+                          <span className="text-xs text-slate-500">{incident.reportedAt}</span>
                         </div>
-                        <div className="text-xs text-slate-500">{incident.reportedAt}</div>
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+                      </motion.div>
+                    ))}
+                  </AnimatedList>
+                </GlassCardContent>
+              </GlassCard>
             )}
           </TabsContent>
 
           <TabsContent value="map" className="space-y-4">
-            <Card className="bg-slate-800/50 border-cyan-500/20">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-white flex items-center gap-2 text-base">
-                  <Navigation className="h-5 w-5 text-cyan-400" />
-                  Find a Location
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
+            <GlassCard gradient glow>
+              <GlassCardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-600">
+                    <Navigation className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Find a Location</h3>
+                    <p className="text-sm text-slate-400">Help guests navigate the stadium</p>
+                  </div>
+                </div>
+              </GlassCardHeader>
+              <GlassCardContent className="space-y-5">
+                <div className="grid grid-cols-2 gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setShowMap(true)}
-                    className="h-20 flex-col gap-2 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 hover:border-cyan-500/50"
-                    variant="outline"
+                    className="h-24 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 hover:border-cyan-500/50 flex flex-col items-center justify-center gap-2 transition-all"
                     data-testid="button-open-map"
                   >
-                    <Map className="h-6 w-6 text-cyan-400" />
-                    <span className="text-white">Stadium Map</span>
-                  </Button>
-                  <Button
+                    <Map className="h-8 w-8 text-cyan-400" />
+                    <span className="text-sm font-medium text-white">Stadium Map</span>
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setShowDirections(true)}
-                    className="h-20 flex-col gap-2 bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 hover:border-emerald-500/50"
-                    variant="outline"
+                    className="h-24 rounded-xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 hover:border-emerald-500/50 flex flex-col items-center justify-center gap-2 transition-all"
                     data-testid="button-get-directions"
                   >
-                    <Navigation className="h-6 w-6 text-emerald-400" />
-                    <span className="text-white">Get Directions</span>
-                  </Button>
+                    <Navigation className="h-8 w-8 text-emerald-400" />
+                    <span className="text-sm font-medium text-white">Get Directions</span>
+                  </motion.button>
                 </div>
 
                 <div>
-                  <label className="text-xs text-slate-400 mb-2 block">Quick Destinations</label>
+                  <label className="text-xs text-slate-400 mb-3 block font-medium">Quick Destinations</label>
                   <div className="grid grid-cols-3 gap-2">
                     {['Restrooms', 'Guest Services', 'First Aid', 'Concessions', 'Elevators', 'Exits'].map((dest) => (
-                      <Button
+                      <motion.button
                         key={dest}
-                        variant="outline"
-                        size="sm"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => {
                           setSelectedDestination(dest);
                           setShowDirections(true);
                         }}
-                        className="border-slate-600 text-slate-300 text-xs"
+                        className="p-2.5 rounded-lg bg-slate-800/50 border border-white/10 hover:border-white/20 text-xs font-medium text-slate-300 transition-all"
                         data-testid={`quick-dest-${dest.toLowerCase()}`}
                       >
                         {dest}
-                      </Button>
+                      </motion.button>
                     ))}
                   </div>
                 </div>
 
-                <div className="p-3 bg-slate-700/30 rounded-lg">
+                <div className="p-4 rounded-xl bg-slate-800/50 border border-white/10">
                   <div className="flex items-center gap-2 mb-2">
                     <Locate className="h-4 w-4 text-cyan-400" />
                     <span className="text-sm font-medium text-white">Your Location</span>
@@ -643,13 +772,16 @@ export default function CheckInAssistantDashboard() {
                   {gpsLoading ? (
                     <p className="text-xs text-slate-400">Detecting location...</p>
                   ) : isOnSite ? (
-                    <p className="text-xs text-emerald-400">You are at Nissan Stadium</p>
+                    <p className="text-xs text-emerald-400 flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      You are at Nissan Stadium
+                    </p>
                   ) : (
                     <Button
                       onClick={requestLocation}
                       variant="outline"
                       size="sm"
-                      className="border-slate-600 text-slate-300"
+                      className="border-white/10 text-slate-300 hover:bg-white/5"
                       data-testid="button-enable-gps"
                     >
                       <Locate className="h-3 w-3 mr-2" />
@@ -657,61 +789,77 @@ export default function CheckInAssistantDashboard() {
                     </Button>
                   )}
                 </div>
-              </CardContent>
-            </Card>
+              </GlassCardContent>
+            </GlassCard>
 
-            <Card className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-cyan-500/20">
-              <CardContent className="py-4">
+            <GlassCard className="bg-gradient-to-r from-cyan-500/5 to-blue-500/5">
+              <GlassCardContent className="py-4">
                 <div className="flex items-start gap-3">
-                  <AlertCircle className="h-5 w-5 text-cyan-400 flex-shrink-0 mt-0.5" />
+                  <div className="p-2 rounded-lg bg-cyan-500/20">
+                    <HelpCircle className="h-4 w-4 text-cyan-400" />
+                  </div>
                   <div>
-                    <h3 className="text-sm font-medium text-white mb-1">Guest Assistance Tips</h3>
-                    <ul className="text-xs text-slate-400 space-y-1">
-                      <li>• Use the interactive map to show guests their destination</li>
-                      <li>• Walking directions include step-by-step guidance</li>
-                      <li>• Elevators are available at each gate for accessibility</li>
-                      <li>• Guest Services is located at the North and South plazas</li>
+                    <h4 className="text-sm font-semibold text-white mb-2">Guest Assistance Tips</h4>
+                    <ul className="text-xs text-slate-400 space-y-1.5">
+                      <li className="flex items-start gap-2">
+                        <span className="text-cyan-400">•</span>
+                        Use the interactive map to show guests their destination
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-cyan-400">•</span>
+                        Walking directions include step-by-step guidance
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-cyan-400">•</span>
+                        Elevators are available at each gate for accessibility
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-cyan-400">•</span>
+                        Guest Services is located at North and South plazas
+                      </li>
                     </ul>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </GlassCardContent>
+            </GlassCard>
           </TabsContent>
         </Tabs>
       </main>
 
       <Dialog open={showMap} onOpenChange={setShowMap}>
-        <DialogContent className="max-w-4xl h-[80vh] p-0 bg-slate-900 border-slate-700">
-          <DialogHeader className="p-4 border-b border-slate-700">
+        <DialogContent className="max-w-4xl h-[85vh] p-0 bg-slate-900 border-white/10">
+          <DialogHeader className="p-4 border-b border-white/10">
             <DialogTitle className="text-white flex items-center gap-2">
               <Map className="h-5 w-5 text-cyan-400" />
               Nissan Stadium Map
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 overflow-hidden">
+          <ScrollArea className="flex-1">
             <InteractiveMap />
-          </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 
       <Dialog open={showDirections} onOpenChange={setShowDirections}>
-        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto bg-slate-900 border-slate-700">
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-hidden bg-slate-900 border-white/10">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Navigation className="h-5 w-5 text-emerald-400" />
               Walking Directions
             </DialogTitle>
           </DialogHeader>
-          <WalkingDirections 
-            userLocation={gpsLocation ? { lat: gpsLocation.coords.latitude, lng: gpsLocation.coords.longitude } : null}
-            defaultDestination={selectedDestination}
-            onClose={() => {
-              setShowDirections(false);
-              setSelectedDestination('');
-            }}
-          />
+          <ScrollArea className="max-h-[calc(85vh-100px)]">
+            <WalkingDirections 
+              userLocation={gpsLocation ? { lat: gpsLocation.coords.latitude, lng: gpsLocation.coords.longitude } : null}
+              defaultDestination={selectedDestination}
+              onClose={() => {
+                setShowDirections(false);
+                setSelectedDestination('');
+              }}
+            />
+          </ScrollArea>
         </DialogContent>
       </Dialog>
-    </div>
+    </AnimatedBackground>
   );
 }

@@ -195,7 +195,8 @@ export function GlowButton({
   size = "default",
   onClick,
   disabled,
-  type = "button"
+  type = "button",
+  ...props
 }: {
   children: React.ReactNode;
   className?: string;
@@ -204,6 +205,7 @@ export function GlowButton({
   onClick?: () => void;
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
+  "data-testid"?: string;
 }) {
   const variantClasses = {
     cyan: "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 shadow-cyan-500/40 hover:shadow-cyan-400/60",
@@ -233,6 +235,7 @@ export function GlowButton({
         disabled && "opacity-50 cursor-not-allowed",
         className
       )}
+      {...props}
     >
       <span className="relative z-10 flex items-center justify-center gap-2">{children}</span>
     </motion.button>
