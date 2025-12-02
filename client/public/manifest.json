@@ -1,7 +1,7 @@
 {
   "name": "Orby",
   "short_name": "Orby",
-  "description": "Real-time communications and operations management for venues",
+  "description": "Complete venue operations platform for Nissan Stadium. Features Emergency Command Center, delivery tracking, three-phase inventory counting, alcohol compliance, GPS-guided navigation, Check-in Assistant, and unified team communications.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
@@ -25,19 +25,64 @@
   "screenshots": [],
   "shortcuts": [
     {
-      "name": "Admin Dashboard",
-      "url": "/admin",
-      "description": "Access admin controls"
+      "name": "Command Center",
+      "url": "/command-center",
+      "description": "Emergency Command Center"
     },
     {
-      "name": "Supervisor View",
-      "url": "/supervisor",
-      "description": "Access supervisor dashboard"
+      "name": "Ops Dashboard",
+      "url": "/ops-command",
+      "description": "Operations Manager dashboard"
+    },
+    {
+      "name": "Deliveries",
+      "url": "/deliveries",
+      "description": "Track deliveries"
+    },
+    {
+      "name": "Inventory Counts",
+      "url": "/manager-dashboard",
+      "description": "Three-phase inventory counting"
+    },
+    {
+      "name": "Document Hub",
+      "url": "/document-hub",
+      "description": "Manager Document Hub"
+    },
+    {
+      "name": "Stand Setup",
+      "url": "/stand-setup",
+      "description": "Configure stand inventory"
+    },
+    {
+      "name": "Alcohol Compliance",
+      "url": "/alcohol-compliance",
+      "description": "Vendor monitoring"
+    },
+    {
+      "name": "Check-in Assistant",
+      "url": "/checkin-assistant",
+      "description": "Guest services and incidents"
+    },
+    {
+      "name": "Bar Scheduler",
+      "url": "/bar-scheduler",
+      "description": "Bar operations scheduling"
+    },
+    {
+      "name": "Team Management",
+      "url": "/team-leads",
+      "description": "Manage team leads"
     },
     {
       "name": "Messages",
       "url": "/messages",
-      "description": "View communications"
+      "description": "Team communications"
+    },
+    {
+      "name": "Stadium Map",
+      "url": "/stadium-map",
+      "description": "Interactive map with directions"
     }
   ]
 }

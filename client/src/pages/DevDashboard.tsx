@@ -213,23 +213,28 @@ export default function DevDashboard() {
 
   const roles = {
     command: [
-      { name: "Ops Manager", description: "David's view - full ops control", pin: "1234", route: "/ops-command", icon: <Radio className="h-5 w-5" />, color: "cyan" },
-      { name: "Special Ops", description: "Sid's controller view", pin: "2468", route: "/ops-command", icon: <Zap className="h-5 w-5" />, color: "purple" },
+      { name: "Developer", description: "Jason - Dev + Field Ops (unified view)", pin: "0424", route: "/ops-command", icon: <Monitor className="h-5 w-5" />, color: "cyan" },
+      { name: "Ops Manager", description: "David - full ops control", pin: "0424", route: "/ops-command", icon: <Radio className="h-5 w-5" />, color: "cyan" },
+      { name: "Special Ops", description: "Sid's controller view", pin: "0424", route: "/ops-command", icon: <Zap className="h-5 w-5" />, color: "purple" },
     ],
     management: [
-      { name: "Warehouse Mgr", description: "Jay/AJ - purchasing & receiving", pin: "3333", route: "/warehouse", icon: <Package className="h-5 w-5" />, color: "teal" },
-      { name: "Kitchen Mgr", description: "Chef Deb/Bobby - culinary ops", pin: "4444", route: "/kitchen", icon: <ChefHat className="h-5 w-5" />, color: "sky" },
-      { name: "Bar Manager", description: "Darby - beverage operations", pin: "5555", route: "/warehouse", icon: <Wine className="h-5 w-5" />, color: "pink" },
-      { name: "IT Manager", description: "David - tech & systems", pin: "9999", route: "/it", icon: <Monitor className="h-5 w-5" />, color: "cyan" },
+      { name: "Management", description: "All managers - full access", pin: "4444", route: "/manager-dashboard", icon: <UserCog className="h-5 w-5" />, color: "teal" },
+      { name: "Warehouse", description: "Jay/AJ - purchasing & receiving", pin: "4444", route: "/warehouse", icon: <Package className="h-5 w-5" />, color: "teal" },
+      { name: "Kitchen", description: "Chef Deb/Bobby - culinary ops", pin: "4444", route: "/kitchen", icon: <ChefHat className="h-5 w-5" />, color: "sky" },
+      { name: "Bar Manager", description: "Darby - bar scheduler & ops", pin: "4444", route: "/bar-scheduler", icon: <Wine className="h-5 w-5" />, color: "pink" },
     ],
     field: [
-      { name: "Supervisor", description: "Section oversight, department requests", pin: "5678", route: "/supervisor", icon: <UserCog className="h-5 w-5" />, color: "teal" },
-      { name: "Stand Lead", description: "Stand flow, worker direction", pin: "7777", route: "/standlead", icon: <Users className="h-5 w-5" />, color: "green" },
-      { name: "NPO Worker", description: "Frontline concessions", pin: "8888", route: "/npo", icon: <Sparkles className="h-5 w-5" />, color: "blue" },
+      { name: "Stand Supervisor", description: "Section oversight, full dashboard", pin: "3333", route: "/supervisor", icon: <UserCog className="h-5 w-5" />, color: "teal" },
+      { name: "Stand Lead", description: "Stand flow, worker direction", pin: "2222", route: "/standlead", icon: <Users className="h-5 w-5" />, color: "green" },
+      { name: "NPO Worker", description: "Frontline concessions", pin: "1111", route: "/npo", icon: <Sparkles className="h-5 w-5" />, color: "blue" },
+    ],
+    specialty: [
+      { name: "Alcohol Compliance", description: "Vendor monitoring, violation reports", pin: "5555", route: "/alcohol-compliance", icon: <Wine className="h-5 w-5" />, color: "red" },
+      { name: "Check-in Assistant", description: "Guest services, incident reporting", pin: "6666", route: "/checkin-assistant", icon: <Users className="h-5 w-5" />, color: "sky" },
     ],
     admin: [
-      { name: "Admin", description: "Full system access", pin: "1234", route: "/admin", icon: <Shield className="h-5 w-5" />, color: "red" },
-      { name: "Executive", description: "Brian/Megan - high-level view", pin: "0000", route: "/executive", icon: <Eye className="h-5 w-5" />, color: "purple" },
+      { name: "Admin", description: "Full system access", pin: "0424", route: "/admin", icon: <Shield className="h-5 w-5" />, color: "red" },
+      { name: "Executive", description: "Brian/Megan - high-level view", pin: "0424", route: "/executive", icon: <Eye className="h-5 w-5" />, color: "purple" },
     ]
   };
 
@@ -339,7 +344,7 @@ export default function DevDashboard() {
           icon={<Radio className="h-5 w-5" />}
           defaultOpen={true}
           accentColor="cyan"
-          badge={2}
+          badge={3}
         >
           <div className="space-y-2">
             {roles.command.map(role => (
@@ -369,6 +374,19 @@ export default function DevDashboard() {
         >
           <div className="space-y-2">
             {roles.field.map(role => (
+              <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
+            ))}
+          </div>
+        </AccordionSection>
+
+        <AccordionSection 
+          title="Specialty Roles" 
+          icon={<ClipboardList className="h-5 w-5" />}
+          accentColor="red"
+          badge={2}
+        >
+          <div className="space-y-2">
+            {roles.specialty.map(role => (
               <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
             ))}
           </div>

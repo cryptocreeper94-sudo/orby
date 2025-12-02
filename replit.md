@@ -1,9 +1,9 @@
-# Orby - Operations Communication Platform
+# Orby - Venue Operations Platform
 
 ## Overview
-Orby (getorby.io) is a comprehensive venue operations communications platform designed to replace texts, phone calls, and two-way radios. Built as a Progressive Web App (PWA), it provides real-time communication, delivery tracking, and issue routing for stadium and venue operations. Orby focuses on front-of-house operations and complements enterprise systems like Yellow Dog (inventory) and OrbitStaffing (scheduling/staffing).
+Orby (getorby.io) is a comprehensive venue operations platform designed for Nissan Stadium, replacing texts, phone calls, and two-way radios with unified digital operations. Built as a Progressive Web App (PWA), it provides Emergency Command Center, delivery lifecycle tracking, three-phase inventory counting, alcohol compliance monitoring, GPS-guided navigation, and real-time team communications. Currently in beta testing with Ops Manager David, targeting app store deployment via Capacitor.
 
-**Key Value Proposition:** Contextual, trackable communication that's better than fragmented texts, interruptive calls, or spotty radios.
+**Key Value Proposition:** Complete venue operations in one platform - from emergency response to inventory counting to team communications.
 
 ## User Preferences
 - Mobile-first design critical (operations staff use phones)
@@ -67,41 +67,64 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 
 **Core Roles in App (with Demo PINs):**
 - Developer (Jason - unified with Ops Manager view + dev tools) - PIN: 0424
-- Admin
+- Admin - PIN: 0424
 - Management (Generally level - all managers) - PIN: 4444
-- IT
-- Warehouse
-- Kitchen
-- Bar
-- Operations
-- HR
-- AlcoholCompliance (event-day vendor monitoring, violation reporting) - PIN: 5555
-- CheckInAssistant (customer service, messaging to managers, incident reporting) - PIN: 6666
+- IT - PIN: 4444
+- Warehouse - PIN: 4444
+- Kitchen - PIN: 4444
+- Bar - PIN: 4444
+- Operations - PIN: 4444
+- HR - PIN: 4444
+- Alcohol Compliance (event-day vendor monitoring, violation reporting) - PIN: 5555
+- Check-in Assistant (customer service, messaging to managers, incident reporting) - PIN: 6666
 - Stand Supervisor (full dashboard access) - PIN: 3333
 - Stand Lead - PIN: 2222
 - NPO Worker - PIN: 1111
+- Universal First-Time Staff - PIN: 9999 (geofenced to stadium)
 
 **Key Features:**
-1. **Smart Message Routing** - Issues automatically route to the right department
-2. **Delivery Tracking** - Full lifecycle: Requested → Approved → Picking → On the Way (ETA) → Delivered
-3. **Status Dashboard** - Ops Manager sees all stands, issues, and deliveries in one view
-4. **Quick Messages** - Pre-built responses for common situations
-5. **Priority Escalation** - Emergency alerts vs normal queue
-6. **Presence Awareness** - Who's on duty, who's at which stand
-7. **Closing Workflows** - Guided checklists, signatures, PDF generation
-8. **AI Scanning** - Photo coolers for auto-count, scan handwritten sheets
-9. **Offline Mode** - Works when radio signals don't
-10. **Full Audit Trail** - Everything documented for accountability
-11. **Alcohol Compliance** - Vendor monitoring with photo/video evidence capture for violation reporting
-12. **Check-in Assistant** - Customer service role with:
-    - Messaging to HR/Managers only
-    - Incident reporting with photo/video capture
-    - Interactive stadium map for guest assistance
-    - GPS-guided walking directions
-13. **Weather Widget** - Real-time weather conditions using Open-Meteo API with animated effects
-14. **Interactive Stadium Map** - Section/zone navigation with supervisor assignments
-15. **Walking Directions** - Step-by-step navigation between stadium locations
-16. **Facility Issue Reporting** - Photo-based issue documentation for maintenance
+
+### Emergency & Command
+1. **Emergency Command Center** - Real-time incident management with priority levels
+2. **Smart Message Routing** - Issues automatically route to the right department
+3. **Priority Escalation** - Emergency alerts vs normal queue
+4. **Full Audit Trail** - Everything documented for accountability
+
+### Delivery Operations
+5. **Delivery Tracking** - Full lifecycle: Requested → Approved → Picking → On the Way (ETA) → Delivered
+6. **Status Dashboard** - Ops Manager sees all stands, issues, and deliveries in one view
+7. **Quick Messages** - Pre-built responses for common situations
+
+### Inventory Management
+8. **Three-Phase Inventory Counting** - PreEvent → PostEvent → DayAfter workflow
+   - PreEvent: Supervisor + Stand Lead/NPO verify printed counts
+   - PostEvent: Different team counts end-of-event inventory
+   - DayAfter: Manager verification and reconciliation
+9. **Stand Setup** - Scan paper count sheets to create digital templates (OCR)
+10. **Manager Document Hub** - Central archive for all reports, searchable by date/stand/category
+11. **AI Scanning** - Photo coolers for auto-count, scan handwritten sheets
+
+### Staff Management
+12. **Universal PIN Login** - PIN 9999 for first-time staff (geofenced to stadium)
+13. **Legends Staff Management** - Staff directory with role-based access
+14. **Team Lead Assignments** - Dynamic lead assignments for hierarchical departments
+15. **Bar Scheduler** - Darby's beverage operations scheduling
+
+### Compliance & Safety
+16. **Alcohol Compliance** - Vendor monitoring with photo/video evidence capture
+17. **Check-in Assistant** - Guest services with incident reporting, messaging to HR/Managers
+18. **Facility Issue Reporting** - Photo-based issue documentation for maintenance
+
+### Navigation & Location
+19. **Interactive Stadium Map** - Section/zone navigation with supervisor assignments
+20. **GPS-Guided Walking Directions** - Step-by-step navigation between stadium locations
+21. **Weather Widget** - Real-time conditions using Open-Meteo API with animated effects
+
+### Platform Features
+22. **Presence Awareness** - Who's on duty, who's at which stand
+23. **Closing Workflows** - Guided checklists, signatures, PDF generation
+24. **Offline Mode** - Works when radio signals don't
+25. **Sandbox Mode** - Training and demo environment
 
 **Technical Stack:**
 - Frontend: React, Wouter (routing), Zustand (state), TailwindCSS
@@ -130,10 +153,11 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 
 ## Branding
 - Name: Orby
-- Tagline: "Operations Communication Platform" or "Your team, connected"
+- Tagline: "Venue Operations Platform" or "Your team, connected"
 - Theme Color: #06B6D4 (Cyan/Aqua)
 - Parent Brand: "Orby by Orbit" (connects to OrbitStaffing)
 - Powered by: DarkWave Studios, LLC
+- Target Venue: Nissan Stadium (beta testing)
 
 ## Design Directives (MANDATORY)
 
