@@ -10,7 +10,7 @@ import { LiveSalesWidget } from '@/components/LiveSalesWidget';
 import {
   LogOut, Menu, Bell, MessageSquare, Package, Utensils, Beer, Monitor, Activity,
   AlertTriangle, CheckCircle2, Clock, MapPin, Users, Radio, TrendingUp, 
-  ChevronRight, Truck, Zap
+  ChevronRight, Truck, Zap, Crown
 } from 'lucide-react';
 import {
   Sheet,
@@ -515,6 +515,7 @@ export default function ManagerDashboard() {
                     { icon: MessageSquare, label: 'Messages', color: 'blue', href: '/messages', testId: 'button-view-messages' },
                     { icon: Package, label: 'Warehouse', color: 'orange', href: '/warehouse', testId: 'button-warehouse' },
                     { icon: TrendingUp, label: 'Reports', color: 'green', testId: 'button-reports' },
+                    { icon: Crown, label: 'Team Leads', color: 'amber', href: '/team-management', testId: 'button-team-management' },
                   ].map((action) => {
                     const content = (
                       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>

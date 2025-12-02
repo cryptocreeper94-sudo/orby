@@ -302,6 +302,80 @@ export async function registerRoutes(
     }
   });
 
+  // Assign team lead to a worker
+  app.patch("/api/users/:id/assign-team-lead", async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.id;
+      const { teamLeadId } = req.body;
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      if (teamLeadId) {
+        const lead = await storage.getUser(String(teamLeadId));
+        if (!lead) {
+          return res.status(400).json({ error: "Team lead not found" });
+        }
+        if (lead.department !== user.department) {
+          return res.status(400).json({ error: "Team lead must be in the same department" });
+        }
+      }
+      
+      await storage.assignTeamLead(userId, teamLeadId ? String(teamLeadId) : null);
+      
+      await createAuditLog(
+        userId,
+        'team_lead_assigned',
+        'user',
+        userId,
+        { teamLeadId },
+        undefined,
+        req
+      );
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Failed to assign team lead:', error);
+      res.status(500).json({ error: "Failed to assign team lead" });
+    }
+  });
+
+  // Promote/demote user to team lead
+  app.patch("/api/users/:id/promote-team-lead", async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.id;
+      const { isTeamLead } = req.body;
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      await storage.setTeamLeadStatus(userId, isTeamLead);
+      
+      if (!isTeamLead) {
+        await storage.removeTeamLeadAssignments(userId);
+      }
+      
+      await createAuditLog(
+        userId,
+        isTeamLead ? 'promoted_to_team_lead' : 'demoted_from_team_lead',
+        'user',
+        userId,
+        { isTeamLead },
+        undefined,
+        req
+      );
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Failed to update team lead status:', error);
+      res.status(500).json({ error: "Failed to update team lead status" });
+    }
+  });
+
   // ============ STANDS ============
   app.get("/api/stands", async (_req: Request, res: Response) => {
     try {

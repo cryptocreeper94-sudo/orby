@@ -72,6 +72,9 @@ export interface IStorage {
   getUsersByRoles(roles: User['role'][]): Promise<User[]>;
   createUser(user: InsertUser): Promise<User>;
   updateUserOnlineStatus(id: string, isOnline: boolean): Promise<void>;
+  assignTeamLead(userId: string, teamLeadId: string | null): Promise<void>;
+  setTeamLeadStatus(userId: string, isTeamLead: boolean): Promise<void>;
+  removeTeamLeadAssignments(teamLeadId: string): Promise<void>;
 
   // Stands
   getStand(id: string): Promise<Stand | undefined>;
@@ -387,6 +390,18 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserOnlineStatus(id: string, isOnline: boolean): Promise<void> {
     await db.update(users).set({ isOnline }).where(eq(users.id, id));
+  }
+
+  async assignTeamLead(userId: string, teamLeadId: string | null): Promise<void> {
+    await db.update(users).set({ teamLeadId }).where(eq(users.id, userId));
+  }
+
+  async setTeamLeadStatus(userId: string, isTeamLead: boolean): Promise<void> {
+    await db.update(users).set({ isTeamLead }).where(eq(users.id, userId));
+  }
+
+  async removeTeamLeadAssignments(teamLeadId: string): Promise<void> {
+    await db.update(users).set({ teamLeadId: null }).where(eq(users.teamLeadId, teamLeadId));
   }
 
   // Stands
