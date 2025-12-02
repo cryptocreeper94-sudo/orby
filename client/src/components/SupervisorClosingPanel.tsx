@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import {
   ClipboardCheck, Trash2, Receipt, Check, Plus, Minus, 
   AlertCircle, Loader2, CheckCircle, X, DollarSign, Send, FileText
 } from 'lucide-react';
+import { PDFActionButtons } from './PDFActionButtons';
 import {
   Select,
   SelectContent,
@@ -839,15 +840,12 @@ export function SupervisorClosingPanel({
                 </div>
 
                 <div className="flex gap-2">
-                  <Button 
-                    variant="outline"
-                    onClick={downloadSpoilagePDF}
-                    className="flex-1"
-                    data-testid="download-spoilage-pdf"
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Download PDF
-                  </Button>
+                  <PDFActionButtons
+                    generatePDF={generateSpoilagePDF}
+                    filename={`spoilage-report-${standId}-${eventDate.replace(/\//g, '-')}.pdf`}
+                    title="Spoilage Report"
+                    variant="compact"
+                  />
                   {!spoilageSubmitted ? (
                     <Button 
                       onClick={submitSpoilageToOps} 
@@ -951,15 +949,12 @@ export function SupervisorClosingPanel({
                 </div>
 
                 <div className="space-y-2">
-                  <Button 
-                    variant="outline"
-                    onClick={downloadVoucherPDF}
-                    className="w-full"
-                    data-testid="download-voucher-pdf"
-                  >
-                    <FileText className="h-4 w-4 mr-2" />
-                    Download PDF
-                  </Button>
+                  <PDFActionButtons
+                    generatePDF={generateVoucherPDF}
+                    filename={`voucher-report-${standId}-${eventDate.replace(/\//g, '-')}.pdf`}
+                    title="Voucher Report"
+                    variant="compact"
+                  />
                   {!voucherSubmitted ? (
                     <>
                       <Button 
