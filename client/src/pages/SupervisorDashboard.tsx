@@ -39,6 +39,7 @@ import {
   SectionHeader,
   StatCard
 } from "@/components/ui/premium";
+import { SectionHelp } from '@/components/OrbyHelp';
 
 type WarehouseProduct = {
   id: string;
@@ -447,6 +448,16 @@ export default function SupervisorDashboard() {
                   <Warehouse className="h-5 w-5 text-white" />
                 </div>
                 Request from Warehouse
+                <SectionHelp
+                  title="Warehouse Request"
+                  description="Order supplies from the warehouse for your stand. Select items, choose priority level, and submit. Runners will bring your order."
+                  tips={[
+                    "Normal: Added to queue in order received",
+                    "Rush: Prioritized in the queue",
+                    "Emergency: Immediate attention required"
+                  ]}
+                  keywords={['delivery', 'eta', 'priority', 'picking', 'on-the-way']}
+                />
               </DialogTitle>
             </DialogHeader>
             
@@ -665,18 +676,30 @@ export default function SupervisorDashboard() {
 
         <GlassCard gradient className="mb-6">
           <Tabs defaultValue="inventory" className="w-full" onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 rounded-t-2xl rounded-b-none border-b border-white/5 p-1">
-              <TabsTrigger value="inventory" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl">
-                Inventory
-              </TabsTrigger>
-              <TabsTrigger value="compliance" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl">
-                Docs
-              </TabsTrigger>
-              <TabsTrigger value="closeout" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl" data-testid="tab-closeout">
-                <ClipboardCheck className="h-3 w-3 mr-1" />
-                Close
-              </TabsTrigger>
-            </TabsList>
+            <div className="flex items-center justify-between px-4 pt-3">
+              <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 rounded-2xl p-1">
+                <TabsTrigger value="inventory" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl">
+                  Inventory
+                </TabsTrigger>
+                <TabsTrigger value="compliance" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl">
+                  Docs
+                </TabsTrigger>
+                <TabsTrigger value="closeout" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl" data-testid="tab-closeout">
+                  <ClipboardCheck className="h-3 w-3 mr-1" />
+                  Close
+                </TabsTrigger>
+              </TabsList>
+              <SectionHelp
+                title="Stand Management Tabs"
+                description="Three core functions for managing your stand: Inventory counting, compliance documents, and end-of-event closeout procedures."
+                tips={[
+                  "Inventory: Count items at start, add deliveries, count at end",
+                  "Docs: Sign required compliance forms",
+                  "Close: Complete closeout checklist and submit"
+                ]}
+                keywords={['count-session', 'variance', 'violation', 'par-level']}
+              />
+            </div>
             
             <TabsContent value="inventory" className="p-4 md:p-5 space-y-4">
               <motion.button

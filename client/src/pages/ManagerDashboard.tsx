@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/sheet';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader } from '@/components/ui/premium';
+import { SectionHelp } from '@/components/OrbyHelp';
 
 interface DeliveryRequest {
   id: string;
@@ -298,6 +299,16 @@ export default function ManagerDashboard() {
                         <Truck className="h-4 w-4 text-blue-400" />
                       </div>
                       <span className="font-bold text-slate-200">Active Deliveries</span>
+                      <SectionHelp
+                        title="Active Deliveries"
+                        description="Track all supply requests from stands to departments (Warehouse, Kitchen, Bar). Each delivery shows its current status and estimated arrival time."
+                        tips={[
+                          "Emergency requests appear at the top with red highlights",
+                          "Click any delivery to see full details and history",
+                          "ETA updates automatically as runners move"
+                        ]}
+                        keywords={['delivery', 'eta', 'priority', 'acknowledged', 'picking', 'on-the-way']}
+                      />
                     </div>
                     <Button variant="ghost" size="sm" className="text-cyan-400 hover:bg-cyan-500/10" data-testid="button-view-all-deliveries">
                       View All <ChevronRight className="h-4 w-4 ml-1" />
@@ -430,6 +441,16 @@ export default function ManagerDashboard() {
                       <MapPin className="h-4 w-4 text-emerald-400" />
                     </div>
                     <span className="font-bold text-slate-200">Stand Overview</span>
+                    <SectionHelp
+                      title="Stand Overview"
+                      description="Real-time status of all concession stands. Green means open and running smoothly. Orange indicates a Hot Spot needing attention. Red means the stand needs immediate help."
+                      tips={[
+                        "Hot Spots are high-volume or problem stands",
+                        "Tap a stand to see active issues and deliveries",
+                        "Filter by section to focus on your area"
+                      ]}
+                      keywords={['stand', 'section', 'hot-spot', 'supervisor']}
+                    />
                   </div>
                 </GlassCardHeader>
                 <GlassCardContent className="pt-0">
@@ -475,7 +496,18 @@ export default function ManagerDashboard() {
 
               <GlassCard data-testid="quick-actions">
                 <GlassCardHeader>
-                  <span className="font-bold text-slate-200">Quick Actions</span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-200">Quick Actions</span>
+                    <SectionHelp
+                      title="Quick Actions"
+                      description="One-tap access to common operations tasks. Broadcast messages to all staff, view reports, or manage system settings."
+                      tips={[
+                        "Use Broadcast for urgent venue-wide announcements",
+                        "Reports show trends and help with decision-making"
+                      ]}
+                      keywords={['broadcast', 'routing', 'audit-trail']}
+                    />
+                  </div>
                 </GlassCardHeader>
                 <GlassCardContent className="grid grid-cols-2 gap-2 pt-0">
                   {[

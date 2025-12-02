@@ -50,6 +50,7 @@ import {
   PageHeader
 } from '@/components/ui/premium';
 import type { EmergencyAlert, Stand, User as UserType } from '@shared/schema';
+import { SectionHelp } from '@/components/OrbyHelp';
 
 const EMERGENCY_TYPES = [
   { id: 'Medical', icon: Heart, color: 'from-rose-500 to-rose-600', bgColor: 'bg-rose-500', label: 'Medical Emergency', sla: 3 },
@@ -555,11 +556,23 @@ export default function CommandCenter() {
           <div className="lg:col-span-2 space-y-6">
             <GlassCard gradient>
               <GlassCardHeader>
-                <SectionHeader 
-                  title="Quick Alert" 
-                  subtitle="One-tap emergency dispatch"
-                  icon={<AlertTriangle className="w-5 h-5" />}
-                />
+                <div className="flex items-center gap-2">
+                  <SectionHeader 
+                    title="Quick Alert" 
+                    subtitle="One-tap emergency dispatch"
+                    icon={<AlertTriangle className="w-5 h-5" />}
+                  />
+                  <SectionHelp
+                    title="Quick Alert Panel"
+                    description="Instantly dispatch emergency alerts with one tap. Each alert type routes to the right responders and tracks SLA (Service Level Agreement) times."
+                    tips={[
+                      "Medical emergencies have a 3-minute SLA",
+                      "All alerts are logged for accountability",
+                      "Critical alerts trigger escalation if not acknowledged"
+                    ]}
+                    keywords={['priority', 'broadcast', 'audit-trail']}
+                  />
+                </div>
               </GlassCardHeader>
               <GlassCardContent>
                 <div className="grid grid-cols-4 gap-3 mb-3">
@@ -677,10 +690,22 @@ export default function CommandCenter() {
           </div>
 
           <div className="space-y-6">
-            <SectionHeader 
-              title="Response Metrics" 
-              icon={<Clock className="w-5 h-5" />}
-            />
+            <div className="flex items-center gap-2">
+              <SectionHeader 
+                title="Response Metrics" 
+                icon={<Clock className="w-5 h-5" />}
+              />
+              <SectionHelp
+                title="Response Metrics"
+                description="Real-time dashboard showing how incidents are being handled. Track active alerts, claimed incidents, resolution rates, and escalations."
+                tips={[
+                  "Green numbers are good - incidents being resolved",
+                  "Watch for rising escalations - may need intervention",
+                  "Claimed means someone has taken ownership"
+                ]}
+                keywords={['acknowledged', 'priority', 'audit-trail']}
+              />
+            </div>
             
             <div className="grid grid-cols-1 gap-4">
               <StatCard 
@@ -716,7 +741,19 @@ export default function CommandCenter() {
 
             <GlassCard gradient className="hidden lg:block">
               <GlassCardHeader>
-                <h3 className="text-sm font-semibold text-slate-300">Emergency Types Guide</h3>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold text-slate-300">Emergency Types Guide</h3>
+                  <SectionHelp
+                    title="Emergency Types"
+                    description="Each emergency type has a specific SLA (response time target) and routes to the appropriate responders. Medical and Fire are the most urgent."
+                    tips={[
+                      "Medical: 3 min SLA - routes to first aid",
+                      "Security: 5 min SLA - routes to security team",
+                      "Equipment: 10 min SLA - routes to IT/maintenance"
+                    ]}
+                    keywords={['priority']}
+                  />
+                </div>
               </GlassCardHeader>
               <GlassCardContent className="space-y-3">
                 {EMERGENCY_TYPES.slice(0, 4).map(type => (
