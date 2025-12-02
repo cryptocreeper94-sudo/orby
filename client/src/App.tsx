@@ -36,6 +36,7 @@ import CheckInAssistantDashboard from "@/pages/CheckInAssistantDashboard";
 import TeamManagement from "@/pages/TeamManagement";
 import BarScheduler from "@/pages/BarScheduler";
 import ItemManagement from "@/pages/ItemManagement";
+import StandSetup from "@/pages/StandSetup";
 import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
@@ -78,6 +79,7 @@ function Router() {
       <Route path="/team-management" component={TeamManagement} />
       <Route path="/bar-scheduler" component={BarScheduler} />
       <Route path="/item-management" component={ItemManagement} />
+      <Route path="/stand-setup" component={StandSetup} />
       <Route component={NotFound} />
     </Switch>
   );
