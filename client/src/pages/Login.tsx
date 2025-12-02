@@ -50,6 +50,7 @@ export default function LoginPage() {
       else if (role === 'StandLead') setLocation("/standlead");
       else if (role === 'StandSupervisor' || role === 'Supervisor') setLocation("/supervisor");
       else if (role === 'AlcoholCompliance') setLocation("/alcohol-compliance");
+      else if (role === 'CheckInAssistant') setLocation("/check-in-assistant");
       else if (role === 'Warehouse' || role === 'WarehouseManager' || role === 'WarehouseWorker') setLocation("/warehouse");
       else if (role === 'Kitchen' || role === 'KitchenManager' || role === 'KitchenWorker') setLocation("/kitchen");
       else if (role === 'ManagementCore' || role === 'ManagementAssistant' || role === 'OperationsAssistant') setLocation("/manager");
@@ -178,7 +179,7 @@ export default function LoginPage() {
               
               <div className="mt-4 text-center">
                 <p className="text-[10px] text-cyan-200/50 font-medium">
-                  Demo: 1111 · 2222 · 3333 · 4444
+                  Demo: 1111 · 2222 · 3333 · 4444 · 5555 · 6666
                 </p>
               </div>
             </form>

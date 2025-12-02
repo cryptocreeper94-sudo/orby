@@ -65,20 +65,21 @@ NPO Workers (frontline concessions)
 ## System Architecture
 Orby is a full-stack PWA utilizing React frontend and Express backend with PostgreSQL/Drizzle ORM.
 
-**Core Roles in App:**
-- Developer (Jason - unified with Ops Manager view + dev tools)
+**Core Roles in App (with Demo PINs):**
+- Developer (Jason - unified with Ops Manager view + dev tools) - PIN: 0424
 - Admin
-- Management (Generally level - all managers)
+- Management (Generally level - all managers) - PIN: 4444
 - IT
 - Warehouse
 - Kitchen
 - Bar
 - Operations
 - HR
-- AlcoholCompliance (event-day vendor monitoring, violation reporting)
-- Stand Supervisor (full dashboard access)
-- Stand Lead
-- NPO Worker
+- AlcoholCompliance (event-day vendor monitoring, violation reporting) - PIN: 5555
+- CheckInAssistant (customer service, messaging to managers, incident reporting) - PIN: 6666
+- Stand Supervisor (full dashboard access) - PIN: 3333
+- Stand Lead - PIN: 2222
+- NPO Worker - PIN: 1111
 
 **Key Features:**
 1. **Smart Message Routing** - Issues automatically route to the right department
@@ -92,6 +93,15 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 9. **Offline Mode** - Works when radio signals don't
 10. **Full Audit Trail** - Everything documented for accountability
 11. **Alcohol Compliance** - Vendor monitoring with photo/video evidence capture for violation reporting
+12. **Check-in Assistant** - Customer service role with:
+    - Messaging to HR/Managers only
+    - Incident reporting with photo/video capture
+    - Interactive stadium map for guest assistance
+    - GPS-guided walking directions
+13. **Weather Widget** - Real-time weather conditions using Open-Meteo API with animated effects
+14. **Interactive Stadium Map** - Section/zone navigation with supervisor assignments
+15. **Walking Directions** - Step-by-step navigation between stadium locations
+16. **Facility Issue Reporting** - Photo-based issue documentation for maintenance
 
 **Technical Stack:**
 - Frontend: React, Wouter (routing), Zustand (state), TailwindCSS

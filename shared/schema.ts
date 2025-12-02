@@ -11,7 +11,7 @@ export const userRoleEnum = pgEnum('user_role', [
   'ManagementCore',   // PIN: 4444 - Warehouse/Kitchen/Culinary/HR/Bar managers
   'ManagementAssistant', // Assigned by managers for the day
   'AlcoholCompliance', // PIN: 5555 - Monitors vendors, reports violations
-  'CheckingAssistant', // PIN: 6666 - Customer service, can only message HR/Managers
+  'CheckInAssistant', // PIN: 6666 - Customer service, can only message HR/Managers
   'Admin',            // System admin
   'IT',               // IT support
   'Developer'         // Dev access
