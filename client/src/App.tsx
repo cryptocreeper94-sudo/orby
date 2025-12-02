@@ -37,6 +37,8 @@ import TeamManagement from "@/pages/TeamManagement";
 import BarScheduler from "@/pages/BarScheduler";
 import ItemManagement from "@/pages/ItemManagement";
 import StandSetup from "@/pages/StandSetup";
+import EventCountSession from "@/pages/EventCountSession";
+import DocumentHub from "@/pages/DocumentHub";
 import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
@@ -80,6 +82,8 @@ function Router() {
       <Route path="/bar-scheduler" component={BarScheduler} />
       <Route path="/item-management" component={ItemManagement} />
       <Route path="/stand-setup" component={StandSetup} />
+      <Route path="/count-session/:standId/:eventDate" component={EventCountSession} />
+      <Route path="/document-hub" component={DocumentHub} />
       <Route component={NotFound} />
     </Switch>
   );

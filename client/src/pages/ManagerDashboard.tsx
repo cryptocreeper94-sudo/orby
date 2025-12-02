@@ -10,7 +10,7 @@ import { LiveSalesWidget } from '@/components/LiveSalesWidget';
 import {
   LogOut, Menu, Bell, MessageSquare, Package, Utensils, Beer, Monitor, Activity,
   AlertTriangle, CheckCircle2, Clock, MapPin, Users, Radio, TrendingUp, 
-  ChevronRight, Truck, Zap, Crown, Calendar
+  ChevronRight, Truck, Zap, Crown, Calendar, Store, FileStack, ClipboardList
 } from 'lucide-react';
 import {
   Sheet,
@@ -457,37 +457,42 @@ export default function ManagerDashboard() {
                   <ScrollArea className="h-[300px]">
                     <div className="space-y-2">
                       {standStatuses.map((stand, idx) => (
-                        <motion.div 
+                        <Link 
                           key={stand.id} 
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: idx * 0.03 }}
-                          className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-                          data-testid={`stand-${stand.id}`}
+                          href={`/count-session/${stand.id}/${encodeURIComponent(new Date().toLocaleDateString())}`}
                         >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-2 h-2 rounded-full ${standStatusColors[stand.status]}`} />
-                            <div>
-                              <div className="font-medium text-sm text-slate-200">{stand.name}</div>
-                              <div className="text-xs text-slate-500">{stand.section}</div>
+                          <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: idx * 0.03 }}
+                            className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                            data-testid={`stand-${stand.id}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`w-2 h-2 rounded-full ${standStatusColors[stand.status]}`} />
+                              <div>
+                                <div className="font-medium text-sm text-slate-200">{stand.name}</div>
+                                <div className="text-xs text-slate-500">{stand.section}</div>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {stand.activeIssues > 0 && (
-                              <Badge className="text-xs bg-red-500/20 text-red-400 border border-red-500/30">
-                                {stand.activeIssues} issue{stand.activeIssues > 1 ? 's' : ''}
+                            <div className="flex items-center gap-2">
+                              {stand.activeIssues > 0 && (
+                                <Badge className="text-xs bg-red-500/20 text-red-400 border border-red-500/30">
+                                  {stand.activeIssues} issue{stand.activeIssues > 1 ? 's' : ''}
+                                </Badge>
+                              )}
+                              {stand.pendingDeliveries > 0 && (
+                                <Badge variant="outline" className="text-xs border-blue-500/30 text-blue-400">
+                                  {stand.pendingDeliveries} pending
+                                </Badge>
+                              )}
+                              <Badge variant="outline" className="text-xs border-white/20 text-slate-400">
+                                {stand.status}
                               </Badge>
-                            )}
-                            {stand.pendingDeliveries > 0 && (
-                              <Badge variant="outline" className="text-xs border-blue-500/30 text-blue-400">
-                                {stand.pendingDeliveries} pending
-                              </Badge>
-                            )}
-                            <Badge variant="outline" className="text-xs border-white/20 text-slate-400">
-                              {stand.status}
-                            </Badge>
-                          </div>
-                        </motion.div>
+                              <ChevronRight className="h-4 w-4 text-slate-500" />
+                            </div>
+                          </motion.div>
+                        </Link>
                       ))}
                     </div>
                   </ScrollArea>
@@ -514,9 +519,11 @@ export default function ManagerDashboard() {
                     { icon: Radio, label: 'Broadcast', color: 'cyan', testId: 'button-broadcast' },
                     { icon: MessageSquare, label: 'Messages', color: 'blue', href: '/messages', testId: 'button-view-messages' },
                     { icon: Package, label: 'Warehouse', color: 'orange', href: '/warehouse', testId: 'button-warehouse' },
-                    { icon: TrendingUp, label: 'Reports', color: 'green', testId: 'button-reports' },
+                    { icon: Store, label: 'Stand Setup', color: 'purple', href: '/stand-setup', testId: 'button-stand-setup' },
+                    { icon: FileStack, label: 'Doc Hub', color: 'green', href: '/document-hub', testId: 'button-document-hub' },
                     { icon: Crown, label: 'Team Leads', color: 'amber', href: '/team-management', testId: 'button-team-management' },
                     { icon: Beer, label: 'Bar Schedule', color: 'amber', href: '/bar-scheduler', testId: 'button-bar-scheduler' },
+                    { icon: ClipboardList, label: 'Items', color: 'emerald', href: '/item-management', testId: 'button-item-management' },
                   ].map((action) => {
                     const content = (
                       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>

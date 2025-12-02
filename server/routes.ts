@@ -1383,6 +1383,39 @@ Return your response as a JSON object with this exact structure:
     }
   });
 
+  // ============ INVENTORY COUNTS ============
+  // Get inventory counts by session
+  app.get("/api/inventory-counts", async (req: Request, res: Response) => {
+    try {
+      const { sessionId, standId, eventDate } = req.query;
+      if (sessionId) {
+        const counts = await storage.getInventoryCountsBySession(sessionId as string);
+        return res.json(counts);
+      }
+      if (standId && eventDate) {
+        const counts = await storage.getInventoryCountsByStand(standId as string, eventDate as string);
+        return res.json(counts);
+      }
+      return res.status(400).json({ error: "Either sessionId or standId+eventDate required" });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch inventory counts" });
+    }
+  });
+
+  // Create or update inventory count
+  app.post("/api/inventory-counts", async (req: Request, res: Response) => {
+    try {
+      const parsed = insertInventoryCountSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Invalid inventory count data", details: parsed.error });
+      }
+      const count = await storage.upsertInventoryCount(parsed.data);
+      res.json(count);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to save inventory count" });
+    }
+  });
+
   // ============ STAND ISSUES ============
   // Get all stand issues (with optional standId filter)
   app.get("/api/stand-issues", async (req: Request, res: Response) => {
