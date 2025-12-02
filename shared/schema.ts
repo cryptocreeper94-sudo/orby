@@ -133,12 +133,38 @@ export const inventoryCounts = pgTable("inventory_counts", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Items catalog
+// Items catalog (global items that can be assigned to stands)
 export const items = pgTable("items", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
   price: integer("price").notNull(),
   category: text("category").notNull(),
+});
+
+// Stand Items - links items to specific stands (semi-permanent templates)
+// This defines which chargeable items each stand carries
+export const standItems = pgTable("stand_items", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id).notNull(),
+  itemId: varchar("item_id", { length: 36 }).references(() => items.id).notNull(),
+  sortOrder: integer("sort_order").default(0), // Display order on count sheet
+  isChargeable: boolean("is_chargeable").default(true), // Whether this item counts toward inventory
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Manager Documents Hub - central repository for all reports and communications
+export const managerDocuments = pgTable("manager_documents", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  category: text("category").notNull(), // CountReport, IncidentReport, ViolationReport, Communication, etc.
+  subcategory: text("subcategory"), // PreEvent, PostEvent, DayAfter for counts
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  eventDate: text("event_date"),
+  submittedById: varchar("submitted_by_id", { length: 36 }).references(() => users.id),
+  pdfUrl: text("pdf_url"),
+  jsonData: jsonb("json_data"), // Structured data for the document
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Messages
@@ -849,6 +875,8 @@ export const insertStandSchema = createInsertSchema(stands);
 export const insertCountSessionSchema = createInsertSchema(countSessions).omit({ id: true, startedAt: true, completedAt: true });
 export const insertInventoryCountSchema = createInsertSchema(inventoryCounts).omit({ id: true, createdAt: true });
 export const insertItemSchema = createInsertSchema(items).omit({ id: true });
+export const insertStandItemSchema = createInsertSchema(standItems).omit({ id: true, createdAt: true });
+export const insertManagerDocumentSchema = createInsertSchema(managerDocuments).omit({ id: true, createdAt: true });
 export const insertMessageSchema = createInsertSchema(messages).omit({ id: true, createdAt: true });
 export const insertNpoSchema = createInsertSchema(npos).omit({ id: true });
 export const insertStaffingGroupSchema = createInsertSchema(staffingGroups).omit({ id: true });
@@ -882,6 +910,10 @@ export type InventoryCount = typeof inventoryCounts.$inferSelect;
 export type InsertInventoryCount = z.infer<typeof insertInventoryCountSchema>;
 export type Item = typeof items.$inferSelect;
 export type InsertItem = z.infer<typeof insertItemSchema>;
+export type StandItem = typeof standItems.$inferSelect;
+export type InsertStandItem = z.infer<typeof insertStandItemSchema>;
+export type ManagerDocument = typeof managerDocuments.$inferSelect;
+export type InsertManagerDocument = z.infer<typeof insertManagerDocumentSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type NPO = typeof npos.$inferSelect;
