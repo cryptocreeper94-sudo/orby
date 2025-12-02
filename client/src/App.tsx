@@ -10,6 +10,7 @@ import { SandboxWelcome } from "@/components/SandboxWelcome";
 import { OnboardingOverlay, OnboardingHelpButton } from "@/components/OnboardingOverlay";
 import { FeatureSlideshow } from "@/components/FeatureSlideshow";
 import { FloatingHelpButton } from "@/components/OrbyHelp";
+import FloatingWeatherButton from "@/components/FloatingWeatherButton";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/Login";
 import SetPinPage from "@/pages/SetPin";
@@ -116,6 +117,7 @@ function App() {
             <FeatureSlideshow />
             <OnboardingHelpButton />
             <FloatingHelpButton />
+            <FloatingWeatherButton />
             <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
               <TwinklingStars />
               <div className="absolute inset-0 flex items-center justify-center">

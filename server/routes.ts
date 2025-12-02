@@ -12,6 +12,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
+import { weatherService } from "./services/weather";
 import path from "path";
 import fs from "fs";
 import { createWorker } from "tesseract.js";
@@ -2895,6 +2896,55 @@ Return your response as a JSON object with this exact structure:
     } catch (error) {
       console.error("Error resolving violation:", error);
       res.status(500).json({ error: "Failed to resolve violation" });
+    }
+  });
+
+  // ========== WEATHER API ==========
+  
+  // Get weather by ZIP code
+  app.get("/api/weather/zip/:zipCode", async (req: Request, res: Response) => {
+    try {
+      const weather = await weatherService.getWeatherByZip(req.params.zipCode);
+      if (!weather) {
+        return res.status(404).json({ error: "Location not found" });
+      }
+      res.json(weather);
+    } catch (error) {
+      console.error("Weather API error:", error);
+      res.status(500).json({ error: "Failed to fetch weather" });
+    }
+  });
+
+  // Get weather by city name
+  app.get("/api/weather/city/:cityName", async (req: Request, res: Response) => {
+    try {
+      const weather = await weatherService.getWeatherByCity(req.params.cityName);
+      if (!weather) {
+        return res.status(404).json({ error: "Location not found" });
+      }
+      res.json(weather);
+    } catch (error) {
+      console.error("Weather API error:", error);
+      res.status(500).json({ error: "Failed to fetch weather" });
+    }
+  });
+
+  // Get weather by coordinates (for Nissan Stadium default)
+  app.get("/api/weather/coords/:lat/:lon", async (req: Request, res: Response) => {
+    try {
+      const lat = parseFloat(req.params.lat);
+      const lon = parseFloat(req.params.lon);
+      if (isNaN(lat) || isNaN(lon)) {
+        return res.status(400).json({ error: "Invalid coordinates" });
+      }
+      const weather = await weatherService.getWeatherByCoords(lat, lon);
+      if (!weather) {
+        return res.status(404).json({ error: "Weather data not available" });
+      }
+      res.json(weather);
+    } catch (error) {
+      console.error("Weather API error:", error);
+      res.status(500).json({ error: "Failed to fetch weather" });
     }
   });
 

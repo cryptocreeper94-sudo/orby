@@ -124,3 +124,30 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 - Theme Color: #06B6D4 (Cyan/Aqua)
 - Parent Brand: "Orby by Orbit" (connects to OrbitStaffing)
 - Powered by: DarkWave Studios, LLC
+
+## Design Directives (MANDATORY)
+
+### Free-Floating Images Policy
+**Effective: December 2024**
+
+All images added to Orby must follow these rules:
+1. **No circular or square backgrounds** - Images must not be contained in shape containers
+2. **Free-floating assets only** - All icons, mascots, and visual elements must have transparent backgrounds
+3. **Use Python rembg** - All generated or imported images must be processed through rembg for clean background removal
+4. **Seamless canvas integration** - Images should float over or blend seamlessly into the app background
+5. **CSS-based effects** - Glows, shadows, and visual effects applied via CSS/Tailwind, not baked into images
+
+### Premium UI/UX Standards
+- Mobile-first, touch-optimized interactions
+- Framer Motion animations for smooth transitions
+- Dynamic glow effects based on context (weather conditions, alert severity, etc.)
+- Glassmorphic effects with backdrop blur
+- Dark theme with aqua/cyan accent gradients
+- Floating action buttons for quick access features
+
+### Image Processing Workflow
+1. Generate image with AI or import asset
+2. Run through Python rembg: `rembg i input.png output.png`
+3. Verify transparent background
+4. Import into React component
+5. Apply CSS animations/effects as needed
