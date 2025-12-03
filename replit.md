@@ -114,24 +114,26 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 16. **Alcohol Compliance** - Vendor monitoring with photo/video evidence capture
 17. **Check-in Assistant** - Guest services with incident reporting, messaging to HR/Managers
 18. **Facility Issue Reporting** - Photo-based issue documentation for maintenance
+19. **Tennessee ABC Board Alerts** - System-wide notification when ABC inspectors arrive with ID verification checklist
+20. **Tennessee Health Department Alerts** - System-wide notification with 0-100 scoring compliance checklist based on Rule 1200-23
 
 ### Navigation & Location
-19. **Interactive Stadium Map** - Section/zone navigation with supervisor assignments
-20. **GPS-Guided Walking Directions** - Step-by-step navigation between stadium locations
-21. **Weather Widget** - Real-time conditions using Open-Meteo API with animated effects
+21. **Interactive Stadium Map** - Section/zone navigation with supervisor assignments
+22. **GPS-Guided Walking Directions** - Step-by-step navigation between stadium locations
+23. **Weather Widget** - Real-time conditions using Open-Meteo API with animated effects
 
 ### Platform Features
-22. **Presence Awareness** - Who's on duty, who's at which stand
-23. **Closing Workflows** - Guided checklists, signatures, PDF generation
-24. **Offline Mode** - Works when radio signals don't
-25. **Sandbox Mode** - Training and demo environment
+24. **Presence Awareness** - Who's on duty, who's at which stand
+25. **Closing Workflows** - Guided checklists, signatures, PDF generation
+26. **Offline Mode** - Works when radio signals don't
+27. **Sandbox Mode** - Training and demo environment
 
 ### Genesis Hallmark Stamping System (Blockchain Certified)
-26. **Universal Asset Stamping** - Every auditable asset gets an ORB number (ORB-000000000001 format, 12 digits = 1 trillion capacity)
-27. **Blockchain Verification** - Important documents (customer-facing, compliance, invoices, PDFs) anchored to Solana for tamper-proof verification
-28. **Asset Tracker UI** - Full search/filter in Dev Panel and Manager Portal by number, name, date, type, category
-29. **Version Badge** - Footer version indicator with changelog modal showing all platform releases
-30. **Two-Tier System**: 
+28. **Universal Asset Stamping** - Every auditable asset gets an ORB number (ORB-000000000001 format, 12 digits = 1 trillion capacity)
+29. **Blockchain Verification** - Important documents (customer-facing, compliance, invoices, PDFs) anchored to Solana for tamper-proof verification
+30. **Asset Tracker UI** - Full search/filter in Dev Panel and Manager Portal by number, name, date, type, category
+31. **Version Badge** - Footer version indicator with changelog modal showing all platform releases
+32. **Two-Tier System**: 
     - Internal Only: Everything gets ORB stamp (searchable paper trail)
     - Blockchain: Important docs also get Solana hash (immutable proof)
 
