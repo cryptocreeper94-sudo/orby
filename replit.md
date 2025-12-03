@@ -5,6 +5,47 @@ Orby (getorby.io) is a comprehensive venue operations platform designed for Niss
 
 **Key Value Proposition:** Complete venue operations in one platform - from emergency response to inventory counting to team communications.
 
+## Current Version: v1.0.0 (Beta)
+**Release Date:** December 3, 2024
+**GitHub:** https://github.com/cryptocreeper94-sudo/orby
+
+### v1.0 Release Notes
+- Emergency Command Center with priority levels and real-time updates
+- Delivery lifecycle tracking (Requested → Approved → Picking → On the Way → Delivered)
+- Three-phase inventory counting (PreEvent → PostEvent → DayAfter)
+- Tennessee ABC Board and Health Department compliance alerts
+- Genesis Hallmark Stamping System with ORB numbers
+- Interactive Stadium Map with section assignments
+- GPS-guided walking directions
+- Orby AI chat assistant with voice input/output
+- Manager Document Hub for PDF reports
+- Dashboard Controls for Ops Manager David
+- Weather widget with animated effects
+- Mobile-optimized with 44px touch targets and accessibility labels
+
+## Version Roadmap
+
+### v1.1 - Enhanced Operations (Target: January 2025)
+- Real-time POS integration for sales data
+- Push notifications via PWA
+- Offline mode sync improvements
+- Bar scheduler enhancements
+- Photo evidence upload optimization
+
+### v1.2 - Analytics & Reporting (Target: February 2025)
+- Historical analytics dashboard
+- Trend analysis for inventory
+- Staff performance metrics
+- Event comparison reports
+- Export to Excel/CSV
+
+### v2.0 - Multi-Venue & App Store (Target: Q2 2025)
+- Capacitor wrapper for iOS/Android app stores
+- Multi-venue support (beyond Nissan Stadium)
+- OrbitStaffing deep integration
+- White-label customization options
+- Enterprise SSO support
+
 ## User Preferences
 - Mobile-first design critical (operations staff use phones)
 - No question dialog boxes - all questions in regular chat
