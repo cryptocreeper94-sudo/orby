@@ -151,22 +151,22 @@ export default function FloatingWeatherButton() {
     <>
       <motion.button
         onClick={() => setIsExpanded(true)}
-        className={`fixed bottom-20 right-4 z-50 w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br ${gradientClass} backdrop-blur-md border border-white/20 flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 ${glowClass}`}
+        className="fixed bottom-20 right-4 z-50 flex flex-col items-center justify-center cursor-pointer"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.5 }}
-        whileHover={{ scale: 1.1 }}
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         data-testid="button-weather-toggle"
       >
         {isLoading ? (
-          <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+          <Loader2 className="w-10 h-10 animate-spin text-cyan-400" />
         ) : (
-          <div className="relative w-full h-full flex items-center justify-center">
+          <div className="flex flex-col items-center">
             <motion.img
               src={currentIcon}
               alt="Weather"
-              className="w-12 h-12 md:w-14 md:h-14 object-contain drop-shadow-lg"
+              className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]"
               animate={{
                 y: [0, -3, 0],
                 rotate: isNight ? [0, 1, -1, 0] : [0, 2, -2, 0],
@@ -178,13 +178,9 @@ export default function FloatingWeatherButton() {
               }}
             />
             {weather && (
-              <div className={`absolute -bottom-1 -right-1 backdrop-blur-sm rounded-full px-1.5 py-0.5 border ${
-                isNight ? 'bg-indigo-900/80 border-indigo-400/30' : 'bg-black/80 border-white/20'
-              }`}>
-                <span className={`text-[10px] font-mono font-bold ${isNight ? 'text-indigo-100' : 'text-white'}`}>
-                  {weather.current.temp}°
-                </span>
-              </div>
+              <span className={`text-sm font-mono font-bold -mt-1 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)] ${isNight ? 'text-indigo-200' : 'text-white'}`}>
+                {weather.current.temp}°
+              </span>
             )}
           </div>
         )}
