@@ -2,6 +2,7 @@ import { useMode } from '@/lib/ModeContext';
 import { Shield, FlaskConical, Radio, Users, AlertTriangle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import orbyCommanderImg from '@assets/generated_images/orby_commander_nobg.png';
 
 interface ModeGateProps {
   onModeSelected: () => void;
@@ -24,19 +25,17 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-800 p-4">
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
-          <div className="w-24 h-24 mx-auto mb-4 relative">
-            <div className="absolute inset-0 bg-cyan-400/25 rounded-full blur-2xl animate-pulse" />
+          <div className="w-48 h-48 mx-auto mb-6 relative">
+            <div className="absolute inset-0 bg-cyan-400/30 rounded-full blur-3xl animate-pulse scale-125" />
+            <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/20 to-transparent rounded-full blur-2xl" />
             <img 
-              src="/orby-mascot.png" 
-              alt="Orby" 
-              className="relative w-24 h-24 object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.8)]"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
+              src={orbyCommanderImg} 
+              alt="Orby Commander" 
+              className="relative w-48 h-48 object-contain drop-shadow-[0_0_40px_rgba(6,182,212,0.9)] animate-float"
             />
           </div>
-          <h1 className="text-3xl font-black text-white mb-2">Welcome to Orby</h1>
-          <p className="text-cyan-200/70 text-sm">Select your mode before continuing</p>
+          <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Welcome to Orby</h1>
+          <p className="text-cyan-200/70 text-base">Select your mode before continuing</p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">

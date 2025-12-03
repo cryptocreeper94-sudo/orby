@@ -58,7 +58,8 @@ import { WalkingDirections } from '@/components/WalkingDirections';
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { AssetTracker } from '@/components/AssetTracker';
 import { POSDeviceTracker } from '@/components/POSDeviceTracker';
-import { Map, Navigation, Wine, Fingerprint, Shield as ShieldIcon, Monitor } from 'lucide-react';
+import { IntegrationHub } from '@/components/IntegrationHub';
+import { Map, Navigation, Wine, Fingerprint, Shield as ShieldIcon, Monitor, Link2 } from 'lucide-react';
 
 const EMERGENCY_TYPES = [
   { id: 'Medical', icon: Heart, color: 'from-rose-500 to-rose-600', bgColor: 'bg-rose-500', label: 'Medical Emergency', sla: 3 },
@@ -444,6 +445,7 @@ export default function CommandCenter() {
   const [showCompliance, setShowCompliance] = useState(false);
   const [showAssetTracker, setShowAssetTracker] = useState(false);
   const [showPOSTracker, setShowPOSTracker] = useState(false);
+  const [showIntegrationHub, setShowIntegrationHub] = useState(false);
   
   // David (PIN 2424) gets Dashboard Controls superpower
   const isDavid = currentUser?.pin === '2424';
@@ -962,6 +964,18 @@ export default function CommandCenter() {
               <Monitor className="w-5 h-5" />
             </motion.button>
           )}
+          {(isDavid || isManager) && (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowIntegrationHub(true)}
+              className="p-3 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-600/20 text-emerald-400 hover:text-emerald-300 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+              data-testid="button-quick-integrations"
+              aria-label="Integration Hub"
+            >
+              <Link2 className="w-5 h-5" />
+            </motion.button>
+          )}
         </div>
       </motion.div>
 
@@ -1016,6 +1030,13 @@ export default function CommandCenter() {
             </DialogTitle>
           </DialogHeader>
           <POSDeviceTracker />
+        </DialogContent>
+      </Dialog>
+
+      {/* Integration Hub Dialog (David/Managers) */}
+      <Dialog open={showIntegrationHub} onOpenChange={setShowIntegrationHub}>
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-3xl max-h-[85vh] overflow-auto p-6">
+          <IntegrationHub onClose={() => setShowIntegrationHub(false)} />
         </DialogContent>
       </Dialog>
 
