@@ -6,6 +6,7 @@ import { useLocation } from "wouter";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader } from "@/components/ui/premium";
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { useState } from "react";
 
 export default function ITDashboard() {
@@ -49,6 +50,10 @@ export default function ITDashboard() {
         />
 
         <main className="p-4 space-y-4 max-w-6xl mx-auto">
+          <ComplianceAlertPanel 
+            isManager={false}
+          />
+          
           <div className="grid grid-cols-3 gap-3">
             <motion.div whileHover={{ scale: 1.02 }}>
               <GlassCard className="border-emerald-500/20">

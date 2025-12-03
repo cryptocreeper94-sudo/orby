@@ -47,6 +47,7 @@ import {
   AnimatedList
 } from '@/components/ui/premium';
 import type { Stand } from '@shared/schema';
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 
 interface AlcoholViolation {
   id: string;
@@ -346,6 +347,12 @@ export default function AlcoholComplianceDashboard() {
       />
 
       <main className="p-4 md:p-6 lg:p-8 space-y-6 pb-32 max-w-7xl mx-auto">
+        <ComplianceAlertPanel 
+          userId={currentUser?.id} 
+          userName={currentUser?.name} 
+          isManager={false}
+        />
+        
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3 space-y-6">
             <div className="grid grid-cols-3 gap-4">

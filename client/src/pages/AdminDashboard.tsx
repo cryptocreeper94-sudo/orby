@@ -15,9 +15,11 @@ import { Notepad } from "@/components/Notepad";
 import { InteractiveMap } from "@/components/InteractiveMap";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader, GlowButton } from "@/components/ui/premium";
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 
 export default function AdminDashboard() {
   const logout = useStore((state) => state.logout);
+  const currentUser = useStore((state) => state.currentUser);
   const [, setLocation] = useLocation();
   const stands = useStore((state) => state.stands);
   const fetchAll = useStore((state) => state.fetchAll);
@@ -99,6 +101,12 @@ export default function AdminDashboard() {
         />
 
         <main className="p-4 sm:px-6 space-y-4 max-w-6xl mx-auto">
+          <ComplianceAlertPanel 
+            userId={currentUser?.id} 
+            userName={currentUser?.name} 
+            isManager={true}
+          />
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <StatCard
               icon={<Package className="h-5 w-5" />}

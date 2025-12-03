@@ -15,6 +15,7 @@ import { useMode } from "@/lib/ModeContext";
 import { SandboxStatusCompact } from "@/components/SandboxBanner";
 import { FeatureInventory } from "@/components/FeatureInventory";
 import { AssetTracker } from "@/components/AssetTracker";
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 
 interface AccordionSectionProps {
   title: string;
@@ -284,6 +285,12 @@ export default function DevDashboard() {
 
       {/* Main Content */}
       <main className="px-4 py-4 space-y-4 max-w-lg mx-auto pb-24">
+        <ComplianceAlertPanel 
+          userId={currentUser?.id} 
+          userName={currentUser?.name} 
+          isManager={true}
+        />
+        
         {/* Quick Stats Row */}
         <div className="grid grid-cols-2 gap-3">
           <StatCard 

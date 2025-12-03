@@ -36,6 +36,7 @@ import {
   AnimatedList,
   SectionHeader
 } from '@/components/ui/premium';
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 
 interface Message {
   id: string;
@@ -275,6 +276,12 @@ export default function CheckInAssistantDashboard() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+        <ComplianceAlertPanel 
+          userId={currentUser?.id} 
+          userName={currentUser?.name} 
+          isManager={false}
+        />
+        
         <div className="grid grid-cols-3 gap-3">
           <StatCard
             icon={<Users className="h-5 w-5" />}

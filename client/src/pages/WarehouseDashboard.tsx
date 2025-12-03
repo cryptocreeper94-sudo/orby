@@ -13,6 +13,7 @@ import { TeamLeadCard } from "@/components/TeamLeadCard";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader, GlowButton } from "@/components/ui/premium";
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 
 type WarehouseCategory = {
   id: string;
@@ -257,6 +258,12 @@ export default function WarehouseDashboard() {
         />
 
         <main className="p-4 sm:px-6 space-y-4 max-w-6xl mx-auto">
+          <ComplianceAlertPanel 
+            userId={currentUser?.id} 
+            userName={currentUser?.name} 
+            isManager={false}
+          />
+          
           {showConfigNotice && stats?.isExampleData && (
             <motion.div
               initial={{ opacity: 0, y: -10 }}
