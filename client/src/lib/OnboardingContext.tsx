@@ -458,6 +458,36 @@ export const opsManagerPages: OnboardingPage[] = [
     ]
   },
   {
+    id: 'ops-weather',
+    title: 'Weather Operations',
+    icon: '🌦️',
+    description: 'Critical weather monitoring for stadium ops',
+    route: '/weather-map',
+    steps: [
+      {
+        id: 'weather-map',
+        page: 'ops-weather',
+        title: 'Interactive Weather Map',
+        description: 'Weather dictates stadium operations. Tap the floating weather button, then "View Interactive Weather Map" for full-screen radar with Windy.com integration.',
+        position: 'center'
+      },
+      {
+        id: 'weather-layout',
+        page: 'ops-weather',
+        title: 'Responsive Layout',
+        description: 'Portrait mode: radar on top, weather data below (collapsible). Landscape mode: 1/3 data panel, 2/3 map. Real-time conditions, hourly and 7-day forecasts.',
+        position: 'center'
+      },
+      {
+        id: 'weather-layers',
+        page: 'ops-weather',
+        title: 'Map Layer Toggle',
+        description: 'Switch between Radar, Temperature, and Precipitation views. Nissan Stadium marker shows your exact location. Make weather-based operational decisions fast.',
+        position: 'center'
+      }
+    ]
+  },
+  {
     id: 'ops-feedback',
     title: 'Beta Feedback',
     icon: '📢',

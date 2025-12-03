@@ -75,6 +75,13 @@ const roleTourConfigs: Record<string, RoleTourConfig> = {
         description: 'Quick access to send messages to your entire team or specific stands. Everyone gets notified instantly.',
         targetSelector: '[data-testid="button-messages"]',
         position: 'bottom'
+      },
+      {
+        id: 'ops-weather',
+        title: 'Interactive Weather Map',
+        description: 'Weather dictates stadium operations. Tap the weather icon for current conditions, or "View Interactive Weather Map" for full-screen radar.',
+        targetSelector: '[data-testid="button-weather-toggle"]',
+        position: 'bottom'
       }
     ]
   },

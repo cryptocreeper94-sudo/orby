@@ -476,6 +476,13 @@ export const tutorialConfigs: Record<string, PageTutorial> = {
         position: "center"
       },
       {
+        id: "weather-map",
+        title: "Interactive Weather Map",
+        body: "Weather dictates stadium operations. Tap the weather icon, then 'View Interactive Weather Map' for full-screen Windy.com radar with real-time conditions, hourly & 7-day forecasts.",
+        targetSelector: "[data-testid='button-weather-toggle']",
+        position: "bottom"
+      },
+      {
         id: "feedback",
         title: "Report Issues to Jason",
         body: "See something that's not working right? Tell Jason immediately and he'll fix it on the spot. This is a beta - your feedback shapes the product.",
