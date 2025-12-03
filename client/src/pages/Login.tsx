@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ShieldCheck, FlaskConical, Radio, Code, Briefcase } from "lucide-react";
+import { ShieldCheck, FlaskConical, Radio, Code, Briefcase, ChevronDown, HelpCircle } from "lucide-react";
 import { useMode } from "@/lib/ModeContext";
 import { ModeGate } from "@/components/ModeGate";
 import { CompactModeIndicator } from "@/components/GlobalModeBar";
