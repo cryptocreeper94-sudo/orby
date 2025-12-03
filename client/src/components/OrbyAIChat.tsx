@@ -162,17 +162,21 @@ export function OrbyAIChat() {
         transition={{ delay: 1, type: 'spring' }}
         className="fixed bottom-20 left-4 z-50"
       >
-        <Button
+        <motion.button
           onClick={() => setIsOpen(true)}
-          className="h-14 w-14 rounded-full bg-gradient-to-br from-cyan-500 to-teal-600 hover:from-cyan-400 hover:to-teal-500 shadow-lg shadow-cyan-500/40 border-2 border-cyan-400/30"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="relative h-16 w-16 rounded-full flex items-center justify-center"
           data-testid="floating-orby-ai-button"
         >
+          <div className="absolute inset-0 bg-cyan-400/30 rounded-full blur-xl animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 rounded-full" />
           <img 
             src={orbyImg} 
             alt="Orby AI" 
-            className="h-10 w-10 object-contain"
+            className="relative h-14 w-14 object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.8)] hover:drop-shadow-[0_0_25px_rgba(6,182,212,1)]"
           />
-        </Button>
+        </motion.button>
       </motion.div>
 
       <AnimatePresence>
