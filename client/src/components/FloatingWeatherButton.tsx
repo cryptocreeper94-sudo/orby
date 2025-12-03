@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { useLocation } from "wouter";
 import { Loader2, X, Wind, Droplets, Eye, Thermometer, Sunrise, Sunset, ChevronRight, Map } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -127,6 +127,7 @@ function getWeatherIcon(desc: string, isNight: boolean): string {
 
 export default function FloatingWeatherButton() {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [, setLocation] = useLocation();
   
   const { data: weather, isLoading, error } = useQuery<WeatherData>({
     queryKey: ["/api/weather/coords", NISSAN_STADIUM.lat, NISSAN_STADIUM.lon],
@@ -331,15 +332,18 @@ export default function FloatingWeatherButton() {
               </div>
 
               <div className="px-6 pb-6">
-                <Link href="/weather-map">
-                  <button 
-                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/25"
-                    data-testid="button-open-weather-map"
-                  >
-                    <Map className="w-5 h-5" />
-                    View Interactive Weather Map
-                  </button>
-                </Link>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsExpanded(false);
+                    setLocation('/weather-map');
+                  }}
+                  className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/25"
+                  data-testid="button-open-weather-map"
+                >
+                  <Map className="w-5 h-5" />
+                  View Interactive Weather Map
+                </button>
               </div>
             </motion.div>
           </motion.div>
