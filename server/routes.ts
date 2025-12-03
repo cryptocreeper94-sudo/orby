@@ -1219,6 +1219,69 @@ Return your response as a JSON object with this exact structure:
     }
   });
 
+  // ============ ORBY AI CHAT ASSISTANT ============
+  // Chat with Orby AI for operations help and guidance
+  app.post("/api/ai-chat", async (req: Request, res: Response) => {
+    try {
+      const { message, context } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      const systemPrompt = `You are Orby, a friendly and knowledgeable AI assistant for stadium concessions operations at Nissan Stadium. You help staff with:
+
+- Delivery requests and tracking (how to request supplies, check status)
+- Inventory management (counting procedures, variance explanations)
+- Role responsibilities (NPO workers, Stand Leads, Supervisors, Managers)
+- Stadium navigation (finding stands, sections, departments)
+- Troubleshooting common issues (POS problems, supply shortages)
+- Compliance (alcohol policies, health codes, ABC regulations)
+- Using the Orby app features
+
+Key facts:
+- Warehouse handles product deliveries
+- Kitchen handles food prep items
+- Bar handles beverage supplies
+- Stand Leads manage individual stands
+- Supervisors oversee 4-6 stands in a section
+- Ops Controllers (like David and Sid) have full visibility
+- Pre-event counts happen before doors open
+- Post-event counts happen after the event ends
+- Three-phase inventory: PreEvent → PostEvent → DayAfter
+
+Keep responses concise and practical - staff are usually busy during events. Use simple language, avoid jargon. If you don't know something specific to this venue, say so and suggest who to contact.
+
+Be encouraging and supportive - venue operations can be stressful!`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: message }
+        ],
+        max_tokens: 500,
+        temperature: 0.7
+      });
+
+      const aiResponse = response.choices[0]?.message?.content;
+      if (!aiResponse) {
+        throw new Error("No response from AI");
+      }
+
+      res.json({
+        success: true,
+        response: aiResponse
+      });
+    } catch (error) {
+      console.error("Orby AI Chat error:", error);
+      res.status(500).json({ 
+        error: "Failed to get response from Orby", 
+        details: error instanceof Error ? error.message : "Unknown error" 
+      });
+    }
+  });
+
   // ============ COUNT SESSIONS ============
   // Start a new count session (with last 4 phone verification)
   app.post("/api/count-sessions", async (req: Request, res: Response) => {
