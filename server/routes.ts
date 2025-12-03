@@ -600,6 +600,233 @@ export async function registerRoutes(
     }
   });
 
+  // ============ DOCUMENT TEMPLATES ============
+  app.get("/api/document-templates", async (req: Request, res: Response) => {
+    try {
+      const { documentType } = req.query;
+      if (documentType && typeof documentType === 'string') {
+        const templates = await storage.getDocumentTemplatesByType(documentType);
+        return res.json(templates);
+      }
+      const templates = await storage.getAllDocumentTemplates();
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching document templates:", error);
+      res.status(500).json({ error: "Failed to fetch document templates" });
+    }
+  });
+
+  app.get("/api/document-templates/:id", async (req: Request, res: Response) => {
+    try {
+      const template = await storage.getDocumentTemplate(req.params.id);
+      if (!template) {
+        return res.status(404).json({ error: "Template not found" });
+      }
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch template" });
+    }
+  });
+
+  app.post("/api/document-templates", async (req: Request, res: Response) => {
+    try {
+      const template = await storage.createDocumentTemplate(req.body);
+      res.status(201).json(template);
+    } catch (error) {
+      console.error("Error creating document template:", error);
+      res.status(500).json({ error: "Failed to create template" });
+    }
+  });
+
+  app.patch("/api/document-templates/:id", async (req: Request, res: Response) => {
+    try {
+      const template = await storage.updateDocumentTemplate(req.params.id, req.body);
+      res.json(template);
+    } catch (error) {
+      console.error("Error updating document template:", error);
+      res.status(500).json({ error: "Failed to update template" });
+    }
+  });
+
+  app.delete("/api/document-templates/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deleteDocumentTemplate(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete template" });
+    }
+  });
+
+  // ============ SCANNED DOCUMENTS ============
+  app.get("/api/scanned-documents", async (req: Request, res: Response) => {
+    try {
+      const { documentType, standId, eventDate, status, isSandbox } = req.query;
+      const filters: any = {};
+      
+      if (documentType && typeof documentType === 'string') filters.documentType = documentType;
+      if (standId && typeof standId === 'string') filters.standId = standId;
+      if (eventDate && typeof eventDate === 'string') filters.eventDate = eventDate;
+      if (status && typeof status === 'string') filters.status = status;
+      if (isSandbox !== undefined) filters.isSandbox = isSandbox === 'true';
+      
+      const docs = await storage.getAllScannedDocuments(
+        Object.keys(filters).length > 0 ? filters : undefined
+      );
+      res.json(docs);
+    } catch (error) {
+      console.error("Error fetching scanned documents:", error);
+      res.status(500).json({ error: "Failed to fetch scanned documents" });
+    }
+  });
+
+  app.get("/api/scanned-documents/:id", async (req: Request, res: Response) => {
+    try {
+      const doc = await storage.getScannedDocument(req.params.id);
+      if (!doc) {
+        return res.status(404).json({ error: "Document not found" });
+      }
+      res.json(doc);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch document" });
+    }
+  });
+
+  app.post("/api/scanned-documents", async (req: Request, res: Response) => {
+    try {
+      const doc = await storage.createScannedDocument(req.body);
+      res.status(201).json(doc);
+    } catch (error) {
+      console.error("Error creating scanned document:", error);
+      res.status(500).json({ error: "Failed to create document" });
+    }
+  });
+
+  app.patch("/api/scanned-documents/:id", async (req: Request, res: Response) => {
+    try {
+      const doc = await storage.updateScannedDocument(req.params.id, req.body);
+      res.json(doc);
+    } catch (error) {
+      console.error("Error updating scanned document:", error);
+      res.status(500).json({ error: "Failed to update document" });
+    }
+  });
+
+  app.post("/api/scanned-documents/:id/verify", async (req: Request, res: Response) => {
+    try {
+      const { verifiedById } = req.body;
+      const doc = await storage.verifyScannedDocument(req.params.id, verifiedById);
+      res.json(doc);
+    } catch (error) {
+      console.error("Error verifying scanned document:", error);
+      res.status(500).json({ error: "Failed to verify document" });
+    }
+  });
+
+  app.delete("/api/scanned-documents/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deleteScannedDocument(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete document" });
+    }
+  });
+
+  // ============ AI DOCUMENT CLASSIFICATION ============
+  app.post("/api/ai-scanner/classify", uploadOcr.single('image'), async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No image file provided" });
+      }
+
+      const imagePath = req.file.path;
+      const imageBuffer = fs.readFileSync(imagePath);
+      const base64Image = imageBuffer.toString('base64');
+      const mimeType = req.file.mimetype;
+
+      const classificationResponse = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: `You are a document classification expert for a venue operations system. Analyze the image and determine what type of document it is.
+
+Available document types:
+- bar_control: Bar control sheets tracking alcohol inventory and sales
+- alcohol_compliance: Alcohol compliance monitoring forms
+- stand_grid: Stand layout and position assignment grids
+- worker_grid: Worker assignment grids showing staff positions
+- schedule: Staff schedules with shifts and assignments
+- inventory_count: Inventory count sheets listing items and quantities
+- incident_report: Incident or accident reports
+- closing_checklist: Stand closing checklists
+- temperature_log: Food temperature monitoring logs
+- cash_count: Cash drawer count sheets
+- delivery_receipt: Delivery receipts for goods received
+- other: Any other type of document
+
+Respond with a JSON object containing:
+{
+  "documentType": "one of the types above",
+  "confidence": "high" | "medium" | "low",
+  "title": "suggested title based on content",
+  "extractedData": { key-value pairs of any data you can extract },
+  "rawText": "any text you can read from the document",
+  "standId": "stand ID if visible (e.g., C101, E501)",
+  "eventDate": "date if visible in YYYY-MM-DD format"
+}`
+          },
+          {
+            role: "user",
+            content: [
+              {
+                type: "image_url",
+                image_url: {
+                  url: `data:${mimeType};base64,${base64Image}`
+                }
+              },
+              {
+                type: "text",
+                text: "Analyze this document and classify it. Extract any relevant data you can see."
+              }
+            ]
+          }
+        ],
+        max_tokens: 2000,
+        response_format: { type: "json_object" }
+      });
+
+      const content = classificationResponse.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error("No response from AI");
+      }
+
+      const result = JSON.parse(content);
+      
+      // Clean up the uploaded file
+      fs.unlinkSync(imagePath);
+
+      res.json({
+        success: true,
+        result: {
+          documentType: result.documentType || 'other',
+          confidence: result.confidence || 'medium',
+          title: result.title || 'Scanned Document',
+          extractedData: result.extractedData || {},
+          rawText: result.rawText || '',
+          standId: result.standId,
+          eventDate: result.eventDate
+        }
+      });
+    } catch (error) {
+      console.error("Error classifying document:", error);
+      // Clean up the uploaded file on error
+      if (req.file?.path) {
+        try { fs.unlinkSync(req.file.path); } catch {}
+      }
+      res.status(500).json({ error: "Failed to classify document" });
+    }
+  });
+
   // ============ INVENTORY COUNTS ============
   app.get("/api/inventory/:standId/:eventDate", async (req: Request, res: Response) => {
     try {

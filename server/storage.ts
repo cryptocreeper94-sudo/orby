@@ -11,6 +11,7 @@ import {
   supervisorSessions, supervisorActivity, dashboardConfigs, venueGeofenceConfig,
   keySets, radios, equipmentCheckoutHistory, equipmentAlerts,
   posDeviceTypes, posDevices, posLocationGrid, posAssignments, posReplacements, posIssues,
+  documentTemplates, scannedDocuments,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -71,7 +72,9 @@ import {
   type PosLocationGrid, type InsertPosLocationGrid,
   type PosAssignment, type InsertPosAssignment,
   type PosReplacement, type InsertPosReplacement,
-  type PosIssue, type InsertPosIssue
+  type PosIssue, type InsertPosIssue,
+  type DocumentTemplate, type InsertDocumentTemplate,
+  type ScannedDocument, type InsertScannedDocument
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray, ilike, sql } from "drizzle-orm";
@@ -2998,6 +3001,125 @@ export class DatabaseStorage implements IStorage {
       updatedAt: new Date()
     }).where(eq(posIssues.id, id)).returning();
     return updated;
+  }
+
+  // Document Templates
+  async getAllDocumentTemplates(): Promise<DocumentTemplate[]> {
+    return await db.select().from(documentTemplates).where(eq(documentTemplates.isActive, true)).orderBy(asc(documentTemplates.name));
+  }
+
+  async getDocumentTemplate(id: string): Promise<DocumentTemplate | undefined> {
+    const [template] = await db.select().from(documentTemplates).where(eq(documentTemplates.id, id));
+    return template;
+  }
+
+  async getDocumentTemplatesByType(documentType: string): Promise<DocumentTemplate[]> {
+    return await db.select().from(documentTemplates)
+      .where(and(
+        eq(documentTemplates.documentType, documentType as any),
+        eq(documentTemplates.isActive, true)
+      ))
+      .orderBy(desc(documentTemplates.isDefault), asc(documentTemplates.name));
+  }
+
+  async createDocumentTemplate(template: InsertDocumentTemplate): Promise<DocumentTemplate> {
+    const [created] = await db.insert(documentTemplates).values(template).returning();
+    return created;
+  }
+
+  async updateDocumentTemplate(id: string, updates: Partial<InsertDocumentTemplate>): Promise<DocumentTemplate> {
+    const [updated] = await db.update(documentTemplates)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(documentTemplates.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDocumentTemplate(id: string): Promise<void> {
+    await db.update(documentTemplates)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(documentTemplates.id, id));
+  }
+
+  // Scanned Documents
+  async getAllScannedDocuments(filters?: { 
+    documentType?: string; 
+    standId?: string; 
+    eventDate?: string;
+    status?: string;
+    isSandbox?: boolean;
+  }): Promise<ScannedDocument[]> {
+    let query = db.select().from(scannedDocuments);
+    const conditions = [];
+    
+    if (filters?.documentType) {
+      conditions.push(eq(scannedDocuments.documentType, filters.documentType as any));
+    }
+    if (filters?.standId) {
+      conditions.push(eq(scannedDocuments.standId, filters.standId));
+    }
+    if (filters?.eventDate) {
+      conditions.push(eq(scannedDocuments.eventDate, filters.eventDate));
+    }
+    if (filters?.status) {
+      conditions.push(eq(scannedDocuments.status, filters.status));
+    }
+    if (filters?.isSandbox !== undefined) {
+      conditions.push(eq(scannedDocuments.isSandbox, filters.isSandbox));
+    }
+    
+    if (conditions.length > 0) {
+      return await db.select().from(scannedDocuments)
+        .where(and(...conditions))
+        .orderBy(desc(scannedDocuments.createdAt));
+    }
+    
+    return await db.select().from(scannedDocuments)
+      .orderBy(desc(scannedDocuments.createdAt));
+  }
+
+  async getScannedDocument(id: string): Promise<ScannedDocument | undefined> {
+    const [doc] = await db.select().from(scannedDocuments).where(eq(scannedDocuments.id, id));
+    return doc;
+  }
+
+  async createScannedDocument(doc: InsertScannedDocument): Promise<ScannedDocument> {
+    const [created] = await db.insert(scannedDocuments).values(doc).returning();
+    return created;
+  }
+
+  async updateScannedDocument(id: string, updates: Partial<InsertScannedDocument>): Promise<ScannedDocument> {
+    const [updated] = await db.update(scannedDocuments)
+      .set(updates)
+      .where(eq(scannedDocuments.id, id))
+      .returning();
+    return updated;
+  }
+
+  async verifyScannedDocument(id: string, verifiedById: string): Promise<ScannedDocument> {
+    const [updated] = await db.update(scannedDocuments).set({
+      verifiedById,
+      verifiedAt: new Date(),
+      status: 'verified'
+    }).where(eq(scannedDocuments.id, id)).returning();
+    return updated;
+  }
+
+  async deleteScannedDocument(id: string): Promise<void> {
+    await db.delete(scannedDocuments).where(eq(scannedDocuments.id, id));
+  }
+
+  async getScannedDocumentsByCategory(category: string, eventDate?: string, isSandbox?: boolean): Promise<ScannedDocument[]> {
+    const conditions = [eq(scannedDocuments.documentType, category as any)];
+    if (eventDate) {
+      conditions.push(eq(scannedDocuments.eventDate, eventDate));
+    }
+    if (isSandbox !== undefined) {
+      conditions.push(eq(scannedDocuments.isSandbox, isSandbox));
+    }
+    return await db.select().from(scannedDocuments)
+      .where(and(...conditions))
+      .orderBy(desc(scannedDocuments.createdAt));
   }
 }
 
