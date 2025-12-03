@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { WeatherWidget, WeatherAlertBanner } from '@/components/WeatherWidget';
 import { LiveSalesWidget } from '@/components/LiveSalesWidget';
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import {
   LogOut, Menu, Bell, MessageSquare, Package, Utensils, Beer, Monitor, Activity,
   AlertTriangle, CheckCircle2, Clock, MapPin, Users, Radio, TrendingUp, 
@@ -212,6 +213,12 @@ export default function ManagerDashboard() {
 
         <main className="p-4 space-y-4 max-w-7xl mx-auto">
           <WeatherAlertBanner />
+          
+          <ComplianceAlertPanel 
+            userId={currentUser?.id} 
+            userName={currentUser?.name} 
+            isManager={true}
+          />
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <StatCard

@@ -25,6 +25,7 @@ import {
 import { motion } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, PageHeader, GlowButton } from "@/components/ui/premium";
 import { TeamLeadCard } from "@/components/TeamLeadCard";
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 
 type CountSession = {
   id: string;
@@ -275,6 +276,12 @@ export default function NPODashboard() {
         )}
 
         <main className="p-4 sm:px-6 space-y-4 max-w-4xl mx-auto">
+          <ComplianceAlertPanel 
+            userId={currentUser?.id} 
+            userName={currentUser?.name} 
+            isManager={false}
+          />
+          
           <GlassCard className={`border-2 ${isOnSite ? 'border-emerald-500/40' : 'border-amber-500/40'}`}>
             <GlassCardHeader className="pb-2">
               <div className="flex items-center gap-2">

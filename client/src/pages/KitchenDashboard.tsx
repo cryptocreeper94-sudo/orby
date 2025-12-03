@@ -10,6 +10,7 @@ import { InteractiveMap } from "@/components/InteractiveMap";
 import { TeamLeadCard } from "@/components/TeamLeadCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader } from "@/components/ui/premium";
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 
 export default function KitchenDashboard() {
   const logout = useStore((state) => state.logout);
@@ -62,6 +63,12 @@ export default function KitchenDashboard() {
         />
 
         <main className="p-4 sm:px-6 space-y-4 max-w-6xl mx-auto">
+          <ComplianceAlertPanel 
+            userId={currentUser?.id} 
+            userName={currentUser?.name} 
+            isManager={false}
+          />
+          
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <StatCard
               icon={<Flame className="h-5 w-5" />}

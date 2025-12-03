@@ -19,6 +19,7 @@ import { CounterLogin } from "@/components/CounterLogin";
 import { CountSheet } from "@/components/CountSheet";
 import { QuickScanModal } from "@/components/QuickScanModal";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import {
   Select,
   SelectContent,
@@ -428,6 +429,12 @@ export default function StandLeadDashboard() {
       </Dialog>
 
       <main className="p-4 sm:px-6 space-y-6 max-w-4xl mx-auto mt-4">
+        <ComplianceAlertPanel 
+          userId={currentUser?.id} 
+          userName={currentUser?.name} 
+          isManager={false}
+        />
+        
         <div className="text-center py-4">
           <h1 className="text-2xl font-black text-slate-200">
             Welcome, {currentUser?.name || 'Stand Lead'}

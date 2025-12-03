@@ -41,6 +41,7 @@ import {
   StatCard
 } from "@/components/ui/premium";
 import { SectionHelp } from '@/components/OrbyHelp';
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 
 type WarehouseProduct = {
   id: string;
@@ -313,6 +314,12 @@ export default function SupervisorDashboard() {
         />
 
         <main className="px-4 md:px-6 lg:px-8 py-4 space-y-4 max-w-4xl mx-auto pb-24">
+          <ComplianceAlertPanel 
+            userId={currentUser?.id} 
+            userName={currentUser?.name} 
+            isManager={false}
+          />
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <motion.button
               whileHover={{ scale: 1.02, y: -2 }}
