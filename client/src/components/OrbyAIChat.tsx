@@ -74,8 +74,35 @@ export function OrbyAIChat() {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const handleResize = () => {
+      if (window.visualViewport) {
+        const viewportHeight = window.visualViewport.height;
+        const windowHeight = window.innerHeight;
+        const kbHeight = windowHeight - viewportHeight;
+        setKeyboardHeight(kbHeight > 50 ? kbHeight : 0);
+      }
+    };
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+      window.visualViewport.addEventListener('scroll', handleResize);
+    }
+    
+    return () => {
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', handleResize);
+        window.visualViewport.removeEventListener('scroll', handleResize);
+      }
+    };
+  }, [isOpen]);
 
   const chatMutation = useMutation({
     mutationFn: sendChatMessage,
@@ -192,10 +219,15 @@ export function OrbyAIChat() {
             />
             
             <motion.div
+              ref={modalRef}
               initial={{ opacity: 0, scale: 0.9, y: 50 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 50 }}
-              className="fixed inset-x-4 bottom-4 top-20 md:inset-auto md:bottom-8 md:left-8 md:w-96 md:h-[600px] md:max-h-[80vh] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 z-50 flex flex-col overflow-hidden"
+              style={{ 
+                bottom: keyboardHeight > 0 ? `${keyboardHeight + 8}px` : '16px',
+                maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight + 80}px)` : undefined
+              }}
+              className="fixed inset-x-4 top-16 md:inset-auto md:bottom-8 md:left-8 md:w-96 md:h-[600px] md:max-h-[80vh] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 z-50 flex flex-col overflow-hidden"
               data-testid="orby-ai-chat-modal"
             >
               <div className="p-4 border-b border-cyan-500/20 bg-gradient-to-r from-cyan-500/10 to-teal-500/10">

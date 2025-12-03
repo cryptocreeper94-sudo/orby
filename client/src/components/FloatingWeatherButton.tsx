@@ -151,7 +151,7 @@ export default function FloatingWeatherButton() {
     <>
       <motion.button
         onClick={() => setIsExpanded(true)}
-        className="fixed bottom-20 right-4 z-50 flex flex-col items-center justify-center cursor-pointer"
+        className="fixed bottom-20 right-4 z-50 cursor-pointer"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.5 }}
@@ -160,13 +160,13 @@ export default function FloatingWeatherButton() {
         data-testid="button-weather-toggle"
       >
         {isLoading ? (
-          <Loader2 className="w-10 h-10 animate-spin text-cyan-400" />
+          <Loader2 className="w-12 h-12 animate-spin text-cyan-400" />
         ) : (
-          <div className="flex flex-col items-center">
+          <div className="relative w-20 h-20">
             <motion.img
               src={currentIcon}
               alt="Weather"
-              className="w-16 h-16 md:w-20 md:h-20 object-contain drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]"
+              className="w-20 h-20 object-contain drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]"
               animate={{
                 y: [0, -3, 0],
                 rotate: isNight ? [0, 1, -1, 0] : [0, 2, -2, 0],
@@ -178,7 +178,7 @@ export default function FloatingWeatherButton() {
               }}
             />
             {weather && (
-              <span className={`text-sm font-mono font-bold -mt-1 drop-shadow-[0_0_4px_rgba(0,0,0,0.8)] ${isNight ? 'text-indigo-200' : 'text-white'}`}>
+              <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 text-base font-bold drop-shadow-[0_0_6px_rgba(0,0,0,1)] ${isNight ? 'text-indigo-100' : 'text-white'}`}>
                 {weather.current.temp}°
               </span>
             )}
