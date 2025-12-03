@@ -44,6 +44,7 @@ import { SectionHelp } from '@/components/OrbyHelp';
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { HeaderTutorialButton } from '@/components/HeaderTutorialButton';
+import { useSupervisorSession } from '@/hooks/useSupervisorSession';
 
 type WarehouseProduct = {
   id: string;
@@ -94,13 +95,23 @@ export default function SupervisorDashboard() {
   const isLoading = useStore((state) => state.isLoading);
   const queryClient = useQueryClient();
 
+  const [activeStandId, setActiveStandId] = useState<string | null>(null);
+  
+  const selectedStand = stands.find(s => s.id === activeStandId);
+  
+  const { logActivity, updateTab, updateStand } = useSupervisorSession({
+    supervisorId: currentUser?.id || 'unknown',
+    supervisorName: currentUser?.name || 'Supervisor',
+    currentStandId: activeStandId,
+    currentStandName: selectedStand?.name || null,
+    currentSection: selectedStand ? getStandSection(selectedStand.name) : null
+  });
+
   useEffect(() => {
     if (stands.length === 0) {
       fetchAll();
     }
   }, [stands.length, fetchAll]);
-  
-  const [activeStandId, setActiveStandId] = useState<string | null>(null);
   const [showScanner, setShowScanner] = useState(false);
   const [activeTab, setActiveTab] = useState("inventory");
   const [showMap, setShowMap] = useState(false);
@@ -412,7 +423,7 @@ export default function SupervisorDashboard() {
                         key={stand.id}
                         whileHover={{ x: 4 }}
                         whileTap={{ scale: 0.98 }}
-                        onClick={() => setActiveStandId(stand.id)}
+                        onClick={() => { setActiveStandId(stand.id); updateStand(stand.id, stand.name, getStandSection(stand.name)); }}
                         className={cn(
                           "w-full px-4 py-3 rounded-xl flex items-center justify-between",
                           "bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-200",
@@ -656,15 +667,13 @@ export default function SupervisorDashboard() {
     );
   }
 
-  const activeStand = stands.find(s => s.id === activeStandId);
-
   return (
     <AnimatedBackground>
       <GlobalModeBar />
       <PageHeader 
-        title={activeStand?.name || 'Stand'}
-        subtitle={activeStand?.status === 'Open' ? '● Open' : '● Closed'}
-        subtitleColor={activeStand?.status === 'Open' ? 'text-emerald-400' : 'text-red-400'}
+        title={selectedStand?.name || 'Stand'}
+        subtitle={selectedStand?.status === 'Open' ? '● Open' : '● Closed'}
+        subtitleColor={selectedStand?.status === 'Open' ? 'text-emerald-400' : 'text-red-400'}
         backAction={() => setActiveStandId(null)}
       />
 
@@ -690,7 +699,7 @@ export default function SupervisorDashboard() {
         )}
 
         <GlassCard gradient className="mb-6">
-          <Tabs defaultValue="inventory" className="w-full" onValueChange={setActiveTab}>
+          <Tabs defaultValue="inventory" className="w-full" onValueChange={(tab) => { setActiveTab(tab); updateTab(tab); }}>
             <div className="flex items-center justify-between px-4 pt-3">
               <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 rounded-2xl p-1">
                 <TabsTrigger value="inventory" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl">
@@ -888,14 +897,14 @@ export default function SupervisorDashboard() {
             <TabsContent value="closeout" className="p-4 md:p-5 space-y-4">
               <FacilityIssuePanel
                 standId={activeStandId!}
-                standName={activeStand?.name || ''}
+                standName={selectedStand?.name || ''}
                 reporterId={currentUser?.id || ''}
                 reporterName={currentUser?.name}
                 eventDate={new Date().toISOString().split('T')[0]}
               />
               <SupervisorClosingPanel
                 standId={activeStandId!}
-                standName={activeStand?.name || ''}
+                standName={selectedStand?.name || ''}
                 eventDate={new Date().toISOString().split('T')[0]}
                 supervisorId={currentUser?.id || ''}
                 supervisorName={currentUser?.name}
