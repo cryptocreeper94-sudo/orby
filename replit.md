@@ -1,8 +1,17 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.1 (Beta) - STAMPED
+## Current Version: v1.0.2 (Beta) - STAMPED
 **Release Date:** December 3, 2024
-**Genesis Hallmark:** ORB-2024-1203-V101-BETA
+**Genesis Hallmark:** ORB-000000000007
+
+### v1.0.2 Release Notes
+- **Culinary Team Management System:** Event-based cook scheduling and check-in tracking
+  - Chef Deb (PIN 3737) as Culinary Director with full scheduling controls
+  - Supervisor Sheila (PIN 4545) with oversight capabilities
+  - Cook assignment to stands by event date
+  - Check-in/check-out tracking with no-show marking
+  - Culinary team visibility panel in Ops Command Center
+- Sample cooks added: Lisa (5252), Marcus (5151), Tony (5353)
 
 ### v1.0.1 Release Notes
 - Event Report Builder for combined PDF packages (Finance, Compliance, Operations, Custom templates)
