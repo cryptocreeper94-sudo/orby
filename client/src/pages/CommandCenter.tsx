@@ -57,7 +57,8 @@ import { InteractiveMap } from '@/components/InteractiveMap';
 import { WalkingDirections } from '@/components/WalkingDirections';
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { AssetTracker } from '@/components/AssetTracker';
-import { Map, Navigation, Wine, Fingerprint, Shield as ShieldIcon } from 'lucide-react';
+import { POSDeviceTracker } from '@/components/POSDeviceTracker';
+import { Map, Navigation, Wine, Fingerprint, Shield as ShieldIcon, Monitor } from 'lucide-react';
 
 const EMERGENCY_TYPES = [
   { id: 'Medical', icon: Heart, color: 'from-rose-500 to-rose-600', bgColor: 'bg-rose-500', label: 'Medical Emergency', sla: 3 },
@@ -442,9 +443,11 @@ export default function CommandCenter() {
   const [showDirections, setShowDirections] = useState(false);
   const [showCompliance, setShowCompliance] = useState(false);
   const [showAssetTracker, setShowAssetTracker] = useState(false);
+  const [showPOSTracker, setShowPOSTracker] = useState(false);
   
   // David (PIN 2424) gets Dashboard Controls superpower
   const isDavid = currentUser?.pin === '2424';
+  const isIT = currentUser?.role === 'IT' || currentUser?.role === 'Developer' || isDavid;
   const isManager = currentUser?.role === 'Developer' || currentUser?.role === 'Admin' || currentUser?.role === 'ManagementCore' || currentUser?.role === 'ManagementAssistant' || currentUser?.role === 'IT';
 
   const { data: alerts = [], isLoading: alertsLoading } = useQuery({
@@ -947,6 +950,18 @@ export default function CommandCenter() {
           >
             <Fingerprint className="w-5 h-5" />
           </motion.button>
+          {isIT && (
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowPOSTracker(true)}
+              className="p-3 rounded-full bg-gradient-to-br from-violet-500/20 to-violet-600/20 text-violet-400 hover:text-violet-300 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+              data-testid="button-quick-pos"
+              aria-label="POS Devices"
+            >
+              <Monitor className="w-5 h-5" />
+            </motion.button>
+          )}
         </div>
       </motion.div>
 
@@ -988,6 +1003,19 @@ export default function CommandCenter() {
       <Dialog open={showAssetTracker} onOpenChange={setShowAssetTracker}>
         <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-4xl max-h-[80vh] overflow-auto p-6">
           <AssetTracker />
+        </DialogContent>
+      </Dialog>
+
+      {/* POS Device Tracker Dialog (IT/David only) */}
+      <Dialog open={showPOSTracker} onOpenChange={setShowPOSTracker}>
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-5xl max-h-[85vh] overflow-auto p-6">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Monitor className="w-5 h-5 text-violet-400" />
+              POS Device Tracker
+            </DialogTitle>
+          </DialogHeader>
+          <POSDeviceTracker />
         </DialogContent>
       </Dialog>
 
