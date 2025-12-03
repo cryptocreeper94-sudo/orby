@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CONFIGURABLE_ROLES, type DashboardConfig, type VenueGeofenceConfig } from "@shared/schema";
+import { toast } from "sonner";
 
 interface DashboardControlsProps {
   isOpen: boolean;
@@ -143,10 +144,22 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to update geofence config');
       }
-      return response.json();
+      return { ...response.json(), presetLabel: preset.label };
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['/api/geofence-config'] });
+      toast.success(`Geofence updated to ${variables.label}`, {
+        description: `Radius: ${formatRadius(variables.radiusFeet)} • Capacity: ${variables.maxUsers.toLocaleString()} users`,
+      });
+    },
+    onError: (error: Error) => {
+      // Revert to previous selection
+      if (geofenceConfig?.preset) {
+        setSelectedGeofencePreset(geofenceConfig.preset);
+      }
+      toast.error("Failed to update geofence", {
+        description: error.message,
+      });
     },
   });
 
