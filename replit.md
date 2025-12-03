@@ -42,9 +42,63 @@ Orby (getorby.io) is a comprehensive venue operations platform designed for Niss
 ### v2.0 - Multi-Venue & App Store (Target: Q2 2025)
 - Capacitor wrapper for iOS/Android app stores
 - Multi-venue support (beyond Nissan Stadium)
-- OrbitStaffing deep integration
+- OrbitStaffing deep integration (see spec below)
 - White-label customization options
 - Enterprise SSO support
+
+## OrbitStaffing Integration Specification
+
+**Target Version:** v2.0
+**Sister Product:** orbitstaffing.io
+
+### Integration Overview
+Connect Orby (venue operations) with OrbitStaffing (workforce scheduling) to create a unified "Orbit" platform experience.
+
+### Data Sync Points
+
+| OrbitStaffing → Orby | Orby → OrbitStaffing |
+|---------------------|----------------------|
+| Staff roster & roles | Shift check-in/out times |
+| Event schedules | Task completion status |
+| Section assignments | Inventory signatures |
+| Contact information | Incident reports |
+| Certification status | Performance metrics |
+
+### Authentication Flow
+1. **Unified PIN System** - Staff PIN works in both platforms
+2. **SSO Option** - Enterprise clients can use single sign-on
+3. **Session Sharing** - Login once, access both platforms
+
+### GPS Integration
+- Staff clocks in at OrbitStaffing (geofenced to Nissan Stadium)
+- Orby receives real-time "on duty" status
+- Location tracking for walking directions and supervisor assignments
+- Clock-out syncs back for accurate payroll
+
+### API Bridge Architecture
+```
+OrbitStaffing API ←→ Orbit Bridge Service ←→ Orby API
+     ↓                      ↓                    ↓
+  Scheduling DB         Sync Queue          Operations DB
+```
+
+### Webhook Events
+- `staff.checked_in` - Staff arrives at venue
+- `staff.checked_out` - Staff leaves venue
+- `shift.assigned` - New shift scheduled
+- `shift.completed` - Orby confirms task completion
+- `incident.reported` - Escalate to HR/Management
+
+### Shared Data Models
+- **Staff Profile**: id, name, pin, roles[], certifications[], photo
+- **Event**: id, date, venue, shifts[]
+- **Shift**: id, staffId, eventId, section, startTime, endTime, status
+
+### Implementation Phases
+1. **Phase 1**: Read-only sync (OrbitStaffing → Orby roster)
+2. **Phase 2**: Bidirectional sync (shift completion, incidents)
+3. **Phase 3**: Real-time GPS and presence awareness
+4. **Phase 4**: Unified analytics dashboard
 
 ## User Preferences
 - Mobile-first design critical (operations staff use phones)
