@@ -704,6 +704,51 @@ export const INITIAL_PINS: Record<string, string> = {
   IT: '4444',
 };
 
+// Dashboard Configuration (David's Superpower - controls what other roles see)
+// Only accessible by Ops Manager (David, PIN 2424) and Developer
+export const dashboardConfigs = pgTable("dashboard_configs", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  targetRole: text("target_role").notNull().unique(), // Role being configured
+  // Widget Visibility
+  showEmergencyFeed: boolean("show_emergency_feed").default(true),
+  showDeliveries: boolean("show_deliveries").default(true),
+  showCompliance: boolean("show_compliance").default(true),
+  showAiChat: boolean("show_ai_chat").default(true),
+  showWeather: boolean("show_weather").default(true),
+  showMap: boolean("show_map").default(true),
+  showMessaging: boolean("show_messaging").default(true),
+  showInventory: boolean("show_inventory").default(true),
+  // Alert Settings
+  alertLevel: text("alert_level").default("normal"), // normal, priority-only, silent
+  // Data Scope
+  dataScope: text("data_scope").default("assigned"), // all, assigned
+  showSensitiveMetrics: boolean("show_sensitive_metrics").default(false),
+  // Layout Preset
+  layoutPreset: text("layout_preset").default("standard"), // ops-lite, standard, full-command
+  // Metadata
+  updatedAt: timestamp("updated_at").defaultNow(),
+  updatedById: varchar("updated_by_id", { length: 36 }).references(() => users.id),
+});
+
+export const insertDashboardConfigSchema = createInsertSchema(dashboardConfigs).omit({ id: true, updatedAt: true });
+export type InsertDashboardConfig = z.infer<typeof insertDashboardConfigSchema>;
+export type DashboardConfig = typeof dashboardConfigs.$inferSelect;
+
+// Available roles that can be configured
+export const CONFIGURABLE_ROLES = [
+  'NPOWorker',
+  'StandLead', 
+  'StandSupervisor',
+  'Bartender',
+  'AlcoholCompliance',
+  'CheckInAssistant',
+  'ManagementCore',
+  'ManagementAssistant',
+  'Warehouse',
+  'Kitchen',
+  'IT',
+];
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   stands: many(stands),
