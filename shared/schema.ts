@@ -31,7 +31,7 @@ export const managementTypeEnum = pgEnum('management_type', [
 export const standStatusEnum = pgEnum('stand_status', ['Open', 'Closed', 'Needs Power', 'Spare', 'Hot Spot']);
 export const messageTypeEnum = pgEnum('message_type', ['Global', 'Urgent', 'Request']);
 export const docCategoryEnum = pgEnum('doc_category', ['Compliance', 'Checklist', 'Reference', 'Contact']);
-export const conversationTargetEnum = pgEnum('conversation_target', ['Warehouse', 'Kitchen', 'Manager', 'Bar Manager', 'HR Manager', 'Operations']);
+export const conversationTargetEnum = pgEnum('conversation_target', ['Warehouse', 'Kitchen', 'Manager', 'Bar Manager', 'HR Manager', 'Operations', 'IT']);
 export const conversationStatusEnum = pgEnum('conversation_status', ['Active', 'Closed']);
 export const incidentSeverityEnum = pgEnum('incident_severity', ['Low', 'Medium', 'High', 'Critical']);
 export const incidentStatusEnum = pgEnum('incident_status', ['Open', 'In Progress', 'Resolved', 'Closed']);
@@ -1592,4 +1592,188 @@ export const LEGENDS_EMPLOYEE_ROLES = [
   'IT',
   'Admin',
   'Developer'
+] as const;
+
+// ============ POS DEVICE TRACKING SYSTEM ============
+// For IT team to track and assign POS devices to stands/portables/bars
+
+// POS device types - configurable for different hardware
+export const posDeviceTypeEnum = pgEnum('pos_device_type', ['A930', 'A700', 'PAX', 'Other']);
+export const posDeviceStatusEnum = pgEnum('pos_device_status', ['available', 'assigned', 'maintenance', 'missing', 'retired']);
+export const posLocationTypeEnum = pgEnum('pos_location_type', ['Stand', 'Portable', 'Bar', 'Suites', 'Other']);
+export const posAssignmentStatusEnum = pgEnum('pos_assignment_status', ['active', 'returned', 'replaced', 'transferred']);
+
+// POS Device Types - configurable list of device types (David can add/edit)
+export const posDeviceTypes = pgTable("pos_device_types", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(), // A930, A700, PAX, etc.
+  description: text("description"),
+  manufacturer: text("manufacturer"),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// POS Devices - individual POS units with serial numbers
+export const posDevices = pgTable("pos_devices", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  deviceNumber: integer("device_number").notNull().unique(), // Unique identifier for this POS
+  deviceType: posDeviceTypeEnum("device_type").notNull(), // A930, A700, PAX, Other
+  customType: text("custom_type"), // If type is "Other", specify here
+  serialNumber: text("serial_number"), // Manufacturer serial
+  assetTag: text("asset_tag"), // Internal asset tag
+  status: posDeviceStatusEnum("status").default('available'),
+  currentLocationId: varchar("current_location_id"), // Stand/Portable/Bar ID
+  currentLocationType: posLocationTypeEnum("current_location_type"),
+  currentLocationName: text("current_location_name"),
+  assignedById: varchar("assigned_by_id").references(() => users.id),
+  assignedByName: text("assigned_by_name"),
+  assignedAt: timestamp("assigned_at"),
+  lastMaintenanceDate: timestamp("last_maintenance_date"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_pos_devices_number").on(table.deviceNumber),
+  index("IDX_pos_devices_type").on(table.deviceType),
+  index("IDX_pos_devices_status").on(table.status),
+  index("IDX_pos_devices_location").on(table.currentLocationId),
+]);
+
+// POS Location Grid - David's setup of which locations get which POS numbers
+// This is the "master grid" that IT uses to know where each POS should go
+export const posLocationGrid = pgTable("pos_location_grid", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  locationId: varchar("location_id").notNull(), // Stand/Portable/Bar ID
+  locationType: posLocationTypeEnum("location_type").notNull(),
+  locationName: text("location_name").notNull(),
+  section: text("section"), // Stadium section
+  expectedPosCount: integer("expected_pos_count").default(1), // How many POS should be here
+  posDeviceNumbers: integer("pos_device_numbers").array().default(sql`ARRAY[]::integer[]`), // Which device numbers are assigned
+  notes: text("notes"),
+  isActive: boolean("is_active").default(true),
+  createdById: varchar("created_by_id").references(() => users.id),
+  createdByName: text("created_by_name"),
+  updatedById: varchar("updated_by_id").references(() => users.id),
+  updatedByName: text("updated_by_name"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_pos_grid_location").on(table.locationId),
+  index("IDX_pos_grid_type").on(table.locationType),
+  index("IDX_pos_grid_section").on(table.section),
+]);
+
+// POS Assignments - actual assignments for events (who assigned what, when)
+export const posAssignments = pgTable("pos_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  posDeviceId: varchar("pos_device_id").references(() => posDevices.id).notNull(),
+  posDeviceNumber: integer("pos_device_number").notNull(),
+  posDeviceType: posDeviceTypeEnum("pos_device_type").notNull(),
+  locationId: varchar("location_id").notNull(),
+  locationType: posLocationTypeEnum("location_type").notNull(),
+  locationName: text("location_name").notNull(),
+  eventDate: text("event_date"), // For event-specific assignments
+  eventName: text("event_name"),
+  status: posAssignmentStatusEnum("status").default('active'),
+  assignedById: varchar("assigned_by_id").references(() => users.id).notNull(),
+  assignedByName: text("assigned_by_name").notNull(),
+  assignedAt: timestamp("assigned_at").defaultNow(),
+  returnedAt: timestamp("returned_at"),
+  returnedById: varchar("returned_by_id").references(() => users.id),
+  returnedByName: text("returned_by_name"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_pos_assignments_device").on(table.posDeviceId),
+  index("IDX_pos_assignments_location").on(table.locationId),
+  index("IDX_pos_assignments_status").on(table.status),
+  index("IDX_pos_assignments_event").on(table.eventDate),
+]);
+
+// POS Replacement History - when a POS is swapped mid-event
+export const posReplacements = pgTable("pos_replacements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  originalPosId: varchar("original_pos_id").references(() => posDevices.id).notNull(),
+  originalPosNumber: integer("original_pos_number").notNull(),
+  replacementPosId: varchar("replacement_pos_id").references(() => posDevices.id).notNull(),
+  replacementPosNumber: integer("replacement_pos_number").notNull(),
+  locationId: varchar("location_id").notNull(),
+  locationType: posLocationTypeEnum("location_type").notNull(),
+  locationName: text("location_name").notNull(),
+  reason: text("reason").notNull(), // "malfunction", "damage", "upgrade", etc.
+  reportedIssue: text("reported_issue"), // What was wrong
+  replacedById: varchar("replaced_by_id").references(() => users.id).notNull(),
+  replacedByName: text("replaced_by_name").notNull(),
+  eventDate: text("event_date"),
+  eventName: text("event_name"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_pos_replacements_original").on(table.originalPosId),
+  index("IDX_pos_replacements_replacement").on(table.replacementPosId),
+  index("IDX_pos_replacements_location").on(table.locationId),
+  index("IDX_pos_replacements_event").on(table.eventDate),
+]);
+
+// POS Issue Reports - for reporting problems (feeds into David's message to IT)
+export const posIssueStatusEnum = pgEnum('pos_issue_status', ['Open', 'Acknowledged', 'InProgress', 'Resolved', 'Closed']);
+
+export const posIssues = pgTable("pos_issues", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  posDeviceId: varchar("pos_device_id").references(() => posDevices.id),
+  posDeviceNumber: integer("pos_device_number"),
+  locationId: varchar("location_id").notNull(),
+  locationType: posLocationTypeEnum("location_type").notNull(),
+  locationName: text("location_name").notNull(),
+  issueType: text("issue_type").notNull(), // "not_working", "slow", "display_issue", "card_reader", etc.
+  description: text("description").notNull(),
+  priority: text("priority").default('normal'), // "low", "normal", "high", "critical"
+  status: posIssueStatusEnum("status").default('Open'),
+  reportedById: varchar("reported_by_id").references(() => users.id).notNull(),
+  reportedByName: text("reported_by_name").notNull(),
+  reportedByRole: text("reported_by_role").notNull(),
+  assignedToId: varchar("assigned_to_id").references(() => users.id), // IT team member
+  assignedToName: text("assigned_to_name"),
+  resolvedById: varchar("resolved_by_id").references(() => users.id),
+  resolvedByName: text("resolved_by_name"),
+  resolution: text("resolution"),
+  resolvedAt: timestamp("resolved_at"),
+  eventDate: text("event_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_pos_issues_device").on(table.posDeviceId),
+  index("IDX_pos_issues_location").on(table.locationId),
+  index("IDX_pos_issues_status").on(table.status),
+  index("IDX_pos_issues_assigned").on(table.assignedToId),
+]);
+
+// Insert schemas for POS system
+export const insertPosDeviceTypeSchema = createInsertSchema(posDeviceTypes).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertPosDeviceSchema = createInsertSchema(posDevices).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertPosLocationGridSchema = createInsertSchema(posLocationGrid).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertPosAssignmentSchema = createInsertSchema(posAssignments).omit({ id: true, createdAt: true });
+export const insertPosReplacementSchema = createInsertSchema(posReplacements).omit({ id: true, createdAt: true });
+export const insertPosIssueSchema = createInsertSchema(posIssues).omit({ id: true, createdAt: true, updatedAt: true });
+
+// Types for POS system
+export type PosDeviceType = typeof posDeviceTypes.$inferSelect;
+export type InsertPosDeviceType = z.infer<typeof insertPosDeviceTypeSchema>;
+export type PosDevice = typeof posDevices.$inferSelect;
+export type InsertPosDevice = z.infer<typeof insertPosDeviceSchema>;
+export type PosLocationGrid = typeof posLocationGrid.$inferSelect;
+export type InsertPosLocationGrid = z.infer<typeof insertPosLocationGridSchema>;
+export type PosAssignment = typeof posAssignments.$inferSelect;
+export type InsertPosAssignment = z.infer<typeof insertPosAssignmentSchema>;
+export type PosReplacement = typeof posReplacements.$inferSelect;
+export type InsertPosReplacement = z.infer<typeof insertPosReplacementSchema>;
+export type PosIssue = typeof posIssues.$inferSelect;
+export type InsertPosIssue = z.infer<typeof insertPosIssueSchema>;
+
+// Default POS device types (seed data)
+export const DEFAULT_POS_TYPES = [
+  { name: 'A930', description: 'Ingenico Axium A930 - Mobile POS', manufacturer: 'Ingenico' },
+  { name: 'A700', description: 'Ingenico Axium A700 - Countertop POS', manufacturer: 'Ingenico' },
+  { name: 'PAX', description: 'PAX Payment Terminal', manufacturer: 'PAX Technology' },
 ] as const;
