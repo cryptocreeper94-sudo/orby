@@ -1184,6 +1184,76 @@ export const EXAMPLE_WAREHOUSE_CATEGORIES = [
   { name: 'Supplies', color: '#64748B', icon: 'Wrench' },
 ];
 
+// ============ COMPLIANCE ALERTS (ABC Board & Health Department) ============
+export const complianceAlertTypeEnum = pgEnum('compliance_alert_type', [
+  'abc_board',      // Tennessee ABC Board inspection
+  'health_dept',    // Health Department inspection
+  'fire_marshal',   // Fire Marshal inspection
+  'osha',           // OSHA inspection
+  'other'           // Other regulatory inspection
+]);
+
+export const complianceAlerts = pgTable("compliance_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  alertType: complianceAlertTypeEnum("alert_type").notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  message: text("message").notNull(),
+  isActive: boolean("is_active").default(true),
+  triggeredById: varchar("triggered_by_id").references(() => users.id),
+  triggeredByName: varchar("triggered_by_name", { length: 100 }),
+  resolvedById: varchar("resolved_by_id").references(() => users.id),
+  resolvedAt: timestamp("resolved_at"),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertComplianceAlertSchema = createInsertSchema(complianceAlerts).omit({ id: true, createdAt: true, updatedAt: true });
+export type ComplianceAlert = typeof complianceAlerts.$inferSelect;
+export type InsertComplianceAlert = z.infer<typeof insertComplianceAlertSchema>;
+
+// Tennessee ABC Board Compliance Checklist
+export const TN_ABC_CHECKLIST = [
+  { id: 'id_check', category: 'ID Verification', item: 'Check ID for anyone who does not appear 50 or older', critical: true },
+  { id: 'id_hold', category: 'ID Verification', item: 'Hold ID in hand to physically verify - do not just glance', critical: true },
+  { id: 'id_valid', category: 'ID Verification', item: 'Verify ID is valid (not expired) and government-issued', critical: true },
+  { id: 'id_photo', category: 'ID Verification', item: 'Match photo on ID to customer face', critical: true },
+  { id: 'id_dob', category: 'ID Verification', item: 'Verify birth date shows customer is 21+', critical: true },
+  { id: 'server_permit', category: 'Server Requirements', item: 'All servers have valid ABC Server Permit', critical: true },
+  { id: 'permit_display', category: 'Display', item: 'ABC license prominently displayed', critical: false },
+  { id: 'signage', category: 'Display', item: 'Required signage posted: "STATE LAW REQUIRES IDENTIFICATION FOR THE SALE OF BEER"', critical: false },
+  { id: 'no_overservice', category: 'Service', item: 'Do not serve visibly intoxicated patrons', critical: true },
+  { id: 'designated_area', category: 'Service', item: 'Alcohol sales only in designated areas', critical: true },
+  { id: 'hours', category: 'Service', item: 'Verify within legal serving hours', critical: true },
+  { id: 'training_current', category: 'Training', item: 'Server training certificates current (within 5 years)', critical: false },
+];
+
+// Tennessee Health Department Compliance Checklist (based on Rule 1200-23)
+export const TN_HEALTH_CHECKLIST = [
+  { id: 'pic_present', category: 'Management', item: 'Person in charge present with food safety certification', points: 5, critical: true },
+  { id: 'illness_policy', category: 'Personnel', item: 'Employees not working while ill (vomiting, diarrhea, fever)', points: 5, critical: true },
+  { id: 'handwashing', category: 'Personnel', item: 'Proper handwashing - 20 seconds, soap, warm water', points: 5, critical: true },
+  { id: 'no_bare_hands', category: 'Personnel', item: 'No bare hand contact with ready-to-eat food', points: 4, critical: true },
+  { id: 'glove_change', category: 'Personnel', item: 'Gloves changed between tasks and when contaminated', points: 3, critical: false },
+  { id: 'no_eating_work', category: 'Personnel', item: 'No eating, drinking, or smoking in food prep areas', points: 2, critical: false },
+  { id: 'hair_restraint', category: 'Personnel', item: 'Hair restraints worn properly', points: 1, critical: false },
+  { id: 'temp_cold', category: 'Food Temperature', item: 'Cold foods held at 41°F or below', points: 5, critical: true },
+  { id: 'temp_hot', category: 'Food Temperature', item: 'Hot foods held at 135°F or above', points: 5, critical: true },
+  { id: 'cooking_temps', category: 'Food Temperature', item: 'Foods cooked to proper internal temperatures', points: 5, critical: true },
+  { id: 'thermometer', category: 'Food Temperature', item: 'Probe thermometer available and calibrated', points: 2, critical: false },
+  { id: 'cross_contamination', category: 'Food Safety', item: 'Raw meats stored below ready-to-eat foods', points: 4, critical: true },
+  { id: 'date_marking', category: 'Food Safety', item: 'Foods date-marked when held more than 24 hours', points: 2, critical: false },
+  { id: 'approved_source', category: 'Food Safety', item: 'All food from approved sources', points: 4, critical: true },
+  { id: 'surfaces_clean', category: 'Sanitation', item: 'Food contact surfaces clean and sanitized', points: 3, critical: false },
+  { id: 'sanitizer_strength', category: 'Sanitation', item: 'Sanitizer at proper concentration (test strips available)', points: 3, critical: false },
+  { id: 'wiping_cloths', category: 'Sanitation', item: 'Wiping cloths stored in sanitizer solution', points: 2, critical: false },
+  { id: 'pest_free', category: 'Facility', item: 'No evidence of pests (flies, roaches, rodents)', points: 4, critical: true },
+  { id: 'garbage', category: 'Facility', item: 'Garbage containers covered and emptied regularly', points: 2, critical: false },
+  { id: 'floors_clean', category: 'Facility', item: 'Floors, walls, and ceilings clean and in good repair', points: 2, critical: false },
+  { id: 'handwash_station', category: 'Facility', item: 'Handwashing stations stocked (soap, paper towels, warm water)', points: 3, critical: false },
+  { id: 'equipment_working', category: 'Equipment', item: 'All equipment in good working order', points: 2, critical: false },
+];
+
 // ============ ORBY HALLMARK STAMPING SYSTEM ============
 // Asset stamp categories for tracking
 export const assetCategoryEnum = pgEnum('asset_category', [
