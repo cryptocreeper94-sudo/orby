@@ -29,6 +29,7 @@ export default function LoginPage() {
   });
   const [showDevRolePicker, setShowDevRolePicker] = useState(false);
   const [pendingDevLogin, setPendingDevLogin] = useState(false);
+  const [showPinHelp, setShowPinHelp] = useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -243,13 +244,82 @@ export default function LoginPage() {
                 </Button>
               </div>
               
-              <div className="mt-4 text-center">
-                <p className="text-[10px] text-cyan-200/50 font-medium">
-                  Demo: 1111 · 2222 · 3333 · 4444 · 5555 · 6666
-                </p>
-              </div>
-            </form>
+              </form>
           </Form>
+
+          {/* PIN Help Accordion */}
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={() => setShowPinHelp(!showPinHelp)}
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
+              data-testid="button-pin-help"
+            >
+              <div className="flex items-center gap-2 text-cyan-200/70">
+                <HelpCircle className="w-4 h-4" />
+                <span className="text-sm">First time? Tap for PIN info</span>
+              </div>
+              <motion.div
+                animate={{ rotate: showPinHelp ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronDown className="w-4 h-4 text-cyan-200/50" />
+              </motion.div>
+            </button>
+
+            <AnimatePresence>
+              {showPinHelp && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-2 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 space-y-3">
+                    <p className="text-xs text-slate-400 mb-3">
+                      Use your role's initial PIN to set up your personal PIN:
+                    </p>
+                    
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
+                        <span className="text-slate-300">New Staff (at stadium)</span>
+                        <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">9999</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
+                        <span className="text-slate-300">NPO Worker</span>
+                        <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">1111</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
+                        <span className="text-slate-300">Stand Lead</span>
+                        <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">2222</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
+                        <span className="text-slate-300">Stand Supervisor</span>
+                        <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">3333</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
+                        <span className="text-slate-300">Managers</span>
+                        <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">4444</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
+                        <span className="text-slate-300">Alcohol Compliance</span>
+                        <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">5555</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1.5">
+                        <span className="text-slate-300">Check-in Assistant</span>
+                        <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">6666</span>
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] text-slate-500 mt-3 pt-2 border-t border-slate-700/50">
+                      After first login, you'll create your own personal PIN.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
