@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, X, Wind, Droplets, Eye, Thermometer, Sunrise, Sunset, ChevronRight } from "lucide-react";
+import { Link } from "wouter";
+import { Loader2, X, Wind, Droplets, Eye, Thermometer, Sunrise, Sunset, ChevronRight, Map } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 import sunnyIcon from "@assets/generated_images/sunny_day_floating_icon.png";
@@ -327,6 +328,18 @@ export default function FloatingWeatherButton() {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div className="px-6 pb-6">
+                <Link href="/weather-map">
+                  <button 
+                    className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-medium flex items-center justify-center gap-2 transition-all shadow-lg shadow-cyan-500/25"
+                    data-testid="button-open-weather-map"
+                  >
+                    <Map className="w-5 h-5" />
+                    View Interactive Weather Map
+                  </button>
+                </Link>
               </div>
             </motion.div>
           </motion.div>
