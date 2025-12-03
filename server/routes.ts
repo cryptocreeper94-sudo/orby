@@ -4163,6 +4163,167 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ========== ACTIVE EVENT SYSTEM (Live vs Sandbox Mode) ==========
+  // Only Event Admins can activate/deactivate events
+  // When no event is active, system defaults to SANDBOX mode
+  const EVENT_ADMIN_PINS = ['2424', '0424', '1234']; // David, Jason, Sid
+
+  // Check if system is in live mode (has active event)
+  app.get("/api/system-status", async (_req: Request, res: Response) => {
+    try {
+      const activeEvent = await storage.getActiveEvent();
+      const isLive = !!activeEvent;
+      res.json({
+        isLive,
+        mode: isLive ? 'live' : 'sandbox',
+        activeEvent: activeEvent || null,
+        message: isLive 
+          ? `System is LIVE for: ${activeEvent?.eventName}` 
+          : 'No active event - System is in SANDBOX mode'
+      });
+    } catch (error) {
+      console.error("Error getting system status:", error);
+      res.status(500).json({ error: "Failed to get system status" });
+    }
+  });
+
+  // Get all events
+  app.get("/api/events", async (_req: Request, res: Response) => {
+    try {
+      const events = await storage.getAllEvents();
+      res.json(events);
+    } catch (error) {
+      console.error("Error getting events:", error);
+      res.status(500).json({ error: "Failed to get events" });
+    }
+  });
+
+  // Get active event
+  app.get("/api/events/active", async (_req: Request, res: Response) => {
+    try {
+      const activeEvent = await storage.getActiveEvent();
+      res.json(activeEvent || null);
+    } catch (error) {
+      console.error("Error getting active event:", error);
+      res.status(500).json({ error: "Failed to get active event" });
+    }
+  });
+
+  // Create a new event (scheduled, not yet active)
+  app.post("/api/events", async (req: Request, res: Response) => {
+    try {
+      const { userPin, eventName, eventDate, eventType, doorsOpenTime, eventStartTime, eventEndTime, expectedAttendance, notes } = req.body;
+      
+      // Authorization check
+      if (!userPin || !EVENT_ADMIN_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized. Only Event Admins can create events." });
+      }
+
+      const event = await storage.createEvent({
+        eventName,
+        eventDate,
+        eventType: eventType || 'standard',
+        doorsOpenTime,
+        eventStartTime,
+        eventEndTime,
+        expectedAttendance,
+        notes,
+        status: 'scheduled'
+      });
+      
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      res.status(500).json({ error: "Failed to create event" });
+    }
+  });
+
+  // Activate an event (switches system to LIVE mode)
+  app.post("/api/events/:id/activate", async (req: Request, res: Response) => {
+    try {
+      const { userPin, userId, userName } = req.body;
+      
+      // Authorization check
+      if (!userPin || !EVENT_ADMIN_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized. Only Event Admins can activate events." });
+      }
+
+      const event = await storage.activateEvent(req.params.id, userId, userName);
+      
+      // Log the activation
+      await storage.createAuditLog({
+        userId,
+        action: 'Event Activated',
+        targetType: 'event',
+        targetId: event.id,
+        details: { eventName: event.eventName, eventDate: event.eventDate }
+      });
+
+      res.json({ 
+        success: true, 
+        event, 
+        message: `System is now LIVE for: ${event.eventName}` 
+      });
+    } catch (error) {
+      console.error("Error activating event:", error);
+      res.status(500).json({ error: "Failed to activate event" });
+    }
+  });
+
+  // Deactivate an event (switches system back to SANDBOX mode)
+  app.post("/api/events/:id/deactivate", async (req: Request, res: Response) => {
+    try {
+      const { userPin, userId, userName } = req.body;
+      
+      // Authorization check
+      if (!userPin || !EVENT_ADMIN_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized. Only Event Admins can deactivate events." });
+      }
+
+      const event = await storage.deactivateEvent(req.params.id, userId, userName);
+      
+      // Log the deactivation
+      await storage.createAuditLog({
+        userId,
+        action: 'Event Deactivated',
+        targetType: 'event',
+        targetId: event.id,
+        details: { eventName: event.eventName, eventDate: event.eventDate }
+      });
+
+      res.json({ 
+        success: true, 
+        event, 
+        message: 'System is now in SANDBOX mode' 
+      });
+    } catch (error) {
+      console.error("Error deactivating event:", error);
+      res.status(500).json({ error: "Failed to deactivate event" });
+    }
+  });
+
+  // Update event details
+  app.put("/api/events/:id", async (req: Request, res: Response) => {
+    try {
+      const { userPin, ...updates } = req.body;
+      
+      // Authorization check
+      if (!userPin || !EVENT_ADMIN_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized. Only Event Admins can update events." });
+      }
+
+      const event = await storage.updateEvent(req.params.id, updates);
+      res.json(event);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      res.status(500).json({ error: "Failed to update event" });
+    }
+  });
+
+  // ========== SANDBOX PROTECTION MIDDLEWARE ==========
+  // This checks if system is live before allowing data-modifying operations
+  // Note: GET operations are always allowed, only POST/PUT/DELETE for core data are blocked
+  
   // ========== VENUE GEOFENCE CONFIGURATION ==========
   // Authorized PINs: David (2424) and Jason (0424) only
   const GEOFENCE_ADMIN_PINS = ['2424', '0424'];

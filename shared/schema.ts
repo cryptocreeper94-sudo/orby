@@ -1457,6 +1457,42 @@ export type InsertSupervisorSession = z.infer<typeof insertSupervisorSessionSche
 export type SupervisorActivity = typeof supervisorActivity.$inferSelect;
 export type InsertSupervisorActivity = z.infer<typeof insertSupervisorActivitySchema>;
 
+// ============ ACTIVE EVENT SYSTEM ============
+// Controls when the system is in LIVE mode vs SANDBOX mode
+// Only managers can activate events - when no event is active, system defaults to sandbox
+export const eventStatusEnum = pgEnum('event_status', ['scheduled', 'active', 'completed', 'cancelled']);
+
+export const activeEvents = pgTable("active_events", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventName: text("event_name").notNull(),
+  eventDate: text("event_date").notNull(), // YYYY-MM-DD format
+  eventType: text("event_type").default('standard'), // standard, concert, special
+  status: eventStatusEnum("status").notNull().default('scheduled'),
+  doorsOpenTime: text("doors_open_time"), // HH:MM format
+  eventStartTime: text("event_start_time"), // HH:MM format
+  eventEndTime: text("event_end_time"), // HH:MM format
+  expectedAttendance: integer("expected_attendance"),
+  activatedById: varchar("activated_by_id").references(() => users.id),
+  activatedByName: text("activated_by_name"),
+  activatedAt: timestamp("activated_at"),
+  deactivatedById: varchar("deactivated_by_id").references(() => users.id),
+  deactivatedByName: text("deactivated_by_name"),
+  deactivatedAt: timestamp("deactivated_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_active_events_date").on(table.eventDate),
+  index("IDX_active_events_status").on(table.status),
+]);
+
+export const insertActiveEventSchema = createInsertSchema(activeEvents).omit({ id: true, createdAt: true, updatedAt: true });
+export type ActiveEvent = typeof activeEvents.$inferSelect;
+export type InsertActiveEvent = z.infer<typeof insertActiveEventSchema>;
+
+// Authorized PINs for event activation (David, Jason, and Sid only)
+export const EVENT_ADMIN_PINS = ['2424', '0424', '1234'];
+
 // ============ VENUE GEOFENCE CONFIGURATION ============
 // Configurable geofencing for different event types (David/Jason only)
 export const eventPresetEnum = pgEnum('event_preset', ['standard', 'largeOutdoor', 'extended', 'custom']);

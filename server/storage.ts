@@ -8,7 +8,7 @@ import {
   auditLogs, emergencyAlerts, emergencyResponders, emergencyEscalationHistory, emergencyAlertNotifications,
   orbitRosters, orbitShifts, deliveryRequests, departmentContacts, alcoholViolations,
   standItems, managerDocuments, assetStamps, blockchainVerifications, complianceAlerts,
-  supervisorSessions, supervisorActivity, dashboardConfigs, venueGeofenceConfig,
+  supervisorSessions, supervisorActivity, dashboardConfigs, venueGeofenceConfig, activeEvents,
   keySets, radios, equipmentCheckoutHistory, equipmentAlerts,
   posDeviceTypes, posDevices, posLocationGrid, posAssignments, posReplacements, posIssues,
   documentTemplates, scannedDocuments,
@@ -63,6 +63,7 @@ import {
   type SupervisorActivity, type InsertSupervisorActivity,
   type DashboardConfig, type InsertDashboardConfig,
   type VenueGeofenceConfig, type InsertVenueGeofenceConfig,
+  type ActiveEvent, type InsertActiveEvent,
   type KeySet, type InsertKeySet,
   type Radio, type InsertRadio,
   type EquipmentCheckoutHistory, type InsertEquipmentCheckoutHistory,
@@ -438,6 +439,17 @@ export interface IStorage {
   // Venue Geofence Configuration (David/Jason only)
   getActiveGeofenceConfig(): Promise<VenueGeofenceConfig | undefined>;
   updateGeofenceConfig(config: Partial<InsertVenueGeofenceConfig>): Promise<VenueGeofenceConfig>;
+
+  // Active Event System (controls live vs sandbox mode)
+  getActiveEvent(): Promise<ActiveEvent | undefined>;
+  getAllEvents(): Promise<ActiveEvent[]>;
+  getEventById(id: string): Promise<ActiveEvent | undefined>;
+  getEventByDate(eventDate: string): Promise<ActiveEvent | undefined>;
+  createEvent(event: InsertActiveEvent): Promise<ActiveEvent>;
+  activateEvent(id: string, activatedById: string, activatedByName: string): Promise<ActiveEvent>;
+  deactivateEvent(id: string, deactivatedById: string, deactivatedByName: string): Promise<ActiveEvent>;
+  updateEvent(id: string, updates: Partial<InsertActiveEvent>): Promise<ActiveEvent>;
+  isSystemLive(): Promise<boolean>;
 
   // ============ KEY & RADIO CHECKOUT SYSTEM ============
   // Key Sets (50 available)
@@ -2476,6 +2488,84 @@ export class DatabaseStorage implements IStorage {
       isActive: true
     }).returning();
     return created;
+  }
+
+  // ============ ACTIVE EVENT SYSTEM (Controls Live vs Sandbox) ============
+  async getActiveEvent(): Promise<ActiveEvent | undefined> {
+    const [event] = await db.select().from(activeEvents)
+      .where(eq(activeEvents.status, 'active'))
+      .orderBy(desc(activeEvents.activatedAt))
+      .limit(1);
+    return event || undefined;
+  }
+
+  async getAllEvents(): Promise<ActiveEvent[]> {
+    return await db.select().from(activeEvents)
+      .orderBy(desc(activeEvents.eventDate));
+  }
+
+  async getEventById(id: string): Promise<ActiveEvent | undefined> {
+    const [event] = await db.select().from(activeEvents)
+      .where(eq(activeEvents.id, id));
+    return event || undefined;
+  }
+
+  async getEventByDate(eventDate: string): Promise<ActiveEvent | undefined> {
+    const [event] = await db.select().from(activeEvents)
+      .where(eq(activeEvents.eventDate, eventDate));
+    return event || undefined;
+  }
+
+  async createEvent(event: InsertActiveEvent): Promise<ActiveEvent> {
+    const [created] = await db.insert(activeEvents).values(event).returning();
+    return created;
+  }
+
+  async activateEvent(id: string, activatedById: string, activatedByName: string): Promise<ActiveEvent> {
+    // First deactivate any currently active events
+    await db.update(activeEvents)
+      .set({ status: 'completed', deactivatedAt: new Date() })
+      .where(eq(activeEvents.status, 'active'));
+    
+    // Now activate the requested event
+    const [updated] = await db.update(activeEvents)
+      .set({
+        status: 'active',
+        activatedById,
+        activatedByName,
+        activatedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(activeEvents.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deactivateEvent(id: string, deactivatedById: string, deactivatedByName: string): Promise<ActiveEvent> {
+    const [updated] = await db.update(activeEvents)
+      .set({
+        status: 'completed',
+        deactivatedById,
+        deactivatedByName,
+        deactivatedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(activeEvents.id, id))
+      .returning();
+    return updated;
+  }
+
+  async updateEvent(id: string, updates: Partial<InsertActiveEvent>): Promise<ActiveEvent> {
+    const [updated] = await db.update(activeEvents)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(activeEvents.id, id))
+      .returning();
+    return updated;
+  }
+
+  async isSystemLive(): Promise<boolean> {
+    const activeEvent = await this.getActiveEvent();
+    return !!activeEvent;
   }
 
   // ============ KEY & RADIO CHECKOUT SYSTEM ============
