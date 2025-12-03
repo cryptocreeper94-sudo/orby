@@ -9,6 +9,7 @@ import {
   orbitRosters, orbitShifts, deliveryRequests, departmentContacts, alcoholViolations,
   standItems, managerDocuments, assetStamps, blockchainVerifications, complianceAlerts,
   supervisorSessions, supervisorActivity, dashboardConfigs, venueGeofenceConfig,
+  keySets, radios, equipmentCheckoutHistory, equipmentAlerts,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -59,7 +60,11 @@ import {
   type SupervisorSession, type InsertSupervisorSession,
   type SupervisorActivity, type InsertSupervisorActivity,
   type DashboardConfig, type InsertDashboardConfig,
-  type VenueGeofenceConfig, type InsertVenueGeofenceConfig
+  type VenueGeofenceConfig, type InsertVenueGeofenceConfig,
+  type KeySet, type InsertKeySet,
+  type Radio, type InsertRadio,
+  type EquipmentCheckoutHistory, type InsertEquipmentCheckoutHistory,
+  type EquipmentAlert, type InsertEquipmentAlert
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray, ilike, sql } from "drizzle-orm";
@@ -423,6 +428,41 @@ export interface IStorage {
   // Venue Geofence Configuration (David/Jason only)
   getActiveGeofenceConfig(): Promise<VenueGeofenceConfig | undefined>;
   updateGeofenceConfig(config: Partial<InsertVenueGeofenceConfig>): Promise<VenueGeofenceConfig>;
+
+  // ============ KEY & RADIO CHECKOUT SYSTEM ============
+  // Key Sets (50 available)
+  getAllKeySets(): Promise<KeySet[]>;
+  getKeySet(id: string): Promise<KeySet | undefined>;
+  getKeySetByNumber(keyNumber: number): Promise<KeySet | undefined>;
+  getAvailableKeySets(): Promise<KeySet[]>;
+  getCheckedOutKeySets(): Promise<KeySet[]>;
+  getKeySetsByHolder(holderId: string): Promise<KeySet[]>;
+  checkoutKeySet(keyNumber: number, userId: string, userName: string, userRole: string): Promise<KeySet>;
+  checkinKeySet(keyNumber: number, userId: string, userName: string): Promise<KeySet>;
+  
+  // Radios
+  getAllRadios(): Promise<Radio[]>;
+  getRadio(id: string): Promise<Radio | undefined>;
+  getRadioByNumber(radioNumber: number): Promise<Radio | undefined>;
+  getAvailableRadios(): Promise<Radio[]>;
+  getCheckedOutRadios(): Promise<Radio[]>;
+  getRadiosByHolder(holderId: string): Promise<Radio[]>;
+  checkoutRadio(radioNumber: number, userId: string, userName: string, userRole: string): Promise<Radio>;
+  checkinRadio(radioNumber: number, userId: string, userName: string): Promise<Radio>;
+  createRadio(radio: InsertRadio): Promise<Radio>;
+  
+  // Equipment Checkout History
+  getEquipmentHistory(equipmentId: string): Promise<EquipmentCheckoutHistory[]>;
+  getEquipmentHistoryByUser(userId: string): Promise<EquipmentCheckoutHistory[]>;
+  createEquipmentHistoryEntry(entry: InsertEquipmentCheckoutHistory): Promise<EquipmentCheckoutHistory>;
+  
+  // Equipment Alerts (geofence violations)
+  getEquipmentAlert(id: string): Promise<EquipmentAlert | undefined>;
+  getPendingEquipmentAlerts(): Promise<EquipmentAlert[]>;
+  getEquipmentAlertsByUser(userId: string): Promise<EquipmentAlert[]>;
+  createEquipmentAlert(alert: InsertEquipmentAlert): Promise<EquipmentAlert>;
+  acknowledgeEquipmentAlert(id: string): Promise<void>;
+  resolveEquipmentAlert(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2378,6 +2418,238 @@ export class DatabaseStorage implements IStorage {
       isActive: true
     }).returning();
     return created;
+  }
+
+  // ============ KEY & RADIO CHECKOUT SYSTEM ============
+  // Key Sets
+  async getAllKeySets(): Promise<KeySet[]> {
+    return await db.select().from(keySets).orderBy(asc(keySets.keyNumber));
+  }
+
+  async getKeySet(id: string): Promise<KeySet | undefined> {
+    const [keySet] = await db.select().from(keySets).where(eq(keySets.id, id));
+    return keySet || undefined;
+  }
+
+  async getKeySetByNumber(keyNumber: number): Promise<KeySet | undefined> {
+    const [keySet] = await db.select().from(keySets).where(eq(keySets.keyNumber, keyNumber));
+    return keySet || undefined;
+  }
+
+  async getAvailableKeySets(): Promise<KeySet[]> {
+    return await db.select().from(keySets)
+      .where(eq(keySets.status, 'available'))
+      .orderBy(asc(keySets.keyNumber));
+  }
+
+  async getCheckedOutKeySets(): Promise<KeySet[]> {
+    return await db.select().from(keySets)
+      .where(eq(keySets.status, 'checked_out'))
+      .orderBy(asc(keySets.keyNumber));
+  }
+
+  async getKeySetsByHolder(holderId: string): Promise<KeySet[]> {
+    return await db.select().from(keySets)
+      .where(eq(keySets.currentHolderId, holderId))
+      .orderBy(asc(keySets.keyNumber));
+  }
+
+  async checkoutKeySet(keyNumber: number, userId: string, userName: string, userRole: string): Promise<KeySet> {
+    const [updated] = await db.update(keySets).set({
+      status: 'checked_out',
+      currentHolderId: userId,
+      currentHolderName: userName,
+      currentHolderRole: userRole,
+      checkedOutAt: new Date()
+    }).where(eq(keySets.keyNumber, keyNumber)).returning();
+    
+    // Create history entry
+    await this.createEquipmentHistoryEntry({
+      equipmentType: 'key',
+      equipmentId: updated.id,
+      equipmentNumber: keyNumber,
+      action: 'checkout',
+      userId,
+      userName,
+      userRole
+    });
+    
+    return updated;
+  }
+
+  async checkinKeySet(keyNumber: number, userId: string, userName: string): Promise<KeySet> {
+    const keySet = await this.getKeySetByNumber(keyNumber);
+    const previousHolder = keySet?.currentHolderName || 'Unknown';
+    const previousHolderId = keySet?.currentHolderId || null;
+    
+    const [updated] = await db.update(keySets).set({
+      status: 'available',
+      currentHolderId: null,
+      currentHolderName: null,
+      currentHolderRole: null,
+      checkedOutAt: null,
+      expectedReturnTime: null
+    }).where(eq(keySets.keyNumber, keyNumber)).returning();
+    
+    // Create history entry
+    await this.createEquipmentHistoryEntry({
+      equipmentType: 'key',
+      equipmentId: updated.id,
+      equipmentNumber: keyNumber,
+      action: 'checkin',
+      userId,
+      userName,
+      userRole: 'checkin',
+      previousHolderId,
+      previousHolderName: previousHolder
+    });
+    
+    return updated;
+  }
+
+  // Radios
+  async getAllRadios(): Promise<Radio[]> {
+    return await db.select().from(radios).orderBy(asc(radios.radioNumber));
+  }
+
+  async getRadio(id: string): Promise<Radio | undefined> {
+    const [radio] = await db.select().from(radios).where(eq(radios.id, id));
+    return radio || undefined;
+  }
+
+  async getRadioByNumber(radioNumber: number): Promise<Radio | undefined> {
+    const [radio] = await db.select().from(radios).where(eq(radios.radioNumber, radioNumber));
+    return radio || undefined;
+  }
+
+  async getAvailableRadios(): Promise<Radio[]> {
+    return await db.select().from(radios)
+      .where(eq(radios.status, 'available'))
+      .orderBy(asc(radios.radioNumber));
+  }
+
+  async getCheckedOutRadios(): Promise<Radio[]> {
+    return await db.select().from(radios)
+      .where(eq(radios.status, 'checked_out'))
+      .orderBy(asc(radios.radioNumber));
+  }
+
+  async getRadiosByHolder(holderId: string): Promise<Radio[]> {
+    return await db.select().from(radios)
+      .where(eq(radios.currentHolderId, holderId))
+      .orderBy(asc(radios.radioNumber));
+  }
+
+  async checkoutRadio(radioNumber: number, userId: string, userName: string, userRole: string): Promise<Radio> {
+    const [updated] = await db.update(radios).set({
+      status: 'checked_out',
+      currentHolderId: userId,
+      currentHolderName: userName,
+      currentHolderRole: userRole,
+      checkedOutAt: new Date()
+    }).where(eq(radios.radioNumber, radioNumber)).returning();
+    
+    // Create history entry
+    await this.createEquipmentHistoryEntry({
+      equipmentType: 'radio',
+      equipmentId: updated.id,
+      equipmentNumber: radioNumber,
+      action: 'checkout',
+      userId,
+      userName,
+      userRole
+    });
+    
+    return updated;
+  }
+
+  async checkinRadio(radioNumber: number, userId: string, userName: string): Promise<Radio> {
+    const radio = await this.getRadioByNumber(radioNumber);
+    const previousHolder = radio?.currentHolderName || 'Unknown';
+    const previousHolderId = radio?.currentHolderId || null;
+    
+    const [updated] = await db.update(radios).set({
+      status: 'available',
+      currentHolderId: null,
+      currentHolderName: null,
+      currentHolderRole: null,
+      checkedOutAt: null
+    }).where(eq(radios.radioNumber, radioNumber)).returning();
+    
+    // Create history entry
+    await this.createEquipmentHistoryEntry({
+      equipmentType: 'radio',
+      equipmentId: updated.id,
+      equipmentNumber: radioNumber,
+      action: 'checkin',
+      userId,
+      userName,
+      userRole: 'checkin',
+      previousHolderId,
+      previousHolderName: previousHolder
+    });
+    
+    return updated;
+  }
+
+  async createRadio(radio: InsertRadio): Promise<Radio> {
+    const [created] = await db.insert(radios).values(radio).returning();
+    return created;
+  }
+
+  // Equipment Checkout History
+  async getEquipmentHistory(equipmentId: string): Promise<EquipmentCheckoutHistory[]> {
+    return await db.select().from(equipmentCheckoutHistory)
+      .where(eq(equipmentCheckoutHistory.equipmentId, equipmentId))
+      .orderBy(desc(equipmentCheckoutHistory.createdAt));
+  }
+
+  async getEquipmentHistoryByUser(userId: string): Promise<EquipmentCheckoutHistory[]> {
+    return await db.select().from(equipmentCheckoutHistory)
+      .where(eq(equipmentCheckoutHistory.userId, userId))
+      .orderBy(desc(equipmentCheckoutHistory.createdAt));
+  }
+
+  async createEquipmentHistoryEntry(entry: InsertEquipmentCheckoutHistory): Promise<EquipmentCheckoutHistory> {
+    const [created] = await db.insert(equipmentCheckoutHistory).values(entry).returning();
+    return created;
+  }
+
+  // Equipment Alerts
+  async getEquipmentAlert(id: string): Promise<EquipmentAlert | undefined> {
+    const [alert] = await db.select().from(equipmentAlerts).where(eq(equipmentAlerts.id, id));
+    return alert || undefined;
+  }
+
+  async getPendingEquipmentAlerts(): Promise<EquipmentAlert[]> {
+    return await db.select().from(equipmentAlerts)
+      .where(eq(equipmentAlerts.status, 'pending'))
+      .orderBy(desc(equipmentAlerts.createdAt));
+  }
+
+  async getEquipmentAlertsByUser(userId: string): Promise<EquipmentAlert[]> {
+    return await db.select().from(equipmentAlerts)
+      .where(eq(equipmentAlerts.userId, userId))
+      .orderBy(desc(equipmentAlerts.createdAt));
+  }
+
+  async createEquipmentAlert(alert: InsertEquipmentAlert): Promise<EquipmentAlert> {
+    const [created] = await db.insert(equipmentAlerts).values(alert).returning();
+    return created;
+  }
+
+  async acknowledgeEquipmentAlert(id: string): Promise<void> {
+    await db.update(equipmentAlerts).set({
+      status: 'acknowledged',
+      acknowledgedAt: new Date()
+    }).where(eq(equipmentAlerts.id, id));
+  }
+
+  async resolveEquipmentAlert(id: string): Promise<void> {
+    await db.update(equipmentAlerts).set({
+      status: 'resolved',
+      resolvedAt: new Date()
+    }).where(eq(equipmentAlerts.id, id));
   }
 }
 
