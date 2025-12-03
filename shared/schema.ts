@@ -1477,3 +1477,119 @@ export type InsertVenueGeofenceConfig = z.infer<typeof insertVenueGeofenceConfig
 
 // Authorized PINs for geofence configuration (David and Jason only)
 export const GEOFENCE_ADMIN_PINS = ['2424', '0424'];
+
+// ============ KEY & RADIO CHECKOUT SYSTEM ============
+// For Legends employees only - tracks key sets (1-50) and radio assignments
+export const equipmentTypeEnum = pgEnum('equipment_type', ['key', 'radio']);
+export const equipmentStatusEnum = pgEnum('equipment_status', ['available', 'checked_out', 'missing', 'maintenance']);
+
+// Key Sets - 50 key sets available for checkout
+export const keySets = pgTable("key_sets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  keyNumber: integer("key_number").notNull().unique(), // 1-50
+  label: text("label"), // Optional label like "Main Gate" or "Suite Level"
+  status: equipmentStatusEnum("status").default('available'),
+  currentHolderId: varchar("current_holder_id").references(() => users.id),
+  currentHolderName: text("current_holder_name"),
+  currentHolderRole: text("current_holder_role"),
+  checkedOutAt: timestamp("checked_out_at"),
+  expectedReturnTime: timestamp("expected_return_time"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_key_sets_number").on(table.keyNumber),
+  index("IDX_key_sets_status").on(table.status),
+  index("IDX_key_sets_holder").on(table.currentHolderId),
+]);
+
+// Radios - track individual radios
+export const radios = pgTable("radios", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  radioNumber: integer("radio_number").notNull().unique(), // Radio ID number
+  channel: text("channel"), // Default channel assignment
+  status: equipmentStatusEnum("status").default('available'),
+  currentHolderId: varchar("current_holder_id").references(() => users.id),
+  currentHolderName: text("current_holder_name"),
+  currentHolderRole: text("current_holder_role"),
+  checkedOutAt: timestamp("checked_out_at"),
+  batteryLevel: integer("battery_level"), // 0-100 percentage
+  lastKnownLocation: text("last_known_location"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_radios_number").on(table.radioNumber),
+  index("IDX_radios_status").on(table.status),
+  index("IDX_radios_holder").on(table.currentHolderId),
+]);
+
+// Equipment checkout history - audit trail for all checkouts/checkins
+export const equipmentCheckoutHistory = pgTable("equipment_checkout_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  equipmentType: equipmentTypeEnum("equipment_type").notNull(),
+  equipmentId: varchar("equipment_id").notNull(), // References keySets.id or radios.id
+  equipmentNumber: integer("equipment_number").notNull(), // Key set number or radio number
+  action: text("action").notNull(), // 'checkout', 'checkin', 'transfer', 'lost', 'found'
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  userName: text("user_name").notNull(),
+  userRole: text("user_role").notNull(),
+  previousHolderId: varchar("previous_holder_id"),
+  previousHolderName: text("previous_holder_name"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_checkout_history_equipment").on(table.equipmentId),
+  index("IDX_checkout_history_user").on(table.userId),
+  index("IDX_checkout_history_type").on(table.equipmentType),
+  index("IDX_checkout_history_created").on(table.createdAt),
+]);
+
+// Equipment alerts - for geofence violations (leaving with equipment)
+export const equipmentAlertStatusEnum = pgEnum('equipment_alert_status', ['pending', 'acknowledged', 'resolved', 'dismissed']);
+
+export const equipmentAlerts = pgTable("equipment_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  userName: text("user_name").notNull(),
+  alertType: text("alert_type").notNull(), // 'geofence_exit', 'overdue_return', 'missing'
+  equipmentType: equipmentTypeEnum("equipment_type").notNull(),
+  equipmentId: varchar("equipment_id").notNull(),
+  equipmentNumber: integer("equipment_number").notNull(),
+  message: text("message").notNull(),
+  status: equipmentAlertStatusEnum("status").default('pending'),
+  acknowledgedAt: timestamp("acknowledged_at"),
+  resolvedAt: timestamp("resolved_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_equipment_alerts_user").on(table.userId),
+  index("IDX_equipment_alerts_status").on(table.status),
+  index("IDX_equipment_alerts_created").on(table.createdAt),
+]);
+
+// Insert schemas
+export const insertKeySetSchema = createInsertSchema(keySets).omit({ id: true, createdAt: true });
+export const insertRadioSchema = createInsertSchema(radios).omit({ id: true, createdAt: true });
+export const insertEquipmentCheckoutHistorySchema = createInsertSchema(equipmentCheckoutHistory).omit({ id: true, createdAt: true });
+export const insertEquipmentAlertSchema = createInsertSchema(equipmentAlerts).omit({ id: true, createdAt: true });
+
+// Types
+export type KeySet = typeof keySets.$inferSelect;
+export type InsertKeySet = z.infer<typeof insertKeySetSchema>;
+export type Radio = typeof radios.$inferSelect;
+export type InsertRadio = z.infer<typeof insertRadioSchema>;
+export type EquipmentCheckoutHistory = typeof equipmentCheckoutHistory.$inferSelect;
+export type InsertEquipmentCheckoutHistory = z.infer<typeof insertEquipmentCheckoutHistorySchema>;
+export type EquipmentAlert = typeof equipmentAlerts.$inferSelect;
+export type InsertEquipmentAlert = z.infer<typeof insertEquipmentAlertSchema>;
+
+// Legends employee roles (eligible for key/radio checkout)
+export const LEGENDS_EMPLOYEE_ROLES = [
+  'StandLead',
+  'StandSupervisor', 
+  'ManagementCore',
+  'ManagementAssistant',
+  'AlcoholCompliance',
+  'CheckInAssistant',
+  'IT',
+  'Admin',
+  'Developer'
+] as const;
