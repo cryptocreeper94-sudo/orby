@@ -27,6 +27,8 @@ const ONBOARDING_PROGRESS_KEY = 'orby_onboarding_progress';
 const ONBOARDING_COMPLETE_KEY = 'orby_onboarding_complete';
 const OPS_MANAGER_TOUR_KEY = 'orby_ops_manager_tour_complete';
 const OPS_MANAGER_TOUR_PENDING_KEY = 'orby_ops_manager_tour_pending';
+const HR_ADMIN_TOUR_KEY = 'orby_hr_admin_tour_complete';
+const HR_ADMIN_TOUR_PENDING_KEY = 'orby_hr_admin_tour_pending';
 
 interface OnboardingProgress {
   currentPageIndex: number;
@@ -433,6 +435,128 @@ export const opsManagerPages: OnboardingPage[] = [
   }
 ];
 
+export const hrAdminPages: OnboardingPage[] = [
+  {
+    id: 'hr-welcome',
+    title: 'Welcome KD',
+    icon: '👋',
+    description: 'Your HR Admin Dashboard Overview',
+    route: '/admin',
+    steps: [
+      {
+        id: 'hr-intro',
+        page: 'hr-welcome',
+        title: 'Welcome to Your Dashboard, KD!',
+        description: 'This is your command center for HR operations. Let me show you how everything works.',
+        position: 'center'
+      },
+      {
+        id: 'hr-mode-bar',
+        page: 'hr-welcome',
+        title: 'Mode Bar',
+        description: 'The top bar shows whether you\'re in Live or Sandbox mode. Sandbox is for training - nothing you do there affects real data.',
+        targetSelector: '[data-testid^="global-mode-bar"]',
+        position: 'bottom'
+      }
+    ]
+  },
+  {
+    id: 'hr-navigation',
+    title: 'Dashboard Navigation',
+    icon: '🗂️',
+    description: 'How to move around the dashboard',
+    route: '/admin',
+    steps: [
+      {
+        id: 'hr-tabs',
+        page: 'hr-navigation',
+        title: 'View Tabs',
+        description: 'Switch between Grid View (staffing assignments), List View, Reports, and Stadium Map using these tabs.',
+        targetSelector: '[data-testid="tab-grid"]',
+        position: 'bottom'
+      },
+      {
+        id: 'hr-staffing-grid',
+        page: 'hr-navigation',
+        title: 'Staffing Grid',
+        description: 'This grid shows all stands and their assigned staff. You can see who\'s working where at a glance.',
+        position: 'center'
+      },
+      {
+        id: 'hr-map-view',
+        page: 'hr-navigation',
+        title: 'Stadium Map',
+        description: 'The Map tab shows an interactive stadium layout. Tap any stand to see details and staff.',
+        targetSelector: '[data-testid="tab-map"]',
+        position: 'bottom'
+      }
+    ]
+  },
+  {
+    id: 'hr-communication',
+    title: 'Communication',
+    icon: '💬',
+    description: 'How to message anyone in the venue',
+    route: '/admin',
+    steps: [
+      {
+        id: 'hr-messages',
+        page: 'hr-communication',
+        title: 'Messages',
+        description: 'Tap this to access messages. You have full communication privileges - you can message any role: NPO groups, Check-in Staff, Supervisors, Managers, IT, everyone.',
+        targetSelector: '[data-testid="button-messages"]',
+        position: 'bottom'
+      }
+    ]
+  },
+  {
+    id: 'hr-role-toggle',
+    title: 'Dual Role Mode',
+    icon: '🔄',
+    description: 'Switching between HR Admin and Supervisor',
+    route: '/admin',
+    steps: [
+      {
+        id: 'hr-dual-role',
+        page: 'hr-role-toggle',
+        title: 'Your Dual Role',
+        description: 'You have two roles: HR Admin (your current view) and Stand Supervisor for event days. When the role toggle is available, you can switch between them.',
+        position: 'center'
+      },
+      {
+        id: 'hr-supervisor-mode',
+        page: 'hr-role-toggle',
+        title: 'Supervisor Mode',
+        description: 'In Supervisor mode, you\'ll see the closing checklist, stand assignments, and field-level controls. Perfect for hands-on event day work.',
+        position: 'center'
+      }
+    ]
+  },
+  {
+    id: 'hr-complete',
+    title: 'Ready to Go',
+    icon: '✅',
+    description: 'You\'re all set',
+    route: '/admin',
+    steps: [
+      {
+        id: 'hr-help',
+        page: 'hr-complete',
+        title: 'Need Help?',
+        description: 'Look for the Help button on any page to replay tutorials or get contextual guidance.',
+        position: 'center'
+      },
+      {
+        id: 'hr-tour-done',
+        page: 'hr-complete',
+        title: 'You\'re Ready!',
+        description: 'That\'s your dashboard! You can access this tour anytime from the Help button. Welcome to Orby, KD!',
+        position: 'center'
+      }
+    ]
+  }
+];
+
 function getStoredProgress(): OnboardingProgress | null {
   try {
     const stored = localStorage.getItem(ONBOARDING_PROGRESS_KEY);
@@ -477,6 +601,21 @@ export function scheduleOpsManagerTour() {
 
 export function isOpsManagerTourPending(): boolean {
   return localStorage.getItem(OPS_MANAGER_TOUR_PENDING_KEY) === 'true' && !isOpsManagerTourComplete();
+}
+
+function isHRAdminTourComplete(): boolean {
+  return localStorage.getItem(HR_ADMIN_TOUR_KEY) === 'true';
+}
+
+export function scheduleHRAdminTour() {
+  // Only schedule if not already completed AND not already pending
+  if (!isHRAdminTourComplete() && !localStorage.getItem(HR_ADMIN_TOUR_PENDING_KEY)) {
+    localStorage.setItem(HR_ADMIN_TOUR_PENDING_KEY, 'true');
+  }
+}
+
+export function isHRAdminTourPending(): boolean {
+  return localStorage.getItem(HR_ADMIN_TOUR_PENDING_KEY) === 'true' && !isHRAdminTourComplete();
 }
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {

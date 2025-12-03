@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { ShieldCheck, FlaskConical, Radio, Code, Briefcase, ChevronDown, HelpCircle, AlertTriangle, Clock } from "lucide-react";
 import { useMode } from "@/lib/ModeContext";
 import { ModeGate } from "@/components/ModeGate";
-import { scheduleOpsManagerTour } from "@/lib/OnboardingContext";
+import { scheduleOpsManagerTour, scheduleHRAdminTour } from "@/lib/OnboardingContext";
 import { CompactModeIndicator } from "@/components/GlobalModeBar";
 import { motion, AnimatePresence } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -139,6 +139,10 @@ export default function LoginPage() {
       // David (PIN 2424) gets the Ops Manager tour on first login (after successful auth)
       if (values.pin === '2424') {
         scheduleOpsManagerTour();
+      }
+      // KD (PIN 8888) gets the HR Admin tour on first login
+      if (values.pin === '8888') {
+        scheduleHRAdminTour();
       }
       if (enablePersistence && MANAGER_PINS.includes(values.pin)) {
         localStorage.setItem(PERSISTENCE_KEY, 'true');

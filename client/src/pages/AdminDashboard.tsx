@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader, GlowButton } from "@/components/ui/premium";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
+import { HRAdminTour } from '@/components/HRAdminTour';
 
 export default function AdminDashboard() {
   const logout = useStore((state) => state.logout);
@@ -54,6 +55,7 @@ export default function AdminDashboard() {
 
   return (
     <AnimatedBackground>
+      <HRAdminTour />
       <GlobalModeBar />
       <div className="min-h-screen pb-20">
         <PageHeader
@@ -91,7 +93,7 @@ export default function AdminDashboard() {
                 </SheetContent>
               </Sheet>
               <Link href="/messages">
-                <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-white/10">
+                <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-white/10" data-testid="button-messages">
                   <MessageSquare className="h-5 w-5" />
                 </Button>
               </Link>
