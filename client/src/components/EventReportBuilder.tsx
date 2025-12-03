@@ -35,12 +35,12 @@ import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
-type DocumentCategory = 'count_report' | 'incident' | 'violation' | 'closing' | 'other';
+type DocumentCategory = 'count_report' | 'incident' | 'violation' | 'closing' | 'other' | 'Compliance' | 'Finance' | 'Operations' | 'CountReport' | 'IncidentReport' | 'Closing' | 'Other';
 
 interface ManagerDocument {
   id: string;
   title: string;
-  category: DocumentCategory;
+  category: string;
   subcategory?: string;
   standId?: string;
   eventDate?: string;
@@ -56,13 +56,23 @@ interface Stand {
   name: string;
 }
 
-const CATEGORY_CONFIG: Record<DocumentCategory, { label: string; icon: any; color: string }> = {
+const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
   count_report: {
     label: 'Count Reports',
     icon: ClipboardList,
     color: 'cyan'
   },
+  CountReport: {
+    label: 'Count Reports',
+    icon: ClipboardList,
+    color: 'cyan'
+  },
   incident: {
+    label: 'Incidents',
+    icon: AlertTriangle,
+    color: 'amber'
+  },
+  IncidentReport: {
     label: 'Incidents',
     icon: AlertTriangle,
     color: 'amber'
@@ -77,7 +87,32 @@ const CATEGORY_CONFIG: Record<DocumentCategory, { label: string; icon: any; colo
     icon: FileText,
     color: 'purple'
   },
+  Closing: {
+    label: 'Closing Docs',
+    icon: FileText,
+    color: 'purple'
+  },
+  Compliance: {
+    label: 'Compliance',
+    icon: Shield,
+    color: 'emerald'
+  },
+  Finance: {
+    label: 'Finance',
+    icon: Package,
+    color: 'green'
+  },
+  Operations: {
+    label: 'Operations',
+    icon: Wrench,
+    color: 'blue'
+  },
   other: {
+    label: 'Other',
+    icon: FolderOpen,
+    color: 'slate'
+  },
+  Other: {
     label: 'Other',
     icon: FolderOpen,
     color: 'slate'
@@ -97,18 +132,18 @@ const REPORT_TEMPLATES: ReportTemplate[] = [
   {
     id: 'finance',
     name: 'Finance Package',
-    description: 'Count reports, closing docs, and variance reports for Pete',
+    description: 'Count reports, closing docs, cash counts, and variance reports',
     icon: Package,
     color: 'emerald',
-    categories: ['count_report', 'closing']
+    categories: ['count_report', 'CountReport', 'closing', 'Closing', 'Finance']
   },
   {
     id: 'compliance',
     name: 'Compliance Package',
-    description: 'Incidents, violations, and ABC/Health alerts',
+    description: 'Incidents, violations, bar control, alcohol compliance, and ABC/Health alerts',
     icon: Shield,
     color: 'amber',
-    categories: ['incident', 'violation']
+    categories: ['incident', 'IncidentReport', 'violation', 'Compliance']
   },
   {
     id: 'operations',
@@ -116,7 +151,7 @@ const REPORT_TEMPLATES: ReportTemplate[] = [
     description: 'Full event summary including all document types',
     icon: Wrench,
     color: 'cyan',
-    categories: ['count_report', 'incident', 'violation', 'closing', 'other']
+    categories: ['count_report', 'CountReport', 'incident', 'IncidentReport', 'violation', 'closing', 'Closing', 'Compliance', 'Finance', 'Operations', 'other', 'Other']
   },
   {
     id: 'custom',
