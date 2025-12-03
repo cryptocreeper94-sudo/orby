@@ -19,7 +19,12 @@ import {
   Loader2,
   AlertCircle,
   FileStack,
-  BookOpen
+  BookOpen,
+  ScanLine,
+  DollarSign,
+  Users,
+  Grid3X3,
+  Thermometer
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -52,8 +57,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventReportBuilder } from "@/components/EventReportBuilder";
+import { UniversalDocumentScanner } from "@/components/UniversalDocumentScanner";
 
-type DocumentCategory = 'count_report' | 'incident' | 'violation' | 'closing' | 'other';
+type DocumentCategory = 'count_report' | 'incident' | 'violation' | 'closing' | 'other' | 'compliance' | 'finance' | 'operations';
 
 interface ManagerDocument {
   id: string;
@@ -74,13 +80,23 @@ interface Stand {
   name: string;
 }
 
-const CATEGORY_CONFIG: Record<DocumentCategory, { label: string; icon: any; color: string }> = {
+const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
   count_report: {
     label: 'Count Reports',
     icon: ClipboardList,
     color: 'cyan'
   },
+  CountReport: {
+    label: 'Count Reports',
+    icon: ClipboardList,
+    color: 'cyan'
+  },
   incident: {
+    label: 'Incidents',
+    icon: AlertTriangle,
+    color: 'amber'
+  },
+  IncidentReport: {
     label: 'Incidents',
     icon: AlertTriangle,
     color: 'amber'
@@ -95,7 +111,47 @@ const CATEGORY_CONFIG: Record<DocumentCategory, { label: string; icon: any; colo
     icon: FileText,
     color: 'purple'
   },
+  Closing: {
+    label: 'Closing Docs',
+    icon: FileText,
+    color: 'purple'
+  },
+  compliance: {
+    label: 'Compliance',
+    icon: Wine,
+    color: 'emerald'
+  },
+  Compliance: {
+    label: 'Compliance',
+    icon: Wine,
+    color: 'emerald'
+  },
+  finance: {
+    label: 'Finance',
+    icon: DollarSign,
+    color: 'green'
+  },
+  Finance: {
+    label: 'Finance',
+    icon: DollarSign,
+    color: 'green'
+  },
+  operations: {
+    label: 'Operations',
+    icon: Grid3X3,
+    color: 'blue'
+  },
+  Operations: {
+    label: 'Operations',
+    icon: Grid3X3,
+    color: 'blue'
+  },
   other: {
+    label: 'Other',
+    icon: FolderOpen,
+    color: 'slate'
+  },
+  Other: {
     label: 'Other',
     icon: FolderOpen,
     color: 'slate'
@@ -118,6 +174,7 @@ export default function DocumentHub() {
   
   const [viewingDoc, setViewingDoc] = useState<ManagerDocument | null>(null);
   const [showReportBuilder, setShowReportBuilder] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -232,6 +289,15 @@ export default function DocumentHub() {
           iconColor="cyan"
           actions={
             <div className="flex items-center gap-2">
+              <Button
+                onClick={() => setShowScanner(true)}
+                className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white"
+                size="sm"
+                data-testid="button-scan-document"
+              >
+                <ScanLine className="h-4 w-4 mr-1" />
+                Scan
+              </Button>
               <Button
                 onClick={() => setShowReportBuilder(true)}
                 className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
@@ -529,6 +595,18 @@ export default function DocumentHub() {
           isOpen={showReportBuilder}
           onClose={() => setShowReportBuilder(false)}
         />
+
+        {/* Universal Document Scanner */}
+        {showScanner && (
+          <UniversalDocumentScanner
+            isOpen={showScanner}
+            onClose={() => setShowScanner(false)}
+            onDocumentSaved={() => {
+              fetchData();
+              setShowScanner(false);
+            }}
+          />
+        )}
       </div>
     </AnimatedBackground>
   );
