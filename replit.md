@@ -12,6 +12,13 @@
   - Check-in/check-out tracking with no-show marking
   - Culinary team visibility panel in Ops Command Center
 - Sample cooks added: Lisa (5252), Marcus (5151), Tony (5353)
+- **Department Inventory Control System:** Bar/Kitchen inventory tracking with integration readiness
+  - Darby (PIN 4646) as Bar Manager with full inventory controls
+  - Inventory locations with department assignment (Bar/Kitchen)
+  - Stock levels with on-hand, par, and variance tracking
+  - Product types: Liquor, Mixer, Beer, Wine, NABeverage, Garnish, Chargeable, Ingredient, Supply
+  - Yellow Dog and PAX Pay integration mapping tables ready
+  - Authorized inventory admins: David (2424), Jason (0424), Chef Deb (3737), Sheila (4545), Darby (4646)
 
 ### v1.0.1 Release Notes
 - Event Report Builder for combined PDF packages (Finance, Compliance, Operations, Custom templates)
