@@ -84,8 +84,7 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
               <span className="text-gray-600">|</span>
 
               <div className="flex items-center gap-1 text-[10px]">
-                <span className="text-cyan-400 font-medium">Orby</span>
-                <span className="hidden sm:inline text-gray-500">by</span>
+                <span className="text-gray-500">&copy; 2025</span>
                 <a 
                   href="https://darkwavestudios.io" 
                   target="_blank" 
@@ -93,8 +92,8 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
                   className="text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-0.5"
                   data-testid="link-darkwave"
                 >
-                  <span className="hidden sm:inline">DarkWave</span>
-                  <span className="sm:hidden">DW</span>
+                  <span className="hidden sm:inline">DarkWave Studios, LLC</span>
+                  <span className="sm:hidden">DarkWave</span>
                   <ExternalLink className="w-2.5 h-2.5" />
                 </a>
               </div>
