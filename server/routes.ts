@@ -4461,6 +4461,58 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // Get culinary dashboard summary for Ops Command Center
+  app.get("/api/culinary/dashboard-summary", async (_req: Request, res: Response) => {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const assignments = await storage.getCulinaryAssignmentsByEvent(today);
+      const checkIns = await storage.getCulinaryCheckInsByEvent(today);
+      
+      const assignmentMap = new Map<string, { cookId: string; standId: string }>();
+      for (const a of assignments) {
+        assignmentMap.set(a.id, { cookId: a.cookId, standId: a.standId });
+      }
+      
+      const checkInMap = new Map<string, string>();
+      for (const c of checkIns) {
+        if (c.checkInTime) {
+          checkInMap.set(c.assignmentId, c.checkInTime);
+        }
+      }
+      
+      const allUsers = await storage.getAllUsers();
+      const stands = await storage.getAllStands();
+      
+      const userMap = new Map<string, string>();
+      for (const u of allUsers) {
+        userMap.set(u.id, u.name);
+      }
+      
+      const standMap = new Map<string, string>();
+      for (const s of stands) {
+        standMap.set(s.id, s.name);
+      }
+      
+      const assignmentsWithNames = assignments.map(a => ({
+        cookName: userMap.get(a.cookId) || 'Unknown Cook',
+        standName: standMap.get(a.standId) || 'Unknown Stand',
+        checkInTime: checkInMap.get(a.id)
+      }));
+      
+      const checkedIn = assignmentsWithNames.filter(a => a.checkInTime).length;
+      
+      res.json({
+        total: assignments.length,
+        checkedIn,
+        pending: assignments.length - checkedIn,
+        assignments: assignmentsWithNames
+      });
+    } catch (error) {
+      console.error("Error getting culinary dashboard summary:", error);
+      res.status(500).json({ error: "Failed to get culinary dashboard summary" });
+    }
+  });
+
   // ========== SANDBOX PROTECTION MIDDLEWARE ==========
   // This checks if system is live before allowing data-modifying operations
   // Note: GET operations are always allowed, only POST/PUT/DELETE for core data are blocked

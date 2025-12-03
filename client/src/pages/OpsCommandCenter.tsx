@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import {
   LogOut, RefreshCw, Package, Utensils, Beer, Monitor, Trash2, MapPin,
   AlertTriangle, CheckCircle2, Clock, Users, Truck, Zap, Radio, Shield,
-  Activity, Bell, ChevronRight, Wifi, WifiOff, Flame, ThermometerSun
+  Activity, Bell, ChevronRight, Wifi, WifiOff, Flame, ThermometerSun, ChefHat
 } from 'lucide-react';
 
 interface DashboardSummary {
@@ -126,10 +126,33 @@ export default function OpsCommandCenter() {
   const [selectedEmergency, setSelectedEmergency] = useState<EmergencyAlert | null>(null);
   const [resolveNotes, setResolveNotes] = useState('');
   const [etaMinutes, setEtaMinutes] = useState('');
+  const [culinaryStats, setCulinaryStats] = useState<{
+    total: number;
+    checkedIn: number;
+    pending: number;
+    assignments: Array<{
+      cookName: string;
+      standName: string;
+      checkInTime?: string;
+    }>;
+  }>({ total: 0, checkedIn: 0, pending: 0, assignments: [] });
 
   useEffect(() => {
     loadDashboardData();
+    loadCulinaryData();
   }, []);
+
+  async function loadCulinaryData() {
+    try {
+      const res = await fetch('/api/culinary/dashboard-summary');
+      if (res.ok) {
+        const data = await res.json();
+        setCulinaryStats(data);
+      }
+    } catch (error) {
+      console.error('Failed to load culinary data:', error);
+    }
+  }
 
   useEffect(() => {
     if (wsStore.deliveries.length > 0) {
@@ -449,6 +472,67 @@ export default function OpsCommandCenter() {
               <div className="text-center py-8 text-gray-500">
                 <Truck className="h-10 w-10 mx-auto mb-2 opacity-50" />
                 <p>No active deliveries</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-slate-800/50 border-orange-500/20" data-testid="section-culinary">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg text-orange-400 flex items-center gap-2">
+              <ChefHat className="h-5 w-5" />
+              Culinary Team Status
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="p-3 rounded bg-slate-900/50 text-center">
+                <p className="text-2xl font-bold text-white">{culinaryStats.total}</p>
+                <p className="text-xs text-gray-400">Assigned</p>
+              </div>
+              <div className="p-3 rounded bg-green-900/30 text-center">
+                <p className="text-2xl font-bold text-green-400">{culinaryStats.checkedIn}</p>
+                <p className="text-xs text-gray-400">Checked In</p>
+              </div>
+              <div className="p-3 rounded bg-yellow-900/30 text-center">
+                <p className="text-2xl font-bold text-yellow-400">{culinaryStats.pending}</p>
+                <p className="text-xs text-gray-400">Pending</p>
+              </div>
+            </div>
+            
+            {culinaryStats.assignments.length > 0 ? (
+              <ScrollArea className="h-[150px]">
+                <div className="space-y-2">
+                  {culinaryStats.assignments.map((assignment, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center justify-between p-2 rounded bg-slate-900/50"
+                      data-testid={`culinary-assignment-${idx}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <ChefHat className="h-4 w-4 text-orange-400" />
+                        <span className="text-sm text-white">{assignment.cookName}</span>
+                        <span className="text-xs text-gray-500">{assignment.standName}</span>
+                      </div>
+                      {assignment.checkInTime ? (
+                        <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          In
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
+                          <Clock className="h-3 w-3 mr-1" />
+                          Pending
+                        </Badge>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                <ChefHat className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No culinary assignments for current event</p>
               </div>
             )}
           </CardContent>
