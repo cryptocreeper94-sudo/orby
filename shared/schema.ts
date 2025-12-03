@@ -683,16 +683,25 @@ export const QUICK_CALL_ROLES = [
   'Admin', 'Developer'
 ];
 
-// Initial PINs for first-time login (users must change on first login)
+// Initial PINs for first-time login
+// Public-facing (shown in login accordion): 9999, 1111, 2222, 3333, 7777, 5555, 6666
+// Manager-level (hidden, distributed privately): 4444
 export const INITIAL_PINS: Record<string, string> = {
+  // Field Staff (public)
   NPOWorker: '1111',
   StandLead: '2222',
   StandSupervisor: '3333',
-  ManagementCore: '4444',
-  ManagementAssistant: '4444',
+  Bartender: '7777',
   AlcoholCompliance: '5555',
   CheckInAssistant: '6666',
-  FirstTimeRegistration: '9999', // Universal PIN for new Legends staff to self-register (geofenced)
+  FirstTimeRegistration: '9999', // Universal PIN for new Legends staff (geofenced)
+  // Management (private - not shown in UI)
+  ManagementCore: '4444',
+  ManagementAssistant: '4444',
+  OperationsManager: '4444',
+  WarehouseManager: '4444',
+  KitchenManager: '4444',
+  IT: '4444',
 };
 
 // Relations

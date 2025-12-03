@@ -255,16 +255,16 @@ export default function LoginPage() {
                 >
                   <div className="mt-2 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 space-y-3">
                     <p className="text-xs text-slate-400 mb-3">
-                      Use your role's initial PIN to set up your personal PIN:
+                      First time logging in? Use your role's initial PIN:
                     </p>
                     
                     <div className="space-y-2 text-xs">
                       <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
-                        <span className="text-slate-300">New Staff (at stadium)</span>
+                        <span className="text-slate-300">New Legends Staff</span>
                         <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">9999</span>
                       </div>
                       <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
-                        <span className="text-slate-300">NPO Worker</span>
+                        <span className="text-slate-300">NPO / Concessions</span>
                         <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">1111</span>
                       </div>
                       <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
@@ -276,8 +276,8 @@ export default function LoginPage() {
                         <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">3333</span>
                       </div>
                       <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
-                        <span className="text-slate-300">Managers</span>
-                        <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">4444</span>
+                        <span className="text-slate-300">Bartender</span>
+                        <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded">7777</span>
                       </div>
                       <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
                         <span className="text-slate-300">Alcohol Compliance</span>
@@ -290,7 +290,7 @@ export default function LoginPage() {
                     </div>
 
                     <p className="text-[10px] text-slate-500 mt-3 pt-2 border-t border-slate-700/50">
-                      After first login, you'll create your own personal PIN.
+                      Managers: Contact your supervisor for your PIN.
                     </p>
                   </div>
                 </motion.div>
