@@ -1,8 +1,19 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.2 (Beta) - STAMPED
+## Current Version: v1.0.3 (Beta) - STAMPED
 **Release Date:** December 3, 2024
-**Genesis Hallmark:** ORB-000000000008
+**Genesis Hallmark:** ORB-000000000009
+
+### v1.0.3 Release Notes
+- **Interactive Weather Map:** Full-screen radar with responsive split-screen layout
+  - Windy.com radar integration with real-time weather data
+  - Portrait mode: Map top, weather data panel bottom (collapsible)
+  - Landscape mode: 1/3 data panel left, 2/3 map right
+  - Compact stats grid: Wind, Humidity, Visibility, Pressure
+  - Hourly and 7-day forecast in scrollable panel
+  - Map layer toggle: Radar, Temperature, Precipitation
+  - Nissan Stadium location marker
+  - Floating weather button auto-hides on map page
 
 ### v1.0.2 Release Notes
 - **Culinary Team Management System:** Event-based cook scheduling and check-in tracking
