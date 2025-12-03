@@ -128,6 +128,13 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 26. **Offline Mode** - Works when radio signals don't
 27. **Sandbox Mode** - Training and demo environment
 
+### David's Dashboard Controls (Superpower - PIN 2424 Only)
+33. **Role-Based Widget Visibility** - Toggle which panels each role can see (Emergency Feed, Deliveries, Compliance, AI Chat, Weather, Map, Messaging, Inventory)
+34. **Alert Level Settings** - Control notification levels per role (Normal, Priority-Only, Silent)
+35. **Data Scope Controls** - Limit data access to assigned areas only vs all stands, toggle sensitive metrics visibility
+36. **Layout Presets** - Quick apply: Ops Lite (training), Standard (default), Full Command (everything visible)
+37. **Real-Time Application** - Changes apply instantly across all user dashboards without code changes
+
 ### Genesis Hallmark Stamping System (Blockchain Certified)
 28. **Universal Asset Stamping** - Every auditable asset gets an ORB number (ORB-000000000001 format, 12 digits = 1 trillion capacity)
 29. **Blockchain Verification** - Important documents (customer-facing, compliance, invoices, PDFs) anchored to Solana for tamper-proof verification
