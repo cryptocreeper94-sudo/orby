@@ -1,6 +1,7 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 export function AnimatedBackground({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
@@ -56,13 +57,13 @@ function Stars() {
 
 function OrbyWatermark() {
   return (
-    <div className="fixed bottom-4 right-4 opacity-10 pointer-events-none -z-5 select-none">
-      <div className="relative">
-        <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 blur-sm" />
-        <div className="absolute inset-2 md:inset-3 rounded-full bg-gradient-to-br from-cyan-300 to-cyan-500 flex items-center justify-center">
-          <span className="text-3xl md:text-5xl font-black text-slate-900/50">O</span>
-        </div>
-        <div className="absolute -top-1 -right-1 w-4 h-4 md:w-6 md:h-6 rounded-full bg-white/30 blur-[1px]" />
+    <div className="fixed inset-0 flex items-center justify-center pointer-events-none -z-5 select-none overflow-hidden">
+      <div className="relative w-[60vw] h-[60vw] max-w-[500px] max-h-[500px] opacity-[0.04]">
+        <img 
+          src={orbyCommanderImg} 
+          alt="" 
+          className="w-full h-full object-contain drop-shadow-[0_0_50px_rgba(6,182,212,0.3)]"
+        />
       </div>
     </div>
   );
