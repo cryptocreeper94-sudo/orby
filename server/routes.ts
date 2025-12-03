@@ -4100,5 +4100,314 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ========== KEY & RADIO CHECKOUT SYSTEM ==========
+  // For Legends employees only - not NPO Workers or temp staff
+  const LEGENDS_ROLES = [
+    'StandLead', 'StandSupervisor', 'ManagementCore', 'ManagementAssistant',
+    'AlcoholCompliance', 'CheckInAssistant', 'IT', 'Admin', 'Developer'
+  ];
+
+  // Get all key sets
+  app.get("/api/keys", async (_req: Request, res: Response) => {
+    try {
+      const keys = await storage.getAllKeySets();
+      res.json(keys);
+    } catch (error) {
+      console.error("Error getting key sets:", error);
+      res.status(500).json({ error: "Failed to get key sets" });
+    }
+  });
+
+  // Get available key sets
+  app.get("/api/keys/available", async (_req: Request, res: Response) => {
+    try {
+      const keys = await storage.getAvailableKeySets();
+      res.json(keys);
+    } catch (error) {
+      console.error("Error getting available keys:", error);
+      res.status(500).json({ error: "Failed to get available keys" });
+    }
+  });
+
+  // Get checked out key sets
+  app.get("/api/keys/checked-out", async (_req: Request, res: Response) => {
+    try {
+      const keys = await storage.getCheckedOutKeySets();
+      res.json(keys);
+    } catch (error) {
+      console.error("Error getting checked out keys:", error);
+      res.status(500).json({ error: "Failed to get checked out keys" });
+    }
+  });
+
+  // Get keys held by a user
+  app.get("/api/keys/holder/:userId", async (req: Request, res: Response) => {
+    try {
+      const keys = await storage.getKeySetsByHolder(req.params.userId);
+      res.json(keys);
+    } catch (error) {
+      console.error("Error getting user keys:", error);
+      res.status(500).json({ error: "Failed to get user keys" });
+    }
+  });
+
+  // Checkout a key
+  app.post("/api/keys/:keyNumber/checkout", async (req: Request, res: Response) => {
+    try {
+      const { userId, userName, userRole } = req.body;
+      const keyNumber = parseInt(req.params.keyNumber);
+      
+      // Verify user role is Legends employee
+      if (!LEGENDS_ROLES.includes(userRole)) {
+        return res.status(403).json({ error: "Only Legends employees can checkout keys" });
+      }
+      
+      // Check if key is available
+      const key = await storage.getKeySetByNumber(keyNumber);
+      if (!key) {
+        return res.status(404).json({ error: `Key Set ${keyNumber} not found` });
+      }
+      if (key.status === 'checked_out') {
+        return res.status(400).json({ 
+          error: `Key Set ${keyNumber} is already checked out by ${key.currentHolderName}` 
+        });
+      }
+      
+      const updated = await storage.checkoutKeySet(keyNumber, userId, userName, userRole);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error checking out key:", error);
+      res.status(500).json({ error: "Failed to checkout key" });
+    }
+  });
+
+  // Return a key
+  app.post("/api/keys/:keyNumber/checkin", async (req: Request, res: Response) => {
+    try {
+      const { userId, userName } = req.body;
+      const keyNumber = parseInt(req.params.keyNumber);
+      
+      const key = await storage.getKeySetByNumber(keyNumber);
+      if (!key) {
+        return res.status(404).json({ error: `Key Set ${keyNumber} not found` });
+      }
+      if (key.status !== 'checked_out') {
+        return res.status(400).json({ error: `Key Set ${keyNumber} is not checked out` });
+      }
+      
+      const updated = await storage.checkinKeySet(keyNumber, userId, userName);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error checking in key:", error);
+      res.status(500).json({ error: "Failed to checkin key" });
+    }
+  });
+
+  // Get all radios
+  app.get("/api/radios", async (_req: Request, res: Response) => {
+    try {
+      const radioList = await storage.getAllRadios();
+      res.json(radioList);
+    } catch (error) {
+      console.error("Error getting radios:", error);
+      res.status(500).json({ error: "Failed to get radios" });
+    }
+  });
+
+  // Get available radios
+  app.get("/api/radios/available", async (_req: Request, res: Response) => {
+    try {
+      const radioList = await storage.getAvailableRadios();
+      res.json(radioList);
+    } catch (error) {
+      console.error("Error getting available radios:", error);
+      res.status(500).json({ error: "Failed to get available radios" });
+    }
+  });
+
+  // Get checked out radios
+  app.get("/api/radios/checked-out", async (_req: Request, res: Response) => {
+    try {
+      const radioList = await storage.getCheckedOutRadios();
+      res.json(radioList);
+    } catch (error) {
+      console.error("Error getting checked out radios:", error);
+      res.status(500).json({ error: "Failed to get checked out radios" });
+    }
+  });
+
+  // Get radios held by a user
+  app.get("/api/radios/holder/:userId", async (req: Request, res: Response) => {
+    try {
+      const radioList = await storage.getRadiosByHolder(req.params.userId);
+      res.json(radioList);
+    } catch (error) {
+      console.error("Error getting user radios:", error);
+      res.status(500).json({ error: "Failed to get user radios" });
+    }
+  });
+
+  // Create a new radio (admin/management only)
+  app.post("/api/radios", async (req: Request, res: Response) => {
+    try {
+      const { radioNumber, channel, notes } = req.body;
+      
+      // Check if radio already exists
+      const existing = await storage.getRadioByNumber(radioNumber);
+      if (existing) {
+        return res.status(400).json({ error: `Radio ${radioNumber} already exists` });
+      }
+      
+      const radio = await storage.createRadio({
+        radioNumber,
+        channel,
+        notes,
+        status: 'available'
+      });
+      res.status(201).json(radio);
+    } catch (error) {
+      console.error("Error creating radio:", error);
+      res.status(500).json({ error: "Failed to create radio" });
+    }
+  });
+
+  // Checkout a radio
+  app.post("/api/radios/:radioNumber/checkout", async (req: Request, res: Response) => {
+    try {
+      const { userId, userName, userRole } = req.body;
+      const radioNumber = parseInt(req.params.radioNumber);
+      
+      // Verify user role is Legends employee
+      if (!LEGENDS_ROLES.includes(userRole)) {
+        return res.status(403).json({ error: "Only Legends employees can checkout radios" });
+      }
+      
+      // Check if radio exists
+      const radio = await storage.getRadioByNumber(radioNumber);
+      if (!radio) {
+        return res.status(404).json({ error: `Radio ${radioNumber} not found` });
+      }
+      if (radio.status === 'checked_out') {
+        return res.status(400).json({ 
+          error: `Radio ${radioNumber} is already checked out by ${radio.currentHolderName}` 
+        });
+      }
+      
+      const updated = await storage.checkoutRadio(radioNumber, userId, userName, userRole);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error checking out radio:", error);
+      res.status(500).json({ error: "Failed to checkout radio" });
+    }
+  });
+
+  // Return a radio
+  app.post("/api/radios/:radioNumber/checkin", async (req: Request, res: Response) => {
+    try {
+      const { userId, userName } = req.body;
+      const radioNumber = parseInt(req.params.radioNumber);
+      
+      const radio = await storage.getRadioByNumber(radioNumber);
+      if (!radio) {
+        return res.status(404).json({ error: `Radio ${radioNumber} not found` });
+      }
+      if (radio.status !== 'checked_out') {
+        return res.status(400).json({ error: `Radio ${radioNumber} is not checked out` });
+      }
+      
+      const updated = await storage.checkinRadio(radioNumber, userId, userName);
+      res.json(updated);
+    } catch (error) {
+      console.error("Error checking in radio:", error);
+      res.status(500).json({ error: "Failed to checkin radio" });
+    }
+  });
+
+  // Get my equipment (keys and radios for current user)
+  app.get("/api/equipment/my/:userId", async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.userId;
+      const [myKeys, myRadios] = await Promise.all([
+        storage.getKeySetsByHolder(userId),
+        storage.getRadiosByHolder(userId)
+      ]);
+      res.json({ keys: myKeys, radios: myRadios });
+    } catch (error) {
+      console.error("Error getting user equipment:", error);
+      res.status(500).json({ error: "Failed to get user equipment" });
+    }
+  });
+
+  // Get equipment overview (all checked out - for David's dashboard)
+  app.get("/api/equipment/overview", async (_req: Request, res: Response) => {
+    try {
+      const [checkedOutKeys, checkedOutRadios, allKeys, allRadios] = await Promise.all([
+        storage.getCheckedOutKeySets(),
+        storage.getCheckedOutRadios(),
+        storage.getAllKeySets(),
+        storage.getAllRadios()
+      ]);
+      res.json({
+        keys: {
+          checkedOut: checkedOutKeys,
+          total: allKeys.length,
+          available: allKeys.filter(k => k.status === 'available').length
+        },
+        radios: {
+          checkedOut: checkedOutRadios,
+          total: allRadios.length,
+          available: allRadios.filter(r => r.status === 'available').length
+        }
+      });
+    } catch (error) {
+      console.error("Error getting equipment overview:", error);
+      res.status(500).json({ error: "Failed to get equipment overview" });
+    }
+  });
+
+  // Equipment Alerts - pending alerts
+  app.get("/api/equipment/alerts", async (_req: Request, res: Response) => {
+    try {
+      const alerts = await storage.getPendingEquipmentAlerts();
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error getting equipment alerts:", error);
+      res.status(500).json({ error: "Failed to get equipment alerts" });
+    }
+  });
+
+  // Create equipment alert (when leaving geofence with equipment)
+  app.post("/api/equipment/alerts", async (req: Request, res: Response) => {
+    try {
+      const alert = await storage.createEquipmentAlert(req.body);
+      res.status(201).json(alert);
+    } catch (error) {
+      console.error("Error creating equipment alert:", error);
+      res.status(500).json({ error: "Failed to create equipment alert" });
+    }
+  });
+
+  // Acknowledge equipment alert
+  app.post("/api/equipment/alerts/:alertId/acknowledge", async (req: Request, res: Response) => {
+    try {
+      await storage.acknowledgeEquipmentAlert(req.params.alertId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error acknowledging equipment alert:", error);
+      res.status(500).json({ error: "Failed to acknowledge equipment alert" });
+    }
+  });
+
+  // Resolve equipment alert (keys returned)
+  app.post("/api/equipment/alerts/:alertId/resolve", async (req: Request, res: Response) => {
+    try {
+      await storage.resolveEquipmentAlert(req.params.alertId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error resolving equipment alert:", error);
+      res.status(500).json({ error: "Failed to resolve equipment alert" });
+    }
+  });
+
   return httpServer;
 }
