@@ -16,6 +16,12 @@
 - Orby Commander watermark and enhanced welcome screen
 - Desktop responsive layouts verified across all major dashboards
 - PWA ready for Google Play and web installation
+- **Culinary Team Management System:** Event-based cook scheduling and check-in tracking
+  - Chef Deb (PIN 3737) as Culinary Director with full scheduling controls
+  - Supervisor Sheila (PIN 4545) with oversight capabilities
+  - Cook assignment to stands by event date
+  - Check-in/check-out tracking with no-show marking
+  - Culinary team visibility panel in Ops Command Center
 
 ## Overview
 Orby (getorby.io) is a comprehensive Progressive Web App (PWA) designed to unify venue operations, replacing fragmented communication with a digital platform. It offers an Emergency Command Center, delivery lifecycle tracking, three-phase inventory counting, alcohol compliance monitoring, GPS-guided navigation, and real-time team communications. Orby aims to provide a complete operational solution for venues, from emergency response to inventory and team management.
