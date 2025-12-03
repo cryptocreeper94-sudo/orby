@@ -48,6 +48,7 @@ import {
 } from '@/components/ui/premium';
 import type { Stand } from '@shared/schema';
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
+import { GlobalModeBar } from '@/components/GlobalModeBar';
 
 interface AlcoholViolation {
   id: string;
@@ -329,6 +330,7 @@ export default function AlcoholComplianceDashboard() {
   
   return (
     <AnimatedBackground>
+      <GlobalModeBar />
       <PageHeader 
         title="Alcohol Compliance"
         subtitle="Vendor monitoring & violation reporting"

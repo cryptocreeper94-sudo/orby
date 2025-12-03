@@ -7,6 +7,7 @@ import { TutorialHelpButton } from "@/components/TutorialCoach";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader } from "@/components/ui/premium";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
+import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { useState } from "react";
 
 export default function ITDashboard() {
@@ -36,6 +37,7 @@ export default function ITDashboard() {
 
   return (
     <AnimatedBackground>
+      <GlobalModeBar />
       <div className="min-h-screen pb-20">
         <PageHeader
           title="IT Command Center"

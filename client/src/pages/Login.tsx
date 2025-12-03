@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useStore } from "@/lib/mockData";
 import { Input } from "@/components/ui/input";
@@ -7,18 +7,25 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ShieldCheck, FlaskConical } from "lucide-react";
+import { ShieldCheck, FlaskConical, Radio } from "lucide-react";
 import { useMode } from "@/lib/ModeContext";
+import { ModeGate } from "@/components/ModeGate";
+import { CompactModeIndicator } from "@/components/GlobalModeBar";
 
 const loginSchema = z.object({
   pin: z.string().length(4, "PIN must be 4 digits"),
 });
 
+const MODE_SELECTED_KEY = 'orby_mode_selected';
+
 export default function LoginPage() {
   const [, setLocation] = useLocation();
   const login = useStore((state) => state.login);
   const currentUser = useStore((state) => state.currentUser);
-  const { enterSandbox } = useMode();
+  const { enterSandbox, isSandbox } = useMode();
+  const [modeSelected, setModeSelected] = useState(() => {
+    return sessionStorage.getItem(MODE_SELECTED_KEY) === 'true';
+  });
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -70,7 +77,6 @@ export default function LoginPage() {
   }, [currentUser, setLocation, login]);
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
-    // Handle 9999 as first-time registration PIN
     if (values.pin === '9999') {
       setLocation('/register');
       return;
@@ -82,8 +88,32 @@ export default function LoginPage() {
     }
   }
 
+  const handleModeSelected = () => {
+    setModeSelected(true);
+    sessionStorage.setItem(MODE_SELECTED_KEY, 'true');
+  };
+
+  if (!modeSelected) {
+    return <ModeGate onModeSelected={handleModeSelected} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-800 p-4">
+      <div className="absolute top-4 left-4 right-4 flex justify-between items-center">
+        <CompactModeIndicator />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            sessionStorage.removeItem(MODE_SELECTED_KEY);
+            setModeSelected(false);
+          }}
+          className="text-cyan-300/70 hover:text-cyan-300 hover:bg-cyan-500/10 text-xs"
+          data-testid="button-change-mode"
+        >
+          Change Mode
+        </Button>
+      </div>
       <div className="flex-1 flex items-center justify-center w-full max-w-md">
         <div className="w-full p-6 rounded-3xl glass-card premium-card">
           {/* Header with Orby Mascot */}
@@ -164,11 +194,11 @@ export default function LoginPage() {
                 Verify Identity
               </Button>
               
-              <div className="mt-6 pt-4 border-t border-white/10 space-y-3">
+              <div className="mt-6 pt-4 border-t border-white/10">
                 <Button 
                   type="button"
                   variant="outline"
-                  className="w-full h-12 border-cyan-500/50 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400"
+                  className="w-full h-10 border-cyan-500/50 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400"
                   onClick={() => {
                     form.setValue("pin", "0424");
                     setTimeout(() => form.handleSubmit(onSubmit)(), 100);
@@ -176,21 +206,7 @@ export default function LoginPage() {
                   data-testid="button-dev-login"
                 >
                   <ShieldCheck className="mr-2 h-4 w-4" />
-                  Dev Login
-                </Button>
-                <Button 
-                  type="button"
-                  variant="outline"
-                  className="w-full h-10 border-teal-500/50 bg-teal-500/10 text-teal-300 hover:bg-teal-500/20 hover:border-teal-400"
-                  onClick={() => {
-                    enterSandbox('/dev');
-                    form.setValue("pin", "0424");
-                    setTimeout(() => form.handleSubmit(onSubmit)(), 100);
-                  }}
-                  data-testid="button-sandbox-login"
-                >
-                  <FlaskConical className="mr-2 h-4 w-4" />
-                  Try Sandbox Mode
+                  Quick Dev Access
                 </Button>
               </div>
               

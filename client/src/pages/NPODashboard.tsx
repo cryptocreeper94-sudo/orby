@@ -26,6 +26,7 @@ import { motion } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, PageHeader, GlowButton } from "@/components/ui/premium";
 import { TeamLeadCard } from "@/components/TeamLeadCard";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
+import { GlobalModeBar } from '@/components/GlobalModeBar';
 
 type CountSession = {
   id: string;
@@ -188,6 +189,7 @@ export default function NPODashboard() {
 
   return (
     <AnimatedBackground>
+      <GlobalModeBar />
       <div className="min-h-screen pb-20">
         <LocationAcknowledgement 
           onAccept={() => setLocationAccepted(true)}

@@ -8,6 +8,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { WeatherWidget, WeatherAlertBanner } from '@/components/WeatherWidget';
 import { LiveSalesWidget } from '@/components/LiveSalesWidget';
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
+import { GlobalModeBar } from '@/components/GlobalModeBar';
+import { SupervisorLiveWall } from '@/components/SupervisorLiveWall';
 import {
   LogOut, Menu, Bell, MessageSquare, Package, Utensils, Beer, Monitor, Activity,
   AlertTriangle, CheckCircle2, Clock, MapPin, Users, Radio, TrendingUp, 
@@ -153,6 +155,7 @@ export default function ManagerDashboard() {
 
   return (
     <AnimatedBackground>
+      <GlobalModeBar />
       <div className="min-h-screen" data-testid="manager-dashboard">
         <PageHeader
           title="Orby Command"
@@ -248,6 +251,8 @@ export default function ManagerDashboard() {
               color={standsWithIssues.length > 0 ? "amber" : "green"}
             />
           </div>
+
+          <SupervisorLiveWall />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="lg:col-span-2 space-y-4">

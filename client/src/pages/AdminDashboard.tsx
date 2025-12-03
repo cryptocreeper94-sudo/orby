@@ -16,6 +16,7 @@ import { InteractiveMap } from "@/components/InteractiveMap";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader, GlowButton } from "@/components/ui/premium";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
+import { GlobalModeBar } from '@/components/GlobalModeBar';
 
 export default function AdminDashboard() {
   const logout = useStore((state) => state.logout);
@@ -53,6 +54,7 @@ export default function AdminDashboard() {
 
   return (
     <AnimatedBackground>
+      <GlobalModeBar />
       <div className="min-h-screen pb-20">
         <PageHeader
           title="Admin Control"

@@ -11,6 +11,7 @@ import { TeamLeadCard } from "@/components/TeamLeadCard";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader } from "@/components/ui/premium";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
+import { GlobalModeBar } from '@/components/GlobalModeBar';
 
 export default function KitchenDashboard() {
   const logout = useStore((state) => state.logout);
@@ -37,6 +38,7 @@ export default function KitchenDashboard() {
 
   return (
     <AnimatedBackground>
+      <GlobalModeBar />
       <div className="min-h-screen pb-20">
         <PageHeader
           title="Kitchen"

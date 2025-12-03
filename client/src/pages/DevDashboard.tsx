@@ -16,6 +16,7 @@ import { SandboxStatusCompact } from "@/components/SandboxBanner";
 import { FeatureInventory } from "@/components/FeatureInventory";
 import { AssetTracker } from "@/components/AssetTracker";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
+import { GlobalModeBar } from '@/components/GlobalModeBar';
 
 interface AccordionSectionProps {
   title: string;
@@ -242,6 +243,7 @@ export default function DevDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      <GlobalModeBar />
       {/* Compact Header */}
       <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3">
         <div className="flex items-center justify-between">

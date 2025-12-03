@@ -1343,3 +1343,58 @@ export type EmergencyEscalationHistory = typeof emergencyEscalationHistory.$infe
 export type InsertEmergencyEscalationHistory = z.infer<typeof insertEmergencyEscalationHistorySchema>;
 export type EmergencyAlertNotification = typeof emergencyAlertNotifications.$inferSelect;
 export type InsertEmergencyAlertNotification = z.infer<typeof insertEmergencyAlertNotificationSchema>;
+
+// ============ SUPERVISOR LIVE TRACKING SYSTEM ============
+// For managers to see real-time supervisor activity
+export const supervisorSessionStatusEnum = pgEnum('supervisor_session_status', ['online', 'away', 'busy', 'offline']);
+
+export const supervisorSessions = pgTable("supervisor_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  supervisorId: varchar("supervisor_id").references(() => users.id).notNull(),
+  supervisorName: text("supervisor_name").notNull(),
+  currentStandId: varchar("current_stand_id", { length: 20 }).references(() => stands.id),
+  currentStandName: text("current_stand_name"),
+  currentSection: text("current_section"),
+  status: supervisorSessionStatusEnum("status").default('online'),
+  currentTab: varchar("current_tab", { length: 50 }),
+  isSandbox: boolean("is_sandbox").default(false),
+  lastHeartbeat: timestamp("last_heartbeat").defaultNow(),
+  sessionStartedAt: timestamp("session_started_at").defaultNow(),
+  sessionEndedAt: timestamp("session_ended_at"),
+}, (table) => [
+  index("IDX_supervisor_session_supervisor").on(table.supervisorId),
+  index("IDX_supervisor_session_status").on(table.status),
+  index("IDX_supervisor_session_heartbeat").on(table.lastHeartbeat),
+]);
+
+export const supervisorActivityKindEnum = pgEnum('supervisor_activity_kind', [
+  'login', 'logout', 'stand_selected', 'tab_changed', 'delivery_requested', 
+  'issue_opened', 'issue_resolved', 'count_started', 'count_completed',
+  'message_sent', 'compliance_submitted', 'facility_issue', 'emergency_alert'
+]);
+
+export const supervisorActivity = pgTable("supervisor_activity", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  sessionId: varchar("session_id").references(() => supervisorSessions.id).notNull(),
+  supervisorId: varchar("supervisor_id").references(() => users.id).notNull(),
+  supervisorName: text("supervisor_name").notNull(),
+  kind: supervisorActivityKindEnum("kind").notNull(),
+  description: text("description"),
+  standId: varchar("stand_id", { length: 20 }),
+  standName: text("stand_name"),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_supervisor_activity_session").on(table.sessionId),
+  index("IDX_supervisor_activity_supervisor").on(table.supervisorId),
+  index("IDX_supervisor_activity_kind").on(table.kind),
+  index("IDX_supervisor_activity_created").on(table.createdAt),
+]);
+
+export const insertSupervisorSessionSchema = createInsertSchema(supervisorSessions).omit({ id: true, sessionStartedAt: true });
+export const insertSupervisorActivitySchema = createInsertSchema(supervisorActivity).omit({ id: true, createdAt: true });
+
+export type SupervisorSession = typeof supervisorSessions.$inferSelect;
+export type InsertSupervisorSession = z.infer<typeof insertSupervisorSessionSchema>;
+export type SupervisorActivity = typeof supervisorActivity.$inferSelect;
+export type InsertSupervisorActivity = z.infer<typeof insertSupervisorActivitySchema>;

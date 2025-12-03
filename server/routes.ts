@@ -3677,6 +3677,153 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ========== SUPERVISOR LIVE TRACKING ==========
+  
+  // Get live supervisor view (sessions + recent activity)
+  app.get("/api/supervisor-live", async (_req: Request, res: Response) => {
+    try {
+      const liveView = await storage.getSupervisorLiveView();
+      res.json(liveView);
+    } catch (error) {
+      console.error("Error getting supervisor live view:", error);
+      res.status(500).json({ error: "Failed to get supervisor live view" });
+    }
+  });
+
+  // Get active supervisor sessions
+  app.get("/api/supervisor-sessions", async (_req: Request, res: Response) => {
+    try {
+      const sessions = await storage.getActiveSupervisorSessions();
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error getting supervisor sessions:", error);
+      res.status(500).json({ error: "Failed to get supervisor sessions" });
+    }
+  });
+
+  // Create or update supervisor session (called on login/activity)
+  app.post("/api/supervisor-sessions", async (req: Request, res: Response) => {
+    try {
+      const { supervisorId, supervisorName, currentStandId, currentStandName, currentSection, isSandbox } = req.body;
+      
+      // Check if there's an existing active session
+      const existingSession = await storage.getSupervisorSession(supervisorId);
+      
+      if (existingSession) {
+        // Update existing session
+        await storage.updateSupervisorSession(existingSession.id, {
+          currentStandId,
+          currentStandName,
+          currentSection,
+          status: 'online'
+        });
+        res.json(existingSession);
+      } else {
+        // Create new session
+        const session = await storage.createSupervisorSession({
+          supervisorId,
+          supervisorName,
+          currentStandId,
+          currentStandName,
+          currentSection,
+          isSandbox: isSandbox || false,
+          status: 'online'
+        });
+        
+        // Log activity
+        await storage.createSupervisorActivity({
+          sessionId: session.id,
+          supervisorId,
+          supervisorName,
+          kind: 'login',
+          description: `${supervisorName} logged in`
+        });
+        
+        res.status(201).json(session);
+      }
+    } catch (error) {
+      console.error("Error creating supervisor session:", error);
+      res.status(500).json({ error: "Failed to create supervisor session" });
+    }
+  });
+
+  // Heartbeat/update session
+  app.post("/api/supervisor-sessions/:sessionId/heartbeat", async (req: Request, res: Response) => {
+    try {
+      const { currentTab, currentStandId, currentStandName, currentSection, status } = req.body;
+      await storage.supervisorHeartbeat(req.params.sessionId, {
+        currentTab,
+        currentStandId,
+        currentStandName,
+        currentSection,
+        status: status || 'online'
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error updating supervisor heartbeat:", error);
+      res.status(500).json({ error: "Failed to update heartbeat" });
+    }
+  });
+
+  // End supervisor session (logout)
+  app.post("/api/supervisor-sessions/:sessionId/end", async (req: Request, res: Response) => {
+    try {
+      const { supervisorId, supervisorName } = req.body;
+      await storage.endSupervisorSession(req.params.sessionId);
+      
+      // Log logout activity
+      if (supervisorId && supervisorName) {
+        await storage.createSupervisorActivity({
+          sessionId: req.params.sessionId,
+          supervisorId,
+          supervisorName,
+          kind: 'logout',
+          description: `${supervisorName} logged out`
+        });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error ending supervisor session:", error);
+      res.status(500).json({ error: "Failed to end session" });
+    }
+  });
+
+  // Get recent supervisor activity
+  app.get("/api/supervisor-activity", async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const activity = await storage.getRecentSupervisorActivity(limit);
+      res.json(activity);
+    } catch (error) {
+      console.error("Error getting supervisor activity:", error);
+      res.status(500).json({ error: "Failed to get supervisor activity" });
+    }
+  });
+
+  // Log supervisor activity
+  app.post("/api/supervisor-activity", async (req: Request, res: Response) => {
+    try {
+      const { sessionId, supervisorId, supervisorName, kind, description, standId, standName, metadata } = req.body;
+      
+      const activity = await storage.createSupervisorActivity({
+        sessionId,
+        supervisorId,
+        supervisorName,
+        kind,
+        description,
+        standId,
+        standName,
+        metadata
+      });
+      
+      res.status(201).json(activity);
+    } catch (error) {
+      console.error("Error creating supervisor activity:", error);
+      res.status(500).json({ error: "Failed to log activity" });
+    }
+  });
+
   // ========== GENESIS ASSET SEEDING ==========
   
   // Initialize genesis assets if not exists

@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/premium";
 import { SectionHelp } from '@/components/OrbyHelp';
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
+import { GlobalModeBar } from '@/components/GlobalModeBar';
 
 type WarehouseProduct = {
   id: string;
@@ -301,6 +302,7 @@ export default function SupervisorDashboard() {
   if (!activeStandId) {
     return (
       <AnimatedBackground>
+        <GlobalModeBar />
         <PageHeader 
           title="Supervisor"
           subtitle={`${stands.length} stands available`}
@@ -654,6 +656,7 @@ export default function SupervisorDashboard() {
 
   return (
     <AnimatedBackground>
+      <GlobalModeBar />
       <PageHeader 
         title={activeStand?.name || 'Stand'}
         subtitle={activeStand?.status === 'Open' ? '● Open' : '● Closed'}

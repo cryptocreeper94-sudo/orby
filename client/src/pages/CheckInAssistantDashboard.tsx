@@ -37,6 +37,7 @@ import {
   SectionHeader
 } from '@/components/ui/premium';
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
+import { GlobalModeBar } from '@/components/GlobalModeBar';
 
 interface Message {
   id: string;
@@ -240,6 +241,7 @@ export default function CheckInAssistantDashboard() {
 
   return (
     <AnimatedBackground>
+      <GlobalModeBar />
       <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-900/80 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">

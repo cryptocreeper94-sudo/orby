@@ -8,6 +8,7 @@ import {
   auditLogs, emergencyAlerts, emergencyResponders, emergencyEscalationHistory, emergencyAlertNotifications,
   orbitRosters, orbitShifts, deliveryRequests, departmentContacts, alcoholViolations,
   standItems, managerDocuments, assetStamps, blockchainVerifications, complianceAlerts,
+  supervisorSessions, supervisorActivity,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -54,7 +55,9 @@ import {
   type AlcoholViolation, type InsertAlcoholViolation,
   type AssetStamp, type InsertAssetStamp,
   type BlockchainVerification, type InsertBlockchainVerification,
-  type ComplianceAlert, type InsertComplianceAlert
+  type ComplianceAlert, type InsertComplianceAlert,
+  type SupervisorSession, type InsertSupervisorSession,
+  type SupervisorActivity, type InsertSupervisorActivity
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray, ilike, sql } from "drizzle-orm";
@@ -2132,7 +2135,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createAssetStamp(stamp: InsertAssetStamp): Promise<AssetStamp> {
-    const [created] = await db.insert(assetStamps).values(stamp).returning();
+    const [created] = await db.insert(assetStamps).values(stamp as any).returning();
     return created;
   }
 
@@ -2230,6 +2233,80 @@ export class DatabaseStorage implements IStorage {
       resolvedAt: new Date(),
       updatedAt: new Date()
     }).where(eq(complianceAlerts.id, id));
+  }
+
+  // ============ SUPERVISOR LIVE TRACKING ============
+  async getActiveSupervisorSessions(): Promise<SupervisorSession[]> {
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    return await db.select().from(supervisorSessions)
+      .where(and(
+        sql`${supervisorSessions.status} != 'offline'`,
+        sql`${supervisorSessions.lastHeartbeat} > ${fiveMinutesAgo}`
+      ))
+      .orderBy(desc(supervisorSessions.lastHeartbeat));
+  }
+
+  async getSupervisorSession(supervisorId: string): Promise<SupervisorSession | undefined> {
+    const [session] = await db.select().from(supervisorSessions)
+      .where(and(
+        eq(supervisorSessions.supervisorId, supervisorId),
+        sql`${supervisorSessions.status} != 'offline'`
+      ))
+      .orderBy(desc(supervisorSessions.sessionStartedAt))
+      .limit(1);
+    return session || undefined;
+  }
+
+  async createSupervisorSession(session: InsertSupervisorSession): Promise<SupervisorSession> {
+    const [created] = await db.insert(supervisorSessions).values(session).returning();
+    return created;
+  }
+
+  async updateSupervisorSession(id: string, updates: Partial<SupervisorSession>): Promise<void> {
+    await db.update(supervisorSessions).set({
+      ...updates,
+      lastHeartbeat: new Date()
+    }).where(eq(supervisorSessions.id, id));
+  }
+
+  async endSupervisorSession(id: string): Promise<void> {
+    await db.update(supervisorSessions).set({
+      status: 'offline',
+      sessionEndedAt: new Date()
+    }).where(eq(supervisorSessions.id, id));
+  }
+
+  async supervisorHeartbeat(sessionId: string, updates?: Partial<SupervisorSession>): Promise<void> {
+    await db.update(supervisorSessions).set({
+      ...updates,
+      lastHeartbeat: new Date()
+    }).where(eq(supervisorSessions.id, sessionId));
+  }
+
+  async getRecentSupervisorActivity(limit: number = 50): Promise<SupervisorActivity[]> {
+    return await db.select().from(supervisorActivity)
+      .orderBy(desc(supervisorActivity.createdAt))
+      .limit(limit);
+  }
+
+  async getSupervisorActivityBySession(sessionId: string): Promise<SupervisorActivity[]> {
+    return await db.select().from(supervisorActivity)
+      .where(eq(supervisorActivity.sessionId, sessionId))
+      .orderBy(desc(supervisorActivity.createdAt));
+  }
+
+  async createSupervisorActivity(activity: InsertSupervisorActivity): Promise<SupervisorActivity> {
+    const [created] = await db.insert(supervisorActivity).values(activity).returning();
+    return created;
+  }
+
+  async getSupervisorLiveView(): Promise<{
+    sessions: SupervisorSession[];
+    recentActivity: SupervisorActivity[];
+  }> {
+    const sessions = await this.getActiveSupervisorSessions();
+    const recentActivity = await this.getRecentSupervisorActivity(30);
+    return { sessions, recentActivity };
   }
 }
 
