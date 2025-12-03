@@ -10,6 +10,7 @@ import { SandboxWelcome } from "@/components/SandboxWelcome";
 import { OnboardingOverlay } from "@/components/OnboardingOverlay";
 import { FeatureSlideshow } from "@/components/FeatureSlideshow";
 import { OrbyAIChat } from "@/components/OrbyAIChat";
+import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import FloatingWeatherButton from "@/components/FloatingWeatherButton";
 import { AppFooter } from "@/components/AppFooter";
 import legendsLogo from "@assets/stock_images/legends_hospitality_nobg.png";
@@ -134,6 +135,7 @@ function App() {
             <OnboardingOverlay />
             <FeatureSlideshow />
             <OrbyAIChat />
+            <PWAInstallPrompt />
             <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
               <TwinklingStars />
               <div className="absolute inset-0 flex items-center justify-center">
