@@ -22,6 +22,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useMode } from '@/lib/ModeContext';
+import { useToast } from '@/hooks/use-toast';
 import { DOCUMENT_TYPE_CONFIG } from '@shared/schema';
 
 interface ClassificationResult {
@@ -98,6 +99,7 @@ export function UniversalDocumentScanner({
 }: UniversalDocumentScannerProps) {
   const { isSandbox } = useMode();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const webcamRef = useRef<Webcam>(null);
   
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -274,12 +276,26 @@ export function UniversalDocumentScanner({
       queryClient.invalidateQueries({ queryKey: ['/api/scanned-documents'] });
       queryClient.invalidateQueries({ queryKey: ['/api/manager-documents'] });
 
+      const routingDest = selectedRouting || suggestedRouting?.destination || 'Document Hub';
+      toast({
+        title: "Document Submitted Successfully",
+        description: `Routed to ${routingDest}`,
+        duration: 4000,
+      });
+
       if (onDocumentSaved) {
         onDocumentSaved(savedDoc);
       }
       onClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save document');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to save document';
+      setError(errorMessage);
+      toast({
+        variant: "destructive",
+        title: "Resubmit Document - There Was a Problem",
+        description: errorMessage,
+        duration: 5000,
+      });
     } finally {
       setIsSaving(false);
     }
