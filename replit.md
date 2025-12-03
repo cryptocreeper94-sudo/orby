@@ -126,6 +126,15 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 24. **Offline Mode** - Works when radio signals don't
 25. **Sandbox Mode** - Training and demo environment
 
+### Genesis Hallmark Stamping System (Blockchain Certified)
+26. **Universal Asset Stamping** - Every auditable asset gets an ORB number (ORB-000000000001 format, 12 digits = 1 trillion capacity)
+27. **Blockchain Verification** - Important documents (customer-facing, compliance, invoices, PDFs) anchored to Solana for tamper-proof verification
+28. **Asset Tracker UI** - Full search/filter in Dev Panel and Manager Portal by number, name, date, type, category
+29. **Version Badge** - Footer version indicator with changelog modal showing all platform releases
+30. **Two-Tier System**: 
+    - Internal Only: Everything gets ORB stamp (searchable paper trail)
+    - Blockchain: Important docs also get Solana hash (immutable proof)
+
 **Technical Stack:**
 - Frontend: React, Wouter (routing), Zustand (state), TailwindCSS
 - Backend: Express, Drizzle ORM, PostgreSQL
@@ -144,6 +153,7 @@ Orby is a full-stack PWA utilizing React frontend and Express backend with Postg
 - Tesseract.js: Client-side OCR
 - Zustand: State management
 - jsPDF: PDF report generation
+- Helius/Solana: Blockchain anchoring for Genesis Hallmark System (optional - works in demo mode without API key)
 
 ## File Structure
 - `client/`: React frontend (pages, components, lib)

@@ -14,6 +14,7 @@ import { useWebSocket, useWebSocketStore } from "@/lib/websocket";
 import { useMode } from "@/lib/ModeContext";
 import { SandboxStatusCompact } from "@/components/SandboxBanner";
 import { FeatureInventory } from "@/components/FeatureInventory";
+import { AssetTracker } from "@/components/AssetTracker";
 
 interface AccordionSectionProps {
   title: string;
@@ -527,6 +528,17 @@ export default function DevDashboard() {
           badge="Track"
         >
           <FeatureInventory />
+        </AccordionSection>
+
+        {/* Genesis Hallmark Asset Tracker */}
+        <AccordionSection
+          title="Asset Tracker"
+          icon={<Shield className="h-5 w-5" />}
+          defaultOpen={false}
+          accentColor="cyan"
+          badge="Hallmark"
+        >
+          <AssetTracker />
         </AccordionSection>
 
         {/* System Status */}

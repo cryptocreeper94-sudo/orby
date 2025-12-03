@@ -1,5 +1,5 @@
 import { sql, relations } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, pgEnum } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, pgEnum, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -1184,24 +1184,69 @@ export const EXAMPLE_WAREHOUSE_CATEGORIES = [
   { name: 'Supplies', color: '#64748B', icon: 'Wrench' },
 ];
 
-// ============ RELEASE VERSION TRACKING ============
-export const releases = pgTable("releases", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  version: varchar("version", { length: 20 }).notNull(),
-  title: varchar("title", { length: 200 }).notNull(),
-  description: text("description"),
-  changes: jsonb("changes").$type<string[]>().default([]),
-  releasedById: varchar("released_by_id").references(() => users.id),
-  releasedAt: timestamp("released_at").defaultNow(),
-  solanaTransactionHash: varchar("solana_transaction_hash", { length: 100 }),
-  solanaNetwork: varchar("solana_network", { length: 20 }).default('devnet'),
-  isPublished: boolean("is_published").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
-});
+// ============ ORBY HALLMARK STAMPING SYSTEM ============
+// Asset stamp categories for tracking
+export const assetCategoryEnum = pgEnum('asset_category', [
+  'platform', 'user', 'version', 'document', 'report', 'inventory_count', 
+  'incident', 'violation', 'emergency', 'delivery', 'invoice', 'compliance',
+  'audit_log', 'slideshow', 'pdf_export', 'signature', 'other'
+]);
 
-export const insertReleaseSchema = createInsertSchema(releases).omit({ id: true, createdAt: true, releasedAt: true });
-export type Release = typeof releases.$inferSelect;
-export type InsertRelease = z.infer<typeof insertReleaseSchema>;
+export const assetStamps = pgTable("asset_stamps", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  assetNumber: varchar("asset_number", { length: 20 }).unique().notNull(),
+  displayName: varchar("display_name", { length: 200 }).notNull(),
+  category: assetCategoryEnum("category").default('other'),
+  description: text("description"),
+  sourceType: varchar("source_type", { length: 50 }),
+  sourceId: varchar("source_id"),
+  userId: varchar("user_id").references(() => users.id),
+  sha256Hash: varchar("sha256_hash", { length: 64 }),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+  isBlockchainAnchored: boolean("is_blockchain_anchored").default(false),
+  solanaNetwork: varchar("solana_network", { length: 20 }),
+  solanaTxSignature: varchar("solana_tx_signature", { length: 100 }),
+  solanaConfirmedAt: timestamp("solana_confirmed_at"),
+  version: varchar("version", { length: 20 }),
+  changes: jsonb("changes").$type<string[]>(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_asset_number").on(table.assetNumber),
+  index("IDX_asset_category").on(table.category),
+  index("IDX_asset_source").on(table.sourceType, table.sourceId),
+  index("IDX_asset_user").on(table.userId),
+  index("IDX_asset_blockchain").on(table.isBlockchainAnchored),
+]);
+
+export const blockchainVerifications = pgTable("blockchain_verifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: varchar("entity_type", { length: 50 }).notNull(),
+  entityId: varchar("entity_id").notNull(),
+  assetStampId: varchar("asset_stamp_id").references(() => assetStamps.id),
+  userId: varchar("user_id").references(() => users.id),
+  dataHash: varchar("data_hash", { length: 64 }).notNull(),
+  txSignature: varchar("tx_signature", { length: 100 }),
+  status: varchar("status", { length: 20 }).default('pending'),
+  network: varchar("network", { length: 20 }).default('devnet'),
+  errorMessage: text("error_message"),
+  retryCount: integer("retry_count").default(0),
+  submittedAt: timestamp("submitted_at"),
+  confirmedAt: timestamp("confirmed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_blockchain_entity").on(table.entityType, table.entityId),
+  index("IDX_blockchain_status").on(table.status),
+  index("IDX_blockchain_tx").on(table.txSignature),
+]);
+
+export const insertAssetStampSchema = createInsertSchema(assetStamps).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertBlockchainVerificationSchema = createInsertSchema(blockchainVerifications).omit({ id: true, createdAt: true });
+
+export type AssetStamp = typeof assetStamps.$inferSelect;
+export type InsertAssetStamp = z.infer<typeof insertAssetStampSchema>;
+export type BlockchainVerification = typeof blockchainVerifications.$inferSelect;
+export type InsertBlockchainVerification = z.infer<typeof insertBlockchainVerificationSchema>;
 
 // ============ AUDIT LOG, ORBIT INTEGRATION & EMERGENCY ALERTS ============
 // Insert schemas

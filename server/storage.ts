@@ -7,7 +7,7 @@ import {
   warehouseCategories, warehouseProducts, warehouseStock, warehouseParLevels, warehouseRequests, warehouseRequestItems,
   auditLogs, emergencyAlerts, emergencyResponders, emergencyEscalationHistory, emergencyAlertNotifications,
   orbitRosters, orbitShifts, deliveryRequests, departmentContacts, alcoholViolations,
-  standItems, managerDocuments, releases,
+  standItems, managerDocuments, assetStamps, blockchainVerifications,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -51,10 +51,12 @@ import {
   type OrbitRoster, type InsertOrbitRoster,
   type OrbitShift, type InsertOrbitShift,
   type DepartmentContact, type InsertDepartmentContact,
-  type AlcoholViolation, type InsertAlcoholViolation
+  type AlcoholViolation, type InsertAlcoholViolation,
+  type AssetStamp, type InsertAssetStamp,
+  type BlockchainVerification, type InsertBlockchainVerification
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, asc, or, inArray } from "drizzle-orm";
+import { eq, and, desc, asc, or, inArray, ilike, sql } from "drizzle-orm";
 
 export interface VarianceReportItem {
   itemId: string;
@@ -379,6 +381,24 @@ export interface IStorage {
   createAlcoholViolation(violation: InsertAlcoholViolation): Promise<AlcoholViolation>;
   updateAlcoholViolationStatus(id: string, status: string, reviewerId?: string, reviewNotes?: string): Promise<void>;
   resolveAlcoholViolation(id: string, resolverId: string, notes: string, actionTaken: string): Promise<void>;
+
+  // Asset Stamps (Hallmark System)
+  getAssetStamp(id: string): Promise<AssetStamp | undefined>;
+  getAssetStampByNumber(assetNumber: string): Promise<AssetStamp | undefined>;
+  getAllAssetStamps(): Promise<AssetStamp[]>;
+  getAssetStampsByCategory(category: string): Promise<AssetStamp[]>;
+  searchAssetStamps(query: string): Promise<AssetStamp[]>;
+  getNextAssetNumber(): Promise<string>;
+  createAssetStamp(stamp: InsertAssetStamp): Promise<AssetStamp>;
+  updateAssetStampBlockchain(id: string, network: string, txSignature: string): Promise<void>;
+  getAssetStampStats(): Promise<{ total: number; byCategory: Record<string, number>; blockchain: number }>;
+
+  // Blockchain Verifications
+  getBlockchainVerification(id: string): Promise<BlockchainVerification | undefined>;
+  getBlockchainVerificationsByEntity(entityType: string, entityId: string): Promise<BlockchainVerification[]>;
+  getPendingBlockchainVerifications(): Promise<BlockchainVerification[]>;
+  createBlockchainVerification(verification: InsertBlockchainVerification): Promise<BlockchainVerification>;
+  updateBlockchainVerificationStatus(id: string, status: string, txSignature?: string, errorMessage?: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2055,6 +2075,116 @@ export class DatabaseStorage implements IStorage {
       actionTaken: actionTaken,
       updatedAt: new Date()
     }).where(eq(alcoholViolations.id, id));
+  }
+
+  // ============ ASSET STAMPS (Orby Hallmark System) ============
+  async getAssetStamp(id: string): Promise<AssetStamp | undefined> {
+    const [stamp] = await db.select().from(assetStamps).where(eq(assetStamps.id, id));
+    return stamp || undefined;
+  }
+
+  async getAssetStampByNumber(assetNumber: string): Promise<AssetStamp | undefined> {
+    const [stamp] = await db.select().from(assetStamps).where(eq(assetStamps.assetNumber, assetNumber));
+    return stamp || undefined;
+  }
+
+  async getAllAssetStamps(): Promise<AssetStamp[]> {
+    return await db.select().from(assetStamps).orderBy(desc(assetStamps.createdAt));
+  }
+
+  async getAssetStampsByCategory(category: string): Promise<AssetStamp[]> {
+    return await db.select().from(assetStamps)
+      .where(eq(assetStamps.category, category as any))
+      .orderBy(desc(assetStamps.createdAt));
+  }
+
+  async searchAssetStamps(query: string): Promise<AssetStamp[]> {
+    const searchQuery = `%${query}%`;
+    return await db.select().from(assetStamps)
+      .where(
+        or(
+          ilike(assetStamps.assetNumber, searchQuery),
+          ilike(assetStamps.displayName, searchQuery),
+          ilike(assetStamps.description || '', searchQuery)
+        )
+      )
+      .orderBy(desc(assetStamps.createdAt))
+      .limit(100);
+  }
+
+  async getNextAssetNumber(): Promise<string> {
+    const [result] = await db.select({ maxNum: sql<string>`MAX(${assetStamps.assetNumber})` }).from(assetStamps);
+    if (!result?.maxNum) {
+      return 'ORB-000000000001';
+    }
+    const match = result.maxNum.match(/ORB-(\d+)/);
+    const currentNum = match ? parseInt(match[1], 10) : 0;
+    return `ORB-${(currentNum + 1).toString().padStart(12, '0')}`;
+  }
+
+  async createAssetStamp(stamp: InsertAssetStamp): Promise<AssetStamp> {
+    const [created] = await db.insert(assetStamps).values(stamp).returning();
+    return created;
+  }
+
+  async updateAssetStampBlockchain(id: string, network: string, txSignature: string): Promise<void> {
+    await db.update(assetStamps).set({
+      isBlockchainAnchored: true,
+      solanaNetwork: network,
+      solanaTxSignature: txSignature,
+      solanaConfirmedAt: new Date(),
+      updatedAt: new Date()
+    }).where(eq(assetStamps.id, id));
+  }
+
+  async getAssetStampStats(): Promise<{ total: number; byCategory: Record<string, number>; blockchain: number }> {
+    const allStamps = await db.select().from(assetStamps);
+    const byCategory: Record<string, number> = {};
+    let blockchain = 0;
+    allStamps.forEach(stamp => {
+      const cat = stamp.category || 'other';
+      byCategory[cat] = (byCategory[cat] || 0) + 1;
+      if (stamp.isBlockchainAnchored) blockchain++;
+    });
+    return { total: allStamps.length, byCategory, blockchain };
+  }
+
+  // ============ BLOCKCHAIN VERIFICATIONS ============
+  async getBlockchainVerification(id: string): Promise<BlockchainVerification | undefined> {
+    const [verification] = await db.select().from(blockchainVerifications).where(eq(blockchainVerifications.id, id));
+    return verification || undefined;
+  }
+
+  async getBlockchainVerificationsByEntity(entityType: string, entityId: string): Promise<BlockchainVerification[]> {
+    return await db.select().from(blockchainVerifications)
+      .where(and(
+        eq(blockchainVerifications.entityType, entityType),
+        eq(blockchainVerifications.entityId, entityId)
+      ))
+      .orderBy(desc(blockchainVerifications.createdAt));
+  }
+
+  async getPendingBlockchainVerifications(): Promise<BlockchainVerification[]> {
+    return await db.select().from(blockchainVerifications)
+      .where(eq(blockchainVerifications.status, 'pending'))
+      .orderBy(asc(blockchainVerifications.createdAt));
+  }
+
+  async createBlockchainVerification(verification: InsertBlockchainVerification): Promise<BlockchainVerification> {
+    const [created] = await db.insert(blockchainVerifications).values(verification).returning();
+    return created;
+  }
+
+  async updateBlockchainVerificationStatus(id: string, status: string, txSignature?: string, errorMessage?: string): Promise<void> {
+    const updates: any = { status };
+    if (txSignature) {
+      updates.txSignature = txSignature;
+      updates.confirmedAt = new Date();
+    }
+    if (errorMessage) {
+      updates.errorMessage = errorMessage;
+    }
+    await db.update(blockchainVerifications).set(updates).where(eq(blockchainVerifications.id, id));
   }
 }
 

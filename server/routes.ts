@@ -7,7 +7,7 @@ import {
   insertInventoryCountSchema, insertQuickMessageSchema, insertConversationSchema, insertConversationMessageSchema,
   insertIncidentSchema, insertCountSessionSchema, insertStandIssueSchema, insertMenuBoardSchema,
   insertAuditLogSchema, insertEmergencyAlertSchema, insertOrbitRosterSchema, insertOrbitShiftSchema,
-  insertAlcoholViolationSchema,
+  insertAlcoholViolationSchema, insertAssetStampSchema,
   QUICK_CALL_ROLES
 } from "@shared/schema";
 import { z } from "zod";
@@ -3284,6 +3284,365 @@ Return your response as a JSON object with this exact structure:
     } catch (error) {
       console.error("Weather API error:", error);
       res.status(500).json({ error: "Failed to fetch weather" });
+    }
+  });
+
+  // ========== ASSET STAMPS (Orby Hallmark System) ==========
+  
+  // Get all asset stamps
+  app.get("/api/asset-stamps", async (req: Request, res: Response) => {
+    try {
+      const stamps = await storage.getAllAssetStamps();
+      res.json(stamps);
+    } catch (error) {
+      console.error("Error getting asset stamps:", error);
+      res.status(500).json({ error: "Failed to get asset stamps" });
+    }
+  });
+
+  // Get asset stamp stats
+  app.get("/api/asset-stamps/stats", async (req: Request, res: Response) => {
+    try {
+      const stats = await storage.getAssetStampStats();
+      res.json(stats);
+    } catch (error) {
+      console.error("Error getting asset stamp stats:", error);
+      res.status(500).json({ error: "Failed to get asset stamp stats" });
+    }
+  });
+
+  // Get next asset number
+  app.get("/api/asset-stamps/next-number", async (req: Request, res: Response) => {
+    try {
+      const nextNumber = await storage.getNextAssetNumber();
+      res.json({ nextNumber });
+    } catch (error) {
+      console.error("Error getting next asset number:", error);
+      res.status(500).json({ error: "Failed to get next asset number" });
+    }
+  });
+
+  // Search asset stamps
+  app.get("/api/asset-stamps/search", async (req: Request, res: Response) => {
+    try {
+      const query = req.query.q as string;
+      if (!query) {
+        return res.status(400).json({ error: "Search query required" });
+      }
+      const stamps = await storage.searchAssetStamps(query);
+      res.json(stamps);
+    } catch (error) {
+      console.error("Error searching asset stamps:", error);
+      res.status(500).json({ error: "Failed to search asset stamps" });
+    }
+  });
+
+  // Get asset stamp by ID
+  app.get("/api/asset-stamps/:id", async (req: Request, res: Response) => {
+    try {
+      const stamp = await storage.getAssetStamp(req.params.id);
+      if (!stamp) {
+        return res.status(404).json({ error: "Asset stamp not found" });
+      }
+      res.json(stamp);
+    } catch (error) {
+      console.error("Error getting asset stamp:", error);
+      res.status(500).json({ error: "Failed to get asset stamp" });
+    }
+  });
+
+  // Get asset stamp by asset number
+  app.get("/api/asset-stamps/number/:assetNumber", async (req: Request, res: Response) => {
+    try {
+      const stamp = await storage.getAssetStampByNumber(req.params.assetNumber);
+      if (!stamp) {
+        return res.status(404).json({ error: "Asset stamp not found" });
+      }
+      res.json(stamp);
+    } catch (error) {
+      console.error("Error getting asset stamp:", error);
+      res.status(500).json({ error: "Failed to get asset stamp" });
+    }
+  });
+
+  // Get asset stamps by category
+  app.get("/api/asset-stamps/category/:category", async (req: Request, res: Response) => {
+    try {
+      const stamps = await storage.getAssetStampsByCategory(req.params.category);
+      res.json(stamps);
+    } catch (error) {
+      console.error("Error getting asset stamps by category:", error);
+      res.status(500).json({ error: "Failed to get asset stamps" });
+    }
+  });
+
+  // Create asset stamp (internal)
+  const createAssetStampBodySchema = z.object({
+    displayName: z.string().min(1, "Display name is required"),
+    category: z.enum(['platform', 'user', 'version', 'document', 'report', 'inventory_count', 
+      'incident', 'violation', 'emergency', 'delivery', 'invoice', 'compliance',
+      'audit_log', 'slideshow', 'pdf_export', 'signature', 'other']).optional().default('other'),
+    description: z.string().optional(),
+    sourceType: z.string().optional(),
+    sourceId: z.string().optional(),
+    userId: z.string().optional(),
+    sha256Hash: z.string().optional(),
+    metadata: z.record(z.unknown()).optional(),
+    version: z.string().optional(),
+    changes: z.array(z.string()).optional()
+  });
+
+  app.post("/api/asset-stamps", async (req: Request, res: Response) => {
+    try {
+      const validationResult = createAssetStampBodySchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: "Validation failed", 
+          details: validationResult.error.errors 
+        });
+      }
+      
+      const { displayName, category, description, sourceType, sourceId, userId, sha256Hash, metadata, version, changes } = validationResult.data;
+      
+      // Get next asset number
+      const assetNumber = await storage.getNextAssetNumber();
+      
+      const stamp = await storage.createAssetStamp({
+        assetNumber,
+        displayName,
+        category: category || 'other',
+        description,
+        sourceType,
+        sourceId,
+        userId,
+        sha256Hash,
+        metadata,
+        isBlockchainAnchored: false,
+        version,
+        changes
+      });
+      
+      res.status(201).json(stamp);
+    } catch (error) {
+      console.error("Error creating asset stamp:", error);
+      res.status(500).json({ error: "Failed to create asset stamp" });
+    }
+  });
+
+  // Anchor asset stamp to blockchain
+  app.post("/api/asset-stamps/:id/anchor", async (req: Request, res: Response) => {
+    try {
+      const { network = 'devnet' } = req.body;
+      
+      const stamp = await storage.getAssetStamp(req.params.id);
+      if (!stamp) {
+        return res.status(404).json({ error: "Asset stamp not found" });
+      }
+      
+      // Import blockchain service
+      const { createVerification, prepareAssetData } = await import("./services/blockchain");
+      
+      // Prepare data for blockchain
+      const blockchainData = prepareAssetData(
+        stamp.category as any,
+        stamp.id,
+        stamp.assetNumber,
+        stamp.userId || undefined,
+        {
+          displayName: stamp.displayName,
+          description: stamp.description,
+          sourceType: stamp.sourceType,
+          sourceId: stamp.sourceId,
+          version: stamp.version,
+          ...((stamp.metadata as Record<string, unknown>) || {})
+        }
+      );
+      
+      // Create verification
+      const result = await createVerification(blockchainData, network as 'mainnet-beta' | 'devnet');
+      
+      if (result.success && result.txSignature) {
+        await storage.updateAssetStampBlockchain(req.params.id, network, result.txSignature);
+        
+        // Create blockchain verification record
+        await storage.createBlockchainVerification({
+          entityType: stamp.category || 'other',
+          entityId: stamp.id,
+          assetStampId: stamp.id,
+          userId: stamp.userId,
+          dataHash: result.dataHash,
+          txSignature: result.txSignature,
+          status: result.status,
+          network
+        });
+      }
+      
+      res.json({
+        success: result.success,
+        assetNumber: stamp.assetNumber,
+        txSignature: result.txSignature,
+        dataHash: result.dataHash,
+        solscanUrl: result.solscanUrl,
+        status: result.status,
+        error: result.error
+      });
+    } catch (error) {
+      console.error("Error anchoring asset stamp:", error);
+      res.status(500).json({ error: "Failed to anchor asset stamp to blockchain" });
+    }
+  });
+
+  // Check blockchain connection status
+  app.get("/api/blockchain/status", async (_req: Request, res: Response) => {
+    try {
+      const { checkHeliusConnection } = await import("./services/blockchain");
+      const status = await checkHeliusConnection();
+      res.json(status);
+    } catch (error) {
+      console.error("Error checking blockchain status:", error);
+      res.status(500).json({ error: "Failed to check blockchain status" });
+    }
+  });
+
+  // Get blockchain verifications by entity
+  app.get("/api/blockchain/verifications/:entityType/:entityId", async (req: Request, res: Response) => {
+    try {
+      const verifications = await storage.getBlockchainVerificationsByEntity(
+        req.params.entityType, 
+        req.params.entityId
+      );
+      res.json(verifications);
+    } catch (error) {
+      console.error("Error getting blockchain verifications:", error);
+      res.status(500).json({ error: "Failed to get blockchain verifications" });
+    }
+  });
+
+  // Get pending blockchain verifications
+  app.get("/api/blockchain/verifications/pending", async (req: Request, res: Response) => {
+    try {
+      const verifications = await storage.getPendingBlockchainVerifications();
+      res.json(verifications);
+    } catch (error) {
+      console.error("Error getting pending verifications:", error);
+      res.status(500).json({ error: "Failed to get pending verifications" });
+    }
+  });
+
+  // ========== GENESIS ASSET SEEDING ==========
+  
+  // Initialize genesis assets if not exists
+  app.post("/api/asset-stamps/seed-genesis", async (req: Request, res: Response) => {
+    try {
+      // Check if genesis assets already exist
+      const existingOrby = await storage.getAssetStampByNumber('ORB-000000000001');
+      if (existingOrby) {
+        return res.json({ message: "Genesis assets already exist", seeded: false });
+      }
+      
+      const { generateDataHash, prepareAssetData, createVerification } = await import("./services/blockchain");
+      
+      // Genesis Asset #1: Orby Platform
+      const orbyData = prepareAssetData('platform', 'genesis-orby', 'ORB-000000000001', undefined, {
+        name: 'Orby',
+        type: 'Platform',
+        description: 'Orby - Blockchain Certified Venue Operations Platform',
+        domain: 'getorby.io',
+        venue: 'Nissan Stadium',
+        version: 'v1.0',
+        genesisDate: new Date().toISOString()
+      });
+      
+      const orbyHash = generateDataHash(orbyData);
+      await storage.createAssetStamp({
+        assetNumber: 'ORB-000000000001',
+        displayName: 'Orby Platform',
+        category: 'platform',
+        description: 'Genesis asset - Orby blockchain certified venue operations platform',
+        sourceType: 'genesis',
+        sourceId: 'orby',
+        sha256Hash: orbyHash,
+        metadata: orbyData.data,
+        isBlockchainAnchored: false,
+        version: 'v1.0'
+      });
+      
+      // Genesis Asset #2: Jason (Developer/Founder)
+      const jasonData = prepareAssetData('user', 'genesis-jason', 'ORB-000000000002', undefined, {
+        name: 'Jason',
+        role: 'Developer',
+        title: 'Founder & Lead Developer',
+        description: 'Jason - Lead Developer of Orby Platform',
+        genesisDate: new Date().toISOString()
+      });
+      
+      const jasonHash = generateDataHash(jasonData);
+      await storage.createAssetStamp({
+        assetNumber: 'ORB-000000000002',
+        displayName: 'Jason (Developer)',
+        category: 'user',
+        description: 'Genesis asset - Jason, Lead Developer and Founder',
+        sourceType: 'genesis',
+        sourceId: 'jason',
+        sha256Hash: jasonHash,
+        metadata: jasonData.data,
+        isBlockchainAnchored: false
+      });
+      
+      // Genesis Asset #3: v1.0 Release
+      const v1Data = prepareAssetData('version', 'genesis-v1.0', 'ORB-000000000003', undefined, {
+        version: 'v1.0',
+        name: 'Initial Release',
+        description: 'Orby v1.0 - Genesis Release with Hallmark Stamping System',
+        releaseDate: new Date().toISOString(),
+        features: [
+          'Emergency Command Center',
+          'Delivery Tracking',
+          'Three-Phase Inventory Counting',
+          'Alcohol Compliance',
+          'Genesis Hallmark Stamping System',
+          'Interactive Stadium Map',
+          'GPS Navigation',
+          'Manager Document Hub'
+        ]
+      });
+      
+      const v1Hash = generateDataHash(v1Data);
+      await storage.createAssetStamp({
+        assetNumber: 'ORB-000000000003',
+        displayName: 'Orby v1.0 Release',
+        category: 'version',
+        description: 'Genesis release - Orby v1.0 with full feature set',
+        sourceType: 'genesis',
+        sourceId: 'v1.0',
+        sha256Hash: v1Hash,
+        metadata: v1Data.data,
+        isBlockchainAnchored: false,
+        version: 'v1.0',
+        changes: [
+          'Emergency Command Center',
+          'Delivery Tracking', 
+          'Three-Phase Inventory Counting',
+          'Alcohol Compliance',
+          'Genesis Hallmark Stamping System',
+          'Interactive Stadium Map',
+          'GPS Navigation',
+          'Manager Document Hub'
+        ]
+      });
+      
+      res.json({ 
+        message: "Genesis assets created successfully", 
+        seeded: true,
+        assets: [
+          { number: 'ORB-000000000001', name: 'Orby Platform' },
+          { number: 'ORB-000000000002', name: 'Jason (Developer)' },
+          { number: 'ORB-000000000003', name: 'Orby v1.0 Release' }
+        ]
+      });
+    } catch (error) {
+      console.error("Error seeding genesis assets:", error);
+      res.status(500).json({ error: "Failed to seed genesis assets" });
     }
   });
 

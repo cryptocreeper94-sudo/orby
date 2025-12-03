@@ -11,6 +11,7 @@ import { OnboardingOverlay, OnboardingHelpButton } from "@/components/Onboarding
 import { FeatureSlideshow } from "@/components/FeatureSlideshow";
 import { FloatingHelpButton } from "@/components/OrbyHelp";
 import FloatingWeatherButton from "@/components/FloatingWeatherButton";
+import { VersionBadge } from "@/components/VersionBadge";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/Login";
 import SetPinPage from "@/pages/SetPin";
@@ -148,6 +149,7 @@ function App() {
               <Toaster />
               <Router />
               <FloatingWeatherButton />
+              <VersionBadge />
             </SandboxContentWrapper>
           </TooltipProvider>
         </OnboardingProvider>
