@@ -66,6 +66,17 @@ export const departmentEnum = pgEnum('department', ['Warehouse', 'Kitchen', 'Bar
 export const requestPriorityEnum = pgEnum('request_priority', ['Normal', 'Emergency']);
 export const deliveryStatusEnum = pgEnum('delivery_status', ['Requested', 'Acknowledged', 'InProgress', 'OnTheWay', 'Delivered', 'Cancelled']);
 
+// Inventory control enums for Bar and Kitchen departments
+export const inventoryDepartmentEnum = pgEnum('inventory_department', ['Bar', 'Kitchen', 'Warehouse', 'Global']);
+export const productTypeEnum = pgEnum('product_type', [
+  'Liquor', 'Beer', 'Wine', 'Mixer', 'NABeverage', 'Garnish', 'Chargeable',  // Bar types
+  'Ingredient', 'Supply', 'Consumable', 'Equipment',  // Kitchen types
+  'Other'
+]);
+export const inventoryUnitEnum = pgEnum('inventory_unit', ['Each', 'Case', 'Bottle', 'Keg', 'Pound', 'Ounce', 'Gallon', 'Box', 'Bag']);
+export const integrationSystemEnum = pgEnum('integration_system', ['YellowDog', 'PAXPay']);
+export const integrationDirectionEnum = pgEnum('integration_direction', ['Push', 'Pull', 'Bidirectional']);
+
 // Users table
 export const users = pgTable("users", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
@@ -145,6 +156,13 @@ export const items = pgTable("items", {
   name: text("name").notNull(),
   price: integer("price").notNull(),
   category: text("category").notNull(),
+  // Department-aware inventory fields
+  inventoryDepartment: inventoryDepartmentEnum("inventory_department").default('Global'),
+  productType: productTypeEnum("product_type").default('Other'),
+  unit: inventoryUnitEnum("unit").default('Each'),
+  packSize: integer("pack_size").default(1), // Units per case/pack
+  sku: text("sku"), // Internal SKU for tracking
+  barcode: text("barcode"), // UPC/barcode for scanning
 });
 
 // Stand Items - links items to specific stands (semi-permanent templates)
@@ -155,6 +173,54 @@ export const standItems = pgTable("stand_items", {
   itemId: varchar("item_id", { length: 36 }).references(() => items.id).notNull(),
   sortOrder: integer("sort_order").default(0), // Display order on count sheet
   isChargeable: boolean("is_chargeable").default(true), // Whether this item counts toward inventory
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Inventory Locations - for Bar and Kitchen inventory tracking
+// Bars can link to stands, Kitchen uses a central KitchenHQ location
+export const inventoryLocations = pgTable("inventory_locations", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  department: inventoryDepartmentEnum("department").notNull(),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id), // For bar locations linked to stands
+  isPrimary: boolean("is_primary").default(false), // Primary storage location for department
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Department Stock Levels - current on-hand quantities per location
+export const departmentStock = pgTable("department_stock", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  locationId: varchar("location_id", { length: 36 }).references(() => inventoryLocations.id).notNull(),
+  itemId: varchar("item_id", { length: 36 }).references(() => items.id).notNull(),
+  onHand: integer("on_hand").default(0),
+  lastCountedAt: timestamp("last_counted_at"),
+  lastCountedBy: varchar("last_counted_by", { length: 36 }).references(() => users.id),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Department Par Levels - target stock levels per location
+export const departmentParLevels = pgTable("department_par_levels", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  locationId: varchar("location_id", { length: 36 }).references(() => inventoryLocations.id).notNull(),
+  itemId: varchar("item_id", { length: 36 }).references(() => items.id).notNull(),
+  parQty: integer("par_qty").notNull(),
+  minQty: integer("min_qty").default(0), // Reorder point
+  maxQty: integer("max_qty"), // Max capacity
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Integration Mappings - for Yellow Dog and PAX Pay compatibility
+export const inventoryIntegrations = pgTable("inventory_integrations", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  itemId: varchar("item_id", { length: 36 }).references(() => items.id).notNull(),
+  system: integrationSystemEnum("system").notNull(),
+  externalId: text("external_id"), // External system's item ID
+  externalSku: text("external_sku"), // External system's SKU
+  externalName: text("external_name"), // Name in external system
+  direction: integrationDirectionEnum("direction").default('Bidirectional'),
+  lastSyncAt: timestamp("last_sync_at"),
+  syncStatus: text("sync_status"), // 'Synced', 'Pending', 'Error'
   createdAt: timestamp("created_at").defaultNow(),
 });
 
