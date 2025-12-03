@@ -42,6 +42,8 @@ import ItemManagement from "@/pages/ItemManagement";
 import StandSetup from "@/pages/StandSetup";
 import EventCountSession from "@/pages/EventCountSession";
 import DocumentHub from "@/pages/DocumentHub";
+import CulinaryDirectorDashboard from "@/pages/CulinaryDirectorDashboard";
+import CulinaryCookDashboard from "@/pages/CulinaryCookDashboard";
 import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
@@ -87,6 +89,8 @@ function Router() {
       <Route path="/stand-setup" component={StandSetup} />
       <Route path="/count-session/:standId/:eventDate" component={EventCountSession} />
       <Route path="/document-hub" component={DocumentHub} />
+      <Route path="/culinary-director" component={CulinaryDirectorDashboard} />
+      <Route path="/culinary-cook" component={CulinaryCookDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

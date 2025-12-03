@@ -118,6 +118,8 @@ export default function LoginPage() {
       }
       else if (role === 'Warehouse' || role === 'WarehouseManager' || role === 'WarehouseWorker') setLocation("/warehouse");
       else if (role === 'Kitchen' || role === 'KitchenManager' || role === 'KitchenWorker') setLocation("/kitchen");
+      else if (role === 'CulinaryDirector') setLocation("/culinary-director");
+      else if (role === 'CulinaryCook') setLocation("/culinary-cook");
       else setLocation("/supervisor");
     }
   }, [currentUser, setLocation, login, pendingDevLogin]);

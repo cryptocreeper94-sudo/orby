@@ -2740,16 +2740,20 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getCulinaryTeamMembers(): Promise<any[]> {
-    return await db.select().from(users).where(eq(users.role, 'CulinaryCook'));
+    const result = await db.execute(sql`
+      SELECT * FROM users WHERE role = 'CulinaryCook' ORDER BY name
+    `);
+    return result.rows as any[];
   }
 
   async getCulinaryManagers(): Promise<any[]> {
-    return await db.select().from(users).where(
-      or(
-        eq(users.role, 'CulinaryDirector'),
-        and(eq(users.role, 'Supervisor'), eq(users.department, 'Culinary'))
-      )
-    );
+    const result = await db.execute(sql`
+      SELECT * FROM users 
+      WHERE role = 'CulinaryDirector' 
+         OR (role = 'Supervisor' AND department = 'Culinary')
+      ORDER BY role, name
+    `);
+    return result.rows as any[];
   }
 
   // ============ KEY & RADIO CHECKOUT SYSTEM ============
