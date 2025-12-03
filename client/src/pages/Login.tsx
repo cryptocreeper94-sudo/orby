@@ -7,17 +7,36 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ShieldCheck, FlaskConical, Radio, Code, Briefcase, ChevronDown, HelpCircle } from "lucide-react";
+import { ShieldCheck, FlaskConical, Radio, Code, Briefcase, ChevronDown, HelpCircle, AlertTriangle, Clock } from "lucide-react";
 import { useMode } from "@/lib/ModeContext";
 import { ModeGate } from "@/components/ModeGate";
 import { CompactModeIndicator } from "@/components/GlobalModeBar";
 import { motion, AnimatePresence } from "framer-motion";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const loginSchema = z.object({
   pin: z.string().length(4, "PIN must be 4 digits"),
 });
 
 const MODE_SELECTED_KEY = 'orby_mode_selected';
+const PERSISTENCE_KEY = 'orby_session_persistence';
+const PERSISTENCE_EXPIRY_KEY = 'orby_session_expiry';
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
+const MANAGER_PINS = ['4444', '0424', '2424'];
+
+function checkPersistenceValid(): boolean {
+  const expiry = localStorage.getItem(PERSISTENCE_EXPIRY_KEY);
+  if (!expiry) return false;
+  const expiryTime = parseInt(expiry, 10);
+  if (isNaN(expiryTime)) return false;
+  return Date.now() < expiryTime;
+}
+
+function clearPersistence() {
+  localStorage.removeItem(PERSISTENCE_KEY);
+  localStorage.removeItem(PERSISTENCE_EXPIRY_KEY);
+}
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
@@ -30,6 +49,8 @@ export default function LoginPage() {
   const [showDevRolePicker, setShowDevRolePicker] = useState(false);
   const [pendingDevLogin, setPendingDevLogin] = useState(false);
   const [showPinHelp, setShowPinHelp] = useState(false);
+  const [enablePersistence, setEnablePersistence] = useState(false);
+  const [showPersistenceWarning, setShowPersistenceWarning] = useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -113,6 +134,19 @@ export default function LoginPage() {
     if (!success) {
       form.setError("pin", { message: "Invalid PIN" });
       setPendingDevLogin(false);
+    } else if (enablePersistence && MANAGER_PINS.includes(values.pin)) {
+      localStorage.setItem(PERSISTENCE_KEY, 'true');
+      localStorage.setItem(PERSISTENCE_EXPIRY_KEY, String(Date.now() + THIRTY_DAYS_MS));
+    }
+  }
+  
+  const handlePersistenceToggle = (checked: boolean) => {
+    setEnablePersistence(checked);
+    if (checked) {
+      setShowPersistenceWarning(true);
+    } else {
+      setShowPersistenceWarning(false);
+      clearPersistence();
     }
   }
 
@@ -212,6 +246,47 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
+              
+              {/* 30-Day Persistence Option (Managers Only) */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                  <Checkbox
+                    id="persistence"
+                    checked={enablePersistence}
+                    onCheckedChange={handlePersistenceToggle}
+                    className="border-cyan-400/50 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+                    data-testid="checkbox-persistence"
+                  />
+                  <label 
+                    htmlFor="persistence" 
+                    className="flex items-center gap-2 text-sm text-cyan-200/80 cursor-pointer"
+                  >
+                    <Clock className="w-4 h-4" />
+                    Stay logged in for 30 days
+                    <span className="text-[10px] text-cyan-400/60 bg-cyan-500/10 px-1.5 py-0.5 rounded">Managers</span>
+                  </label>
+                </div>
+                
+                <AnimatePresence>
+                  {showPersistenceWarning && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+                        <div className="text-xs text-amber-200/90">
+                          <strong className="text-amber-300">Security Notice:</strong> Anyone with access to this device can use your account while persistence is enabled. Only use on personal or secured devices.
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <Button 
                 type="submit" 
                 variant="glow"

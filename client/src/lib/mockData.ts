@@ -90,6 +90,8 @@ export const useStore = create<AppState>()(
         if (user) {
           api.logout(user.id).catch(console.error);
         }
+        localStorage.removeItem('orby_session_persistence');
+        localStorage.removeItem('orby_session_expiry');
         set({ currentUser: null });
       },
 
@@ -230,6 +232,27 @@ export const useStore = create<AppState>()(
         currentUser: state.currentUser,
         countSheets: state.countSheets,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state?.currentUser) {
+          const PERSISTENCE_KEY = 'orby_session_persistence';
+          const PERSISTENCE_EXPIRY_KEY = 'orby_session_expiry';
+          const hasPersistence = localStorage.getItem(PERSISTENCE_KEY) === 'true';
+          const expiry = localStorage.getItem(PERSISTENCE_EXPIRY_KEY);
+          
+          if (hasPersistence && expiry) {
+            const expiryTime = parseInt(expiry, 10);
+            if (!isNaN(expiryTime) && Date.now() < expiryTime) {
+              return;
+            }
+          }
+          
+          if (!hasPersistence) {
+            state.currentUser = null;
+            localStorage.removeItem(PERSISTENCE_KEY);
+            localStorage.removeItem(PERSISTENCE_EXPIRY_KEY);
+          }
+        }
+      },
     }
   )
 );
