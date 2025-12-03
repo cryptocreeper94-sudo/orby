@@ -393,6 +393,13 @@ export const opsManagerPages: OnboardingPage[] = [
         position: 'center'
       },
       {
+        id: 'report-builder',
+        page: 'ops-docs',
+        title: 'Event Report Builder',
+        description: 'Pete\'s game-changer: Build combined PDF packages by event date. Finance Package, Compliance Package, or Custom. Count sheets with item tables, variance data, incidents - all in one download.',
+        position: 'center'
+      },
+      {
         id: 'audit-trail',
         page: 'ops-docs',
         title: 'Full Audit Trail',
