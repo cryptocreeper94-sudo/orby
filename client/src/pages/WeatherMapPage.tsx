@@ -75,112 +75,91 @@ export default function WeatherMapPage() {
 
   const WeatherDataPanel = () => (
     <div className="h-full flex flex-col bg-gradient-to-b from-slate-900/95 to-slate-800/95 backdrop-blur-xl">
-      <div className="p-4 border-b border-white/10">
-        <div className="flex items-center justify-between mb-3">
+      <div className="p-3 border-b border-white/10">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-cyan-400" />
-            <span className="text-sm font-medium text-white">Nissan Stadium</span>
+            <MapPin className="h-3 w-3 text-cyan-400" />
+            <span className="text-xs font-medium text-white">Nissan Stadium</span>
           </div>
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={() => refetch()}
-            className="text-white/60 hover:text-white h-8 w-8 p-0"
+            className="text-white/60 hover:text-white h-6 w-6 p-0"
             data-testid="button-refresh-weather"
           >
-            <RefreshCw className="h-4 w-4" />
+            <RefreshCw className="h-3 w-3" />
           </Button>
         </div>
         
         {weather && (
-          <div className="flex items-center gap-4">
-            <div className="text-5xl">{getWeatherEmoji(weather.current.description)}</div>
-            <div>
-              <div className="text-4xl font-bold text-white">{weather.current.temp}°F</div>
-              <div className="text-sm text-white/60">{weather.current.description}</div>
-              <div className="text-xs text-cyan-400">Feels like {weather.current.feelsLike}°F</div>
+          <div className="flex items-center gap-3 mt-2">
+            <div className="text-2xl">{getWeatherEmoji(weather.current.description)}</div>
+            <div className="flex-1">
+              <div className="flex items-baseline gap-2">
+                <span className="text-2xl font-bold text-white">{weather.current.temp}°F</span>
+                <span className="text-xs text-cyan-400">Feels {weather.current.feelsLike}°</span>
+              </div>
+              <div className="text-xs text-white/60">{weather.current.description}</div>
             </div>
           </div>
         )}
       </div>
       
-      <ScrollArea className="flex-1 p-4">
+      <ScrollArea className="flex-1 p-3">
         {weather && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <GlassCard className="p-3">
-                <div className="flex items-center gap-2 text-white/60 mb-1">
-                  <Wind className="h-4 w-4" />
-                  <span className="text-xs">Wind</span>
-                </div>
-                <div className="text-lg font-semibold text-white">
-                  {weather.current.windSpeed} mph
-                </div>
-                <div className="text-xs text-white/40">{weather.current.windDirection}</div>
+          <div className="space-y-3">
+            <div className="grid grid-cols-4 gap-2">
+              <GlassCard className="p-2 text-center">
+                <Wind className="h-3 w-3 text-white/60 mx-auto" />
+                <div className="text-sm font-semibold text-white">{weather.current.windSpeed}</div>
+                <div className="text-[10px] text-white/40">mph {weather.current.windDirection}</div>
               </GlassCard>
               
-              <GlassCard className="p-3">
-                <div className="flex items-center gap-2 text-white/60 mb-1">
-                  <Droplets className="h-4 w-4" />
-                  <span className="text-xs">Humidity</span>
-                </div>
-                <div className="text-lg font-semibold text-white">
-                  {weather.current.humidity}%
-                </div>
+              <GlassCard className="p-2 text-center">
+                <Droplets className="h-3 w-3 text-blue-400 mx-auto" />
+                <div className="text-sm font-semibold text-white">{weather.current.humidity}%</div>
+                <div className="text-[10px] text-white/40">Humidity</div>
               </GlassCard>
               
-              <GlassCard className="p-3">
-                <div className="flex items-center gap-2 text-white/60 mb-1">
-                  <Eye className="h-4 w-4" />
-                  <span className="text-xs">Visibility</span>
-                </div>
-                <div className="text-lg font-semibold text-white">
-                  {weather.current.visibility} mi
-                </div>
+              <GlassCard className="p-2 text-center">
+                <Eye className="h-3 w-3 text-white/60 mx-auto" />
+                <div className="text-sm font-semibold text-white">{weather.current.visibility}</div>
+                <div className="text-[10px] text-white/40">mi Vis</div>
               </GlassCard>
               
-              <GlassCard className="p-3">
-                <div className="flex items-center gap-2 text-white/60 mb-1">
-                  <Gauge className="h-4 w-4" />
-                  <span className="text-xs">Pressure</span>
-                </div>
-                <div className="text-lg font-semibold text-white">
-                  {weather.current.pressure} in
-                </div>
+              <GlassCard className="p-2 text-center">
+                <Gauge className="h-3 w-3 text-white/60 mx-auto" />
+                <div className="text-sm font-semibold text-white">{weather.current.pressure}</div>
+                <div className="text-[10px] text-white/40">in</div>
               </GlassCard>
             </div>
             
-            <div className="mt-4">
-              <div className="text-sm font-medium text-white/80 mb-2">Today's Forecast</div>
-              <div className="flex gap-2 overflow-x-auto pb-2">
+            <div>
+              <div className="text-xs font-medium text-white/60 mb-1">Hourly</div>
+              <div className="flex gap-1.5 overflow-x-auto pb-1">
                 {weather.hourly.slice(0, 8).map((hour, i) => (
-                  <GlassCard key={i} className="p-2 min-w-[60px] text-center shrink-0">
-                    <div className="text-xs text-white/60">{hour.time}</div>
-                    <div className="text-lg my-1">{hour.icon}</div>
-                    <div className="text-sm font-medium text-white">{hour.temp}°</div>
-                    {hour.precipitation > 0 && (
-                      <div className="text-xs text-blue-400">{hour.precipitation}%</div>
-                    )}
+                  <GlassCard key={i} className="p-1.5 min-w-[48px] text-center shrink-0">
+                    <div className="text-[10px] text-white/60">{hour.time}</div>
+                    <div className="text-sm my-0.5">{hour.icon}</div>
+                    <div className="text-xs font-medium text-white">{hour.temp}°</div>
                   </GlassCard>
                 ))}
               </div>
             </div>
             
-            <div className="mt-4">
-              <div className="text-sm font-medium text-white/80 mb-2">7-Day Outlook</div>
-              <div className="space-y-2">
-                {weather.daily.slice(0, 5).map((day, i) => (
-                  <GlassCard key={i} className="p-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">{day.icon}</span>
-                      <div>
-                        <div className="text-sm font-medium text-white">{day.date}</div>
-                        <div className="text-xs text-white/40">{day.description}</div>
-                      </div>
+            <div>
+              <div className="text-xs font-medium text-white/60 mb-1">7-Day</div>
+              <div className="space-y-1">
+                {weather.daily.slice(0, 4).map((day, i) => (
+                  <GlassCard key={i} className="p-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">{day.icon}</span>
+                      <span className="text-xs font-medium text-white w-8">{day.date}</span>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium text-white">{day.tempHigh}°</div>
-                      <div className="text-xs text-white/40">{day.tempLow}°</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-white">{day.tempHigh}°</span>
+                      <span className="text-[10px] text-white/40">{day.tempLow}°</span>
                     </div>
                   </GlassCard>
                 ))}

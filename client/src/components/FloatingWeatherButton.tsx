@@ -127,7 +127,7 @@ function getWeatherIcon(desc: string, isNight: boolean): string {
 
 export default function FloatingWeatherButton() {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   
   const { data: weather, isLoading, error } = useQuery<WeatherData>({
     queryKey: ["/api/weather/coords", NISSAN_STADIUM.lat, NISSAN_STADIUM.lon],
@@ -148,6 +148,9 @@ export default function FloatingWeatherButton() {
   const currentIcon = useMemo(() => getWeatherIcon(description, isNight), [description, isNight]);
 
   if (error) return null;
+  
+  // Hide on weather map page - redundant when already viewing weather
+  if (location === '/weather-map') return null;
 
   return (
     <>
