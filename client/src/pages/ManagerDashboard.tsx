@@ -538,7 +538,9 @@ export default function ManagerDashboard() {
                     { icon: MessageSquare, label: 'Messages', color: 'blue', href: '/messages', testId: 'button-view-messages' },
                     { icon: Package, label: 'Warehouse', color: 'orange', href: '/warehouse', testId: 'button-warehouse' },
                     { icon: Store, label: 'Stand Setup', color: 'purple', href: '/stand-setup', testId: 'button-stand-setup' },
-                    { icon: FileStack, label: 'Doc Hub', color: 'green', href: '/document-hub', testId: 'button-document-hub' },
+                    ...(currentUser && ['Developer', 'Management'].includes(currentUser.role) 
+                      ? [{ icon: FileStack, label: 'Doc Hub', color: 'green', href: '/document-hub', testId: 'button-document-hub' }] 
+                      : []),
                     { icon: Crown, label: 'Team Leads', color: 'amber', href: '/team-management', testId: 'button-team-management' },
                     { icon: Beer, label: 'Bar Schedule', color: 'amber', href: '/bar-scheduler', testId: 'button-bar-scheduler' },
                     { icon: ClipboardList, label: 'Items', color: 'emerald', href: '/item-management', testId: 'button-item-management' },

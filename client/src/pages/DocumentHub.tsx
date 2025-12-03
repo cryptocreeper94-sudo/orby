@@ -225,7 +225,10 @@ export default function DocumentHub() {
     }
   };
 
-  if (!currentUser || !['Developer', 'Admin', 'Management', 'Warehouse', 'Kitchen', 'Operations'].includes(currentUser.role)) {
+  const MANAGER_ACCESS_ROLES = ['Developer', 'Management'];
+  const hasManagerAccess = currentUser && MANAGER_ACCESS_ROLES.includes(currentUser.role);
+  
+  if (!hasManagerAccess) {
     return (
       <AnimatedBackground>
         <div className="min-h-screen flex items-center justify-center p-4">
@@ -233,7 +236,7 @@ export default function DocumentHub() {
             <GlassCardContent className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-slate-200 mb-2">Access Restricted</h2>
-              <p className="text-slate-400 mb-4">Document Hub is only available for managers.</p>
+              <p className="text-slate-400 mb-4">Document Hub is restricted to managers only.</p>
               <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600">
                 Return Home
               </Button>
