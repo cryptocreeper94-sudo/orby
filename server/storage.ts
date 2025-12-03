@@ -451,6 +451,29 @@ export interface IStorage {
   updateEvent(id: string, updates: Partial<InsertActiveEvent>): Promise<ActiveEvent>;
   isSystemLive(): Promise<boolean>;
 
+  // ============ CULINARY TEAM MANAGEMENT ============
+  // Culinary Event Assignments
+  getCulinaryAssignmentsByEvent(eventDate: string): Promise<any[]>;
+  getCulinaryAssignmentsByCook(cookId: string): Promise<any[]>;
+  getCulinaryAssignmentsByStand(standId: string, eventDate: string): Promise<any[]>;
+  createCulinaryAssignment(assignment: any): Promise<any>;
+  updateCulinaryAssignment(id: string, updates: any): Promise<any>;
+  deleteCulinaryAssignment(id: string): Promise<void>;
+  
+  // Culinary Check-Ins
+  getCulinaryCheckInsByEvent(eventDate: string): Promise<any[]>;
+  getCulinaryCheckInsByCook(cookId: string): Promise<any[]>;
+  getCulinaryCheckIn(assignmentId: string): Promise<any | undefined>;
+  createCulinaryCheckIn(checkIn: any): Promise<any>;
+  updateCulinaryCheckInStatus(id: string, status: string, byId: string, byName: string): Promise<any>;
+  checkInCook(assignmentId: string, byId: string, byName: string): Promise<any>;
+  checkOutCook(assignmentId: string, byId: string, byName: string): Promise<any>;
+  markCookNoShow(assignmentId: string, byId: string, byName: string): Promise<any>;
+  
+  // Culinary Team Members
+  getCulinaryTeamMembers(): Promise<any[]>;
+  getCulinaryManagers(): Promise<any[]>;
+
   // ============ KEY & RADIO CHECKOUT SYSTEM ============
   // Key Sets (50 available)
   getAllKeySets(): Promise<KeySet[]>;
@@ -2572,6 +2595,161 @@ export class DatabaseStorage implements IStorage {
   async isSystemLive(): Promise<boolean> {
     const activeEvent = await this.getActiveEvent();
     return !!activeEvent;
+  }
+
+  // ============ CULINARY TEAM MANAGEMENT ============
+  async getCulinaryAssignmentsByEvent(eventDate: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT * FROM culinary_event_assignments 
+      WHERE event_date = ${eventDate}
+      ORDER BY shift_start, cook_name
+    `);
+    return result.rows as any[];
+  }
+
+  async getCulinaryAssignmentsByCook(cookId: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT * FROM culinary_event_assignments 
+      WHERE cook_id = ${cookId}
+      ORDER BY event_date DESC
+    `);
+    return result.rows as any[];
+  }
+
+  async getCulinaryAssignmentsByStand(standId: string, eventDate: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT * FROM culinary_event_assignments 
+      WHERE stand_id = ${standId} AND event_date = ${eventDate}
+      ORDER BY shift_start
+    `);
+    return result.rows as any[];
+  }
+
+  async createCulinaryAssignment(assignment: any): Promise<any> {
+    const result = await db.execute(sql`
+      INSERT INTO culinary_event_assignments 
+        (event_id, event_date, cook_id, cook_name, stand_id, stand_name, position, shift_start, shift_end, assigned_by_id, assigned_by_name, notes)
+      VALUES 
+        (${assignment.eventId}, ${assignment.eventDate}, ${assignment.cookId}, ${assignment.cookName}, 
+         ${assignment.standId}, ${assignment.standName}, ${assignment.position}, ${assignment.shiftStart}, 
+         ${assignment.shiftEnd}, ${assignment.assignedById}, ${assignment.assignedByName}, ${assignment.notes})
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async updateCulinaryAssignment(id: string, updates: any): Promise<any> {
+    const setClause = Object.entries(updates)
+      .filter(([_, v]) => v !== undefined)
+      .map(([k, _]) => {
+        const snakeKey = k.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+        return `${snakeKey} = $${snakeKey}`;
+      })
+      .join(', ');
+    
+    const result = await db.execute(sql`
+      UPDATE culinary_event_assignments 
+      SET updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async deleteCulinaryAssignment(id: string): Promise<void> {
+    await db.execute(sql`DELETE FROM culinary_event_assignments WHERE id = ${id}`);
+  }
+
+  async getCulinaryCheckInsByEvent(eventDate: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT ci.*, cea.position, cea.shift_start, cea.shift_end, cea.stand_name
+      FROM culinary_check_ins ci
+      JOIN culinary_event_assignments cea ON ci.assignment_id = cea.id
+      WHERE ci.event_date = ${eventDate}
+      ORDER BY ci.status, ci.cook_name
+    `);
+    return result.rows as any[];
+  }
+
+  async getCulinaryCheckInsByCook(cookId: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT * FROM culinary_check_ins 
+      WHERE cook_id = ${cookId}
+      ORDER BY event_date DESC
+    `);
+    return result.rows as any[];
+  }
+
+  async getCulinaryCheckIn(assignmentId: string): Promise<any | undefined> {
+    const result = await db.execute(sql`
+      SELECT * FROM culinary_check_ins WHERE assignment_id = ${assignmentId}
+    `);
+    return result.rows[0] || undefined;
+  }
+
+  async createCulinaryCheckIn(checkIn: any): Promise<any> {
+    const result = await db.execute(sql`
+      INSERT INTO culinary_check_ins 
+        (assignment_id, cook_id, cook_name, event_date, stand_id, status)
+      VALUES 
+        (${checkIn.assignmentId}, ${checkIn.cookId}, ${checkIn.cookName}, 
+         ${checkIn.eventDate}, ${checkIn.standId}, 'Scheduled')
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async updateCulinaryCheckInStatus(id: string, status: string, byId: string, byName: string): Promise<any> {
+    const result = await db.execute(sql`
+      UPDATE culinary_check_ins 
+      SET status = ${status}::culinary_check_in_status, updated_at = NOW()
+      WHERE id = ${id}
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async checkInCook(assignmentId: string, byId: string, byName: string): Promise<any> {
+    const result = await db.execute(sql`
+      UPDATE culinary_check_ins 
+      SET status = 'CheckedIn', check_in_time = NOW(), check_in_by_id = ${byId}, check_in_by_name = ${byName}, updated_at = NOW()
+      WHERE assignment_id = ${assignmentId}
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async checkOutCook(assignmentId: string, byId: string, byName: string): Promise<any> {
+    const result = await db.execute(sql`
+      UPDATE culinary_check_ins 
+      SET status = 'CheckedOut', check_out_time = NOW(), check_out_by_id = ${byId}, check_out_by_name = ${byName}, updated_at = NOW()
+      WHERE assignment_id = ${assignmentId}
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async markCookNoShow(assignmentId: string, byId: string, byName: string): Promise<any> {
+    const result = await db.execute(sql`
+      UPDATE culinary_check_ins 
+      SET status = 'NoShow', updated_at = NOW()
+      WHERE assignment_id = ${assignmentId}
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async getCulinaryTeamMembers(): Promise<any[]> {
+    return await db.select().from(users).where(eq(users.role, 'CulinaryCook'));
+  }
+
+  async getCulinaryManagers(): Promise<any[]> {
+    return await db.select().from(users).where(
+      or(
+        eq(users.role, 'CulinaryDirector'),
+        and(eq(users.role, 'Supervisor'), eq(users.department, 'Culinary'))
+      )
+    );
   }
 
   // ============ KEY & RADIO CHECKOUT SYSTEM ============

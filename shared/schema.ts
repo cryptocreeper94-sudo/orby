@@ -14,7 +14,9 @@ export const userRoleEnum = pgEnum('user_role', [
   'CheckInAssistant', // PIN: 6666 - Customer service, can only message HR/Managers
   'Admin',            // System admin
   'IT',               // IT support
-  'Developer'         // Dev access
+  'Developer',        // Dev access
+  'CulinaryDirector', // Chef Deb - manages culinary team, scheduling, check-ins
+  'CulinaryCook'      // Culinary team member - event cooks working in stands
 ]);
 
 // Management sub-types for ManagementCore role
@@ -60,7 +62,7 @@ export const violationSeverityEnum = pgEnum('violation_severity', ['Warning', 'M
 export const violationStatusEnum = pgEnum('violation_status', ['Reported', 'UnderReview', 'Confirmed', 'Dismissed', 'Resolved']);
 
 // Department request system enums
-export const departmentEnum = pgEnum('department', ['Warehouse', 'Kitchen', 'Bar', 'IT', 'Operations', 'HR']);
+export const departmentEnum = pgEnum('department', ['Warehouse', 'Kitchen', 'Bar', 'IT', 'Operations', 'HR', 'Culinary']);
 export const requestPriorityEnum = pgEnum('request_priority', ['Normal', 'Emergency']);
 export const deliveryStatusEnum = pgEnum('delivery_status', ['Requested', 'Acknowledged', 'InProgress', 'OnTheWay', 'Delivered', 'Cancelled']);
 
@@ -1492,6 +1494,80 @@ export type InsertActiveEvent = z.infer<typeof insertActiveEventSchema>;
 
 // Authorized PINs for event activation (David, Jason, and Sid only)
 export const EVENT_ADMIN_PINS = ['2424', '0424', '1234'];
+
+// ============ CULINARY TEAM MANAGEMENT ============
+// Chef Deb manages culinary team, Sheila provides supervisory oversight during events
+
+export const culinaryCheckInStatusEnum = pgEnum('culinary_check_in_status', [
+  'Scheduled',   // Assigned but not yet checked in
+  'CheckedIn',   // Currently working
+  'OnBreak',     // On break
+  'CheckedOut',  // Completed shift
+  'NoShow'       // Did not check in
+]);
+
+// Culinary Event Assignments - assigns cooks to events and stands
+export const culinaryEventAssignments = pgTable("culinary_event_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  eventId: varchar("event_id").references(() => activeEvents.id),
+  eventDate: text("event_date").notNull(), // YYYY-MM-DD format
+  cookId: varchar("cook_id").references(() => users.id).notNull(),
+  cookName: text("cook_name").notNull(),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  standName: text("stand_name"),
+  position: text("position"), // 'Fryer', 'Grill', 'Prep', 'Lead Cook'
+  shiftStart: text("shift_start"), // HH:MM format
+  shiftEnd: text("shift_end"), // HH:MM format
+  assignedById: varchar("assigned_by_id").references(() => users.id),
+  assignedByName: text("assigned_by_name"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_culinary_assignments_event").on(table.eventId),
+  index("IDX_culinary_assignments_date").on(table.eventDate),
+  index("IDX_culinary_assignments_cook").on(table.cookId),
+  index("IDX_culinary_assignments_stand").on(table.standId),
+]);
+
+// Culinary Check-Ins - tracks when cooks check in/out for events
+export const culinaryCheckIns = pgTable("culinary_check_ins", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  assignmentId: varchar("assignment_id").references(() => culinaryEventAssignments.id).notNull(),
+  cookId: varchar("cook_id").references(() => users.id).notNull(),
+  cookName: text("cook_name").notNull(),
+  eventDate: text("event_date").notNull(),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  status: culinaryCheckInStatusEnum("status").notNull().default('Scheduled'),
+  checkInTime: timestamp("check_in_time"),
+  checkInById: varchar("check_in_by_id").references(() => users.id), // Chef Deb or Sheila
+  checkInByName: text("check_in_by_name"),
+  breakStartTime: timestamp("break_start_time"),
+  breakEndTime: timestamp("break_end_time"),
+  checkOutTime: timestamp("check_out_time"),
+  checkOutById: varchar("check_out_by_id").references(() => users.id),
+  checkOutByName: text("check_out_by_name"),
+  hoursWorked: text("hours_worked"), // Calculated on check-out
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_culinary_checkins_assignment").on(table.assignmentId),
+  index("IDX_culinary_checkins_cook").on(table.cookId),
+  index("IDX_culinary_checkins_date").on(table.eventDate),
+  index("IDX_culinary_checkins_status").on(table.status),
+]);
+
+export const insertCulinaryEventAssignmentSchema = createInsertSchema(culinaryEventAssignments).omit({ id: true, createdAt: true, updatedAt: true });
+export type CulinaryEventAssignment = typeof culinaryEventAssignments.$inferSelect;
+export type InsertCulinaryEventAssignment = z.infer<typeof insertCulinaryEventAssignmentSchema>;
+
+export const insertCulinaryCheckInSchema = createInsertSchema(culinaryCheckIns).omit({ id: true, createdAt: true, updatedAt: true });
+export type CulinaryCheckIn = typeof culinaryCheckIns.$inferSelect;
+export type InsertCulinaryCheckIn = z.infer<typeof insertCulinaryCheckInSchema>;
+
+// Authorized PINs for culinary team management (Chef Deb and Sheila)
+export const CULINARY_MANAGER_PINS: string[] = []; // Will be populated after users are created
 
 // ============ VENUE GEOFENCE CONFIGURATION ============
 // Configurable geofencing for different event types (David/Jason only)

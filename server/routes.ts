@@ -4302,6 +4302,165 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ========== CULINARY TEAM MANAGEMENT ==========
+  // Chef Deb (CulinaryDirector) and Sheila (Supervisor, Culinary dept) manage the culinary team
+  const CULINARY_MANAGER_PINS = ['3737', '4545']; // Chef Deb and Sheila
+
+  // Get culinary team members (cooks)
+  app.get("/api/culinary/team", async (_req: Request, res: Response) => {
+    try {
+      const team = await storage.getCulinaryTeamMembers();
+      res.json(team);
+    } catch (error) {
+      console.error("Error getting culinary team:", error);
+      res.status(500).json({ error: "Failed to get culinary team" });
+    }
+  });
+
+  // Get culinary managers (Chef Deb and Sheila)
+  app.get("/api/culinary/managers", async (_req: Request, res: Response) => {
+    try {
+      const managers = await storage.getCulinaryManagers();
+      res.json(managers);
+    } catch (error) {
+      console.error("Error getting culinary managers:", error);
+      res.status(500).json({ error: "Failed to get culinary managers" });
+    }
+  });
+
+  // Get culinary assignments for an event date
+  app.get("/api/culinary/assignments/:eventDate", async (req: Request, res: Response) => {
+    try {
+      const assignments = await storage.getCulinaryAssignmentsByEvent(req.params.eventDate);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error getting culinary assignments:", error);
+      res.status(500).json({ error: "Failed to get culinary assignments" });
+    }
+  });
+
+  // Get culinary assignments for a cook
+  app.get("/api/culinary/assignments/cook/:cookId", async (req: Request, res: Response) => {
+    try {
+      const assignments = await storage.getCulinaryAssignmentsByCook(req.params.cookId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error getting cook assignments:", error);
+      res.status(500).json({ error: "Failed to get cook assignments" });
+    }
+  });
+
+  // Create culinary assignment (Chef Deb or Sheila only)
+  app.post("/api/culinary/assignments", async (req: Request, res: Response) => {
+    try {
+      const { userPin, ...assignmentData } = req.body;
+      
+      // Authorization check
+      if (!userPin || !CULINARY_MANAGER_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized. Only Culinary Directors and Supervisors can create assignments." });
+      }
+
+      const assignment = await storage.createCulinaryAssignment(assignmentData);
+      
+      // Also create a check-in record for tracking
+      await storage.createCulinaryCheckIn({
+        assignmentId: assignment.id,
+        cookId: assignmentData.cookId,
+        cookName: assignmentData.cookName,
+        eventDate: assignmentData.eventDate,
+        standId: assignmentData.standId
+      });
+
+      res.status(201).json(assignment);
+    } catch (error) {
+      console.error("Error creating culinary assignment:", error);
+      res.status(500).json({ error: "Failed to create culinary assignment" });
+    }
+  });
+
+  // Delete culinary assignment (Chef Deb or Sheila only)
+  app.delete("/api/culinary/assignments/:id", async (req: Request, res: Response) => {
+    try {
+      const { userPin } = req.body;
+      
+      // Authorization check
+      if (!userPin || !CULINARY_MANAGER_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized. Only Culinary Directors and Supervisors can delete assignments." });
+      }
+
+      await storage.deleteCulinaryAssignment(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting culinary assignment:", error);
+      res.status(500).json({ error: "Failed to delete culinary assignment" });
+    }
+  });
+
+  // Get culinary check-ins for an event date
+  app.get("/api/culinary/checkins/:eventDate", async (req: Request, res: Response) => {
+    try {
+      const checkIns = await storage.getCulinaryCheckInsByEvent(req.params.eventDate);
+      res.json(checkIns);
+    } catch (error) {
+      console.error("Error getting culinary check-ins:", error);
+      res.status(500).json({ error: "Failed to get culinary check-ins" });
+    }
+  });
+
+  // Check in a cook (Chef Deb or Sheila only)
+  app.post("/api/culinary/checkin/:assignmentId", async (req: Request, res: Response) => {
+    try {
+      const { userPin, userId, userName } = req.body;
+      
+      // Authorization check
+      if (!userPin || !CULINARY_MANAGER_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized. Only Culinary Directors and Supervisors can check in cooks." });
+      }
+
+      const checkIn = await storage.checkInCook(req.params.assignmentId, userId, userName);
+      res.json(checkIn);
+    } catch (error) {
+      console.error("Error checking in cook:", error);
+      res.status(500).json({ error: "Failed to check in cook" });
+    }
+  });
+
+  // Check out a cook (Chef Deb or Sheila only)
+  app.post("/api/culinary/checkout/:assignmentId", async (req: Request, res: Response) => {
+    try {
+      const { userPin, userId, userName } = req.body;
+      
+      // Authorization check
+      if (!userPin || !CULINARY_MANAGER_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized. Only Culinary Directors and Supervisors can check out cooks." });
+      }
+
+      const checkIn = await storage.checkOutCook(req.params.assignmentId, userId, userName);
+      res.json(checkIn);
+    } catch (error) {
+      console.error("Error checking out cook:", error);
+      res.status(500).json({ error: "Failed to check out cook" });
+    }
+  });
+
+  // Mark cook as no-show (Chef Deb or Sheila only)
+  app.post("/api/culinary/noshow/:assignmentId", async (req: Request, res: Response) => {
+    try {
+      const { userPin, userId, userName } = req.body;
+      
+      // Authorization check
+      if (!userPin || !CULINARY_MANAGER_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized. Only Culinary Directors and Supervisors can mark no-shows." });
+      }
+
+      const checkIn = await storage.markCookNoShow(req.params.assignmentId, userId, userName);
+      res.json(checkIn);
+    } catch (error) {
+      console.error("Error marking cook as no-show:", error);
+      res.status(500).json({ error: "Failed to mark cook as no-show" });
+    }
+  });
+
   // ========== SANDBOX PROTECTION MIDDLEWARE ==========
   // This checks if system is live before allowing data-modifying operations
   // Note: GET operations are always allowed, only POST/PUT/DELETE for core data are blocked
