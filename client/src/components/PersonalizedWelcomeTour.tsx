@@ -244,6 +244,114 @@ const roleTourConfigs: Record<string, RoleTourConfig> = {
         position: 'bottom'
       }
     ]
+  },
+  CulinaryDirector: {
+    role: 'Culinary Director',
+    greeting: 'Welcome to Your Kitchen Command',
+    themeColors: {
+      primary: 'from-orange-500 to-red-600',
+      secondary: 'bg-orange-500/20',
+      glow: 'shadow-orange-500/50',
+      border: 'border-orange-500/50',
+      gradient: 'from-orange-600 via-red-500 to-orange-600'
+    },
+    steps: [
+      {
+        id: 'culinary-welcome',
+        title: 'Your Culinary Dashboard',
+        description: 'Manage all kitchen operations from one place - cook scheduling, stand assignments, and check-ins.',
+        position: 'center'
+      },
+      {
+        id: 'culinary-mode-bar',
+        title: 'Live vs Sandbox Mode',
+        description: 'Sandbox mode lets you practice scheduling without affecting real assignments. Toggle to Live for event days.',
+        targetSelector: '[data-testid^="global-mode-bar"]',
+        position: 'bottom'
+      },
+      {
+        id: 'culinary-scheduling',
+        title: 'Cook Scheduling',
+        description: 'Assign cooks to stands by event date. See who\'s available, who\'s assigned, and manage the full culinary team.',
+        position: 'center'
+      },
+      {
+        id: 'culinary-checkins',
+        title: 'Check-In Tracking',
+        description: 'Monitor cook arrivals in real-time. Mark no-shows and see who\'s ready across all stands.',
+        position: 'center'
+      }
+    ]
+  },
+  CulinaryCook: {
+    role: 'Culinary Cook',
+    greeting: 'Ready for Service',
+    themeColors: {
+      primary: 'from-yellow-500 to-orange-600',
+      secondary: 'bg-yellow-500/20',
+      glow: 'shadow-yellow-500/50',
+      border: 'border-yellow-500/50',
+      gradient: 'from-yellow-600 via-orange-500 to-yellow-600'
+    },
+    steps: [
+      {
+        id: 'cook-welcome',
+        title: 'Your Shift Dashboard',
+        description: 'See your assigned stand, check-in when you arrive, and stay connected with Chef Deb and the culinary team.',
+        position: 'center'
+      },
+      {
+        id: 'cook-assignment',
+        title: 'Your Assignment',
+        description: 'Your current stand assignment is shown here. Tap to see location details and directions.',
+        position: 'center'
+      },
+      {
+        id: 'cook-checkin',
+        title: 'Check In',
+        description: 'When you arrive at your stand, tap Check In. Chef Deb will see you\'re ready in real-time.',
+        targetSelector: '[data-testid="button-check-in"]',
+        position: 'bottom'
+      }
+    ]
+  },
+  BarManager: {
+    role: 'Bar Manager',
+    greeting: 'Welcome to Bar Command',
+    themeColors: {
+      primary: 'from-purple-500 to-violet-600',
+      secondary: 'bg-purple-500/20',
+      glow: 'shadow-purple-500/50',
+      border: 'border-purple-500/50',
+      gradient: 'from-purple-600 via-violet-500 to-purple-600'
+    },
+    steps: [
+      {
+        id: 'bar-welcome',
+        title: 'Your Bar Inventory Hub',
+        description: 'Manage all bar inventory - liquor, mixers, beer, wine, and chargeables. Track stock levels across all locations.',
+        position: 'center'
+      },
+      {
+        id: 'bar-mode-bar',
+        title: 'Live vs Sandbox Mode',
+        description: 'Use Sandbox to practice inventory updates. Switch to Live for actual stock management.',
+        targetSelector: '[data-testid^="global-mode-bar"]',
+        position: 'bottom'
+      },
+      {
+        id: 'bar-inventory',
+        title: 'Stock Tracking',
+        description: 'Monitor on-hand quantities, par levels, and variances. Know what needs restocking before you run out.',
+        position: 'center'
+      },
+      {
+        id: 'bar-integration',
+        title: 'Yellow Dog & PAX Ready',
+        description: 'When connected, Yellow Dog inventory syncs automatically. PAX Pay sales deduct from stock in real-time.',
+        position: 'center'
+      }
+    ]
   }
 };
 

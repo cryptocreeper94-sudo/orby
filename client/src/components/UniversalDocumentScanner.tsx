@@ -62,6 +62,34 @@ const CONFIDENCE_COLORS = {
   low: 'bg-red-100 text-red-700 border-red-200',
 };
 
+const DOCUMENT_ROUTING_MAP: Record<string, { destination: string; department: string; description: string }> = {
+  bar_control: { destination: 'Bar Manager (Darby)', department: 'Bar', description: 'Liquor inventory and bar control documents' },
+  alcohol_compliance: { destination: 'Alcohol Compliance Team', department: 'Compliance', description: 'ABC/TABC compliance documentation' },
+  stand_grid: { destination: 'Operations Command', department: 'Operations', description: 'Stand assignment and layout records' },
+  worker_grid: { destination: 'HR Admin (KD)', department: 'HR', description: 'Staff scheduling and assignment records' },
+  schedule: { destination: 'Culinary Director (Chef Deb)', department: 'Culinary', description: 'Kitchen and cook scheduling' },
+  inventory_count: { destination: 'Inventory Control', department: 'Operations', description: 'Pre/Post event count sheets' },
+  incident_report: { destination: 'Emergency Command Center', department: 'Operations', description: 'Incident and safety reports' },
+  closing_checklist: { destination: 'Stand Supervisor', department: 'Operations', description: 'End-of-event checklists' },
+  temperature_log: { destination: 'Health & Safety', department: 'Compliance', description: 'Food safety temperature records' },
+  cash_count: { destination: 'Finance Team', department: 'Finance', description: 'Cash handling and reconciliation' },
+  delivery_receipt: { destination: 'Warehouse Manager', department: 'Warehouse', description: 'Delivery confirmation records' },
+  other: { destination: 'Document Hub', department: 'General', description: 'General documents for review' }
+};
+
+const ROUTING_DESTINATIONS = [
+  { id: 'ops', label: 'Operations Command', department: 'Operations' },
+  { id: 'bar', label: 'Bar Manager (Darby)', department: 'Bar' },
+  { id: 'culinary', label: 'Culinary Director (Chef Deb)', department: 'Culinary' },
+  { id: 'hr', label: 'HR Admin (KD)', department: 'HR' },
+  { id: 'compliance', label: 'Alcohol Compliance', department: 'Compliance' },
+  { id: 'finance', label: 'Finance Team', department: 'Finance' },
+  { id: 'warehouse', label: 'Warehouse Manager', department: 'Warehouse' },
+  { id: 'safety', label: 'Health & Safety', department: 'Compliance' },
+  { id: 'command', label: 'Emergency Command Center', department: 'Operations' },
+  { id: 'hub', label: 'Document Hub (General)', department: 'General' },
+];
+
 export function UniversalDocumentScanner({ 
   onClose, 
   onDocumentSaved,
@@ -84,6 +112,10 @@ export function UniversalDocumentScanner({
   const [eventDate, setEventDate] = useState(defaultEventDate || new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  
+  const [routingStep, setRoutingStep] = useState<'confirm' | 'change' | 'ready'>('confirm');
+  const [suggestedRouting, setSuggestedRouting] = useState<{ destination: string; department: string } | null>(null);
+  const [selectedRouting, setSelectedRouting] = useState<string>('');
 
   const { data: stands } = useQuery({
     queryKey: ['/api/stands'],
@@ -164,6 +196,11 @@ export function UniversalDocumentScanner({
         setTitle(data.result.title);
         if (data.result.standId) setStandId(data.result.standId);
         if (data.result.eventDate) setEventDate(data.result.eventDate);
+        
+        const routing = DOCUMENT_ROUTING_MAP[data.result.documentType] || DOCUMENT_ROUTING_MAP['other'];
+        setSuggestedRouting({ destination: routing.destination, department: routing.department });
+        setSelectedRouting(routing.destination);
+        setRoutingStep('confirm');
       } else {
         throw new Error('Invalid response from AI scanner');
       }
@@ -407,7 +444,103 @@ export function UniversalDocumentScanner({
                     )}
                   </div>
 
+                  {routingStep === 'confirm' && suggestedRouting && (
+                    <div className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 rounded-lg p-4 border border-emerald-500/30">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 rounded-lg bg-emerald-500/20">
+                          <Truck className="h-5 w-5 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-slate-400">Suggested Routing</p>
+                          <p className="text-white font-medium">{suggestedRouting.destination}</p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-slate-300 mb-4">
+                        This document is scheduled to be delivered to <span className="text-emerald-400 font-medium">{suggestedRouting.destination}</span>. Is this correct?
+                      </p>
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={() => setRoutingStep('ready')}
+                          className="flex-1 bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white"
+                          data-testid="button-confirm-routing"
+                        >
+                          <Check className="h-4 w-4 mr-2" />
+                          Yes, Route Here
+                        </Button>
+                        <Button
+                          onClick={() => setRoutingStep('change')}
+                          variant="outline"
+                          className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                          data-testid="button-change-routing"
+                        >
+                          Send Elsewhere
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {routingStep === 'change' && (
+                    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-lg p-4 border border-purple-500/30">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="p-2 rounded-lg bg-purple-500/20">
+                          <Users className="h-5 w-5 text-purple-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm text-slate-400">Select Destination</p>
+                          <p className="text-white font-medium">Where would you like to send this?</p>
+                        </div>
+                      </div>
+                      <div className="space-y-2 mb-4 max-h-48 overflow-y-auto">
+                        {ROUTING_DESTINATIONS.map((dest) => (
+                          <button
+                            key={dest.id}
+                            onClick={() => {
+                              setSelectedRouting(dest.label);
+                              setSuggestedRouting({ destination: dest.label, department: dest.department });
+                            }}
+                            className={`w-full text-left p-3 rounded-lg border transition-all ${
+                              selectedRouting === dest.label
+                                ? 'bg-purple-500/20 border-purple-500/50 text-white'
+                                : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:border-slate-600'
+                            }`}
+                            data-testid={`routing-option-${dest.id}`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">{dest.label}</span>
+                              <span className="text-xs text-slate-500">{dest.department}</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex gap-3">
+                        <Button
+                          onClick={() => setRoutingStep('confirm')}
+                          variant="outline"
+                          className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                        >
+                          Back
+                        </Button>
+                        <Button
+                          onClick={() => setRoutingStep('ready')}
+                          className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
+                          data-testid="button-confirm-new-routing"
+                        >
+                          <Check className="h-4 w-4 mr-2" />
+                          Send to {selectedRouting.split(' ')[0]}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {routingStep === 'ready' && (
                   <div className="space-y-3">
+                    <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700 mb-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <CheckCircle className="h-4 w-4 text-emerald-400" />
+                        <span className="text-slate-300">Routing to: </span>
+                        <span className="text-emerald-400 font-medium">{selectedRouting}</span>
+                      </div>
+                    </div>
                     <div>
                       <Label className="text-slate-300">Document Type</Label>
                       <Select value={documentType} onValueChange={setDocumentType}>

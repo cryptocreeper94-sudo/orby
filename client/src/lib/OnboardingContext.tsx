@@ -317,6 +317,53 @@ export const opsManagerPages: OnboardingPage[] = [
     ]
   },
   {
+    id: 'ops-culinary',
+    title: 'Culinary Operations',
+    icon: '👨‍🍳',
+    description: 'Kitchen team management and scheduling',
+    route: '/command-center',
+    steps: [
+      {
+        id: 'culinary-team',
+        page: 'ops-culinary',
+        title: 'Culinary Team Management',
+        description: 'Chef Deb (PIN 3737) manages cook scheduling. Sheila (4545) has supervisor oversight. See cook assignments, check-ins, and no-shows in real-time.',
+        position: 'center'
+      },
+      {
+        id: 'culinary-panel',
+        page: 'ops-culinary',
+        title: 'Culinary Visibility Panel',
+        description: 'The Ops Command Center shows cook check-in status by stand. Green = checked in, gray = not yet, red = no-show. Real-time updates.',
+        targetSelector: '[data-testid="section-culinary-team"]',
+        position: 'bottom'
+      }
+    ]
+  },
+  {
+    id: 'ops-inventory',
+    title: 'Department Inventory',
+    icon: '📦',
+    description: 'Bar and Kitchen stock tracking',
+    route: '/command-center',
+    steps: [
+      {
+        id: 'inventory-control',
+        page: 'ops-inventory',
+        title: 'Department Inventory Control',
+        description: 'Darby (PIN 4646) manages Bar inventory. Chef Deb handles Kitchen. Track liquor, mixers, ingredients by location with par levels and variances.',
+        position: 'center'
+      },
+      {
+        id: 'inventory-integration',
+        page: 'ops-inventory',
+        title: 'Yellow Dog & PAX Integration',
+        description: 'Integration-ready for Yellow Dog inventory sync and PAX Pay POS data. When connected, sales automatically deduct from stock levels.',
+        position: 'center'
+      }
+    ]
+  },
+  {
     id: 'ops-emergency',
     title: 'Emergency Command',
     icon: '🚨',

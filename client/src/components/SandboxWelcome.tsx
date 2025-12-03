@@ -32,6 +32,21 @@ const ROLE_GREETINGS: Record<string, { icon: React.ReactNode; title: string; des
     title: "Supervisor Training Mode",
     description: "Practice managing your section, handling requests, and coordinating with departments."
   },
+  'CulinaryDirector': {
+    icon: <Sparkles className="h-6 w-6" />,
+    title: "Kitchen Command Training",
+    description: "Practice cook scheduling, stand assignments, and check-in tracking without affecting real operations."
+  },
+  'CulinaryCook': {
+    icon: <Users className="h-6 w-6" />,
+    title: "Cook Training Mode",
+    description: "Practice checking in, viewing assignments, and using the culinary dashboard."
+  },
+  'BarManager': {
+    icon: <FlaskConical className="h-6 w-6" />,
+    title: "Bar Inventory Training",
+    description: "Practice stock management, par levels, and inventory tracking without affecting real data."
+  },
   'default': {
     icon: <FlaskConical className="h-6 w-6" />,
     title: "Welcome to Sandbox Mode",
