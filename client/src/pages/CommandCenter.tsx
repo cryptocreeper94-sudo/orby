@@ -24,7 +24,8 @@ import {
   LogOut,
   ChevronRight,
   Radio,
-  Zap
+  Zap,
+  Crown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -51,6 +52,7 @@ import {
 } from '@/components/ui/premium';
 import type { EmergencyAlert, Stand, User as UserType } from '@shared/schema';
 import { SectionHelp } from '@/components/OrbyHelp';
+import { DashboardControls } from '@/components/DashboardControls';
 
 const EMERGENCY_TYPES = [
   { id: 'Medical', icon: Heart, color: 'from-rose-500 to-rose-600', bgColor: 'bg-rose-500', label: 'Medical Emergency', sla: 3 },
@@ -430,6 +432,10 @@ export default function CommandCenter() {
   });
   
   const [activeTab, setActiveTab] = useState('active');
+  const [showDashboardControls, setShowDashboardControls] = useState(false);
+  
+  // David (PIN 2424) gets Dashboard Controls superpower
+  const isDavid = currentUser?.pin === '2424';
 
   const { data: alerts = [], isLoading: alertsLoading } = useQuery({
     queryKey: ['/api/emergency-alerts'],
@@ -539,6 +545,18 @@ export default function CommandCenter() {
             <Badge variant="outline" className="border-cyan-500/30 text-cyan-400" data-testid="badge-active-count">
               {activeAlerts.length} Active
             </Badge>
+            {isDavid && (
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowDashboardControls(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/40 text-cyan-300 hover:border-cyan-400/60 transition-colors"
+                data-testid="button-dashboard-controls"
+              >
+                <Crown className="w-4 h-4" />
+                <span className="text-xs font-medium hidden sm:inline">Controls</span>
+              </motion.button>
+            )}
             <Button 
               variant="ghost" 
               size="icon" 
@@ -870,6 +888,14 @@ export default function CommandCenter() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* David's Dashboard Controls Superpower */}
+      {isDavid && (
+        <DashboardControls
+          isOpen={showDashboardControls}
+          onClose={() => setShowDashboardControls(false)}
+        />
+      )}
     </AnimatedBackground>
   );
 }
