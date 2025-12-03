@@ -19,6 +19,11 @@
   - Product types: Liquor, Mixer, Beer, Wine, NABeverage, Garnish, Chargeable, Ingredient, Supply
   - Yellow Dog and PAX Pay integration mapping tables ready
   - Authorized inventory admins: David (2424), Jason (0424), Chef Deb (3737), Sheila (4545), Darby (4646)
+- **Smart Document Routing:** Universal Document Scanner auto-routes to correct destination
+  - AI classification suggests routing based on document type
+  - User confirmation with option to change destination
+  - Routes saved to Manager's Document Hub with destination metadata
+  - Success/error toast notifications on document submission
 
 ### v1.0.1 Release Notes
 - Event Report Builder for combined PDF packages (Finance, Compliance, Operations, Custom templates)
