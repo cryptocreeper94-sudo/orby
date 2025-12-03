@@ -376,7 +376,7 @@ export function OrbyGlossary({ isOpen, onClose }: OrbyGlossaryProps) {
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto space-y-2 mt-2">
+        <div className="flex-1 overflow-y-auto space-y-2 mt-2 pb-4">
           <AnimatePresence mode="popLayout">
             {filteredTerms.map(([key, entry]) => (
               <motion.div
