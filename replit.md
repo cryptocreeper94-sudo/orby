@@ -1,8 +1,16 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.3 (Beta) - STAMPED
+## Current Version: v1.0.4 (Beta) - STAMPED
 **Release Date:** December 3, 2024
-**Genesis Hallmark:** ORB-000000000009
+**Genesis Hallmark:** ORB-000000000010
+
+### v1.0.4 Release Notes
+- **Orby Commander Splash Screen:** Custom branded app launch experience
+  - Animated floating Orby Commander logo with cyan glow
+  - "ORBY" branding with "Venue Operations" tagline
+  - Smooth fade transition to main app
+  - Updated PWA icons to Orby Commander (replaces Replit default)
+  - Fresh install required to see new splash
 
 ### v1.0.3 Release Notes
 - **Interactive Weather Map:** Full-screen radar with responsive split-screen layout
