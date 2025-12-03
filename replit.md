@@ -1,8 +1,21 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.4 (Beta) - STAMPED
+## Current Version: v1.0.5 (Beta) - STAMPED
 **Release Date:** December 3, 2024
-**Genesis Hallmark:** ORB-000000000010
+**Genesis Hallmark:** ORB-000000000011
+
+### v1.0.5 Release Notes
+- **Complete Manager Roster:** All leadership team added with PINs
+  - Megan (9090) - General Manager → Command Center
+  - Brian (8080) - Regional VP → Command Center
+  - Pete (7070) - Finance Manager → Admin Dashboard
+  - Brooke K (6060) - HR Manager → Admin Dashboard
+  - Jay (7171) - Purchasing Manager → Admin Dashboard
+  - AJ (8181) - Warehouse Manager → Warehouse Dashboard
+- **Senior Leadership Superpowers:** GM and Regional VP get full Command Center controls
+  - Staff PIN Management panel accessible to David, Megan, and Brian
+  - Dashboard Controls available to all senior leadership
+  - PINs button (amber) and Controls button (cyan) in header
 
 ### v1.0.4 Release Notes
 - **Orby Commander Splash Screen:** Custom branded app launch experience
