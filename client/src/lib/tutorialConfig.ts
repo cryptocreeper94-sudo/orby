@@ -380,6 +380,114 @@ export const tutorialConfigs: Record<string, PageTutorial> = {
         position: "bottom"
       }
     ]
+  },
+
+  "ops-manager": {
+    page: "ops-manager",
+    title: "Ops Manager Command (David)",
+    steps: [
+      {
+        id: "welcome",
+        title: "Your Command Center",
+        body: "As Ops Manager, you have full visibility and control over all venue operations. This tour covers your superpowers.",
+        position: "center"
+      },
+      {
+        id: "dashboard-controls",
+        title: "Dashboard Controls (Your Superpower)",
+        body: "Only YOU can access Dashboard Controls. Toggle which widgets each role sees, set alert levels, and control data scope for all users.",
+        targetSelector: "[data-testid='button-dashboard-controls']",
+        position: "bottom"
+      },
+      {
+        id: "widget-visibility",
+        title: "Widget Visibility",
+        body: "Control what each role sees: Emergency Feed, Deliveries, Compliance, AI Chat, Weather, Map, Messaging, Inventory. Changes apply instantly.",
+        position: "center"
+      },
+      {
+        id: "alert-levels",
+        title: "Alert Level Settings",
+        body: "Set notification levels per role: Normal (all alerts), Priority-Only, or Silent. Manage noise during high-traffic events.",
+        position: "center"
+      },
+      {
+        id: "geofence",
+        title: "Venue Geofencing",
+        body: "Configure the geofence radius for staff check-ins. Presets: Standard (1,640ft), Large Event (2,461ft), CMA Festival (4,921ft).",
+        position: "center"
+      },
+      {
+        id: "integration-hub",
+        title: "Integration Hub",
+        body: "View connectivity status with PAX Systems (A930, A700), Yellow Dog Inventory, and OrbitStaffing. All data in one unified view.",
+        targetSelector: "[data-testid='button-quick-integrations']",
+        position: "bottom"
+      },
+      {
+        id: "pos-tracker",
+        title: "POS Device Tracker",
+        body: "Track all POS terminals assigned to stands. IT staff manage assignments; you see the full grid and can message IT about issues.",
+        targetSelector: "[data-testid='button-quick-pos']",
+        position: "bottom"
+      },
+      {
+        id: "emergency-center",
+        title: "Emergency Command",
+        body: "Real-time emergency alerts with SLA tracking. One-tap to create Medical, Security, Fire, Equipment, Weather, or Crowd alerts.",
+        position: "center"
+      },
+      {
+        id: "compliance-alerts",
+        title: "Compliance Alerts",
+        body: "Tennessee ABC Board and Health Department alerts. When inspectors arrive, system-wide notification with compliance checklists.",
+        targetSelector: "[data-testid='button-quick-compliance']",
+        position: "bottom"
+      },
+      {
+        id: "asset-tracker",
+        title: "Genesis Hallmark System",
+        body: "Every auditable asset gets an ORB number. Search/filter assets by number, name, date, or type. Important docs anchored to blockchain.",
+        targetSelector: "[data-testid='button-quick-assets']",
+        position: "bottom"
+      },
+      {
+        id: "other-roles",
+        title: "Role Overview",
+        body: "NPO Workers handle inventory counts. Stand Leads oversee NPO teams. Supervisors manage sections. Managers handle department docs. You see it all.",
+        position: "center"
+      },
+      {
+        id: "messaging",
+        title: "Smart Messaging",
+        body: "Messages auto-route to the right department. You can message any role directly: IT, Warehouse, Kitchen, Bar, Operations, HR.",
+        position: "center"
+      },
+      {
+        id: "document-hub",
+        title: "Document Hub",
+        body: "Central archive for all reports: closing checklists, spoilage logs, variance reports, compliance docs. Searchable by date/stand/category.",
+        position: "center"
+      },
+      {
+        id: "reporting",
+        title: "Full Audit Trail",
+        body: "Every action is logged. Deliveries, emergencies, inventory counts, messages - complete accountability for all operations.",
+        position: "center"
+      },
+      {
+        id: "feedback",
+        title: "Report Issues to Jason",
+        body: "See something that's not working right? Tell Jason immediately and he'll fix it on the spot. This is a beta - your feedback shapes the product.",
+        position: "center"
+      },
+      {
+        id: "complete",
+        title: "You're Ready!",
+        body: "Access this tour anytime from the Help button. All pages have contextual help. Let's make operations seamless.",
+        position: "center"
+      }
+    ]
   }
 };
 

@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { ShieldCheck, FlaskConical, Radio, Code, Briefcase, ChevronDown, HelpCircle, AlertTriangle, Clock } from "lucide-react";
 import { useMode } from "@/lib/ModeContext";
 import { ModeGate } from "@/components/ModeGate";
+import { scheduleOpsManagerTour } from "@/lib/OnboardingContext";
 import { CompactModeIndicator } from "@/components/GlobalModeBar";
 import { motion, AnimatePresence } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -134,9 +135,15 @@ export default function LoginPage() {
     if (!success) {
       form.setError("pin", { message: "Invalid PIN" });
       setPendingDevLogin(false);
-    } else if (enablePersistence && MANAGER_PINS.includes(values.pin)) {
-      localStorage.setItem(PERSISTENCE_KEY, 'true');
-      localStorage.setItem(PERSISTENCE_EXPIRY_KEY, String(Date.now() + THIRTY_DAYS_MS));
+    } else {
+      // David (PIN 2424) gets the Ops Manager tour on first login (after successful auth)
+      if (values.pin === '2424') {
+        scheduleOpsManagerTour();
+      }
+      if (enablePersistence && MANAGER_PINS.includes(values.pin)) {
+        localStorage.setItem(PERSISTENCE_KEY, 'true');
+        localStorage.setItem(PERSISTENCE_EXPIRY_KEY, String(Date.now() + THIRTY_DAYS_MS));
+      }
     }
   }
   

@@ -25,6 +25,8 @@ export interface OnboardingPage {
 
 const ONBOARDING_PROGRESS_KEY = 'orby_onboarding_progress';
 const ONBOARDING_COMPLETE_KEY = 'orby_onboarding_complete';
+const OPS_MANAGER_TOUR_KEY = 'orby_ops_manager_tour_complete';
+const OPS_MANAGER_TOUR_PENDING_KEY = 'orby_ops_manager_tour_pending';
 
 interface OnboardingProgress {
   currentPageIndex: number;
@@ -232,6 +234,198 @@ export const onboardingPages: OnboardingPage[] = [
   }
 ];
 
+export const opsManagerPages: OnboardingPage[] = [
+  {
+    id: 'ops-welcome',
+    title: 'Ops Manager Command',
+    icon: '👑',
+    description: 'Your control center for all venue operations',
+    route: '/command-center',
+    steps: [
+      {
+        id: 'ops-intro',
+        page: 'ops-welcome',
+        title: 'Welcome, David!',
+        description: 'As Ops Manager, you have full visibility and control over all venue operations. This tour covers your superpowers. It\'s thorough but quick.',
+        position: 'center'
+      }
+    ]
+  },
+  {
+    id: 'ops-controls',
+    title: 'Dashboard Controls',
+    icon: '⚙️',
+    description: 'Your superpower - control what everyone sees',
+    route: '/command-center',
+    steps: [
+      {
+        id: 'controls-access',
+        page: 'ops-controls',
+        title: 'Dashboard Controls (Your Superpower)',
+        description: 'Only YOU can access this. Toggle widgets per role, set alert levels, control data scope. Changes apply instantly across all dashboards.',
+        targetSelector: '[data-testid="button-dashboard-controls"]',
+        position: 'bottom'
+      },
+      {
+        id: 'controls-widgets',
+        page: 'ops-controls',
+        title: 'Widget Visibility',
+        description: 'Control what each role sees: Emergency Feed, Deliveries, Compliance, AI Chat, Weather, Map, Messaging, Inventory.',
+        position: 'center'
+      },
+      {
+        id: 'controls-alerts',
+        page: 'ops-controls',
+        title: 'Alert Levels',
+        description: 'Set notification levels per role: Normal (all), Priority-Only, or Silent. Manage noise during high-traffic events.',
+        position: 'center'
+      },
+      {
+        id: 'controls-geofence',
+        page: 'ops-controls',
+        title: 'Venue Geofencing',
+        description: 'Configure geofence radius: Standard (1,640ft), Large Event (2,461ft), CMA Festival (4,921ft). Only you and Jason can change this.',
+        position: 'center'
+      }
+    ]
+  },
+  {
+    id: 'ops-integrations',
+    title: 'System Integrations',
+    icon: '🔗',
+    description: 'Unified view of all connected systems',
+    route: '/command-center',
+    steps: [
+      {
+        id: 'integration-hub',
+        page: 'ops-integrations',
+        title: 'Integration Hub',
+        description: 'One dashboard for PAX Systems (A930, A700), Yellow Dog Inventory, and OrbitStaffing. No more switching between 4-5 screens.',
+        targetSelector: '[data-testid="button-quick-integrations"]',
+        position: 'bottom'
+      },
+      {
+        id: 'pos-tracker',
+        page: 'ops-integrations',
+        title: 'POS Device Tracker',
+        description: 'Track all POS terminals. IT manages assignments. You see the full grid and can message IT about issues.',
+        targetSelector: '[data-testid="button-quick-pos"]',
+        position: 'bottom'
+      }
+    ]
+  },
+  {
+    id: 'ops-emergency',
+    title: 'Emergency Command',
+    icon: '🚨',
+    description: 'Real-time alerts with SLA tracking',
+    route: '/command-center',
+    steps: [
+      {
+        id: 'emergency-center',
+        page: 'ops-emergency',
+        title: 'Emergency Command Center',
+        description: 'Real-time alerts with SLA tracking. One-tap for Medical, Security, Fire, Equipment, Weather, or Crowd alerts. Right teams notified instantly.',
+        position: 'center'
+      },
+      {
+        id: 'compliance-alerts',
+        page: 'ops-emergency',
+        title: 'Compliance Alerts',
+        description: 'Tennessee ABC Board and Health Department alerts. Inspector arrivals trigger system-wide notifications with checklists.',
+        targetSelector: '[data-testid="button-quick-compliance"]',
+        position: 'bottom'
+      }
+    ]
+  },
+  {
+    id: 'ops-assets',
+    title: 'Genesis Hallmark',
+    icon: '🔐',
+    description: 'Blockchain-certified asset tracking',
+    route: '/command-center',
+    steps: [
+      {
+        id: 'asset-tracker',
+        page: 'ops-assets',
+        title: 'Genesis Hallmark System',
+        description: 'Every auditable asset gets an ORB number (ORB-000000000001 format). Search by number, name, date, type. Important docs anchored to blockchain.',
+        targetSelector: '[data-testid="button-quick-assets"]',
+        position: 'bottom'
+      }
+    ]
+  },
+  {
+    id: 'ops-roles',
+    title: 'Role Hierarchy',
+    icon: '👥',
+    description: 'How the team structure works',
+    route: '/command-center',
+    steps: [
+      {
+        id: 'role-overview',
+        page: 'ops-roles',
+        title: 'Role Overview',
+        description: 'NPO Workers handle counts. Stand Leads oversee NPOs. Supervisors manage sections. Managers handle department docs. You see and control it all.',
+        position: 'center'
+      },
+      {
+        id: 'messaging-flow',
+        page: 'ops-roles',
+        title: 'Smart Messaging',
+        description: 'Messages auto-route to the right department. You can message any role: IT, Warehouse, Kitchen, Bar, Operations, HR. Full audit trail.',
+        position: 'center'
+      }
+    ]
+  },
+  {
+    id: 'ops-docs',
+    title: 'Documents & Reports',
+    icon: '📄',
+    description: 'Central archive for all operations',
+    route: '/command-center',
+    steps: [
+      {
+        id: 'document-hub',
+        page: 'ops-docs',
+        title: 'Document Hub',
+        description: 'Central archive: closing checklists, spoilage logs, variance reports, compliance docs. Searchable by date/stand/category. All as PDFs.',
+        position: 'center'
+      },
+      {
+        id: 'audit-trail',
+        page: 'ops-docs',
+        title: 'Full Audit Trail',
+        description: 'Every action logged. Deliveries, emergencies, inventory, messages. Complete accountability for all venue operations.',
+        position: 'center'
+      }
+    ]
+  },
+  {
+    id: 'ops-feedback',
+    title: 'Beta Feedback',
+    icon: '📢',
+    description: 'Help shape the product',
+    route: '/command-center',
+    steps: [
+      {
+        id: 'report-issues',
+        page: 'ops-feedback',
+        title: 'Report Issues to Jason',
+        description: 'See something wrong? Tell Jason immediately. He\'ll fix it on the spot. This is beta - your feedback shapes the product.',
+        position: 'center'
+      },
+      {
+        id: 'tour-complete',
+        page: 'ops-feedback',
+        title: 'You\'re Ready!',
+        description: 'Access this tour anytime from Help button. All pages have contextual help. Let\'s make operations seamless. Welcome to Orby, David.',
+        position: 'center'
+      }
+    ]
+  }
+];
+
 function getStoredProgress(): OnboardingProgress | null {
   try {
     const stored = localStorage.getItem(ONBOARDING_PROGRESS_KEY);
@@ -256,6 +450,26 @@ function setOnboardingComplete() {
 function clearOnboardingComplete() {
   localStorage.removeItem(ONBOARDING_COMPLETE_KEY);
   localStorage.removeItem(ONBOARDING_PROGRESS_KEY);
+}
+
+function isOpsManagerTourComplete(): boolean {
+  return localStorage.getItem(OPS_MANAGER_TOUR_KEY) === 'true';
+}
+
+function setOpsManagerTourComplete() {
+  localStorage.setItem(OPS_MANAGER_TOUR_KEY, 'true');
+  localStorage.removeItem(OPS_MANAGER_TOUR_PENDING_KEY);
+}
+
+export function scheduleOpsManagerTour() {
+  // Only schedule if not already completed AND not already pending
+  if (!isOpsManagerTourComplete() && !localStorage.getItem(OPS_MANAGER_TOUR_PENDING_KEY)) {
+    localStorage.setItem(OPS_MANAGER_TOUR_PENDING_KEY, 'true');
+  }
+}
+
+export function isOpsManagerTourPending(): boolean {
+  return localStorage.getItem(OPS_MANAGER_TOUR_PENDING_KEY) === 'true' && !isOpsManagerTourComplete();
 }
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {

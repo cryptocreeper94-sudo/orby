@@ -59,6 +59,7 @@ import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { AssetTracker } from '@/components/AssetTracker';
 import { POSDeviceTracker } from '@/components/POSDeviceTracker';
 import { IntegrationHub } from '@/components/IntegrationHub';
+import { OpsManagerTour } from '@/components/OpsManagerTour';
 import { Map, Navigation, Wine, Fingerprint, Shield as ShieldIcon, Monitor, Link2 } from 'lucide-react';
 
 const EMERGENCY_TYPES = [
@@ -1047,6 +1048,9 @@ export default function CommandCenter() {
           onClose={() => setShowDashboardControls(false)}
         />
       )}
+
+      {/* Ops Manager Tour for David on first login */}
+      {isDavid && <OpsManagerTour />}
     </AnimatedBackground>
   );
 }
