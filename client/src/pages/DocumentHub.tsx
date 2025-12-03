@@ -18,7 +18,8 @@ import {
   Wine,
   Loader2,
   AlertCircle,
-  FileStack
+  FileStack,
+  BookOpen
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -50,6 +51,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { EventReportBuilder } from "@/components/EventReportBuilder";
 
 type DocumentCategory = 'count_report' | 'incident' | 'violation' | 'closing' | 'other';
 
@@ -115,6 +117,7 @@ export default function DocumentHub() {
   const [dateFilter, setDateFilter] = useState('');
   
   const [viewingDoc, setViewingDoc] = useState<ManagerDocument | null>(null);
+  const [showReportBuilder, setShowReportBuilder] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -228,12 +231,23 @@ export default function DocumentHub() {
           icon={<FileStack className="h-6 w-6 text-cyan-400" />}
           iconColor="cyan"
           actions={
-            <Link href="/manager">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-white/10" data-testid="button-back">
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Back
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => setShowReportBuilder(true)}
+                className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white"
+                size="sm"
+                data-testid="button-report-builder"
+              >
+                <BookOpen className="h-4 w-4 mr-1" />
+                Build Report
               </Button>
-            </Link>
+              <Link href="/manager">
+                <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-white/10" data-testid="button-back">
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Back
+                </Button>
+              </Link>
+            </div>
           }
         />
 
@@ -509,6 +523,12 @@ export default function DocumentHub() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* Event Report Builder */}
+        <EventReportBuilder
+          isOpen={showReportBuilder}
+          onClose={() => setShowReportBuilder(false)}
+        />
       </div>
     </AnimatedBackground>
   );

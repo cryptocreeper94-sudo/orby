@@ -1,106 +1,7 @@
 # Orby - Venue Operations Platform
 
 ## Overview
-Orby (getorby.io) is a comprehensive venue operations platform designed for Nissan Stadium, replacing texts, phone calls, and two-way radios with unified digital operations. Built as a Progressive Web App (PWA), it provides Emergency Command Center, delivery lifecycle tracking, three-phase inventory counting, alcohol compliance monitoring, GPS-guided navigation, and real-time team communications. Currently in beta testing with Ops Manager David, targeting app store deployment via Capacitor.
-
-**Key Value Proposition:** Complete venue operations in one platform - from emergency response to inventory counting to team communications.
-
-## Current Version: v1.0.0 (Beta)
-**Release Date:** December 3, 2024
-**GitHub:** https://github.com/cryptocreeper94-sudo/orby
-
-### v1.0 Release Notes
-- Emergency Command Center with priority levels and real-time updates
-- Delivery lifecycle tracking (Requested → Approved → Picking → On the Way → Delivered)
-- Three-phase inventory counting (PreEvent → PostEvent → DayAfter)
-- Tennessee ABC Board and Health Department compliance alerts
-- Genesis Hallmark Stamping System with ORB numbers
-- Interactive Stadium Map with section assignments
-- GPS-guided walking directions
-- Orby AI chat assistant with voice input/output
-- Manager Document Hub for PDF reports
-- Dashboard Controls for Ops Manager David
-- Weather widget with animated effects
-- Mobile-optimized with 44px touch targets and accessibility labels
-
-## Version Roadmap
-
-### v1.1 - Enhanced Operations (Target: January 2025)
-- Real-time POS integration for sales data
-- Push notifications via PWA
-- Offline mode sync improvements
-- Bar scheduler enhancements
-- Photo evidence upload optimization
-- Configurable geofence radius (already in v1.0 - David/Jason only)
-- Scalability testing for 500+ concurrent users
-
-### v1.2 - Analytics & Reporting (Target: February 2025)
-- Historical analytics dashboard
-- Trend analysis for inventory
-- Staff performance metrics
-- Event comparison reports
-- Export to Excel/CSV
-
-### v2.0 - Multi-Venue & App Store (Target: Q2 2025)
-- Capacitor wrapper for iOS/Android app stores
-- Multi-venue support (beyond Nissan Stadium)
-- OrbitStaffing deep integration (see spec below)
-- White-label customization options
-- Enterprise SSO support
-
-## OrbitStaffing Integration Specification
-
-**Target Version:** v2.0
-**Sister Product:** orbitstaffing.io
-
-### Integration Overview
-Connect Orby (venue operations) with OrbitStaffing (workforce scheduling) to create a unified "Orbit" platform experience.
-
-### Data Sync Points
-
-| OrbitStaffing → Orby | Orby → OrbitStaffing |
-|---------------------|----------------------|
-| Staff roster & roles | Shift check-in/out times |
-| Event schedules | Task completion status |
-| Section assignments | Inventory signatures |
-| Contact information | Incident reports |
-| Certification status | Performance metrics |
-
-### Authentication Flow
-1. **Unified PIN System** - Staff PIN works in both platforms
-2. **SSO Option** - Enterprise clients can use single sign-on
-3. **Session Sharing** - Login once, access both platforms
-
-### GPS Integration
-- Staff clocks in at OrbitStaffing (geofenced to Nissan Stadium)
-- Orby receives real-time "on duty" status
-- Location tracking for walking directions and supervisor assignments
-- Clock-out syncs back for accurate payroll
-
-### API Bridge Architecture
-```
-OrbitStaffing API ←→ Orbit Bridge Service ←→ Orby API
-     ↓                      ↓                    ↓
-  Scheduling DB         Sync Queue          Operations DB
-```
-
-### Webhook Events
-- `staff.checked_in` - Staff arrives at venue
-- `staff.checked_out` - Staff leaves venue
-- `shift.assigned` - New shift scheduled
-- `shift.completed` - Orby confirms task completion
-- `incident.reported` - Escalate to HR/Management
-
-### Shared Data Models
-- **Staff Profile**: id, name, pin, roles[], certifications[], photo
-- **Event**: id, date, venue, shifts[]
-- **Shift**: id, staffId, eventId, section, startTime, endTime, status
-
-### Implementation Phases
-1. **Phase 1**: Read-only sync (OrbitStaffing → Orby roster)
-2. **Phase 2**: Bidirectional sync (shift completion, incidents)
-3. **Phase 3**: Real-time GPS and presence awareness
-4. **Phase 4**: Unified analytics dashboard
+Orby (getorby.io) is a comprehensive Progressive Web App (PWA) designed to unify venue operations, replacing fragmented communication with a digital platform. It offers an Emergency Command Center, delivery lifecycle tracking, three-phase inventory counting, alcohol compliance monitoring, GPS-guided navigation, and real-time team communications. Orby aims to provide a complete operational solution for venues, from emergency response to inventory and team management.
 
 ## User Preferences
 - Mobile-first design critical (operations staff use phones)
@@ -110,194 +11,30 @@ OrbitStaffing API ←→ Orbit Bridge Service ←→ Orby API
 - Brand: Aqua theme (#06B6D4), Orby mascot (aqua planet character)
 - Domain: getorby.io
 
-## Organizational Structure (Nissan Stadium Reference)
-
-### Access Levels
-
-| Level | Role | Dashboard Access |
-|-------|------|------------------|
-| **Full (Generally)** | All Managers, Ops Controllers | See everything, do everything |
-| **Department** | Leads | See their queue + communicate up/down |
-| **Field** | Supervisors → Stand Leads → NPO | Scoped to section/stand |
-
-### Executive
-- Brian (RVP)
-- Megan (GM)
-
-### Command Level (Full Access - All-Seeing)
-- David (Ops Manager + IT Manager)
-- Sid (Special Ops Controller)
-- Jason (Dev + Field Ops - same purview as David/Sid)
-
-### Department Managers (Full Access - Generally)
-| Department | Manager(s) | Lead(s) |
-|------------|-----------|---------|
-| **Warehouse** | Jay (Purchasing Mgr - senior, fields event orders), AJ (Warehouse Mgr) | Sharrod |
-| **Kitchen/Culinary** | Chef Deb (Culinary Mgr), Bobby (Kitchen Mgr) | — |
-| **Bar** | Darby | — |
-| **Operations** | Shelia (Supervisor/Mgr) | Serena |
-| **IT** | David (also Ops Mgr) | Event IT collective |
-| **HR** | Brooke K | K.D. (Assistant) |
-| **Finance** | Pete | — |
-
-### Special Notes
-- **Brooke** (not Brooke K): Inventory Clerk/Supervisor - works warehouse during week, Stand Supervisor during events
-- **IT Team**: Collective of event-day IT staff, no formal lead - David manages directly
-
-### Field Hierarchy
-```
-Stand Supervisors (section oversight, can request from departments)
-    ↓
-Stand Leads (stand flow only, communicate to Supervisors)
-    ↓
-NPO Workers (frontline concessions)
-```
-
-### Communication Rules
-- **Stand Leads**: NO direct access to Warehouse/Kitchen/IT/Operations - must go through Supervisor
-- **Supervisors**: CAN request from all departments
-- **Visibility**: Supervisor controls what Stand Lead sees, but Managers can override
-- **All Managers**: Equal access, can see everything, can intervene anywhere
-
 ## System Architecture
-Orby is a full-stack PWA utilizing React frontend and Express backend with PostgreSQL/Drizzle ORM.
+Orby is a full-stack PWA built with a React frontend and an Express backend, using PostgreSQL with Drizzle ORM. The platform emphasizes a mobile-first, touch-optimized UI/UX with Framer Motion animations, dynamic glow effects, glassmorphism with backdrop blur, and a dark theme featuring aqua/cyan accent gradients.
 
-**Core Roles in App (with Demo PINs):**
-- Developer (Jason - unified with Ops Manager view + dev tools) - PIN: 0424
-- Admin - PIN: 0424
-- Management (Generally level - all managers) - PIN: 4444
-- IT - PIN: 4444
-- Warehouse - PIN: 4444
-- Kitchen - PIN: 4444
-- Bar - PIN: 4444
-- Operations - PIN: 4444
-- HR - PIN: 4444
-- Alcohol Compliance (event-day vendor monitoring, violation reporting) - PIN: 5555
-- Check-in Assistant (customer service, messaging to managers, incident reporting) - PIN: 6666
-- Stand Supervisor (full dashboard access) - PIN: 3333
-- Stand Lead - PIN: 2222
-- NPO Worker - PIN: 1111
-- Universal First-Time Staff - PIN: 9999 (geofenced to stadium)
+**Core Features include:**
+- **Emergency & Command:** Real-time incident management, smart message routing, priority escalation, and full audit trails.
+- **Delivery Operations:** Full lifecycle tracking (Requested → Approved → Picking → On the Way → Delivered) with status dashboards and quick messages.
+- **Inventory Management:** Three-phase counting (PreEvent → PostEvent → DayAfter), digital template creation from paper counts via OCR, a Manager Document Hub, and AI scanning for auto-counting.
+- **Staff Management:** Universal PIN login, role-based access, dynamic team lead assignments, and a bar scheduler.
+- **Compliance & Safety:** Alcohol compliance monitoring with photo/video, guest services with incident reporting, facility issue reporting, and real-time alerts for Tennessee ABC Board and Health Department inspections.
+- **Navigation & Location:** Interactive stadium map, GPS-guided walking directions, and a weather widget.
+- **Platform Features:** Presence awareness, guided closing workflows, offline mode, and a sandbox environment for training.
+- **Genesis Hallmark Stamping System:** Universal asset stamping with ORB numbers and optional blockchain verification via Solana for critical documents, ensuring tamper-proof records.
+- **Admin Controls:** Role-based widget visibility, alert level settings, data scope controls, and layout presets are configurable by authorized managers.
 
-**Key Features:**
-
-### Emergency & Command
-1. **Emergency Command Center** - Real-time incident management with priority levels
-2. **Smart Message Routing** - Issues automatically route to the right department
-3. **Priority Escalation** - Emergency alerts vs normal queue
-4. **Full Audit Trail** - Everything documented for accountability
-
-### Delivery Operations
-5. **Delivery Tracking** - Full lifecycle: Requested → Approved → Picking → On the Way (ETA) → Delivered
-6. **Status Dashboard** - Ops Manager sees all stands, issues, and deliveries in one view
-7. **Quick Messages** - Pre-built responses for common situations
-
-### Inventory Management
-8. **Three-Phase Inventory Counting** - PreEvent → PostEvent → DayAfter workflow
-   - PreEvent: Supervisor + Stand Lead/NPO verify printed counts
-   - PostEvent: Different team counts end-of-event inventory
-   - DayAfter: Manager verification and reconciliation
-9. **Stand Setup** - Scan paper count sheets to create digital templates (OCR)
-10. **Manager Document Hub** - Central archive for all reports, searchable by date/stand/category
-11. **AI Scanning** - Photo coolers for auto-count, scan handwritten sheets
-
-### Staff Management
-12. **Universal PIN Login** - PIN 9999 for first-time staff (geofenced to stadium)
-13. **Legends Staff Management** - Staff directory with role-based access
-14. **Team Lead Assignments** - Dynamic lead assignments for hierarchical departments
-15. **Bar Scheduler** - Darby's beverage operations scheduling
-
-### Compliance & Safety
-16. **Alcohol Compliance** - Vendor monitoring with photo/video evidence capture
-17. **Check-in Assistant** - Guest services with incident reporting, messaging to HR/Managers
-18. **Facility Issue Reporting** - Photo-based issue documentation for maintenance
-19. **Tennessee ABC Board Alerts** - System-wide notification when ABC inspectors arrive with ID verification checklist
-20. **Tennessee Health Department Alerts** - System-wide notification with 0-100 scoring compliance checklist based on Rule 1200-23
-
-### Navigation & Location
-21. **Interactive Stadium Map** - Section/zone navigation with supervisor assignments
-22. **GPS-Guided Walking Directions** - Step-by-step navigation between stadium locations
-23. **Weather Widget** - Real-time conditions using Open-Meteo API with animated effects
-
-### Platform Features
-24. **Presence Awareness** - Who's on duty, who's at which stand
-25. **Closing Workflows** - Guided checklists, signatures, PDF generation
-26. **Offline Mode** - Works when radio signals don't
-27. **Sandbox Mode** - Training and demo environment
-
-### David's Dashboard Controls (Superpower - PIN 2424 Only)
-33. **Role-Based Widget Visibility** - Toggle which panels each role can see (Emergency Feed, Deliveries, Compliance, AI Chat, Weather, Map, Messaging, Inventory)
-34. **Alert Level Settings** - Control notification levels per role (Normal, Priority-Only, Silent)
-35. **Data Scope Controls** - Limit data access to assigned areas only vs all stands, toggle sensitive metrics visibility
-36. **Layout Presets** - Quick apply: Ops Lite (training), Standard (default), Full Command (everything visible)
-37. **Real-Time Application** - Changes apply instantly across all user dashboards without code changes
-
-### Genesis Hallmark Stamping System (Blockchain Certified)
-28. **Universal Asset Stamping** - Every auditable asset gets an ORB number (ORB-000000000001 format, 12 digits = 1 trillion capacity)
-29. **Blockchain Verification** - Important documents (customer-facing, compliance, invoices, PDFs) anchored to Solana for tamper-proof verification
-30. **Asset Tracker UI** - Full search/filter in Dev Panel and Manager Portal by number, name, date, type, category
-31. **Version Badge** - Footer version indicator with changelog modal showing all platform releases
-32. **Two-Tier System**: 
-    - Internal Only: Everything gets ORB stamp (searchable paper trail)
-    - Blockchain: Important docs also get Solana hash (immutable proof)
-
-**Technical Stack:**
-- Frontend: React, Wouter (routing), Zustand (state), TailwindCSS
-- Backend: Express, Drizzle ORM, PostgreSQL
-- PWA: Service Worker, offline support
-- AI: GPT-4o Vision for can counting, Tesseract.js for OCR
-
-## Integration Strategy
-- **OrbitStaffing:** Roster sync, GPS verification, shift completion (sister product at orbitstaffing.io)
-- **Yellow Dog:** Complements (not competes) - Orby = front-of-house ops, Yellow Dog = back-office inventory
-- **POS Systems:** Real-time sales data integration potential
+**Integration Strategy:**
+- **OrbitStaffing:** Deep integration for roster sync, GPS verification, and shift completion.
+- **POS Systems:** Potential for real-time sales data integration.
 
 ## External Dependencies
-- PostgreSQL: Primary database
-- Drizzle ORM: Schema and queries
-- GPT-4o Vision: AI-powered counting from images
-- Tesseract.js: Client-side OCR
-- Zustand: State management
-- jsPDF: PDF report generation
-- Helius/Solana: Blockchain anchoring for Genesis Hallmark System (optional - works in demo mode without API key)
-
-## File Structure
-- `client/`: React frontend (pages, components, lib)
-- `server/`: Express backend (routes, storage)
-- `shared/`: Drizzle schema definitions
-- `client/public/`: PWA assets, icons, manifest
-
-## Branding
-- Name: Orby
-- Tagline: "Venue Operations Platform" or "Your team, connected"
-- Theme Color: #06B6D4 (Cyan/Aqua)
-- Parent Brand: "Orby by Orbit" (connects to OrbitStaffing)
-- Powered by: DarkWave Studios, LLC
-- Target Venue: Nissan Stadium (beta testing)
-
-## Design Directives (MANDATORY)
-
-### Free-Floating Images Policy
-**Effective: December 2024**
-
-All images added to Orby must follow these rules:
-1. **No circular or square backgrounds** - Images must not be contained in shape containers
-2. **Free-floating assets only** - All icons, mascots, and visual elements must have transparent backgrounds
-3. **Use Python rembg** - All generated or imported images must be processed through rembg for clean background removal
-4. **Seamless canvas integration** - Images should float over or blend seamlessly into the app background
-5. **CSS-based effects** - Glows, shadows, and visual effects applied via CSS/Tailwind, not baked into images
-
-### Premium UI/UX Standards
-- Mobile-first, touch-optimized interactions
-- Framer Motion animations for smooth transitions
-- Dynamic glow effects based on context (weather conditions, alert severity, etc.)
-- Glassmorphic effects with backdrop blur
-- Dark theme with aqua/cyan accent gradients
-- Floating action buttons for quick access features
-
-### Image Processing Workflow
-1. Generate image with AI or import asset
-2. Run through Python rembg: `rembg i input.png output.png`
-3. Verify transparent background
-4. Import into React component
-5. Apply CSS animations/effects as needed
+- **PostgreSQL:** Primary database.
+- **Drizzle ORM:** Schema and query builder.
+- **GPT-4o Vision:** AI for image-based counting.
+- **Tesseract.js:** Client-side OCR for scanning paper documents.
+- **Zustand:** State management.
+- **jsPDF:** PDF report generation.
+- **Helius/Solana:** Blockchain anchoring for the Genesis Hallmark System.
+- **Open-Meteo API:** Weather data for the widget.
