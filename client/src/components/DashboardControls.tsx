@@ -4,10 +4,10 @@ import {
   Settings2, Crown, Eye, EyeOff, Bell, BellOff, Users, 
   LayoutGrid, Sparkles, HelpCircle, X, Check, RotateCcw,
   Shield, Radio, MapPin, MessageSquare, Package, AlertTriangle,
-  Thermometer, Bot, ChevronDown, ChevronUp, Zap, Lock
+  Thermometer, Bot, ChevronDown, ChevronUp, Zap, Lock, Globe, Maximize2
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CONFIGURABLE_ROLES, type DashboardConfig } from "@shared/schema";
+import { CONFIGURABLE_ROLES, type DashboardConfig, type VenueGeofenceConfig } from "@shared/schema";
 
 interface DashboardControlsProps {
   isOpen: boolean;
@@ -51,6 +51,18 @@ const LAYOUT_PRESETS = [
   { value: "standard", label: "Standard", description: "Default balanced layout" },
   { value: "full-command", label: "Full Command", description: "All panels visible" },
 ];
+
+const GEOFENCE_PRESETS = [
+  { value: "standard", label: "Standard Stadium", radiusFeet: 100, maxUsers: 500, description: "Regular games and concerts" },
+  { value: "extended", label: "Extended Campus", radiusFeet: 1320, maxUsers: 750, description: "Parking lots and surrounding areas" },
+  { value: "largeOutdoor", label: "Large Outdoor Event", radiusFeet: 2640, maxUsers: 1000, description: "CMA Fest, multi-day festivals" },
+];
+
+const formatRadius = (feet: number): string => {
+  if (feet >= 5280) return `${(feet / 5280).toFixed(1)} miles`;
+  if (feet >= 1000) return `${(feet / 5280).toFixed(2)} mi (${feet.toLocaleString()} ft)`;
+  return `${feet} feet`;
+};
 
 export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
   const [selectedRole, setSelectedRole] = useState<string>("NPOWorker");
@@ -97,6 +109,54 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard-configs"] });
     },
   });
+
+  // Geofence Configuration (David/Jason only)
+  const { data: geofenceConfig } = useQuery<VenueGeofenceConfig>({
+    queryKey: ["/api/geofence-config"],
+  });
+
+  const [selectedGeofencePreset, setSelectedGeofencePreset] = useState<string>("standard");
+
+  useEffect(() => {
+    if (geofenceConfig?.preset) {
+      setSelectedGeofencePreset(geofenceConfig.preset);
+    }
+  }, [geofenceConfig]);
+
+  const geofenceMutation = useMutation({
+    mutationFn: async (preset: typeof GEOFENCE_PRESETS[0]) => {
+      const userPin = sessionStorage.getItem('userPin') || localStorage.getItem('userPin');
+      const userName = sessionStorage.getItem('userName') || localStorage.getItem('userName') || 'Unknown';
+      const response = await fetch('/api/geofence-config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userPin,
+          userName,
+          preset: preset.value,
+          radiusFeet: preset.radiusFeet,
+          maxConcurrentUsers: preset.maxUsers,
+          eventName: preset.label
+        }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to update geofence config');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/geofence-config'] });
+    },
+  });
+
+  const handleGeofenceChange = (presetValue: string) => {
+    const preset = GEOFENCE_PRESETS.find(p => p.value === presetValue);
+    if (preset) {
+      setSelectedGeofencePreset(presetValue);
+      geofenceMutation.mutate(preset);
+    }
+  };
 
   const getConfigValue = (key: keyof DashboardConfig) => {
     if (pendingChanges[key] !== undefined) return pendingChanges[key];
@@ -477,6 +537,97 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                               </button>
                             );
                           })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Venue Geofence Section */}
+                <div className="rounded-xl border border-cyan-500/30 overflow-hidden bg-gradient-to-br from-cyan-500/5 to-transparent">
+                  <button
+                    onClick={() => toggleSection("geofence")}
+                    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-cyan-400" />
+                      <span className="text-sm font-medium text-white">Venue Geofence</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                        Scalable
+                      </span>
+                    </div>
+                    {expandedSection === "geofence" ? (
+                      <ChevronUp className="w-4 h-4 text-slate-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                    )}
+                  </button>
+                  
+                  <AnimatePresence>
+                    {expandedSection === "geofence" && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="border-t border-cyan-500/20"
+                      >
+                        <div className="p-3 space-y-3">
+                          <p className="text-xs text-slate-400">
+                            Configure geofence radius for different event types. Larger events like CMA Fest need extended coverage.
+                          </p>
+                          
+                          {GEOFENCE_PRESETS.map((preset) => {
+                            const isSelected = selectedGeofencePreset === preset.value;
+                            return (
+                              <button
+                                key={preset.value}
+                                onClick={() => handleGeofenceChange(preset.value)}
+                                disabled={geofenceMutation.isPending}
+                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
+                                  isSelected
+                                    ? "bg-cyan-500/20 border border-cyan-500/40"
+                                    : "bg-slate-800/30 border border-slate-700/30 hover:border-cyan-500/30"
+                                }`}
+                                data-testid={`geofence-${preset.value}`}
+                              >
+                                <div className="p-2 rounded-lg bg-slate-700/50">
+                                  <Maximize2 className={`w-4 h-4 ${isSelected ? "text-cyan-400" : "text-slate-400"}`} />
+                                </div>
+                                <div className="text-left flex-1">
+                                  <div className={`text-sm font-medium ${isSelected ? "text-cyan-300" : "text-slate-300"}`}>
+                                    {preset.label}
+                                  </div>
+                                  <div className="text-xs text-slate-500">{preset.description}</div>
+                                  <div className="flex gap-3 mt-1">
+                                    <span className="text-xs text-cyan-400/70">
+                                      {formatRadius(preset.radiusFeet)} radius
+                                    </span>
+                                    <span className="text-xs text-green-400/70">
+                                      {preset.maxUsers.toLocaleString()} users
+                                    </span>
+                                  </div>
+                                </div>
+                                {isSelected && <Check className="w-4 h-4 text-cyan-400" />}
+                              </button>
+                            );
+                          })}
+                          
+                          {geofenceConfig && (
+                            <div className="mt-2 p-2 rounded-lg bg-slate-800/50 border border-slate-700/30">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-slate-400">Current Setting:</span>
+                                <span className="text-cyan-300 font-medium">
+                                  {formatRadius(geofenceConfig.radiusFeet || 100)}
+                                </span>
+                              </div>
+                              {geofenceConfig.updatedByName && (
+                                <div className="text-xs text-slate-500 mt-1">
+                                  Last updated by {geofenceConfig.updatedByName}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </motion.div>
                     )}

@@ -8,7 +8,7 @@ import {
   auditLogs, emergencyAlerts, emergencyResponders, emergencyEscalationHistory, emergencyAlertNotifications,
   orbitRosters, orbitShifts, deliveryRequests, departmentContacts, alcoholViolations,
   standItems, managerDocuments, assetStamps, blockchainVerifications, complianceAlerts,
-  supervisorSessions, supervisorActivity, dashboardConfigs,
+  supervisorSessions, supervisorActivity, dashboardConfigs, venueGeofenceConfig,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -58,7 +58,8 @@ import {
   type ComplianceAlert, type InsertComplianceAlert,
   type SupervisorSession, type InsertSupervisorSession,
   type SupervisorActivity, type InsertSupervisorActivity,
-  type DashboardConfig, type InsertDashboardConfig
+  type DashboardConfig, type InsertDashboardConfig,
+  type VenueGeofenceConfig, type InsertVenueGeofenceConfig
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray, ilike, sql } from "drizzle-orm";
@@ -418,6 +419,10 @@ export interface IStorage {
   getAllDashboardConfigs(): Promise<DashboardConfig[]>;
   upsertDashboardConfig(config: InsertDashboardConfig): Promise<DashboardConfig>;
   resetDashboardConfig(targetRole: string): Promise<void>;
+
+  // Venue Geofence Configuration (David/Jason only)
+  getActiveGeofenceConfig(): Promise<VenueGeofenceConfig | undefined>;
+  updateGeofenceConfig(config: Partial<InsertVenueGeofenceConfig>): Promise<VenueGeofenceConfig>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2342,6 +2347,37 @@ export class DatabaseStorage implements IStorage {
 
   async resetDashboardConfig(targetRole: string): Promise<void> {
     await db.delete(dashboardConfigs).where(eq(dashboardConfigs.targetRole, targetRole));
+  }
+
+  // ============ VENUE GEOFENCE CONFIGURATION (David/Jason only) ============
+  async getActiveGeofenceConfig(): Promise<VenueGeofenceConfig | undefined> {
+    const [config] = await db.select().from(venueGeofenceConfig)
+      .where(eq(venueGeofenceConfig.isActive, true))
+      .orderBy(desc(venueGeofenceConfig.updatedAt))
+      .limit(1);
+    return config || undefined;
+  }
+
+  async updateGeofenceConfig(config: Partial<InsertVenueGeofenceConfig>): Promise<VenueGeofenceConfig> {
+    const existing = await this.getActiveGeofenceConfig();
+    if (existing) {
+      const [updated] = await db.update(venueGeofenceConfig)
+        .set({ ...config, updatedAt: new Date() })
+        .where(eq(venueGeofenceConfig.id, existing.id))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(venueGeofenceConfig).values({
+      preset: config.preset || 'standard',
+      radiusFeet: config.radiusFeet || 100,
+      customRadiusFeet: config.customRadiusFeet,
+      maxConcurrentUsers: config.maxConcurrentUsers || 500,
+      eventName: config.eventName,
+      updatedById: config.updatedById,
+      updatedByName: config.updatedByName,
+      isActive: true
+    }).returning();
+    return created;
   }
 }
 

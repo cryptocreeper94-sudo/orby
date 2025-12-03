@@ -218,4 +218,57 @@ export const STADIUM_LOCATION = {
   lng: -86.7713
 };
 
+// Default radius for standard stadium events
 export const GEOFENCE_RADIUS_FEET = 100;
+
+// Event type presets for geofencing
+export const EVENT_PRESETS = {
+  standard: {
+    name: "Standard Stadium Event",
+    description: "Regular games and concerts within stadium grounds",
+    radiusFeet: 100,
+    maxConcurrentUsers: 500
+  },
+  largeOutdoor: {
+    name: "Large Outdoor Event",
+    description: "Multi-day festivals like CMA Fest extending beyond stadium",
+    radiusFeet: 2640, // Half mile = 2640 feet
+    maxConcurrentUsers: 1000
+  },
+  extended: {
+    name: "Extended Campus",
+    description: "Events using parking lots and surrounding areas",
+    radiusFeet: 1320, // Quarter mile = 1320 feet
+    maxConcurrentUsers: 750
+  }
+};
+
+export type EventPresetKey = keyof typeof EVENT_PRESETS;
+
+// Get current geofence config from localStorage or use default
+export function getGeofenceConfig(): { radiusFeet: number; preset: EventPresetKey; customRadius?: number } {
+  try {
+    const stored = localStorage.getItem('orby-geofence-config');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+  } catch (e) {
+    console.warn('Failed to load geofence config');
+  }
+  return { radiusFeet: GEOFENCE_RADIUS_FEET, preset: 'standard' };
+}
+
+// Save geofence config
+export function setGeofenceConfig(config: { radiusFeet: number; preset: EventPresetKey; customRadius?: number }): void {
+  localStorage.setItem('orby-geofence-config', JSON.stringify(config));
+}
+
+// Get radius in human-readable format
+export function formatRadius(feet: number): string {
+  if (feet >= 5280) {
+    return `${(feet / 5280).toFixed(1)} miles`;
+  } else if (feet >= 1000) {
+    return `${(feet / 5280).toFixed(2)} miles (${feet.toLocaleString()} ft)`;
+  }
+  return `${feet} feet`;
+}

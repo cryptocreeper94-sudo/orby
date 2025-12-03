@@ -1452,3 +1452,28 @@ export type SupervisorSession = typeof supervisorSessions.$inferSelect;
 export type InsertSupervisorSession = z.infer<typeof insertSupervisorSessionSchema>;
 export type SupervisorActivity = typeof supervisorActivity.$inferSelect;
 export type InsertSupervisorActivity = z.infer<typeof insertSupervisorActivitySchema>;
+
+// ============ VENUE GEOFENCE CONFIGURATION ============
+// Configurable geofencing for different event types (David/Jason only)
+export const eventPresetEnum = pgEnum('event_preset', ['standard', 'largeOutdoor', 'extended', 'custom']);
+
+export const venueGeofenceConfig = pgTable("venue_geofence_config", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  preset: eventPresetEnum("preset").notNull().default('standard'),
+  radiusFeet: integer("radius_feet").notNull().default(100),
+  customRadiusFeet: integer("custom_radius_feet"),
+  maxConcurrentUsers: integer("max_concurrent_users").default(500),
+  eventName: text("event_name"),
+  isActive: boolean("is_active").default(true),
+  updatedById: varchar("updated_by_id").references(() => users.id),
+  updatedByName: text("updated_by_name"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertVenueGeofenceConfigSchema = createInsertSchema(venueGeofenceConfig).omit({ id: true, createdAt: true, updatedAt: true });
+export type VenueGeofenceConfig = typeof venueGeofenceConfig.$inferSelect;
+export type InsertVenueGeofenceConfig = z.infer<typeof insertVenueGeofenceConfigSchema>;
+
+// Authorized PINs for geofence configuration (David and Jason only)
+export const GEOFENCE_ADMIN_PINS = ['2424', '0424'];

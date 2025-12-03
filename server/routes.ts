@@ -3789,6 +3789,53 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ========== VENUE GEOFENCE CONFIGURATION ==========
+  // Authorized PINs: David (2424) and Jason (0424) only
+  const GEOFENCE_ADMIN_PINS = ['2424', '0424'];
+
+  // Get current geofence configuration
+  app.get("/api/geofence-config", async (_req: Request, res: Response) => {
+    try {
+      const config = await storage.getActiveGeofenceConfig();
+      res.json(config || {
+        preset: 'standard',
+        radiusFeet: 100,
+        maxConcurrentUsers: 500,
+        eventName: 'Standard Stadium Event'
+      });
+    } catch (error) {
+      console.error("Error getting geofence config:", error);
+      res.status(500).json({ error: "Failed to get geofence config" });
+    }
+  });
+
+  // Update geofence configuration (David/Jason only)
+  app.put("/api/geofence-config", async (req: Request, res: Response) => {
+    try {
+      const { userPin, userId, userName, preset, radiusFeet, customRadiusFeet, maxConcurrentUsers, eventName } = req.body;
+      
+      // Authorization check - only David (2424) and Jason (0424) can modify
+      if (!userPin || !GEOFENCE_ADMIN_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized. Only Operations Manager and Developer can modify geofence settings." });
+      }
+      
+      const config = await storage.updateGeofenceConfig({
+        preset,
+        radiusFeet,
+        customRadiusFeet,
+        maxConcurrentUsers,
+        eventName,
+        updatedById: userId,
+        updatedByName: userName
+      });
+      
+      res.json(config);
+    } catch (error) {
+      console.error("Error updating geofence config:", error);
+      res.status(500).json({ error: "Failed to update geofence config" });
+    }
+  });
+
   // ========== SUPERVISOR LIVE TRACKING ==========
   
   // Get live supervisor view (sessions + recent activity)

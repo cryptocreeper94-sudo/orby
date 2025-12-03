@@ -31,6 +31,8 @@ Orby (getorby.io) is a comprehensive venue operations platform designed for Niss
 - Offline mode sync improvements
 - Bar scheduler enhancements
 - Photo evidence upload optimization
+- Configurable geofence radius (already in v1.0 - David/Jason only)
+- Scalability testing for 500+ concurrent users
 
 ### v1.2 - Analytics & Reporting (Target: February 2025)
 - Historical analytics dashboard
