@@ -57,14 +57,10 @@ export default function LoginPage() {
     }
 
     if (currentUser) {
-      if (currentUser.requiresPinReset) {
-        setLocation("/set-pin");
-        return;
-      }
-
       const role = currentUser.role as string;
       const department = currentUser.department as string | undefined;
       
+      // Developer/Jason (0424) - always show role picker, never reset PIN
       if (currentUser.name === 'Developer' || currentUser.pin === '0424') {
         if (pendingDevLogin) {
           setShowDevRolePicker(true);
@@ -77,6 +73,13 @@ export default function LoginPage() {
         } else {
           setLocation("/dev");
         }
+        return;
+      }
+      
+      // Other users - check for PIN reset requirement
+      if (currentUser.requiresPinReset) {
+        setLocation("/set-pin");
+        return;
       }
       else if (role === 'OperationsManager' || role === 'GeneralManager' || role === 'RegionalVP') setLocation("/command-center");
       else if (role === 'Admin') setLocation("/admin");
