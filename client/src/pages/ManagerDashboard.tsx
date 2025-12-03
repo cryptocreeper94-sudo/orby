@@ -13,7 +13,7 @@ import { SupervisorLiveWall } from '@/components/SupervisorLiveWall';
 import {
   LogOut, Menu, Bell, MessageSquare, Package, Utensils, Beer, Monitor, Activity,
   AlertTriangle, CheckCircle2, Clock, MapPin, Users, Radio, TrendingUp, 
-  ChevronRight, Truck, Zap, Crown, Calendar, Store, FileStack, ClipboardList
+  ChevronRight, Truck, Zap, Crown, Calendar, Store, FileStack, ClipboardList, Siren
 } from 'lucide-react';
 import {
   Sheet,
@@ -183,6 +183,10 @@ export default function ManagerDashboard() {
                 </SheetTrigger>
                 <SheetContent side="left" className="bg-slate-900 border-slate-700">
                   <nav className="grid gap-4 text-lg font-medium pt-8">
+                    <Link href="/command-center" className="flex items-center gap-4 px-2.5 text-red-400 hover:text-red-300" data-testid="nav-command-center">
+                      <Siren className="h-5 w-5" />
+                      Emergency Command
+                    </Link>
                     <Link href="/messages" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400" data-testid="nav-messages">
                       <MessageSquare className="h-5 w-5" />
                       Messages

@@ -523,7 +523,7 @@ export default function CommandCenter() {
         title="Command Center"
         subtitle="Emergency Response Control"
         icon={<Siren className="w-5 h-5" />}
-        backAction={() => navigate('/dev')}
+        backAction={() => navigate('/manager')}
         actions={
           <div className="flex items-center gap-2">
             {criticalAlerts.length > 0 && (
