@@ -7,10 +7,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { ShieldCheck, FlaskConical, Radio } from "lucide-react";
+import { ShieldCheck, FlaskConical, Radio, Code, Briefcase } from "lucide-react";
 import { useMode } from "@/lib/ModeContext";
 import { ModeGate } from "@/components/ModeGate";
 import { CompactModeIndicator } from "@/components/GlobalModeBar";
+import { motion, AnimatePresence } from "framer-motion";
 
 const loginSchema = z.object({
   pin: z.string().length(4, "PIN must be 4 digits"),
@@ -26,6 +27,8 @@ export default function LoginPage() {
   const [modeSelected, setModeSelected] = useState(() => {
     return sessionStorage.getItem(MODE_SELECTED_KEY) === 'true';
   });
+  const [showDevRolePicker, setShowDevRolePicker] = useState(false);
+  const [pendingDevLogin, setPendingDevLogin] = useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -33,6 +36,17 @@ export default function LoginPage() {
       pin: "",
     },
   });
+
+  const handleDevRoleSelect = (role: 'developer' | 'ops_manager') => {
+    setShowDevRolePicker(false);
+    if (role === 'developer') {
+      sessionStorage.setItem('orby_dev_role', 'developer');
+      setLocation("/dev");
+    } else {
+      sessionStorage.setItem('orby_dev_role', 'ops_manager');
+      setLocation("/command-center");
+    }
+  };
 
   useEffect(() => {
     const devBypass = localStorage.getItem("orby_dev_bypass");
@@ -51,7 +65,19 @@ export default function LoginPage() {
       const role = currentUser.role as string;
       const department = currentUser.department as string | undefined;
       
-      if (currentUser.name === 'Developer' || currentUser.pin === '0424') setLocation("/dev");
+      if (currentUser.name === 'Developer' || currentUser.pin === '0424') {
+        if (pendingDevLogin) {
+          setShowDevRolePicker(true);
+          setPendingDevLogin(false);
+          return;
+        }
+        const savedRole = sessionStorage.getItem('orby_dev_role');
+        if (savedRole === 'ops_manager') {
+          setLocation("/command-center");
+        } else {
+          setLocation("/dev");
+        }
+      }
       else if (role === 'OperationsManager' || role === 'GeneralManager' || role === 'RegionalVP') setLocation("/command-center");
       else if (role === 'Admin') setLocation("/admin");
       else if (role === 'IT') setLocation("/it");
@@ -60,21 +86,20 @@ export default function LoginPage() {
       else if (role === 'AlcoholCompliance') setLocation("/alcohol-compliance");
       else if (role === 'CheckInAssistant') setLocation("/check-in-assistant");
       else if (role === 'ManagementCore' || role === 'ManagementAssistant' || role === 'OperationsAssistant') setLocation("/manager");
-      // For workers (NPOWorker), route by department if set
       else if (role === 'NPOWorker' || role === 'NPO') {
         if (department === 'Warehouse') setLocation("/warehouse");
         else if (department === 'Kitchen') setLocation("/kitchen");
-        else if (department === 'Bar') setLocation("/npo"); // Bar workers use NPO dashboard until bar-specific is built
-        else if (department === 'Operations') setLocation("/operations"); // Operations workers
+        else if (department === 'Bar') setLocation("/npo");
+        else if (department === 'Operations') setLocation("/operations");
         else if (department === 'IT') setLocation("/it");
-        else if (department === 'HR') setLocation("/manager"); // HR assistants go to manager view
-        else setLocation("/npo"); // Default NPO dashboard for unassigned
+        else if (department === 'HR') setLocation("/manager");
+        else setLocation("/npo");
       }
       else if (role === 'Warehouse' || role === 'WarehouseManager' || role === 'WarehouseWorker') setLocation("/warehouse");
       else if (role === 'Kitchen' || role === 'KitchenManager' || role === 'KitchenWorker') setLocation("/kitchen");
       else setLocation("/supervisor");
     }
-  }, [currentUser, setLocation, login]);
+  }, [currentUser, setLocation, login, pendingDevLogin]);
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     if (values.pin === '9999') {
@@ -82,9 +107,14 @@ export default function LoginPage() {
       return;
     }
     
+    if (values.pin === '0424') {
+      setPendingDevLogin(true);
+    }
+    
     const success = await login(values.pin);
     if (!success) {
       form.setError("pin", { message: "Invalid PIN" });
+      setPendingDevLogin(false);
     }
   }
 
@@ -229,6 +259,67 @@ export default function LoginPage() {
           Powered by DarkWave Studios, LLC • © 2025
         </div>
       </footer>
+
+      <AnimatePresence>
+        {showDevRolePicker && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-cyan-500/30 p-6 max-w-sm w-full shadow-2xl shadow-cyan-500/20"
+            >
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-white mb-2">Welcome, Jason</h3>
+                <p className="text-sm text-slate-400">How would you like to log in?</p>
+              </div>
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => handleDevRoleSelect('developer')}
+                  className="w-full p-4 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 border border-purple-500/30 hover:border-purple-400/50 transition-all group"
+                  data-testid="button-login-developer"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
+                      <Code className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-bold text-white">Developer Mode</div>
+                      <div className="text-xs text-slate-400">Dev Panel with tools & debugging</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleDevRoleSelect('ops_manager')}
+                  className="w-full p-4 rounded-xl bg-gradient-to-r from-cyan-500/20 to-teal-500/20 border border-cyan-500/30 hover:border-cyan-400/50 transition-all group"
+                  data-testid="button-login-ops-manager"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center group-hover:bg-cyan-500/30 transition-colors">
+                      <Briefcase className="w-6 h-6 text-cyan-400" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-bold text-white">Jason - Ops Manager</div>
+                      <div className="text-xs text-slate-400">Command Center (same as David)</div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <p className="text-center text-xs text-slate-500 mt-4">
+                Your choice will be remembered for this session
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
