@@ -327,7 +327,7 @@ export const opsManagerPages: OnboardingPage[] = [
         id: 'culinary-team',
         page: 'ops-culinary',
         title: 'Culinary Team Management',
-        description: 'Chef Deb (PIN 3737) manages cook scheduling. Sheila (4545) has supervisor oversight. See cook assignments, check-ins, and no-shows in real-time.',
+        description: 'Chef Deb (PIN 3737) manages cook scheduling. Shelia (4545) has supervisor oversight. See cook assignments, check-ins, and no-shows in real-time.',
         position: 'center'
       },
       {

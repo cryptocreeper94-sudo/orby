@@ -157,7 +157,7 @@ export default function CulinaryCookDashboard() {
                     <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10">
                       <div className="flex items-center gap-2 text-white/60">
                         <AlertCircle className="h-4 w-4" />
-                        <span className="text-sm">Check in with Chef Deb or Sheila when you arrive</span>
+                        <span className="text-sm">Check in with Chef Deb or Shelia when you arrive</span>
                       </div>
                     </div>
                   </GlassCard>

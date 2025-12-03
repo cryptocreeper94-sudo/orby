@@ -4303,8 +4303,8 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   });
 
   // ========== CULINARY TEAM MANAGEMENT ==========
-  // Chef Deb (CulinaryDirector) and Sheila (Supervisor, Culinary dept) manage the culinary team
-  const CULINARY_MANAGER_PINS = ['3737', '4545']; // Chef Deb and Sheila
+  // Chef Deb (CulinaryDirector) and Shelia (Supervisor, Culinary dept) manage the culinary team
+  const CULINARY_MANAGER_PINS = ['3737', '4545']; // Chef Deb and Shelia
 
   // Get culinary team members (cooks)
   app.get("/api/culinary/team", async (_req: Request, res: Response) => {
@@ -4317,7 +4317,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
-  // Get culinary managers (Chef Deb and Sheila)
+  // Get culinary managers (Chef Deb and Shelia)
   app.get("/api/culinary/managers", async (_req: Request, res: Response) => {
     try {
       const managers = await storage.getCulinaryManagers();
@@ -4350,7 +4350,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
-  // Create culinary assignment (Chef Deb or Sheila only)
+  // Create culinary assignment (Chef Deb or Shelia only)
   app.post("/api/culinary/assignments", async (req: Request, res: Response) => {
     try {
       const { userPin, ...assignmentData } = req.body;
@@ -4378,7 +4378,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
-  // Delete culinary assignment (Chef Deb or Sheila only)
+  // Delete culinary assignment (Chef Deb or Shelia only)
   app.delete("/api/culinary/assignments/:id", async (req: Request, res: Response) => {
     try {
       const { userPin } = req.body;
@@ -4407,7 +4407,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
-  // Check in a cook (Chef Deb or Sheila only)
+  // Check in a cook (Chef Deb or Shelia only)
   app.post("/api/culinary/checkin/:assignmentId", async (req: Request, res: Response) => {
     try {
       const { userPin, userId, userName } = req.body;
@@ -4425,7 +4425,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
-  // Check out a cook (Chef Deb or Sheila only)
+  // Check out a cook (Chef Deb or Shelia only)
   app.post("/api/culinary/checkout/:assignmentId", async (req: Request, res: Response) => {
     try {
       const { userPin, userId, userName } = req.body;
@@ -4443,7 +4443,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
-  // Mark cook as no-show (Chef Deb or Sheila only)
+  // Mark cook as no-show (Chef Deb or Shelia only)
   app.post("/api/culinary/noshow/:assignmentId", async (req: Request, res: Response) => {
     try {
       const { userPin, userId, userName } = req.body;
@@ -4514,7 +4514,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   });
 
   // ========== DEPARTMENT INVENTORY CONTROL ==========
-  // Authorized PINs for inventory management: Bar Manager (Darby), Chef Deb, Sheila, David, Jason
+  // Authorized PINs for inventory management: Bar Manager (Darby), Chef Deb, Shelia, David, Jason
   const INVENTORY_ADMIN_PINS = ['2424', '0424', '3737', '4545', '4646'];
   
   // Get inventory locations (optionally filter by department)

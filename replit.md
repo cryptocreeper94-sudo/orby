@@ -7,7 +7,7 @@
 ### v1.0.2 Release Notes
 - **Culinary Team Management System:** Event-based cook scheduling and check-in tracking
   - Chef Deb (PIN 3737) as Culinary Director with full scheduling controls
-  - Supervisor Sheila (PIN 4545) with oversight capabilities
+  - Supervisor Shelia (PIN 4545) with oversight capabilities
   - Cook assignment to stands by event date
   - Check-in/check-out tracking with no-show marking
   - Culinary team visibility panel in Ops Command Center
@@ -18,7 +18,7 @@
   - Stock levels with on-hand, par, and variance tracking
   - Product types: Liquor, Mixer, Beer, Wine, NABeverage, Garnish, Chargeable, Ingredient, Supply
   - Yellow Dog and PAX Pay integration mapping tables ready
-  - Authorized inventory admins: David (2424), Jason (0424), Chef Deb (3737), Sheila (4545), Darby (4646)
+  - Authorized inventory admins: David (2424), Jason (0424), Chef Deb (3737), Shelia (4545), Darby (4646)
 - **Smart Document Routing:** Universal Document Scanner auto-routes to correct destination
   - AI classification suggests routing based on document type
   - User confirmation with option to change destination
@@ -39,7 +39,7 @@
 - PWA ready for Google Play and web installation
 - **Culinary Team Management System:** Event-based cook scheduling and check-in tracking
   - Chef Deb (PIN 3737) as Culinary Director with full scheduling controls
-  - Supervisor Sheila (PIN 4545) with oversight capabilities
+  - Supervisor Shelia (PIN 4545) with oversight capabilities
   - Cook assignment to stands by event date
   - Check-in/check-out tracking with no-show marking
   - Culinary team visibility panel in Ops Command Center

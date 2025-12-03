@@ -1562,7 +1562,7 @@ export type InsertActiveEvent = z.infer<typeof insertActiveEventSchema>;
 export const EVENT_ADMIN_PINS = ['2424', '0424', '1234'];
 
 // ============ CULINARY TEAM MANAGEMENT ============
-// Chef Deb manages culinary team, Sheila provides supervisory oversight during events
+// Chef Deb manages culinary team, Shelia provides supervisory oversight during events
 
 export const culinaryCheckInStatusEnum = pgEnum('culinary_check_in_status', [
   'Scheduled',   // Assigned but not yet checked in
@@ -1606,7 +1606,7 @@ export const culinaryCheckIns = pgTable("culinary_check_ins", {
   standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
   status: culinaryCheckInStatusEnum("status").notNull().default('Scheduled'),
   checkInTime: timestamp("check_in_time"),
-  checkInById: varchar("check_in_by_id").references(() => users.id), // Chef Deb or Sheila
+  checkInById: varchar("check_in_by_id").references(() => users.id), // Chef Deb or Shelia
   checkInByName: text("check_in_by_name"),
   breakStartTime: timestamp("break_start_time"),
   breakEndTime: timestamp("break_end_time"),
@@ -1632,7 +1632,7 @@ export const insertCulinaryCheckInSchema = createInsertSchema(culinaryCheckIns).
 export type CulinaryCheckIn = typeof culinaryCheckIns.$inferSelect;
 export type InsertCulinaryCheckIn = z.infer<typeof insertCulinaryCheckInSchema>;
 
-// Authorized PINs for culinary team management (Chef Deb and Sheila)
+// Authorized PINs for culinary team management (Chef Deb and Shelia)
 export const CULINARY_MANAGER_PINS: string[] = []; // Will be populated after users are created
 
 // ============ VENUE GEOFENCE CONFIGURATION ============
