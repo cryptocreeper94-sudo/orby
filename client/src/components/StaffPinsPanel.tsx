@@ -32,6 +32,9 @@ interface StaffMember {
 
 const ROLE_LABELS: Record<string, string> = {
   'OperationsManager': 'Ops Manager',
+  'GeneralManager': 'General Manager',
+  'RegionalVP': 'Regional VP',
+  'WarehouseManager': 'Warehouse Manager',
   'Admin': 'Admin',
   'Supervisor': 'Supervisor',
   'ManagementCore': 'Manager',
@@ -41,10 +44,15 @@ const ROLE_LABELS: Record<string, string> = {
   'CheckInAssistant': 'Check-In',
   'StandLead': 'Stand Lead',
   'NPOWorker': 'NPO Worker',
+  'CulinaryDirector': 'Culinary Director',
+  'CulinaryCook': 'Cook',
 };
 
 const ROLE_COLORS: Record<string, string> = {
   'OperationsManager': 'from-cyan-500 to-blue-600',
+  'GeneralManager': 'from-amber-500 to-yellow-600',
+  'RegionalVP': 'from-violet-500 to-purple-600',
+  'WarehouseManager': 'from-teal-500 to-cyan-600',
   'Admin': 'from-purple-500 to-pink-600',
   'Supervisor': 'from-emerald-500 to-teal-600',
   'ManagementCore': 'from-amber-500 to-orange-600',
@@ -54,6 +62,8 @@ const ROLE_COLORS: Record<string, string> = {
   'CheckInAssistant': 'from-indigo-500 to-purple-600',
   'StandLead': 'from-lime-500 to-green-600',
   'NPOWorker': 'from-gray-500 to-gray-600',
+  'CulinaryDirector': 'from-orange-500 to-red-600',
+  'CulinaryCook': 'from-orange-400 to-amber-500',
 };
 
 export function StaffPinsPanel() {

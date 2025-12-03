@@ -59,9 +59,10 @@ import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { AssetTracker } from '@/components/AssetTracker';
 import { POSDeviceTracker } from '@/components/POSDeviceTracker';
 import { IntegrationHub } from '@/components/IntegrationHub';
+import { StaffPinsPanel } from '@/components/StaffPinsPanel';
 import { OpsManagerTour } from '@/components/OpsManagerTour';
 import { PersonalizedWelcomeTour } from '@/components/PersonalizedWelcomeTour';
-import { Map, Navigation, Wine, Fingerprint, Shield as ShieldIcon, Monitor, Link2 } from 'lucide-react';
+import { Map, Navigation, Wine, Fingerprint, Shield as ShieldIcon, Monitor, Link2, KeyRound } from 'lucide-react';
 
 const EMERGENCY_TYPES = [
   { id: 'Medical', icon: Heart, color: 'from-rose-500 to-rose-600', bgColor: 'bg-rose-500', label: 'Medical Emergency', sla: 3 },
@@ -448,9 +449,15 @@ export default function CommandCenter() {
   const [showAssetTracker, setShowAssetTracker] = useState(false);
   const [showPOSTracker, setShowPOSTracker] = useState(false);
   const [showIntegrationHub, setShowIntegrationHub] = useState(false);
+  const [showStaffPins, setShowStaffPins] = useState(false);
   
-  // David (PIN 2424) gets Dashboard Controls superpower
+  // Senior leadership gets Dashboard Controls superpower (David, Megan, Brian)
   const isDavid = currentUser?.pin === '2424';
+  const userRole = currentUser?.role as string;
+  const isSeniorLeadership = isDavid || 
+    userRole === 'GeneralManager' || 
+    userRole === 'RegionalVP' ||
+    userRole === 'OperationsManager';
   const isIT = currentUser?.role === 'IT' || currentUser?.role === 'Developer' || isDavid;
   const isManager = currentUser?.role === 'Developer' || currentUser?.role === 'Admin' || currentUser?.role === 'ManagementCore' || currentUser?.role === 'ManagementAssistant' || currentUser?.role === 'IT';
 
@@ -562,17 +569,29 @@ export default function CommandCenter() {
             <Badge variant="outline" className="border-cyan-500/30 text-cyan-400" data-testid="badge-active-count">
               {activeAlerts.length} Active
             </Badge>
-            {isDavid && (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowDashboardControls(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/40 text-cyan-300 hover:border-cyan-400/60 transition-colors"
-                data-testid="button-dashboard-controls"
-              >
-                <Crown className="w-4 h-4" />
-                <span className="text-xs font-medium hidden sm:inline">Controls</span>
-              </motion.button>
+            {isSeniorLeadership && (
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowStaffPins(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-400/40 text-amber-300 hover:border-amber-400/60 transition-colors"
+                  data-testid="button-staff-pins"
+                >
+                  <KeyRound className="w-4 h-4" />
+                  <span className="text-xs font-medium hidden sm:inline">PINs</span>
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowDashboardControls(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500/20 to-purple-500/20 border border-cyan-400/40 text-cyan-300 hover:border-cyan-400/60 transition-colors"
+                  data-testid="button-dashboard-controls"
+                >
+                  <Crown className="w-4 h-4" />
+                  <span className="text-xs font-medium hidden sm:inline">Controls</span>
+                </motion.button>
+              </>
             )}
             <Button 
               variant="ghost" 
@@ -1042,13 +1061,26 @@ export default function CommandCenter() {
         </DialogContent>
       </Dialog>
 
-      {/* David's Dashboard Controls Superpower */}
-      {isDavid && (
+      {/* Senior Leadership Dashboard Controls */}
+      {isSeniorLeadership && (
         <DashboardControls
           isOpen={showDashboardControls}
           onClose={() => setShowDashboardControls(false)}
         />
       )}
+
+      {/* Staff PINs Panel for Senior Leadership */}
+      <Dialog open={showStaffPins} onOpenChange={setShowStaffPins}>
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-2xl max-h-[85vh] overflow-auto p-6">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-amber-400" />
+              Staff PIN Management
+            </DialogTitle>
+          </DialogHeader>
+          <StaffPinsPanel />
+        </DialogContent>
+      </Dialog>
 
       {/* Ops Manager Tour for David on first login */}
       {isDavid && <OpsManagerTour />}
