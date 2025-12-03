@@ -429,26 +429,28 @@ export function InteractiveMap({
   const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#000000', '#ffffff'];
 
   return (
-    <Card className="h-full flex flex-col" data-testid="interactive-map">
-      <CardHeader className="pb-2 flex-shrink-0">
+    <Card className="h-full flex flex-col bg-slate-900/90 border-white/10" data-testid="interactive-map">
+      <CardHeader className="pb-2 flex-shrink-0 border-b border-white/5">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <MapPin className="h-5 w-5" />
+          <CardTitle className="text-lg flex items-center gap-2 text-white">
+            <MapPin className="h-5 w-5 text-cyan-400" />
             Stadium Map
           </CardTitle>
           {onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose} data-testid="close-map">
+            <Button variant="ghost" size="icon" onClick={onClose} data-testid="close-map" aria-label="Close map" className="text-slate-400 hover:text-white hover:bg-white/10">
               <X className="h-4 w-4" />
             </Button>
           )}
         </div>
         
-        <div className="flex flex-wrap gap-1 mt-2">
+        <div className="flex flex-wrap gap-1.5 mt-2">
           <Button
             size="sm"
             variant={tool === 'pan' ? 'default' : 'outline'}
             onClick={() => setTool('pan')}
             data-testid="tool-pan"
+            aria-label="Pan map"
+            className="min-w-[44px] min-h-[44px]"
           >
             <Move className="h-4 w-4" />
           </Button>
@@ -457,6 +459,8 @@ export function InteractiveMap({
             variant={tool === 'draw' ? 'default' : 'outline'}
             onClick={() => setTool('draw')}
             data-testid="tool-draw"
+            aria-label="Draw on map"
+            className="min-w-[44px] min-h-[44px]"
           >
             <Pencil className="h-4 w-4" />
           </Button>
@@ -465,6 +469,8 @@ export function InteractiveMap({
             variant={tool === 'pin' ? 'default' : 'outline'}
             onClick={() => setTool('pin')}
             data-testid="tool-pin"
+            aria-label="Drop pin"
+            className="min-w-[44px] min-h-[44px]"
           >
             <MapPin className="h-4 w-4" />
           </Button>
@@ -473,6 +479,8 @@ export function InteractiveMap({
             variant={tool === 'erase' ? 'default' : 'outline'}
             onClick={() => setTool('erase')}
             data-testid="tool-erase"
+            aria-label="Erase"
+            className="min-w-[44px] min-h-[44px]"
           >
             <Eraser className="h-4 w-4" />
           </Button>
@@ -482,26 +490,27 @@ export function InteractiveMap({
               variant={tool === 'section' ? 'default' : 'outline'}
               onClick={() => setTool('section')}
               data-testid="tool-section"
-              className="bg-purple-100 hover:bg-purple-200 text-purple-700"
+              aria-label="Assign section"
+              className="min-w-[44px] min-h-[44px] bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 border-purple-500/30"
             >
               <Grid3X3 className="h-4 w-4 mr-1" />
               Section
             </Button>
           )}
-          <div className="border-l mx-1" />
-          <Button size="sm" variant="outline" onClick={() => handleZoom(0.2)} data-testid="zoom-in">
+          <div className="border-l border-white/20 mx-1" />
+          <Button size="sm" variant="outline" onClick={() => handleZoom(0.2)} data-testid="zoom-in" aria-label="Zoom in" className="min-w-[44px] min-h-[44px]">
             <ZoomIn className="h-4 w-4" />
           </Button>
-          <Button size="sm" variant="outline" onClick={() => handleZoom(-0.2)} data-testid="zoom-out">
+          <Button size="sm" variant="outline" onClick={() => handleZoom(-0.2)} data-testid="zoom-out" aria-label="Zoom out" className="min-w-[44px] min-h-[44px]">
             <ZoomOut className="h-4 w-4" />
           </Button>
-          <Button size="sm" variant="outline" onClick={handleReset} data-testid="reset-map">
+          <Button size="sm" variant="outline" onClick={handleReset} data-testid="reset-map" aria-label="Reset map" className="min-w-[44px] min-h-[44px]">
             <RotateCcw className="h-4 w-4" />
           </Button>
           {showNavigation && (
             <>
-              <div className="border-l mx-1" />
-              <Button size="sm" variant="outline" className="text-green-600" data-testid="navigation">
+              <div className="border-l border-white/20 mx-1" />
+              <Button size="sm" variant="outline" className="min-w-[44px] min-h-[44px] text-green-400 border-green-500/30 hover:bg-green-500/10" data-testid="navigation" aria-label="Navigate to location">
                 <Navigation className="h-4 w-4 mr-1" />
                 Navigate
               </Button>
@@ -537,10 +546,10 @@ export function InteractiveMap({
         )}
       </CardHeader>
 
-      <CardContent className="flex-1 p-2 overflow-hidden" ref={containerRef}>
+      <CardContent className="flex-1 p-2 overflow-hidden bg-slate-800/50" ref={containerRef}>
         <canvas
           ref={canvasRef}
-          className="w-full h-full cursor-crosshair touch-none rounded-lg bg-gray-100"
+          className="w-full h-full cursor-crosshair touch-none rounded-lg bg-slate-700/50"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}

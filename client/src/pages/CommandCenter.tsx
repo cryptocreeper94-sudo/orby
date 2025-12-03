@@ -53,6 +53,11 @@ import {
 import type { EmergencyAlert, Stand, User as UserType } from '@shared/schema';
 import { SectionHelp } from '@/components/OrbyHelp';
 import { DashboardControls } from '@/components/DashboardControls';
+import { InteractiveMap } from '@/components/InteractiveMap';
+import { WalkingDirections } from '@/components/WalkingDirections';
+import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
+import { AssetTracker } from '@/components/AssetTracker';
+import { Map, Navigation, Wine, Fingerprint, Shield as ShieldIcon } from 'lucide-react';
 
 const EMERGENCY_TYPES = [
   { id: 'Medical', icon: Heart, color: 'from-rose-500 to-rose-600', bgColor: 'bg-rose-500', label: 'Medical Emergency', sla: 3 },
@@ -433,9 +438,14 @@ export default function CommandCenter() {
   
   const [activeTab, setActiveTab] = useState('active');
   const [showDashboardControls, setShowDashboardControls] = useState(false);
+  const [showStadiumMap, setShowStadiumMap] = useState(false);
+  const [showDirections, setShowDirections] = useState(false);
+  const [showCompliance, setShowCompliance] = useState(false);
+  const [showAssetTracker, setShowAssetTracker] = useState(false);
   
   // David (PIN 2424) gets Dashboard Controls superpower
   const isDavid = currentUser?.pin === '2424';
+  const isManager = currentUser?.role === 'Developer' || currentUser?.role === 'Admin' || currentUser?.role === 'ManagementCore' || currentUser?.role === 'ManagementAssistant' || currentUser?.role === 'IT';
 
   const { data: alerts = [], isLoading: alertsLoading } = useQuery({
     queryKey: ['/api/emergency-alerts'],
@@ -562,6 +572,7 @@ export default function CommandCenter() {
               size="icon" 
               onClick={handleLogout}
               className="text-slate-400 hover:text-white"
+              aria-label="Log out"
             >
               <LogOut className="w-5 h-5" />
             </Button>
@@ -886,6 +897,97 @@ export default function CommandCenter() {
               Send Alert
             </GlowButton>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick Tools Floating Bar */}
+      <motion.div
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40"
+      >
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl">
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowStadiumMap(true)}
+            className="p-3 rounded-full bg-gradient-to-br from-blue-500/20 to-blue-600/20 text-blue-400 hover:text-blue-300 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            data-testid="button-quick-map"
+            aria-label="Stadium Map"
+          >
+            <Map className="w-5 h-5" />
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowDirections(true)}
+            className="p-3 rounded-full bg-gradient-to-br from-green-500/20 to-green-600/20 text-green-400 hover:text-green-300 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            data-testid="button-quick-directions"
+            aria-label="Walking Directions"
+          >
+            <Navigation className="w-5 h-5" />
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowCompliance(true)}
+            className="p-3 rounded-full bg-gradient-to-br from-purple-500/20 to-purple-600/20 text-purple-400 hover:text-purple-300 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            data-testid="button-quick-compliance"
+            aria-label="Compliance Alerts"
+          >
+            <Wine className="w-5 h-5" />
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowAssetTracker(true)}
+            className="p-3 rounded-full bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 text-cyan-400 hover:text-cyan-300 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            data-testid="button-quick-assets"
+            aria-label="Genesis Hallmark"
+          >
+            <Fingerprint className="w-5 h-5" />
+          </motion.button>
+        </div>
+      </motion.div>
+
+      {/* Stadium Map Dialog */}
+      <Dialog open={showStadiumMap} onOpenChange={setShowStadiumMap}>
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-4xl h-[80vh] p-0 overflow-hidden">
+          <InteractiveMap 
+            onClose={() => setShowStadiumMap(false)}
+            isManager={isManager}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Walking Directions Dialog */}
+      <Dialog open={showDirections} onOpenChange={setShowDirections}>
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md max-h-[80vh] overflow-auto">
+          <WalkingDirections onClose={() => setShowDirections(false)} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Compliance Alerts Dialog */}
+      <Dialog open={showCompliance} onOpenChange={setShowCompliance}>
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-2xl max-h-[80vh] overflow-auto">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <ShieldIcon className="w-5 h-5 text-purple-400" />
+              Tennessee Compliance Alerts
+            </DialogTitle>
+          </DialogHeader>
+          <ComplianceAlertPanel 
+            userId={currentUser?.id} 
+            userName={currentUser?.name} 
+            isManager={isManager}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Genesis Hallmark Asset Tracker Dialog */}
+      <Dialog open={showAssetTracker} onOpenChange={setShowAssetTracker}>
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-4xl max-h-[80vh] overflow-auto p-6">
+          <AssetTracker />
         </DialogContent>
       </Dialog>
 

@@ -266,15 +266,15 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
   const needsElevator = selectedSectionData && selectedSectionData.floorLevel !== currentFloor;
 
   return (
-    <Card className="h-full flex flex-col" data-testid="walking-directions">
-      <CardHeader className="pb-2 flex-shrink-0">
+    <Card className="h-full flex flex-col bg-slate-900/90 border-white/10" data-testid="walking-directions">
+      <CardHeader className="pb-2 flex-shrink-0 border-b border-white/5">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Navigation className="h-5 w-5 text-blue-600" />
+          <CardTitle className="text-lg flex items-center gap-2 text-white">
+            <Navigation className="h-5 w-5 text-cyan-400" />
             Walking Directions
           </CardTitle>
           {onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose} data-testid="close-directions">
+            <Button variant="ghost" size="icon" onClick={onClose} data-testid="close-directions" aria-label="Close directions" className="text-slate-400 hover:text-white hover:bg-white/10">
               <X className="h-4 w-4" />
             </Button>
           )}

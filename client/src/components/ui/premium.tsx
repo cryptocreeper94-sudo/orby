@@ -215,9 +215,9 @@ export function GlowButton({
   };
 
   const sizeClasses = {
-    sm: "px-3 py-1.5 text-sm",
-    default: "px-4 py-2 md:px-5 md:py-2.5",
-    lg: "px-6 py-3 text-lg",
+    sm: "px-4 py-2.5 min-h-[44px] text-sm",
+    default: "px-5 py-3 min-h-[44px] md:px-6 md:py-3",
+    lg: "px-7 py-4 min-h-[48px] text-lg",
   };
 
   return (

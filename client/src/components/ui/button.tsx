@@ -24,11 +24,11 @@ const buttonVariants = cva(
         floating: "relative bg-white/10 backdrop-blur-md text-white border border-white/20 shadow-xl hover:bg-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:-translate-y-1 active:translate-y-0",
       },
       size: {
-        // @replit changed sizes
-        default: "min-h-9 px-4 py-2",
-        sm: "min-h-8 rounded-md px-3 text-xs",
-        lg: "min-h-10 rounded-md px-8",
-        icon: "h-9 w-9",
+        // Mobile-optimized touch targets (minimum 44px for accessibility)
+        default: "min-h-11 px-4 py-2",
+        sm: "min-h-10 rounded-lg px-3 text-xs",
+        lg: "min-h-12 rounded-xl px-8",
+        icon: "min-h-11 min-w-11 h-11 w-11",
       },
     },
     defaultVariants: {
