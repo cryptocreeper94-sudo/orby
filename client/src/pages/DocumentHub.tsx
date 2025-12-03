@@ -567,13 +567,11 @@ export default function DocumentHub() {
         {/* Universal Document Scanner */}
         {showScanner && (
           <UniversalDocumentScanner
-            isOpen={showScanner}
             onClose={() => setShowScanner(false)}
             onDocumentSaved={() => {
               fetchData();
               setShowScanner(false);
             }}
-            isSandbox={isSandbox}
           />
         )}
       </div>
