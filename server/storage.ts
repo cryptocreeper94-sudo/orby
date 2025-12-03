@@ -10,6 +10,7 @@ import {
   standItems, managerDocuments, assetStamps, blockchainVerifications, complianceAlerts,
   supervisorSessions, supervisorActivity, dashboardConfigs, venueGeofenceConfig,
   keySets, radios, equipmentCheckoutHistory, equipmentAlerts,
+  posDeviceTypes, posDevices, posLocationGrid, posAssignments, posReplacements, posIssues,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -64,7 +65,13 @@ import {
   type KeySet, type InsertKeySet,
   type Radio, type InsertRadio,
   type EquipmentCheckoutHistory, type InsertEquipmentCheckoutHistory,
-  type EquipmentAlert, type InsertEquipmentAlert
+  type EquipmentAlert, type InsertEquipmentAlert,
+  type PosDeviceType, type InsertPosDeviceType,
+  type PosDevice, type InsertPosDevice,
+  type PosLocationGrid, type InsertPosLocationGrid,
+  type PosAssignment, type InsertPosAssignment,
+  type PosReplacement, type InsertPosReplacement,
+  type PosIssue, type InsertPosIssue
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray, ilike, sql } from "drizzle-orm";
@@ -463,6 +470,54 @@ export interface IStorage {
   createEquipmentAlert(alert: InsertEquipmentAlert): Promise<EquipmentAlert>;
   acknowledgeEquipmentAlert(id: string): Promise<void>;
   resolveEquipmentAlert(id: string): Promise<void>;
+
+  // ============ POS DEVICE TRACKING SYSTEM ============
+  // POS Device Types
+  getAllPosDeviceTypes(): Promise<PosDeviceType[]>;
+  createPosDeviceType(deviceType: InsertPosDeviceType): Promise<PosDeviceType>;
+  updatePosDeviceType(id: string, updates: Partial<InsertPosDeviceType>): Promise<PosDeviceType>;
+  
+  // POS Devices
+  getAllPosDevices(): Promise<PosDevice[]>;
+  getPosDevice(id: string): Promise<PosDevice | undefined>;
+  getPosDeviceByNumber(deviceNumber: number): Promise<PosDevice | undefined>;
+  getAvailablePosDevices(): Promise<PosDevice[]>;
+  getAssignedPosDevices(): Promise<PosDevice[]>;
+  getPosDevicesByLocation(locationId: string): Promise<PosDevice[]>;
+  getPosDevicesByType(deviceType: string): Promise<PosDevice[]>;
+  createPosDevice(device: InsertPosDevice): Promise<PosDevice>;
+  updatePosDevice(id: string, updates: Partial<InsertPosDevice>): Promise<PosDevice>;
+  
+  // POS Location Grid (David's master grid)
+  getAllPosLocationGrid(): Promise<PosLocationGrid[]>;
+  getPosLocationGrid(locationId: string): Promise<PosLocationGrid | undefined>;
+  createPosLocationGrid(grid: InsertPosLocationGrid): Promise<PosLocationGrid>;
+  updatePosLocationGrid(id: string, updates: Partial<InsertPosLocationGrid>): Promise<PosLocationGrid>;
+  deletePosLocationGrid(id: string): Promise<void>;
+  
+  // POS Assignments
+  getAllPosAssignments(): Promise<PosAssignment[]>;
+  getActivePosAssignments(): Promise<PosAssignment[]>;
+  getPosAssignmentsByLocation(locationId: string): Promise<PosAssignment[]>;
+  getPosAssignmentsByDevice(deviceId: string): Promise<PosAssignment[]>;
+  getPosAssignmentsByEvent(eventDate: string): Promise<PosAssignment[]>;
+  createPosAssignment(assignment: InsertPosAssignment): Promise<PosAssignment>;
+  returnPosAssignment(assignmentId: string, returnedById: string, returnedByName: string): Promise<PosAssignment>;
+  
+  // POS Replacements
+  getAllPosReplacements(): Promise<PosReplacement[]>;
+  getPosReplacementsByEvent(eventDate: string): Promise<PosReplacement[]>;
+  createPosReplacement(replacement: InsertPosReplacement): Promise<PosReplacement>;
+  
+  // POS Issues
+  getAllPosIssues(): Promise<PosIssue[]>;
+  getOpenPosIssues(): Promise<PosIssue[]>;
+  getPosIssuesByLocation(locationId: string): Promise<PosIssue[]>;
+  getPosIssuesByDevice(deviceId: string): Promise<PosIssue[]>;
+  createPosIssue(issue: InsertPosIssue): Promise<PosIssue>;
+  updatePosIssue(id: string, updates: Partial<InsertPosIssue>): Promise<PosIssue>;
+  assignPosIssue(id: string, assignedToId: string, assignedToName: string): Promise<PosIssue>;
+  resolvePosIssue(id: string, resolvedById: string, resolvedByName: string, resolution: string): Promise<PosIssue>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2650,6 +2705,299 @@ export class DatabaseStorage implements IStorage {
       status: 'resolved',
       resolvedAt: new Date()
     }).where(eq(equipmentAlerts.id, id));
+  }
+
+  // ============ POS DEVICE TRACKING SYSTEM ============
+  // POS Device Types
+  async getAllPosDeviceTypes(): Promise<PosDeviceType[]> {
+    return await db.select().from(posDeviceTypes)
+      .where(eq(posDeviceTypes.isActive, true))
+      .orderBy(asc(posDeviceTypes.sortOrder));
+  }
+
+  async createPosDeviceType(deviceType: InsertPosDeviceType): Promise<PosDeviceType> {
+    const [created] = await db.insert(posDeviceTypes).values(deviceType).returning();
+    return created;
+  }
+
+  async updatePosDeviceType(id: string, updates: Partial<InsertPosDeviceType>): Promise<PosDeviceType> {
+    const [updated] = await db.update(posDeviceTypes)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(posDeviceTypes.id, id))
+      .returning();
+    return updated;
+  }
+
+  // POS Devices
+  async getAllPosDevices(): Promise<PosDevice[]> {
+    return await db.select().from(posDevices).orderBy(asc(posDevices.deviceNumber));
+  }
+
+  async getPosDevice(id: string): Promise<PosDevice | undefined> {
+    const [device] = await db.select().from(posDevices).where(eq(posDevices.id, id));
+    return device || undefined;
+  }
+
+  async getPosDeviceByNumber(deviceNumber: number): Promise<PosDevice | undefined> {
+    const [device] = await db.select().from(posDevices).where(eq(posDevices.deviceNumber, deviceNumber));
+    return device || undefined;
+  }
+
+  async getAvailablePosDevices(): Promise<PosDevice[]> {
+    return await db.select().from(posDevices)
+      .where(eq(posDevices.status, 'available'))
+      .orderBy(asc(posDevices.deviceNumber));
+  }
+
+  async getAssignedPosDevices(): Promise<PosDevice[]> {
+    return await db.select().from(posDevices)
+      .where(eq(posDevices.status, 'assigned'))
+      .orderBy(asc(posDevices.deviceNumber));
+  }
+
+  async getPosDevicesByLocation(locationId: string): Promise<PosDevice[]> {
+    return await db.select().from(posDevices)
+      .where(eq(posDevices.currentLocationId, locationId))
+      .orderBy(asc(posDevices.deviceNumber));
+  }
+
+  async getPosDevicesByType(deviceType: string): Promise<PosDevice[]> {
+    return await db.select().from(posDevices)
+      .where(sql`${posDevices.deviceType}::text = ${deviceType}`)
+      .orderBy(asc(posDevices.deviceNumber));
+  }
+
+  async createPosDevice(device: InsertPosDevice): Promise<PosDevice> {
+    const [created] = await db.insert(posDevices).values(device).returning();
+    return created;
+  }
+
+  async updatePosDevice(id: string, updates: Partial<InsertPosDevice>): Promise<PosDevice> {
+    const [updated] = await db.update(posDevices)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(posDevices.id, id))
+      .returning();
+    return updated;
+  }
+
+  // POS Location Grid (David's master grid)
+  async getAllPosLocationGrid(): Promise<PosLocationGrid[]> {
+    return await db.select().from(posLocationGrid)
+      .where(eq(posLocationGrid.isActive, true))
+      .orderBy(asc(posLocationGrid.locationName));
+  }
+
+  async getPosLocationGrid(locationId: string): Promise<PosLocationGrid | undefined> {
+    const [grid] = await db.select().from(posLocationGrid)
+      .where(eq(posLocationGrid.locationId, locationId));
+    return grid || undefined;
+  }
+
+  async createPosLocationGrid(grid: InsertPosLocationGrid): Promise<PosLocationGrid> {
+    const [created] = await db.insert(posLocationGrid).values(grid).returning();
+    return created;
+  }
+
+  async updatePosLocationGrid(id: string, updates: Partial<InsertPosLocationGrid>): Promise<PosLocationGrid> {
+    const [updated] = await db.update(posLocationGrid)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(posLocationGrid.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deletePosLocationGrid(id: string): Promise<void> {
+    await db.update(posLocationGrid)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(posLocationGrid.id, id));
+  }
+
+  // POS Assignments
+  async getAllPosAssignments(): Promise<PosAssignment[]> {
+    return await db.select().from(posAssignments)
+      .orderBy(desc(posAssignments.createdAt));
+  }
+
+  async getActivePosAssignments(): Promise<PosAssignment[]> {
+    return await db.select().from(posAssignments)
+      .where(eq(posAssignments.status, 'active'))
+      .orderBy(asc(posAssignments.locationName));
+  }
+
+  async getPosAssignmentsByLocation(locationId: string): Promise<PosAssignment[]> {
+    return await db.select().from(posAssignments)
+      .where(eq(posAssignments.locationId, locationId))
+      .orderBy(desc(posAssignments.createdAt));
+  }
+
+  async getPosAssignmentsByDevice(deviceId: string): Promise<PosAssignment[]> {
+    return await db.select().from(posAssignments)
+      .where(eq(posAssignments.posDeviceId, deviceId))
+      .orderBy(desc(posAssignments.createdAt));
+  }
+
+  async getPosAssignmentsByEvent(eventDate: string): Promise<PosAssignment[]> {
+    return await db.select().from(posAssignments)
+      .where(eq(posAssignments.eventDate, eventDate))
+      .orderBy(asc(posAssignments.locationName));
+  }
+
+  async createPosAssignment(assignment: InsertPosAssignment): Promise<PosAssignment> {
+    const [created] = await db.insert(posAssignments).values(assignment).returning();
+    
+    // Update the POS device status and location
+    await db.update(posDevices).set({
+      status: 'assigned',
+      currentLocationId: assignment.locationId,
+      currentLocationType: assignment.locationType,
+      currentLocationName: assignment.locationName,
+      assignedById: assignment.assignedById,
+      assignedByName: assignment.assignedByName,
+      assignedAt: new Date(),
+      updatedAt: new Date()
+    }).where(eq(posDevices.id, assignment.posDeviceId));
+    
+    return created;
+  }
+
+  async returnPosAssignment(assignmentId: string, returnedById: string, returnedByName: string): Promise<PosAssignment> {
+    const [assignment] = await db.select().from(posAssignments)
+      .where(eq(posAssignments.id, assignmentId));
+    
+    if (!assignment) throw new Error('Assignment not found');
+    
+    const [updated] = await db.update(posAssignments).set({
+      status: 'returned',
+      returnedAt: new Date(),
+      returnedById,
+      returnedByName
+    }).where(eq(posAssignments.id, assignmentId)).returning();
+    
+    // Update the POS device to available
+    await db.update(posDevices).set({
+      status: 'available',
+      currentLocationId: null,
+      currentLocationType: null,
+      currentLocationName: null,
+      assignedById: null,
+      assignedByName: null,
+      assignedAt: null,
+      updatedAt: new Date()
+    }).where(eq(posDevices.id, assignment.posDeviceId));
+    
+    return updated;
+  }
+
+  // POS Replacements
+  async getAllPosReplacements(): Promise<PosReplacement[]> {
+    return await db.select().from(posReplacements)
+      .orderBy(desc(posReplacements.createdAt));
+  }
+
+  async getPosReplacementsByEvent(eventDate: string): Promise<PosReplacement[]> {
+    return await db.select().from(posReplacements)
+      .where(eq(posReplacements.eventDate, eventDate))
+      .orderBy(desc(posReplacements.createdAt));
+  }
+
+  async createPosReplacement(replacement: InsertPosReplacement): Promise<PosReplacement> {
+    const [created] = await db.insert(posReplacements).values(replacement).returning();
+    
+    // Mark original POS as in maintenance and update replacement POS
+    await Promise.all([
+      db.update(posDevices).set({
+        status: 'maintenance',
+        currentLocationId: null,
+        currentLocationType: null,
+        currentLocationName: null,
+        notes: `Replaced at ${replacement.locationName}: ${replacement.reportedIssue}`,
+        updatedAt: new Date()
+      }).where(eq(posDevices.id, replacement.originalPosId)),
+      
+      db.update(posDevices).set({
+        status: 'assigned',
+        currentLocationId: replacement.locationId,
+        currentLocationType: replacement.locationType,
+        currentLocationName: replacement.locationName,
+        assignedById: replacement.replacedById,
+        assignedByName: replacement.replacedByName,
+        assignedAt: new Date(),
+        updatedAt: new Date()
+      }).where(eq(posDevices.id, replacement.replacementPosId))
+    ]);
+    
+    // Update the assignment to mark it as replaced
+    await db.update(posAssignments).set({
+      status: 'replaced'
+    }).where(and(
+      eq(posAssignments.posDeviceId, replacement.originalPosId),
+      eq(posAssignments.status, 'active')
+    ));
+    
+    return created;
+  }
+
+  // POS Issues
+  async getAllPosIssues(): Promise<PosIssue[]> {
+    return await db.select().from(posIssues)
+      .orderBy(desc(posIssues.createdAt));
+  }
+
+  async getOpenPosIssues(): Promise<PosIssue[]> {
+    return await db.select().from(posIssues)
+      .where(or(
+        eq(posIssues.status, 'Open'),
+        eq(posIssues.status, 'Acknowledged'),
+        eq(posIssues.status, 'InProgress')
+      ))
+      .orderBy(desc(posIssues.createdAt));
+  }
+
+  async getPosIssuesByLocation(locationId: string): Promise<PosIssue[]> {
+    return await db.select().from(posIssues)
+      .where(eq(posIssues.locationId, locationId))
+      .orderBy(desc(posIssues.createdAt));
+  }
+
+  async getPosIssuesByDevice(deviceId: string): Promise<PosIssue[]> {
+    return await db.select().from(posIssues)
+      .where(eq(posIssues.posDeviceId, deviceId))
+      .orderBy(desc(posIssues.createdAt));
+  }
+
+  async createPosIssue(issue: InsertPosIssue): Promise<PosIssue> {
+    const [created] = await db.insert(posIssues).values(issue).returning();
+    return created;
+  }
+
+  async updatePosIssue(id: string, updates: Partial<InsertPosIssue>): Promise<PosIssue> {
+    const [updated] = await db.update(posIssues)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(posIssues.id, id))
+      .returning();
+    return updated;
+  }
+
+  async assignPosIssue(id: string, assignedToId: string, assignedToName: string): Promise<PosIssue> {
+    const [updated] = await db.update(posIssues).set({
+      assignedToId,
+      assignedToName,
+      status: 'Acknowledged',
+      updatedAt: new Date()
+    }).where(eq(posIssues.id, id)).returning();
+    return updated;
+  }
+
+  async resolvePosIssue(id: string, resolvedById: string, resolvedByName: string, resolution: string): Promise<PosIssue> {
+    const [updated] = await db.update(posIssues).set({
+      resolvedById,
+      resolvedByName,
+      resolution,
+      status: 'Resolved',
+      resolvedAt: new Date(),
+      updatedAt: new Date()
+    }).where(eq(posIssues.id, id)).returning();
+    return updated;
   }
 }
 

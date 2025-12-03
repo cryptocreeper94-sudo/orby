@@ -4409,5 +4409,437 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ========== POS DEVICE TRACKING SYSTEM ==========
+  // For IT team to track and assign POS devices to stands/portables/bars
+
+  // Get all POS device types
+  app.get("/api/pos/device-types", async (_req: Request, res: Response) => {
+    try {
+      const types = await storage.getAllPosDeviceTypes();
+      res.json(types);
+    } catch (error) {
+      console.error("Error getting POS device types:", error);
+      res.status(500).json({ error: "Failed to get POS device types" });
+    }
+  });
+
+  // Create new POS device type (David only)
+  app.post("/api/pos/device-types", async (req: Request, res: Response) => {
+    try {
+      const deviceType = await storage.createPosDeviceType(req.body);
+      res.status(201).json(deviceType);
+    } catch (error) {
+      console.error("Error creating POS device type:", error);
+      res.status(500).json({ error: "Failed to create POS device type" });
+    }
+  });
+
+  // Update POS device type
+  app.put("/api/pos/device-types/:id", async (req: Request, res: Response) => {
+    try {
+      const deviceType = await storage.updatePosDeviceType(req.params.id, req.body);
+      res.json(deviceType);
+    } catch (error) {
+      console.error("Error updating POS device type:", error);
+      res.status(500).json({ error: "Failed to update POS device type" });
+    }
+  });
+
+  // Get all POS devices
+  app.get("/api/pos/devices", async (_req: Request, res: Response) => {
+    try {
+      const devices = await storage.getAllPosDevices();
+      res.json(devices);
+    } catch (error) {
+      console.error("Error getting POS devices:", error);
+      res.status(500).json({ error: "Failed to get POS devices" });
+    }
+  });
+
+  // Get available POS devices
+  app.get("/api/pos/devices/available", async (_req: Request, res: Response) => {
+    try {
+      const devices = await storage.getAvailablePosDevices();
+      res.json(devices);
+    } catch (error) {
+      console.error("Error getting available POS devices:", error);
+      res.status(500).json({ error: "Failed to get available POS devices" });
+    }
+  });
+
+  // Get assigned POS devices
+  app.get("/api/pos/devices/assigned", async (_req: Request, res: Response) => {
+    try {
+      const devices = await storage.getAssignedPosDevices();
+      res.json(devices);
+    } catch (error) {
+      console.error("Error getting assigned POS devices:", error);
+      res.status(500).json({ error: "Failed to get assigned POS devices" });
+    }
+  });
+
+  // Get POS device by number
+  app.get("/api/pos/devices/number/:number", async (req: Request, res: Response) => {
+    try {
+      const device = await storage.getPosDeviceByNumber(parseInt(req.params.number));
+      if (!device) {
+        return res.status(404).json({ error: "POS device not found" });
+      }
+      res.json(device);
+    } catch (error) {
+      console.error("Error getting POS device:", error);
+      res.status(500).json({ error: "Failed to get POS device" });
+    }
+  });
+
+  // Get POS devices by location
+  app.get("/api/pos/devices/location/:locationId", async (req: Request, res: Response) => {
+    try {
+      const devices = await storage.getPosDevicesByLocation(req.params.locationId);
+      res.json(devices);
+    } catch (error) {
+      console.error("Error getting POS devices by location:", error);
+      res.status(500).json({ error: "Failed to get POS devices by location" });
+    }
+  });
+
+  // Get POS devices by type
+  app.get("/api/pos/devices/type/:type", async (req: Request, res: Response) => {
+    try {
+      const devices = await storage.getPosDevicesByType(req.params.type);
+      res.json(devices);
+    } catch (error) {
+      console.error("Error getting POS devices by type:", error);
+      res.status(500).json({ error: "Failed to get POS devices by type" });
+    }
+  });
+
+  // Create POS device
+  app.post("/api/pos/devices", async (req: Request, res: Response) => {
+    try {
+      // Check if device number already exists
+      const existing = await storage.getPosDeviceByNumber(req.body.deviceNumber);
+      if (existing) {
+        return res.status(400).json({ error: `POS device #${req.body.deviceNumber} already exists` });
+      }
+      const device = await storage.createPosDevice(req.body);
+      res.status(201).json(device);
+    } catch (error) {
+      console.error("Error creating POS device:", error);
+      res.status(500).json({ error: "Failed to create POS device" });
+    }
+  });
+
+  // Update POS device
+  app.put("/api/pos/devices/:id", async (req: Request, res: Response) => {
+    try {
+      const device = await storage.updatePosDevice(req.params.id, req.body);
+      res.json(device);
+    } catch (error) {
+      console.error("Error updating POS device:", error);
+      res.status(500).json({ error: "Failed to update POS device" });
+    }
+  });
+
+  // Get POS location grid (David's master grid)
+  app.get("/api/pos/location-grid", async (_req: Request, res: Response) => {
+    try {
+      const grid = await storage.getAllPosLocationGrid();
+      res.json(grid);
+    } catch (error) {
+      console.error("Error getting POS location grid:", error);
+      res.status(500).json({ error: "Failed to get POS location grid" });
+    }
+  });
+
+  // Get POS location grid by location ID
+  app.get("/api/pos/location-grid/:locationId", async (req: Request, res: Response) => {
+    try {
+      const grid = await storage.getPosLocationGrid(req.params.locationId);
+      res.json(grid || null);
+    } catch (error) {
+      console.error("Error getting POS location grid entry:", error);
+      res.status(500).json({ error: "Failed to get POS location grid entry" });
+    }
+  });
+
+  // Create/Update POS location grid entry (David sets which POS go where)
+  app.post("/api/pos/location-grid", async (req: Request, res: Response) => {
+    try {
+      const grid = await storage.createPosLocationGrid(req.body);
+      res.status(201).json(grid);
+    } catch (error) {
+      console.error("Error creating POS location grid:", error);
+      res.status(500).json({ error: "Failed to create POS location grid" });
+    }
+  });
+
+  // Update POS location grid entry
+  app.put("/api/pos/location-grid/:id", async (req: Request, res: Response) => {
+    try {
+      const grid = await storage.updatePosLocationGrid(req.params.id, req.body);
+      res.json(grid);
+    } catch (error) {
+      console.error("Error updating POS location grid:", error);
+      res.status(500).json({ error: "Failed to update POS location grid" });
+    }
+  });
+
+  // Delete POS location grid entry
+  app.delete("/api/pos/location-grid/:id", async (req: Request, res: Response) => {
+    try {
+      await storage.deletePosLocationGrid(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting POS location grid:", error);
+      res.status(500).json({ error: "Failed to delete POS location grid" });
+    }
+  });
+
+  // Get all POS assignments
+  app.get("/api/pos/assignments", async (_req: Request, res: Response) => {
+    try {
+      const assignments = await storage.getAllPosAssignments();
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error getting POS assignments:", error);
+      res.status(500).json({ error: "Failed to get POS assignments" });
+    }
+  });
+
+  // Get active POS assignments
+  app.get("/api/pos/assignments/active", async (_req: Request, res: Response) => {
+    try {
+      const assignments = await storage.getActivePosAssignments();
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error getting active POS assignments:", error);
+      res.status(500).json({ error: "Failed to get active POS assignments" });
+    }
+  });
+
+  // Get POS assignments by location
+  app.get("/api/pos/assignments/location/:locationId", async (req: Request, res: Response) => {
+    try {
+      const assignments = await storage.getPosAssignmentsByLocation(req.params.locationId);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error getting POS assignments by location:", error);
+      res.status(500).json({ error: "Failed to get POS assignments by location" });
+    }
+  });
+
+  // Get POS assignments by event date
+  app.get("/api/pos/assignments/event/:eventDate", async (req: Request, res: Response) => {
+    try {
+      const assignments = await storage.getPosAssignmentsByEvent(req.params.eventDate);
+      res.json(assignments);
+    } catch (error) {
+      console.error("Error getting POS assignments by event:", error);
+      res.status(500).json({ error: "Failed to get POS assignments by event" });
+    }
+  });
+
+  // Create POS assignment (IT assigns POS to location)
+  app.post("/api/pos/assignments", async (req: Request, res: Response) => {
+    try {
+      // Check if device is available
+      const device = await storage.getPosDevice(req.body.posDeviceId);
+      if (!device) {
+        return res.status(404).json({ error: "POS device not found" });
+      }
+      if (device.status === 'assigned') {
+        return res.status(400).json({ 
+          error: `POS #${device.deviceNumber} is already assigned to ${device.currentLocationName}` 
+        });
+      }
+      
+      const assignment = await storage.createPosAssignment(req.body);
+      res.status(201).json(assignment);
+    } catch (error) {
+      console.error("Error creating POS assignment:", error);
+      res.status(500).json({ error: "Failed to create POS assignment" });
+    }
+  });
+
+  // Return POS assignment
+  app.post("/api/pos/assignments/:id/return", async (req: Request, res: Response) => {
+    try {
+      const { returnedById, returnedByName } = req.body;
+      const assignment = await storage.returnPosAssignment(req.params.id, returnedById, returnedByName);
+      res.json(assignment);
+    } catch (error) {
+      console.error("Error returning POS assignment:", error);
+      res.status(500).json({ error: "Failed to return POS assignment" });
+    }
+  });
+
+  // Get all POS replacements
+  app.get("/api/pos/replacements", async (_req: Request, res: Response) => {
+    try {
+      const replacements = await storage.getAllPosReplacements();
+      res.json(replacements);
+    } catch (error) {
+      console.error("Error getting POS replacements:", error);
+      res.status(500).json({ error: "Failed to get POS replacements" });
+    }
+  });
+
+  // Get POS replacements by event
+  app.get("/api/pos/replacements/event/:eventDate", async (req: Request, res: Response) => {
+    try {
+      const replacements = await storage.getPosReplacementsByEvent(req.params.eventDate);
+      res.json(replacements);
+    } catch (error) {
+      console.error("Error getting POS replacements by event:", error);
+      res.status(500).json({ error: "Failed to get POS replacements by event" });
+    }
+  });
+
+  // Create POS replacement (swap a POS mid-event)
+  app.post("/api/pos/replacements", async (req: Request, res: Response) => {
+    try {
+      // Validate replacement device is available
+      const replacementDevice = await storage.getPosDevice(req.body.replacementPosId);
+      if (!replacementDevice) {
+        return res.status(404).json({ error: "Replacement POS device not found" });
+      }
+      if (replacementDevice.status === 'assigned') {
+        return res.status(400).json({ 
+          error: `Replacement POS #${replacementDevice.deviceNumber} is already assigned` 
+        });
+      }
+      
+      const replacement = await storage.createPosReplacement(req.body);
+      res.status(201).json(replacement);
+    } catch (error) {
+      console.error("Error creating POS replacement:", error);
+      res.status(500).json({ error: "Failed to create POS replacement" });
+    }
+  });
+
+  // Get all POS issues
+  app.get("/api/pos/issues", async (_req: Request, res: Response) => {
+    try {
+      const issues = await storage.getAllPosIssues();
+      res.json(issues);
+    } catch (error) {
+      console.error("Error getting POS issues:", error);
+      res.status(500).json({ error: "Failed to get POS issues" });
+    }
+  });
+
+  // Get open POS issues
+  app.get("/api/pos/issues/open", async (_req: Request, res: Response) => {
+    try {
+      const issues = await storage.getOpenPosIssues();
+      res.json(issues);
+    } catch (error) {
+      console.error("Error getting open POS issues:", error);
+      res.status(500).json({ error: "Failed to get open POS issues" });
+    }
+  });
+
+  // Get POS issues by location
+  app.get("/api/pos/issues/location/:locationId", async (req: Request, res: Response) => {
+    try {
+      const issues = await storage.getPosIssuesByLocation(req.params.locationId);
+      res.json(issues);
+    } catch (error) {
+      console.error("Error getting POS issues by location:", error);
+      res.status(500).json({ error: "Failed to get POS issues by location" });
+    }
+  });
+
+  // Create POS issue (report a problem)
+  app.post("/api/pos/issues", async (req: Request, res: Response) => {
+    try {
+      const issue = await storage.createPosIssue(req.body);
+      res.status(201).json(issue);
+    } catch (error) {
+      console.error("Error creating POS issue:", error);
+      res.status(500).json({ error: "Failed to create POS issue" });
+    }
+  });
+
+  // Update POS issue
+  app.put("/api/pos/issues/:id", async (req: Request, res: Response) => {
+    try {
+      const issue = await storage.updatePosIssue(req.params.id, req.body);
+      res.json(issue);
+    } catch (error) {
+      console.error("Error updating POS issue:", error);
+      res.status(500).json({ error: "Failed to update POS issue" });
+    }
+  });
+
+  // Assign POS issue to IT team member
+  app.post("/api/pos/issues/:id/assign", async (req: Request, res: Response) => {
+    try {
+      const { assignedToId, assignedToName } = req.body;
+      const issue = await storage.assignPosIssue(req.params.id, assignedToId, assignedToName);
+      res.json(issue);
+    } catch (error) {
+      console.error("Error assigning POS issue:", error);
+      res.status(500).json({ error: "Failed to assign POS issue" });
+    }
+  });
+
+  // Resolve POS issue
+  app.post("/api/pos/issues/:id/resolve", async (req: Request, res: Response) => {
+    try {
+      const { resolvedById, resolvedByName, resolution } = req.body;
+      const issue = await storage.resolvePosIssue(req.params.id, resolvedById, resolvedByName, resolution);
+      res.json(issue);
+    } catch (error) {
+      console.error("Error resolving POS issue:", error);
+      res.status(500).json({ error: "Failed to resolve POS issue" });
+    }
+  });
+
+  // Get POS overview (David's dashboard)
+  app.get("/api/pos/overview", async (_req: Request, res: Response) => {
+    try {
+      const [allDevices, activeAssignments, openIssues, locationGrid] = await Promise.all([
+        storage.getAllPosDevices(),
+        storage.getActivePosAssignments(),
+        storage.getOpenPosIssues(),
+        storage.getAllPosLocationGrid()
+      ]);
+      
+      const available = allDevices.filter(d => d.status === 'available');
+      const assigned = allDevices.filter(d => d.status === 'assigned');
+      const maintenance = allDevices.filter(d => d.status === 'maintenance');
+      
+      // Group by type
+      const byType: Record<string, { total: number; available: number; assigned: number }> = {};
+      allDevices.forEach(device => {
+        const type = device.deviceType;
+        if (!byType[type]) {
+          byType[type] = { total: 0, available: 0, assigned: 0 };
+        }
+        byType[type].total++;
+        if (device.status === 'available') byType[type].available++;
+        if (device.status === 'assigned') byType[type].assigned++;
+      });
+      
+      res.json({
+        summary: {
+          total: allDevices.length,
+          available: available.length,
+          assigned: assigned.length,
+          maintenance: maintenance.length
+        },
+        byType,
+        activeAssignments,
+        openIssues,
+        locationGrid
+      });
+    } catch (error) {
+      console.error("Error getting POS overview:", error);
+      res.status(500).json({ error: "Failed to get POS overview" });
+    }
+  });
+
   return httpServer;
 }
