@@ -1777,3 +1777,257 @@ export const DEFAULT_POS_TYPES = [
   { name: 'A700', description: 'Ingenico Axium A700 - Countertop POS', manufacturer: 'Ingenico' },
   { name: 'PAX', description: 'PAX Payment Terminal', manufacturer: 'PAX Technology' },
 ] as const;
+
+// =====================================
+// DOCUMENT SCANNING & TEMPLATES SYSTEM
+// =====================================
+
+// Document type categories for auto-recognition and routing
+export const scannedDocTypeEnum = pgEnum('scanned_doc_type', [
+  'bar_control',        // Bar control sheets
+  'alcohol_compliance', // Alcohol compliance forms
+  'stand_grid',         // Stand layout grids
+  'worker_grid',        // Worker assignment grids
+  'schedule',           // Staff schedules
+  'inventory_count',    // Inventory count sheets
+  'incident_report',    // Incident reports
+  'closing_checklist',  // Stand closing checklists
+  'temperature_log',    // Food temperature logs
+  'cash_count',         // Cash drawer counts
+  'delivery_receipt',   // Delivery receipts
+  'other'               // Other documents
+]);
+
+// Document templates - configurable by managers
+export const documentTemplates = pgTable("document_templates", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  documentType: scannedDocTypeEnum("document_type").notNull(),
+  description: text("description"),
+  fields: jsonb("fields").notNull(), // Array of field definitions: {name, type, required, options}
+  isActive: boolean("is_active").default(true),
+  isDefault: boolean("is_default").default(false), // System-provided default templates
+  createdById: varchar("created_by_id", { length: 36 }).references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Scanned documents - all scanned/captured documents with auto-classification
+export const scannedDocuments = pgTable("scanned_documents", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  documentType: scannedDocTypeEnum("document_type").notNull(),
+  detectedType: scannedDocTypeEnum("detected_type"), // AI-detected type (may differ from final)
+  confidence: text("confidence"), // AI confidence: high, medium, low
+  templateId: varchar("template_id", { length: 36 }).references(() => documentTemplates.id),
+  standId: varchar("stand_id", { length: 20 }).references(() => stands.id),
+  eventDate: text("event_date"),
+  eventName: text("event_name"),
+  imageUrl: text("image_url"), // Original scanned image
+  thumbnailUrl: text("thumbnail_url"),
+  extractedData: jsonb("extracted_data"), // OCR/AI extracted structured data
+  rawOcrText: text("raw_ocr_text"), // Raw OCR text for searchability
+  submittedById: varchar("submitted_by_id", { length: 36 }).references(() => users.id),
+  submittedByName: text("submitted_by_name"),
+  verifiedById: varchar("verified_by_id", { length: 36 }).references(() => users.id),
+  verifiedAt: timestamp("verified_at"),
+  status: text("status").default('pending'), // pending, verified, rejected
+  notes: text("notes"),
+  isSandbox: boolean("is_sandbox").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_scanned_docs_type").on(table.documentType),
+  index("IDX_scanned_docs_stand").on(table.standId),
+  index("IDX_scanned_docs_event").on(table.eventDate),
+  index("IDX_scanned_docs_status").on(table.status),
+]);
+
+// Insert schemas for document system
+export const insertDocumentTemplateSchema = createInsertSchema(documentTemplates).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertScannedDocumentSchema = createInsertSchema(scannedDocuments).omit({ id: true, createdAt: true });
+
+// Types for document system
+export type DocumentTemplate = typeof documentTemplates.$inferSelect;
+export type InsertDocumentTemplate = z.infer<typeof insertDocumentTemplateSchema>;
+export type ScannedDocument = typeof scannedDocuments.$inferSelect;
+export type InsertScannedDocument = z.infer<typeof insertScannedDocumentSchema>;
+
+// Document type display names and routing
+export const DOCUMENT_TYPE_CONFIG = {
+  bar_control: {
+    name: 'Bar Control Sheet',
+    category: 'Compliance',
+    icon: 'Wine',
+    routeTo: ['BarManager', 'OperationsManager'],
+    color: 'purple'
+  },
+  alcohol_compliance: {
+    name: 'Alcohol Compliance',
+    category: 'Compliance',
+    icon: 'Shield',
+    routeTo: ['AlcoholCompliance', 'BarManager'],
+    color: 'red'
+  },
+  stand_grid: {
+    name: 'Stand Grid',
+    category: 'Operations',
+    icon: 'Grid',
+    routeTo: ['OperationsManager', 'StandSupervisor'],
+    color: 'blue'
+  },
+  worker_grid: {
+    name: 'Worker Grid',
+    category: 'Operations',
+    icon: 'Users',
+    routeTo: ['OperationsManager', 'HRManager'],
+    color: 'green'
+  },
+  schedule: {
+    name: 'Schedule',
+    category: 'Operations',
+    icon: 'Calendar',
+    routeTo: ['OperationsManager', 'HRManager'],
+    color: 'cyan'
+  },
+  inventory_count: {
+    name: 'Inventory Count',
+    category: 'Finance',
+    icon: 'Package',
+    routeTo: ['WarehouseManager', 'OperationsManager'],
+    color: 'amber'
+  },
+  incident_report: {
+    name: 'Incident Report',
+    category: 'Compliance',
+    icon: 'AlertTriangle',
+    routeTo: ['OperationsManager', 'HRManager'],
+    color: 'red'
+  },
+  closing_checklist: {
+    name: 'Closing Checklist',
+    category: 'Operations',
+    icon: 'CheckSquare',
+    routeTo: ['StandSupervisor', 'OperationsManager'],
+    color: 'green'
+  },
+  temperature_log: {
+    name: 'Temperature Log',
+    category: 'Compliance',
+    icon: 'Thermometer',
+    routeTo: ['KitchenManager', 'OperationsManager'],
+    color: 'orange'
+  },
+  cash_count: {
+    name: 'Cash Count',
+    category: 'Finance',
+    icon: 'DollarSign',
+    routeTo: ['OperationsManager', 'WarehouseManager'],
+    color: 'green'
+  },
+  delivery_receipt: {
+    name: 'Delivery Receipt',
+    category: 'Operations',
+    icon: 'Truck',
+    routeTo: ['WarehouseManager'],
+    color: 'blue'
+  },
+  other: {
+    name: 'Other Document',
+    category: 'Other',
+    icon: 'FileText',
+    routeTo: ['OperationsManager'],
+    color: 'gray'
+  }
+} as const;
+
+// Default document templates (seed data)
+export const DEFAULT_DOCUMENT_TEMPLATES = [
+  {
+    name: 'Standard Bar Control Sheet',
+    documentType: 'bar_control',
+    description: 'Daily bar control sheet for tracking alcohol inventory and sales',
+    isDefault: true,
+    fields: [
+      { name: 'stand', type: 'text', required: true, label: 'Stand/Location' },
+      { name: 'date', type: 'date', required: true, label: 'Date' },
+      { name: 'shift', type: 'select', required: true, label: 'Shift', options: ['Day', 'Night'] },
+      { name: 'bartender', type: 'text', required: true, label: 'Bartender Name' },
+      { name: 'startingInventory', type: 'number', required: true, label: 'Starting Inventory' },
+      { name: 'received', type: 'number', required: false, label: 'Received During Shift' },
+      { name: 'endingInventory', type: 'number', required: true, label: 'Ending Inventory' },
+      { name: 'waste', type: 'number', required: false, label: 'Waste/Spillage' },
+      { name: 'sales', type: 'number', required: false, label: 'Total Sales' },
+      { name: 'notes', type: 'textarea', required: false, label: 'Notes' }
+    ]
+  },
+  {
+    name: 'Alcohol Compliance Check',
+    documentType: 'alcohol_compliance',
+    description: 'Alcohol compliance monitoring form',
+    isDefault: true,
+    fields: [
+      { name: 'stand', type: 'text', required: true, label: 'Stand/Location' },
+      { name: 'date', type: 'date', required: true, label: 'Date' },
+      { name: 'time', type: 'time', required: true, label: 'Time of Check' },
+      { name: 'vendorName', type: 'text', required: true, label: 'Vendor Name' },
+      { name: 'idChecked', type: 'boolean', required: true, label: 'ID Checked' },
+      { name: 'wristbandVerified', type: 'boolean', required: true, label: 'Wristband Verified' },
+      { name: 'overserviceObserved', type: 'boolean', required: true, label: 'Overservice Observed' },
+      { name: 'violationNoted', type: 'boolean', required: true, label: 'Violation Noted' },
+      { name: 'violationDetails', type: 'textarea', required: false, label: 'Violation Details' },
+      { name: 'inspector', type: 'text', required: true, label: 'Inspector Name' }
+    ]
+  },
+  {
+    name: 'Stand Assignment Grid',
+    documentType: 'stand_grid',
+    description: 'Stand layout and position assignments',
+    isDefault: true,
+    fields: [
+      { name: 'section', type: 'text', required: true, label: 'Section' },
+      { name: 'date', type: 'date', required: true, label: 'Date' },
+      { name: 'event', type: 'text', required: true, label: 'Event Name' },
+      { name: 'positions', type: 'grid', required: true, label: 'Positions', columns: ['Position', 'Stand ID', 'Status'] },
+      { name: 'notes', type: 'textarea', required: false, label: 'Notes' }
+    ]
+  },
+  {
+    name: 'Worker Assignment Grid',
+    documentType: 'worker_grid',
+    description: 'Worker assignments to stands and positions',
+    isDefault: true,
+    fields: [
+      { name: 'date', type: 'date', required: true, label: 'Date' },
+      { name: 'event', type: 'text', required: true, label: 'Event Name' },
+      { name: 'assignments', type: 'grid', required: true, label: 'Assignments', columns: ['Name', 'Stand', 'Position', 'Check-in Time'] },
+      { name: 'supervisor', type: 'text', required: true, label: 'Supervisor' },
+      { name: 'notes', type: 'textarea', required: false, label: 'Notes' }
+    ]
+  },
+  {
+    name: 'Staff Schedule',
+    documentType: 'schedule',
+    description: 'Daily staff schedule',
+    isDefault: true,
+    fields: [
+      { name: 'date', type: 'date', required: true, label: 'Date' },
+      { name: 'department', type: 'select', required: true, label: 'Department', options: ['Warehouse', 'Kitchen', 'Bar', 'Operations'] },
+      { name: 'shifts', type: 'grid', required: true, label: 'Shifts', columns: ['Name', 'Role', 'Start Time', 'End Time', 'Assignment'] },
+      { name: 'manager', type: 'text', required: true, label: 'Manager on Duty' }
+    ]
+  },
+  {
+    name: 'Inventory Count Sheet',
+    documentType: 'inventory_count',
+    description: 'Standard inventory count sheet',
+    isDefault: true,
+    fields: [
+      { name: 'stand', type: 'text', required: true, label: 'Stand/Location' },
+      { name: 'date', type: 'date', required: true, label: 'Date' },
+      { name: 'countType', type: 'select', required: true, label: 'Count Type', options: ['PreEvent', 'PostEvent', 'DayAfter'] },
+      { name: 'items', type: 'grid', required: true, label: 'Items', columns: ['Item Name', 'Count', 'Notes'] },
+      { name: 'counterName', type: 'text', required: true, label: 'Counter Name' },
+      { name: 'counterPhone', type: 'text', required: false, label: 'Counter Phone (Last 4)' }
+    ]
+  }
+] as const;
