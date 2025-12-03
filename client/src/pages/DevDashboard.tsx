@@ -7,7 +7,7 @@ import {
   Wine, Sparkles, Users, Radio, AlertTriangle, Truck,
   MessageSquare, Activity, ChevronDown, ChevronRight,
   Zap, Eye, RefreshCw, Trash2, Clock, CheckCircle2,
-  XCircle, Wifi, WifiOff, Siren, FlaskConical, ClipboardList
+  XCircle, Wifi, WifiOff, Siren, FlaskConical, ClipboardList, Crown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWebSocket, useWebSocketStore } from "@/lib/websocket";
@@ -17,6 +17,7 @@ import { FeatureInventory } from "@/components/FeatureInventory";
 import { AssetTracker } from "@/components/AssetTracker";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
+import { DashboardControls } from '@/components/DashboardControls';
 
 interface AccordionSectionProps {
   title: string;
@@ -173,6 +174,7 @@ export default function DevDashboard() {
   const wsStore = useWebSocketStore();
   const { isSandbox, enterSandbox, exitSandbox } = useMode();
   
+  const [showDashboardControls, setShowDashboardControls] = useState(false);
   const [systemStats, setSystemStats] = useState({
     activeUsers: 0,
     pendingDeliveries: 0,
@@ -526,6 +528,16 @@ export default function DevDashboard() {
             <Trash2 className="h-4 w-4 mr-2" />
             Reset All Local Data
           </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="w-full mt-2 text-xs border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 bg-gradient-to-r from-cyan-500/10 to-purple-500/10"
+            onClick={() => setShowDashboardControls(true)}
+            data-testid="button-dashboard-controls"
+          >
+            <Crown className="h-4 w-4 mr-2" />
+            Dashboard Controls (David's Superpower)
+          </Button>
         </AccordionSection>
 
         {/* Feature Inventory */}
@@ -604,6 +616,12 @@ export default function DevDashboard() {
           />
         ))}
       </div>
+
+      {/* Dashboard Controls Modal */}
+      <DashboardControls
+        isOpen={showDashboardControls}
+        onClose={() => setShowDashboardControls(false)}
+      />
     </div>
   );
 }
