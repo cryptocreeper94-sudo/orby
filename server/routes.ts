@@ -4513,6 +4513,179 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ========== DEPARTMENT INVENTORY CONTROL ==========
+  // Authorized PINs for inventory management: Bar Manager (Darby), Chef Deb, Sheila, David, Jason
+  const INVENTORY_ADMIN_PINS = ['2424', '0424', '3737', '4545', '4646'];
+  
+  // Get inventory locations (optionally filter by department)
+  app.get("/api/inventory/locations", async (req: Request, res: Response) => {
+    try {
+      const department = req.query.department as string | undefined;
+      const locations = await storage.getInventoryLocations(department);
+      res.json(locations);
+    } catch (error) {
+      console.error("Error getting inventory locations:", error);
+      res.status(500).json({ error: "Failed to get inventory locations" });
+    }
+  });
+
+  // Create inventory location
+  app.post("/api/inventory/locations", async (req: Request, res: Response) => {
+    try {
+      const { userPin, ...locationData } = req.body;
+      if (!userPin || !INVENTORY_ADMIN_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+      const location = await storage.createInventoryLocation(locationData);
+      res.json(location);
+    } catch (error) {
+      console.error("Error creating inventory location:", error);
+      res.status(500).json({ error: "Failed to create inventory location" });
+    }
+  });
+
+  // Get items by department
+  app.get("/api/inventory/items", async (req: Request, res: Response) => {
+    try {
+      const department = req.query.department as string;
+      const productType = req.query.productType as string;
+      
+      if (department) {
+        const items = await storage.getItemsByDepartment(department);
+        res.json(items);
+      } else if (productType) {
+        const items = await storage.getItemsByProductType(productType);
+        res.json(items);
+      } else {
+        const items = await storage.getAllItems();
+        res.json(items);
+      }
+    } catch (error) {
+      console.error("Error getting inventory items:", error);
+      res.status(500).json({ error: "Failed to get inventory items" });
+    }
+  });
+
+  // Update item department info
+  app.put("/api/inventory/items/:itemId", async (req: Request, res: Response) => {
+    try {
+      const { userPin, ...updates } = req.body;
+      if (!userPin || !INVENTORY_ADMIN_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+      const item = await storage.updateItemDepartmentInfo(req.params.itemId, updates);
+      res.json(item);
+    } catch (error) {
+      console.error("Error updating item:", error);
+      res.status(500).json({ error: "Failed to update item" });
+    }
+  });
+
+  // Get stock levels by location
+  app.get("/api/inventory/stock/:locationId", async (req: Request, res: Response) => {
+    try {
+      const stock = await storage.getDepartmentStock(req.params.locationId);
+      res.json(stock);
+    } catch (error) {
+      console.error("Error getting stock levels:", error);
+      res.status(500).json({ error: "Failed to get stock levels" });
+    }
+  });
+
+  // Update stock on-hand
+  app.post("/api/inventory/stock", async (req: Request, res: Response) => {
+    try {
+      const { userPin, locationId, itemId, onHand, countedBy } = req.body;
+      if (!userPin || !INVENTORY_ADMIN_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+      const stock = await storage.upsertDepartmentStock({ locationId, itemId, onHand, lastCountedBy: countedBy });
+      res.json(stock);
+    } catch (error) {
+      console.error("Error updating stock:", error);
+      res.status(500).json({ error: "Failed to update stock" });
+    }
+  });
+
+  // Get par levels by location
+  app.get("/api/inventory/par-levels/:locationId", async (req: Request, res: Response) => {
+    try {
+      const parLevels = await storage.getDeptParLevels(req.params.locationId);
+      res.json(parLevels);
+    } catch (error) {
+      console.error("Error getting par levels:", error);
+      res.status(500).json({ error: "Failed to get par levels" });
+    }
+  });
+
+  // Set par level
+  app.post("/api/inventory/par-levels", async (req: Request, res: Response) => {
+    try {
+      const { userPin, ...parLevelData } = req.body;
+      if (!userPin || !INVENTORY_ADMIN_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+      const parLevel = await storage.upsertDeptParLevel(parLevelData);
+      res.json(parLevel);
+    } catch (error) {
+      console.error("Error setting par level:", error);
+      res.status(500).json({ error: "Failed to set par level" });
+    }
+  });
+
+  // Get integration mappings for Yellow Dog/PAX
+  app.get("/api/inventory/integrations/:system", async (req: Request, res: Response) => {
+    try {
+      const mappings = await storage.getIntegrationMappingsBySystem(req.params.system);
+      res.json(mappings);
+    } catch (error) {
+      console.error("Error getting integration mappings:", error);
+      res.status(500).json({ error: "Failed to get integration mappings" });
+    }
+  });
+
+  // Create integration mapping
+  app.post("/api/inventory/integrations", async (req: Request, res: Response) => {
+    try {
+      const { userPin, ...mappingData } = req.body;
+      if (!userPin || !INVENTORY_ADMIN_PINS.includes(userPin)) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+      const mapping = await storage.createIntegrationMapping(mappingData);
+      res.json(mapping);
+    } catch (error) {
+      console.error("Error creating integration mapping:", error);
+      res.status(500).json({ error: "Failed to create integration mapping" });
+    }
+  });
+
+  // Get inventory dashboard summary for Ops Command Center
+  app.get("/api/inventory/dashboard-summary", async (req: Request, res: Response) => {
+    try {
+      const department = req.query.department as string | undefined;
+      const locations = await storage.getInventoryLocations(department);
+      
+      const summary = {
+        totalLocations: locations.length,
+        barLocations: locations.filter((l: any) => l.department === 'Bar').length,
+        kitchenLocations: locations.filter((l: any) => l.department === 'Kitchen').length,
+        yellowDogMapped: 0,
+        paxPayMapped: 0
+      };
+      
+      // Get integration counts
+      const yellowDog = await storage.getIntegrationMappingsBySystem('YellowDog');
+      const paxPay = await storage.getIntegrationMappingsBySystem('PAXPay');
+      summary.yellowDogMapped = yellowDog.length;
+      summary.paxPayMapped = paxPay.length;
+      
+      res.json(summary);
+    } catch (error) {
+      console.error("Error getting inventory dashboard summary:", error);
+      res.status(500).json({ error: "Failed to get inventory dashboard summary" });
+    }
+  });
+
   // ========== SANDBOX PROTECTION MIDDLEWARE ==========
   // This checks if system is live before allowing data-modifying operations
   // Note: GET operations are always allowed, only POST/PUT/DELETE for core data are blocked

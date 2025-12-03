@@ -474,6 +474,38 @@ export interface IStorage {
   getCulinaryTeamMembers(): Promise<any[]>;
   getCulinaryManagers(): Promise<any[]>;
 
+  // ============ DEPARTMENT INVENTORY CONTROL ============
+  // Inventory Locations
+  getInventoryLocations(department?: string): Promise<any[]>;
+  getInventoryLocation(id: string): Promise<any | undefined>;
+  createInventoryLocation(location: any): Promise<any>;
+  updateInventoryLocation(id: string, updates: any): Promise<any>;
+  deleteInventoryLocation(id: string): Promise<void>;
+  
+  // Items by Department
+  getItemsByDepartment(department: string): Promise<any[]>;
+  getItemsByProductType(productType: string): Promise<any[]>;
+  updateItemDepartmentInfo(itemId: string, updates: any): Promise<any>;
+  
+  // Department Stock
+  getDepartmentStock(locationId: string): Promise<any[]>;
+  getStockByItem(itemId: string): Promise<any[]>;
+  upsertDepartmentStock(stock: any): Promise<any>;
+  updateStockOnHand(locationId: string, itemId: string, onHand: number, countedBy: string): Promise<any>;
+  
+  // Par Levels
+  getDeptParLevels(locationId: string): Promise<any[]>;
+  getDeptParLevel(locationId: string, itemId: string): Promise<any | undefined>;
+  upsertDeptParLevel(parLevel: any): Promise<any>;
+  deleteDeptParLevel(locationId: string, itemId: string): Promise<void>;
+  
+  // Integration Mappings (Yellow Dog, PAX Pay)
+  getIntegrationMappings(itemId: string): Promise<any[]>;
+  getIntegrationMappingsBySystem(system: string): Promise<any[]>;
+  createIntegrationMapping(mapping: any): Promise<any>;
+  updateIntegrationMapping(id: string, updates: any): Promise<any>;
+  deleteIntegrationMapping(id: string): Promise<void>;
+
   // ============ KEY & RADIO CHECKOUT SYSTEM ============
   // Key Sets (50 available)
   getAllKeySets(): Promise<KeySet[]>;
@@ -2754,6 +2786,217 @@ export class DatabaseStorage implements IStorage {
       ORDER BY role, name
     `);
     return result.rows as any[];
+  }
+
+  // ============ DEPARTMENT INVENTORY CONTROL ============
+  // Inventory Locations
+  async getInventoryLocations(department?: string): Promise<any[]> {
+    if (department) {
+      const result = await db.execute(sql`
+        SELECT * FROM inventory_locations WHERE department = ${department} ORDER BY name
+      `);
+      return result.rows as any[];
+    }
+    const result = await db.execute(sql`
+      SELECT * FROM inventory_locations ORDER BY department, name
+    `);
+    return result.rows as any[];
+  }
+
+  async getInventoryLocation(id: string): Promise<any | undefined> {
+    const result = await db.execute(sql`
+      SELECT * FROM inventory_locations WHERE id = ${id}
+    `);
+    return result.rows[0];
+  }
+
+  async createInventoryLocation(location: any): Promise<any> {
+    const result = await db.execute(sql`
+      INSERT INTO inventory_locations (name, department, stand_id, is_primary, notes)
+      VALUES (${location.name}, ${location.department}, ${location.standId || null}, ${location.isPrimary || false}, ${location.notes || null})
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async updateInventoryLocation(id: string, updates: any): Promise<any> {
+    const result = await db.execute(sql`
+      UPDATE inventory_locations 
+      SET name = COALESCE(${updates.name}, name),
+          department = COALESCE(${updates.department}, department),
+          stand_id = COALESCE(${updates.standId}, stand_id),
+          is_primary = COALESCE(${updates.isPrimary}, is_primary),
+          notes = COALESCE(${updates.notes}, notes)
+      WHERE id = ${id}
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async deleteInventoryLocation(id: string): Promise<void> {
+    await db.execute(sql`DELETE FROM inventory_locations WHERE id = ${id}`);
+  }
+
+  // Items by Department
+  async getItemsByDepartment(department: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT * FROM items WHERE inventory_department = ${department} ORDER BY name
+    `);
+    return result.rows as any[];
+  }
+
+  async getItemsByProductType(productType: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT * FROM items WHERE product_type = ${productType} ORDER BY name
+    `);
+    return result.rows as any[];
+  }
+
+  async updateItemDepartmentInfo(itemId: string, updates: any): Promise<any> {
+    const result = await db.execute(sql`
+      UPDATE items 
+      SET inventory_department = COALESCE(${updates.inventoryDepartment}, inventory_department),
+          product_type = COALESCE(${updates.productType}, product_type),
+          unit = COALESCE(${updates.unit}, unit),
+          pack_size = COALESCE(${updates.packSize}, pack_size),
+          sku = COALESCE(${updates.sku}, sku),
+          barcode = COALESCE(${updates.barcode}, barcode)
+      WHERE id = ${itemId}
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  // Department Stock
+  async getDepartmentStock(locationId: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT ds.*, i.name as item_name, i.category, i.product_type, i.unit
+      FROM department_stock ds
+      JOIN items i ON ds.item_id = i.id
+      WHERE ds.location_id = ${locationId}
+      ORDER BY i.name
+    `);
+    return result.rows as any[];
+  }
+
+  async getStockByItem(itemId: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT ds.*, il.name as location_name, il.department
+      FROM department_stock ds
+      JOIN inventory_locations il ON ds.location_id = il.id
+      WHERE ds.item_id = ${itemId}
+    `);
+    return result.rows as any[];
+  }
+
+  async upsertDepartmentStock(stock: any): Promise<any> {
+    const result = await db.execute(sql`
+      INSERT INTO department_stock (location_id, item_id, on_hand, last_counted_by, last_counted_at)
+      VALUES (${stock.locationId}, ${stock.itemId}, ${stock.onHand || 0}, ${stock.lastCountedBy || null}, NOW())
+      ON CONFLICT (location_id, item_id) DO UPDATE SET
+        on_hand = ${stock.onHand || 0},
+        last_counted_by = ${stock.lastCountedBy || null},
+        last_counted_at = NOW(),
+        updated_at = NOW()
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async updateStockOnHand(locationId: string, itemId: string, onHand: number, countedBy: string): Promise<any> {
+    const result = await db.execute(sql`
+      UPDATE department_stock 
+      SET on_hand = ${onHand}, last_counted_by = ${countedBy}, last_counted_at = NOW(), updated_at = NOW()
+      WHERE location_id = ${locationId} AND item_id = ${itemId}
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  // Par Levels
+  async getDeptParLevels(locationId: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT pl.*, i.name as item_name, i.category, i.product_type
+      FROM department_par_levels pl
+      JOIN items i ON pl.item_id = i.id
+      WHERE pl.location_id = ${locationId}
+      ORDER BY i.name
+    `);
+    return result.rows as any[];
+  }
+
+  async getDeptParLevel(locationId: string, itemId: string): Promise<any | undefined> {
+    const result = await db.execute(sql`
+      SELECT * FROM department_par_levels 
+      WHERE location_id = ${locationId} AND item_id = ${itemId}
+    `);
+    return result.rows[0];
+  }
+
+  async upsertDeptParLevel(parLevel: any): Promise<any> {
+    const result = await db.execute(sql`
+      INSERT INTO department_par_levels (location_id, item_id, par_qty, min_qty, max_qty)
+      VALUES (${parLevel.locationId}, ${parLevel.itemId}, ${parLevel.parQty}, ${parLevel.minQty || 0}, ${parLevel.maxQty || null})
+      ON CONFLICT (location_id, item_id) DO UPDATE SET
+        par_qty = ${parLevel.parQty},
+        min_qty = ${parLevel.minQty || 0},
+        max_qty = ${parLevel.maxQty || null}
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async deleteDeptParLevel(locationId: string, itemId: string): Promise<void> {
+    await db.execute(sql`
+      DELETE FROM department_par_levels WHERE location_id = ${locationId} AND item_id = ${itemId}
+    `);
+  }
+
+  // Integration Mappings (Yellow Dog, PAX Pay)
+  async getIntegrationMappings(itemId: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT * FROM inventory_integrations WHERE item_id = ${itemId}
+    `);
+    return result.rows as any[];
+  }
+
+  async getIntegrationMappingsBySystem(system: string): Promise<any[]> {
+    const result = await db.execute(sql`
+      SELECT ii.*, i.name as item_name, i.sku, i.barcode
+      FROM inventory_integrations ii
+      JOIN items i ON ii.item_id = i.id
+      WHERE ii.system = ${system}
+      ORDER BY i.name
+    `);
+    return result.rows as any[];
+  }
+
+  async createIntegrationMapping(mapping: any): Promise<any> {
+    const result = await db.execute(sql`
+      INSERT INTO inventory_integrations (item_id, system, external_id, external_sku, external_name, direction, sync_status)
+      VALUES (${mapping.itemId}, ${mapping.system}, ${mapping.externalId || null}, ${mapping.externalSku || null}, ${mapping.externalName || null}, ${mapping.direction || 'Bidirectional'}, 'Pending')
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async updateIntegrationMapping(id: string, updates: any): Promise<any> {
+    const result = await db.execute(sql`
+      UPDATE inventory_integrations 
+      SET external_id = COALESCE(${updates.externalId}, external_id),
+          external_sku = COALESCE(${updates.externalSku}, external_sku),
+          external_name = COALESCE(${updates.externalName}, external_name),
+          direction = COALESCE(${updates.direction}, direction),
+          sync_status = COALESCE(${updates.syncStatus}, sync_status),
+          last_sync_at = CASE WHEN ${updates.syncStatus} = 'Synced' THEN NOW() ELSE last_sync_at END
+      WHERE id = ${id}
+      RETURNING *
+    `);
+    return result.rows[0];
+  }
+
+  async deleteIntegrationMapping(id: string): Promise<void> {
+    await db.execute(sql`DELETE FROM inventory_integrations WHERE id = ${id}`);
   }
 
   // ============ KEY & RADIO CHECKOUT SYSTEM ============
