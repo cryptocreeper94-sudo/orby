@@ -264,7 +264,9 @@ export function UniversalDocumentScanner({
           scannedDocumentId: savedDoc.id,
           extractedData: classificationResult?.extractedData,
           confidence: classificationResult?.confidence,
-          isSandbox
+          isSandbox,
+          routingDestination: selectedRouting || suggestedRouting?.destination || 'Document Hub',
+          routingDepartment: suggestedRouting?.department || 'General'
         },
         notes
       });
@@ -612,38 +614,39 @@ export function UniversalDocumentScanner({
                         data-testid="input-notes"
                       />
                     </div>
-                  </div>
 
-                  <div className="flex gap-3 pt-2">
-                    <Button
-                      onClick={retakePhoto}
-                      variant="outline"
-                      className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
-                      disabled={isSaving}
-                      data-testid="button-retake-2"
-                    >
-                      <RotateCcw className="h-4 w-4 mr-2" />
-                      Retake
-                    </Button>
-                    <Button
-                      onClick={saveDocument}
-                      className="flex-[2] bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium"
-                      disabled={isSaving || !documentType || !title}
-                      data-testid="button-save-document"
-                    >
-                      {isSaving ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <CheckCircle className="h-4 w-4 mr-2" />
-                          Save & Route Document
-                        </>
-                      )}
-                    </Button>
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        onClick={retakePhoto}
+                        variant="outline"
+                        className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                        disabled={isSaving}
+                        data-testid="button-retake-2"
+                      >
+                        <RotateCcw className="h-4 w-4 mr-2" />
+                        Retake
+                      </Button>
+                      <Button
+                        onClick={saveDocument}
+                        className="flex-[2] bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium"
+                        disabled={isSaving || !documentType || !title}
+                        data-testid="button-save-document"
+                      >
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Save & Route Document
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
+                  )}
                 </div>
               )}
             </div>
