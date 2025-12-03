@@ -39,6 +39,7 @@ import {
   GlowButton
 } from "@/components/ui/premium";
 import { useStore } from "@/lib/mockData";
+import { useMode } from "@/lib/ModeContext";
 import {
   Select,
   SelectContent,
@@ -162,6 +163,7 @@ export default function DocumentHub() {
   const [, setLocation] = useLocation();
   const currentUser = useStore((state: { currentUser: any }) => state.currentUser);
   const { toast } = useToast();
+  const { isSandbox } = useMode();
 
   const [documents, setDocuments] = useState<ManagerDocument[]>([]);
   const [stands, setStands] = useState<Stand[]>([]);
@@ -605,6 +607,7 @@ export default function DocumentHub() {
               fetchData();
               setShowScanner(false);
             }}
+            isSandbox={isSandbox}
           />
         )}
       </div>
