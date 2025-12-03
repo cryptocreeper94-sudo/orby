@@ -61,7 +61,7 @@ export default function LoginPage() {
       const role = currentUser.role as string;
       const department = currentUser.department as string | undefined;
       
-      // Developer/Jason (0424) - always show role picker, never reset PIN
+      // Developer/Jason (0424) - show role picker
       if (currentUser.name === 'Developer' || currentUser.pin === '0424') {
         if (pendingDevLogin) {
           setShowDevRolePicker(true);
@@ -74,12 +74,6 @@ export default function LoginPage() {
         } else {
           setLocation("/dev");
         }
-        return;
-      }
-      
-      // Other users - check for PIN reset requirement
-      if (currentUser.requiresPinReset) {
-        setLocation("/set-pin");
         return;
       }
       else if (role === 'OperationsManager' || role === 'GeneralManager' || role === 'RegionalVP') setLocation("/command-center");
@@ -207,8 +201,8 @@ export default function LoginPage() {
                     <FormControl>
                       <Input 
                         type="password" 
-                        placeholder="0000" 
-                        className="text-center text-3xl tracking-[1em] h-16 font-mono border-2 border-white/20 bg-white/10 text-white placeholder:text-white/40 focus:border-cyan-400 focus:ring-cyan-400/50 focus-visible:ring-offset-0" 
+                        placeholder="••••" 
+                        className="text-center text-3xl tracking-[0.5em] h-16 font-mono border-2 border-white/20 bg-white/10 text-white placeholder:text-white/30 focus:border-cyan-400 focus:ring-cyan-400/50 focus-visible:ring-offset-0" 
                         maxLength={4}
                         {...field} 
                         data-testid="input-pin"
@@ -227,23 +221,6 @@ export default function LoginPage() {
                 <ShieldCheck className="mr-2 h-5 w-5" /> 
                 Verify Identity
               </Button>
-              
-              <div className="mt-6 pt-4 border-t border-white/10">
-                <Button 
-                  type="button"
-                  variant="outline"
-                  className="w-full h-10 border-cyan-500/50 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20 hover:border-cyan-400"
-                  onClick={() => {
-                    form.setValue("pin", "0424");
-                    setTimeout(() => form.handleSubmit(onSubmit)(), 100);
-                  }}
-                  data-testid="button-dev-login"
-                >
-                  <ShieldCheck className="mr-2 h-4 w-4" />
-                  Quick Dev Access
-                </Button>
-              </div>
-              
               </form>
           </Form>
 
