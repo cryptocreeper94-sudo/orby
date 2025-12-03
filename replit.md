@@ -74,6 +74,27 @@ Orby (getorby.io) is a comprehensive Progressive Web App (PWA) designed to unify
 - Brand: Aqua theme (#06B6D4), Orby mascot (aqua planet character)
 - Domain: getorby.io
 
+## Manager Roster (v1.0.4)
+| Name | PIN | Role | Dashboard |
+|------|-----|------|-----------|
+| Jason | 0424 | Developer | Dev Dashboard or Command Center |
+| David | 2424 | Operations Manager | Command Center |
+| Megan | 9090 | General Manager | Command Center |
+| Brian | 8080 | Regional VP | Command Center |
+| Pete | 7070 | Finance Manager | Admin Dashboard |
+| KD | 8888 | HR Admin | Admin Dashboard |
+| Brooke K | 6060 | HR Manager | Admin Dashboard |
+| Chef Deb | 3737 | Culinary Director | Culinary Dashboard |
+| Shelia | 4545 | Supervisor | Supervisor Dashboard |
+| Darby | 4646 | Bar Manager | Admin Dashboard |
+| Jay | 7171 | Purchasing Manager | Admin Dashboard |
+| AJ | 8181 | Warehouse Manager | Warehouse Dashboard |
+
+### Sample Staff (for testing)
+- Lisa (Cook): 5252
+- Marcus (Cook): 5151
+- Tony (Cook): 5353
+
 ## System Architecture
 Orby is a full-stack PWA built with a React frontend and an Express backend, using PostgreSQL with Drizzle ORM. The platform emphasizes a mobile-first, touch-optimized UI/UX with Framer Motion animations, dynamic glow effects, glassmorphism with backdrop blur, and a dark theme featuring aqua/cyan accent gradients.
 

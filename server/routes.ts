@@ -313,7 +313,7 @@ export async function registerRoutes(
       // Filter to Legends employees (management, supervisors, admins, etc.)
       const legendsStaff = allUsers.filter((u: any) => 
         u.employmentAffiliation === 'Legends' || 
-        ['Admin', 'OperationsManager', 'Supervisor', 'IT', 'AlcoholCompliance', 'CheckInAssistant', 'ManagementCore', 'ManagementAssistant'].includes(u.role)
+        ['Admin', 'OperationsManager', 'GeneralManager', 'RegionalVP', 'WarehouseManager', 'Supervisor', 'IT', 'AlcoholCompliance', 'CheckInAssistant', 'ManagementCore', 'ManagementAssistant', 'CulinaryDirector', 'CulinaryCook'].includes(u.role)
       );
       
       // Map to safe response format (show presetPin but never actual PIN if changed)
