@@ -3740,6 +3740,55 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ========== DASHBOARD CONFIGURATION (David's Superpower) ==========
+
+  // Get all dashboard configs
+  app.get("/api/dashboard-configs", async (_req: Request, res: Response) => {
+    try {
+      const configs = await storage.getAllDashboardConfigs();
+      res.json(configs);
+    } catch (error) {
+      console.error("Error getting dashboard configs:", error);
+      res.status(500).json({ error: "Failed to get dashboard configs" });
+    }
+  });
+
+  // Get dashboard config for a specific role
+  app.get("/api/dashboard-configs/:role", async (req: Request, res: Response) => {
+    try {
+      const config = await storage.getDashboardConfig(req.params.role);
+      res.json(config || null);
+    } catch (error) {
+      console.error("Error getting dashboard config:", error);
+      res.status(500).json({ error: "Failed to get dashboard config" });
+    }
+  });
+
+  // Update dashboard config for a role (David/Developer only)
+  app.put("/api/dashboard-configs/:role", async (req: Request, res: Response) => {
+    try {
+      const config = await storage.upsertDashboardConfig({
+        targetRole: req.params.role,
+        ...req.body
+      });
+      res.json(config);
+    } catch (error) {
+      console.error("Error updating dashboard config:", error);
+      res.status(500).json({ error: "Failed to update dashboard config" });
+    }
+  });
+
+  // Reset dashboard config to defaults
+  app.delete("/api/dashboard-configs/:role", async (req: Request, res: Response) => {
+    try {
+      await storage.resetDashboardConfig(req.params.role);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error resetting dashboard config:", error);
+      res.status(500).json({ error: "Failed to reset dashboard config" });
+    }
+  });
+
   // ========== SUPERVISOR LIVE TRACKING ==========
   
   // Get live supervisor view (sessions + recent activity)

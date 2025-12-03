@@ -8,7 +8,7 @@ import {
   auditLogs, emergencyAlerts, emergencyResponders, emergencyEscalationHistory, emergencyAlertNotifications,
   orbitRosters, orbitShifts, deliveryRequests, departmentContacts, alcoholViolations,
   standItems, managerDocuments, assetStamps, blockchainVerifications, complianceAlerts,
-  supervisorSessions, supervisorActivity,
+  supervisorSessions, supervisorActivity, dashboardConfigs,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -57,7 +57,8 @@ import {
   type BlockchainVerification, type InsertBlockchainVerification,
   type ComplianceAlert, type InsertComplianceAlert,
   type SupervisorSession, type InsertSupervisorSession,
-  type SupervisorActivity, type InsertSupervisorActivity
+  type SupervisorActivity, type InsertSupervisorActivity,
+  type DashboardConfig, type InsertDashboardConfig
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray, ilike, sql } from "drizzle-orm";
@@ -411,6 +412,12 @@ export interface IStorage {
   getComplianceAlertsByType(alertType: string): Promise<ComplianceAlert[]>;
   createComplianceAlert(alert: InsertComplianceAlert): Promise<ComplianceAlert>;
   resolveComplianceAlert(id: string, resolvedById: string): Promise<void>;
+
+  // Dashboard Configuration (David's Superpower)
+  getDashboardConfig(targetRole: string): Promise<DashboardConfig | undefined>;
+  getAllDashboardConfigs(): Promise<DashboardConfig[]>;
+  upsertDashboardConfig(config: InsertDashboardConfig): Promise<DashboardConfig>;
+  resetDashboardConfig(targetRole: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2307,6 +2314,34 @@ export class DatabaseStorage implements IStorage {
     const sessions = await this.getActiveSupervisorSessions();
     const recentActivity = await this.getRecentSupervisorActivity(30);
     return { sessions, recentActivity };
+  }
+
+  // ============ DASHBOARD CONFIGURATION (David's Superpower) ============
+  async getDashboardConfig(targetRole: string): Promise<DashboardConfig | undefined> {
+    const [config] = await db.select().from(dashboardConfigs)
+      .where(eq(dashboardConfigs.targetRole, targetRole));
+    return config || undefined;
+  }
+
+  async getAllDashboardConfigs(): Promise<DashboardConfig[]> {
+    return await db.select().from(dashboardConfigs);
+  }
+
+  async upsertDashboardConfig(config: InsertDashboardConfig): Promise<DashboardConfig> {
+    const existing = await this.getDashboardConfig(config.targetRole);
+    if (existing) {
+      const [updated] = await db.update(dashboardConfigs)
+        .set({ ...config, updatedAt: new Date() })
+        .where(eq(dashboardConfigs.targetRole, config.targetRole))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(dashboardConfigs).values(config).returning();
+    return created;
+  }
+
+  async resetDashboardConfig(targetRole: string): Promise<void> {
+    await db.delete(dashboardConfigs).where(eq(dashboardConfigs.targetRole, targetRole));
   }
 }
 
