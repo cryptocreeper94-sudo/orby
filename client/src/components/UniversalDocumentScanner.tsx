@@ -203,23 +203,23 @@ export function UniversalDocumentScanner({
       const savedDoc = await response.json();
 
       const categoryMapping: Record<string, string> = {
-        bar_control: 'Compliance',
-        alcohol_compliance: 'Compliance',
-        inventory_count: 'CountReport',
-        incident_report: 'IncidentReport',
-        closing_checklist: 'Closing',
-        temperature_log: 'Compliance',
-        cash_count: 'Finance',
-        stand_grid: 'Operations',
-        worker_grid: 'Operations',
-        schedule: 'Operations',
-        delivery_receipt: 'Operations',
-        other: 'Other'
+        bar_control: 'violation',
+        alcohol_compliance: 'violation',
+        inventory_count: 'count_report',
+        incident_report: 'incident',
+        closing_checklist: 'closing',
+        temperature_log: 'violation',
+        cash_count: 'count_report',
+        stand_grid: 'other',
+        worker_grid: 'other',
+        schedule: 'other',
+        delivery_receipt: 'other',
+        other: 'other'
       };
 
       await apiRequest('POST', '/api/manager-documents', {
         title,
-        category: categoryMapping[documentType] || 'Other',
+        category: categoryMapping[documentType] || 'other',
         subcategory: documentType,
         standId: standId || null,
         eventDate: eventDate || null,

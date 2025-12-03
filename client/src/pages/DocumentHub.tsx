@@ -6,12 +6,10 @@ import {
   Search,
   Calendar,
   Store,
-  Filter,
   Download,
   Eye,
   Trash2,
   Clock,
-  User,
   FolderOpen,
   ClipboardList,
   AlertTriangle,
@@ -20,11 +18,7 @@ import {
   AlertCircle,
   FileStack,
   BookOpen,
-  ScanLine,
-  DollarSign,
-  Users,
-  Grid3X3,
-  Thermometer
+  ScanLine
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -60,7 +54,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventReportBuilder } from "@/components/EventReportBuilder";
 import { UniversalDocumentScanner } from "@/components/UniversalDocumentScanner";
 
-type DocumentCategory = 'count_report' | 'incident' | 'violation' | 'closing' | 'other' | 'compliance' | 'finance' | 'operations';
+type DocumentCategory = 'count_report' | 'incident' | 'violation' | 'closing' | 'other';
 
 interface ManagerDocument {
   id: string;
@@ -87,17 +81,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string 
     icon: ClipboardList,
     color: 'cyan'
   },
-  CountReport: {
-    label: 'Count Reports',
-    icon: ClipboardList,
-    color: 'cyan'
-  },
   incident: {
-    label: 'Incidents',
-    icon: AlertTriangle,
-    color: 'amber'
-  },
-  IncidentReport: {
     label: 'Incidents',
     icon: AlertTriangle,
     color: 'amber'
@@ -112,51 +96,28 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string 
     icon: FileText,
     color: 'purple'
   },
-  Closing: {
-    label: 'Closing Docs',
-    icon: FileText,
-    color: 'purple'
-  },
-  compliance: {
-    label: 'Compliance',
-    icon: Wine,
-    color: 'emerald'
-  },
-  Compliance: {
-    label: 'Compliance',
-    icon: Wine,
-    color: 'emerald'
-  },
-  finance: {
-    label: 'Finance',
-    icon: DollarSign,
-    color: 'green'
-  },
-  Finance: {
-    label: 'Finance',
-    icon: DollarSign,
-    color: 'green'
-  },
-  operations: {
-    label: 'Operations',
-    icon: Grid3X3,
-    color: 'blue'
-  },
-  Operations: {
-    label: 'Operations',
-    icon: Grid3X3,
-    color: 'blue'
-  },
   other: {
     label: 'Other',
     icon: FolderOpen,
     color: 'slate'
-  },
-  Other: {
-    label: 'Other',
-    icon: FolderOpen,
-    color: 'slate'
   }
+};
+
+const normalizeCategory = (category: string): DocumentCategory => {
+  const normalized = category.toLowerCase();
+  const categoryMap: Record<string, DocumentCategory> = {
+    'count_report': 'count_report',
+    'countreport': 'count_report',
+    'incident': 'incident',
+    'incidentreport': 'incident',
+    'violation': 'violation',
+    'compliance': 'violation',
+    'closing': 'closing',
+    'finance': 'count_report',
+    'operations': 'other',
+    'other': 'other'
+  };
+  return categoryMap[normalized] || 'other';
 };
 
 export default function DocumentHub() {
@@ -215,7 +176,8 @@ export default function DocumentHub() {
       doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       doc.notes?.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesCategory = selectedCategory === 'all' || doc.category === selectedCategory;
+    const docCategory = normalizeCategory(doc.category);
+    const matchesCategory = selectedCategory === 'all' || docCategory === selectedCategory;
     const matchesStand = selectedStand === 'all' || doc.standId === selectedStand;
     const matchesDate = !dateFilter || doc.eventDate === dateFilter;
 
@@ -223,8 +185,9 @@ export default function DocumentHub() {
   });
 
   const documentsByCategory = documents.reduce((acc, doc) => {
-    if (!acc[doc.category]) acc[doc.category] = [];
-    acc[doc.category].push(doc);
+    const category = normalizeCategory(doc.category);
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(doc);
     return acc;
   }, {} as Record<string, ManagerDocument[]>);
 
