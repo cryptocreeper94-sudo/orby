@@ -3529,6 +3529,154 @@ Return your response as a JSON object with this exact structure:
     }
   });
 
+  // ========== COMPLIANCE ALERTS (ABC Board & Health Department) ==========
+  
+  // Get all compliance alerts
+  app.get("/api/compliance-alerts", async (_req: Request, res: Response) => {
+    try {
+      const alerts = await storage.getAllComplianceAlerts();
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error getting compliance alerts:", error);
+      res.status(500).json({ error: "Failed to get compliance alerts" });
+    }
+  });
+
+  // Get active compliance alerts (for staff notification)
+  app.get("/api/compliance-alerts/active", async (_req: Request, res: Response) => {
+    try {
+      const alerts = await storage.getActiveComplianceAlerts();
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error getting active compliance alerts:", error);
+      res.status(500).json({ error: "Failed to get active compliance alerts" });
+    }
+  });
+
+  // Get compliance alerts by type
+  app.get("/api/compliance-alerts/type/:alertType", async (req: Request, res: Response) => {
+    try {
+      const alerts = await storage.getComplianceAlertsByType(req.params.alertType);
+      res.json(alerts);
+    } catch (error) {
+      console.error("Error getting compliance alerts by type:", error);
+      res.status(500).json({ error: "Failed to get compliance alerts by type" });
+    }
+  });
+
+  // Get Tennessee ABC Board checklist
+  app.get("/api/compliance/abc-checklist", async (_req: Request, res: Response) => {
+    try {
+      const { TN_ABC_CHECKLIST } = await import("@shared/schema");
+      res.json(TN_ABC_CHECKLIST);
+    } catch (error) {
+      console.error("Error getting ABC checklist:", error);
+      res.status(500).json({ error: "Failed to get ABC checklist" });
+    }
+  });
+
+  // Get Tennessee Health Department checklist
+  app.get("/api/compliance/health-checklist", async (_req: Request, res: Response) => {
+    try {
+      const { TN_HEALTH_CHECKLIST } = await import("@shared/schema");
+      res.json(TN_HEALTH_CHECKLIST);
+    } catch (error) {
+      console.error("Error getting health checklist:", error);
+      res.status(500).json({ error: "Failed to get health checklist" });
+    }
+  });
+
+  // Trigger ABC Board alert (system-wide notification)
+  app.post("/api/compliance-alerts/abc-board", async (req: Request, res: Response) => {
+    try {
+      const { triggeredById, triggeredByName, location } = req.body;
+      
+      const alert = await storage.createComplianceAlert({
+        alertType: 'abc_board',
+        title: 'ABC BOARD INSPECTION IN PROGRESS',
+        message: `ATTENTION ALL STAFF: Tennessee ABC Board inspectors are on-site${location ? ` at ${location}` : ''}. 
+
+IMMEDIATELY VERIFY:
+- Check ID for ANYONE who does not appear 50 or older
+- HOLD the ID in your hand - physically verify, do not just glance
+- Verify the ID is valid (not expired) and government-issued
+- Match photo on ID to customer's face
+- Confirm birth date shows customer is 21+
+
+DO NOT serve anyone without proper verification. Violations carry severe penalties including fines and license suspension.`,
+        isActive: true,
+        triggeredById,
+        triggeredByName,
+        metadata: { location, triggeredAt: new Date().toISOString() }
+      });
+
+      res.status(201).json(alert);
+    } catch (error) {
+      console.error("Error triggering ABC Board alert:", error);
+      res.status(500).json({ error: "Failed to trigger ABC Board alert" });
+    }
+  });
+
+  // Trigger Health Department alert (system-wide notification)
+  app.post("/api/compliance-alerts/health-dept", async (req: Request, res: Response) => {
+    try {
+      const { triggeredById, triggeredByName, location } = req.body;
+      
+      const alert = await storage.createComplianceAlert({
+        alertType: 'health_dept',
+        title: 'HEALTH DEPARTMENT INSPECTION IN PROGRESS',
+        message: `ATTENTION ALL STAFF: Tennessee Health Department inspectors are on-site${location ? ` at ${location}` : ''}. 
+
+IMMEDIATE COMPLIANCE CHECK:
+- All food handlers must have hair restraints in place
+- Handwashing must be performed properly (20 seconds, soap, warm water)
+- Cold foods at 41°F or below, hot foods at 135°F or above
+- No bare hand contact with ready-to-eat food
+- Food contact surfaces must be clean and sanitized
+- Check date labels on all stored food items
+- Ensure sanitizer buckets are at proper concentration
+- Clear any debris from floors and work surfaces
+
+Maintain professional composure. Answer inspector questions honestly. Report any issues to your supervisor immediately.`,
+        isActive: true,
+        triggeredById,
+        triggeredByName,
+        metadata: { location, triggeredAt: new Date().toISOString() }
+      });
+
+      res.status(201).json(alert);
+    } catch (error) {
+      console.error("Error triggering Health Department alert:", error);
+      res.status(500).json({ error: "Failed to trigger Health Department alert" });
+    }
+  });
+
+  // Resolve/clear a compliance alert
+  app.post("/api/compliance-alerts/:id/resolve", async (req: Request, res: Response) => {
+    try {
+      const { resolvedById } = req.body;
+      await storage.resolveComplianceAlert(req.params.id, resolvedById);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error resolving compliance alert:", error);
+      res.status(500).json({ error: "Failed to resolve compliance alert" });
+    }
+  });
+
+  // Get single compliance alert
+  app.get("/api/compliance-alerts/:id", async (req: Request, res: Response) => {
+    try {
+      const alert = await storage.getComplianceAlert(req.params.id);
+      if (!alert) {
+        return res.status(404).json({ error: "Compliance alert not found" });
+      }
+      res.json(alert);
+    } catch (error) {
+      console.error("Error getting compliance alert:", error);
+      res.status(500).json({ error: "Failed to get compliance alert" });
+    }
+  });
+
   // ========== GENESIS ASSET SEEDING ==========
   
   // Initialize genesis assets if not exists

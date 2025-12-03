@@ -7,7 +7,7 @@ import {
   warehouseCategories, warehouseProducts, warehouseStock, warehouseParLevels, warehouseRequests, warehouseRequestItems,
   auditLogs, emergencyAlerts, emergencyResponders, emergencyEscalationHistory, emergencyAlertNotifications,
   orbitRosters, orbitShifts, deliveryRequests, departmentContacts, alcoholViolations,
-  standItems, managerDocuments, assetStamps, blockchainVerifications,
+  standItems, managerDocuments, assetStamps, blockchainVerifications, complianceAlerts,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -53,7 +53,8 @@ import {
   type DepartmentContact, type InsertDepartmentContact,
   type AlcoholViolation, type InsertAlcoholViolation,
   type AssetStamp, type InsertAssetStamp,
-  type BlockchainVerification, type InsertBlockchainVerification
+  type BlockchainVerification, type InsertBlockchainVerification,
+  type ComplianceAlert, type InsertComplianceAlert
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray, ilike, sql } from "drizzle-orm";
@@ -399,6 +400,14 @@ export interface IStorage {
   getPendingBlockchainVerifications(): Promise<BlockchainVerification[]>;
   createBlockchainVerification(verification: InsertBlockchainVerification): Promise<BlockchainVerification>;
   updateBlockchainVerificationStatus(id: string, status: string, txSignature?: string, errorMessage?: string): Promise<void>;
+
+  // Compliance Alerts (ABC Board & Health Department)
+  getComplianceAlert(id: string): Promise<ComplianceAlert | undefined>;
+  getAllComplianceAlerts(): Promise<ComplianceAlert[]>;
+  getActiveComplianceAlerts(): Promise<ComplianceAlert[]>;
+  getComplianceAlertsByType(alertType: string): Promise<ComplianceAlert[]>;
+  createComplianceAlert(alert: InsertComplianceAlert): Promise<ComplianceAlert>;
+  resolveComplianceAlert(id: string, resolvedById: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2185,6 +2194,42 @@ export class DatabaseStorage implements IStorage {
       updates.errorMessage = errorMessage;
     }
     await db.update(blockchainVerifications).set(updates).where(eq(blockchainVerifications.id, id));
+  }
+
+  // ============ COMPLIANCE ALERTS (ABC Board & Health Department) ============
+  async getComplianceAlert(id: string): Promise<ComplianceAlert | undefined> {
+    const [alert] = await db.select().from(complianceAlerts).where(eq(complianceAlerts.id, id));
+    return alert || undefined;
+  }
+
+  async getAllComplianceAlerts(): Promise<ComplianceAlert[]> {
+    return await db.select().from(complianceAlerts).orderBy(desc(complianceAlerts.createdAt));
+  }
+
+  async getActiveComplianceAlerts(): Promise<ComplianceAlert[]> {
+    return await db.select().from(complianceAlerts)
+      .where(eq(complianceAlerts.isActive, true))
+      .orderBy(desc(complianceAlerts.createdAt));
+  }
+
+  async getComplianceAlertsByType(alertType: string): Promise<ComplianceAlert[]> {
+    return await db.select().from(complianceAlerts)
+      .where(sql`${complianceAlerts.alertType} = ${alertType}`)
+      .orderBy(desc(complianceAlerts.createdAt));
+  }
+
+  async createComplianceAlert(alert: InsertComplianceAlert): Promise<ComplianceAlert> {
+    const [created] = await db.insert(complianceAlerts).values(alert).returning();
+    return created;
+  }
+
+  async resolveComplianceAlert(id: string, resolvedById: string): Promise<void> {
+    await db.update(complianceAlerts).set({
+      isActive: false,
+      resolvedById,
+      resolvedAt: new Date(),
+      updatedAt: new Date()
+    }).where(eq(complianceAlerts.id, id));
   }
 }
 
