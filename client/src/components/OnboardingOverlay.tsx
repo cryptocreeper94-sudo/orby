@@ -3,7 +3,7 @@ import { useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ChevronLeft, ChevronRight, X, Play, Pause, SkipForward,
-  HelpCircle, MapPin, Sparkles
+  HelpCircle, MapPin, Sparkles, Eye, EyeOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -30,6 +30,7 @@ export function OnboardingOverlay() {
   } = useOnboarding();
 
   const [targetRect, setTargetRect] = useState<DOMRect | null>(null);
+  const [isPeekMode, setIsPeekMode] = useState(false);
 
   useEffect(() => {
     if (!isOnboarding || !currentStep?.targetSelector) {
@@ -153,6 +154,20 @@ export function OnboardingOverlay() {
             </div>
             
             <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsPeekMode(!isPeekMode)}
+                className={`h-8 w-8 transition-colors ${
+                  isPeekMode 
+                    ? 'text-cyan-400 bg-cyan-500/20 hover:bg-cyan-500/30' 
+                    : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                }`}
+                data-testid="peek-mode-toggle"
+                title={isPeekMode ? 'Hide page' : 'View page'}
+              >
+                {isPeekMode ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"
@@ -292,8 +307,9 @@ export function OnboardingOverlay() {
             left: 0,
             right: 0,
             bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            backdropFilter: 'blur(4px)',
+            backgroundColor: isPeekMode ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.5)',
+            backdropFilter: isPeekMode ? 'none' : 'blur(2px)',
+            transition: 'all 0.3s ease',
           }}
           onClick={pauseOnboarding}
         />
@@ -310,8 +326,11 @@ export function OnboardingOverlay() {
               left: targetRect.left - 8,
               width: targetRect.width + 16,
               height: targetRect.height + 16,
-              boxShadow: '0 0 0 4px rgba(6, 182, 212, 0.6), 0 0 0 9999px rgba(0, 0, 0, 0.7)',
-              background: 'transparent'
+              boxShadow: isPeekMode
+                ? '0 0 0 4px rgba(6, 182, 212, 0.8), 0 0 0 9999px rgba(0, 0, 0, 0.2)'
+                : '0 0 0 4px rgba(6, 182, 212, 0.6), 0 0 0 9999px rgba(0, 0, 0, 0.5)',
+              background: 'transparent',
+              transition: 'box-shadow 0.3s ease',
             }}
           >
             <motion.div

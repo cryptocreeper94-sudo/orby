@@ -43,6 +43,7 @@ import {
 import { SectionHelp } from '@/components/OrbyHelp';
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
+import { HeaderTutorialButton } from '@/components/HeaderTutorialButton';
 
 type WarehouseProduct = {
   id: string;
@@ -309,9 +310,12 @@ export default function SupervisorDashboard() {
           icon={<ClipboardList className="w-5 h-5" />}
           iconColor="amber"
           actions={
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-400 hover:text-white">
-              <LogOut className="h-5 w-5" />
-            </Button>
+            <div className="flex items-center gap-2">
+              <HeaderTutorialButton variant="icon" />
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-400 hover:text-white">
+                <LogOut className="h-5 w-5" />
+              </Button>
+            </div>
           }
         />
 

@@ -151,7 +151,7 @@ export default function FloatingWeatherButton() {
     <>
       <motion.button
         onClick={() => setIsExpanded(true)}
-        className={`fixed bottom-28 right-20 z-50 w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br ${gradientClass} backdrop-blur-md border border-white/20 flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 ${glowClass}`}
+        className={`fixed bottom-20 right-4 z-50 w-14 h-14 md:w-16 md:h-16 rounded-full bg-gradient-to-br ${gradientClass} backdrop-blur-md border border-white/20 flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 ${glowClass}`}
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.5 }}

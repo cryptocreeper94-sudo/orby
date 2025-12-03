@@ -7,11 +7,12 @@ import { ModeProvider, useMode } from "@/lib/ModeContext";
 import { OnboardingProvider } from "@/lib/OnboardingContext";
 import { SandboxBanner } from "@/components/SandboxBanner";
 import { SandboxWelcome } from "@/components/SandboxWelcome";
-import { OnboardingOverlay, OnboardingHelpButton } from "@/components/OnboardingOverlay";
+import { OnboardingOverlay } from "@/components/OnboardingOverlay";
 import { FeatureSlideshow } from "@/components/FeatureSlideshow";
 import { FloatingHelpButton } from "@/components/OrbyHelp";
 import FloatingWeatherButton from "@/components/FloatingWeatherButton";
-import { VersionBadge } from "@/components/VersionBadge";
+import { AppFooter } from "@/components/AppFooter";
+import legendsLogo from "@assets/stock_images/legends_hospitality_nobg.png";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/Login";
 import SetPinPage from "@/pages/SetPin";
@@ -45,7 +46,7 @@ import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
   const { isSandbox } = useMode();
   return (
-    <div className={`relative z-10 ${isSandbox ? 'pt-10' : ''}`}>
+    <div className={`relative z-10 pb-14 ${isSandbox ? 'pt-10' : ''}`}>
       {children}
     </div>
   );
@@ -132,7 +133,6 @@ function App() {
             <SandboxWelcome />
             <OnboardingOverlay />
             <FeatureSlideshow />
-            <OnboardingHelpButton />
             <FloatingHelpButton />
             <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
               <TwinklingStars />
@@ -149,7 +149,7 @@ function App() {
               <Toaster />
               <Router />
               <FloatingWeatherButton />
-              <VersionBadge />
+              <AppFooter companyLogo={legendsLogo} companyName="Legends" />
             </SandboxContentWrapper>
           </TooltipProvider>
         </OnboardingProvider>

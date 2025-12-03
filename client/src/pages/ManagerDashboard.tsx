@@ -23,6 +23,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader } from '@/components/ui/premium';
 import { SectionHelp } from '@/components/OrbyHelp';
+import { HeaderTutorialButton } from '@/components/HeaderTutorialButton';
 
 interface DeliveryRequest {
   id: string;
@@ -198,6 +199,7 @@ export default function ManagerDashboard() {
                 </SheetContent>
               </Sheet>
 
+              <HeaderTutorialButton variant="icon" />
               <Button variant="ghost" size="icon" className="relative text-slate-300 hover:bg-white/10" data-testid="button-notifications">
                 <Bell className="h-5 w-5" />
                 {(emergencyDeliveries.length + emergencyITAlerts.length) > 0 && (
