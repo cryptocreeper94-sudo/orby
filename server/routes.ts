@@ -1,13 +1,15 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import { 
   insertUserSchema, insertStandSchema, insertItemSchema, insertMessageSchema,
   insertNpoSchema, insertStaffingGroupSchema, insertSupervisorDocSchema, insertDocSignatureSchema,
   insertInventoryCountSchema, insertQuickMessageSchema, insertConversationSchema, insertConversationMessageSchema,
   insertIncidentSchema, insertCountSessionSchema, insertStandIssueSchema, insertMenuBoardSchema,
   insertAuditLogSchema, insertEmergencyAlertSchema, insertOrbitRosterSchema, insertOrbitShiftSchema,
-  insertAlcoholViolationSchema, insertAssetStampSchema,
+  insertAlcoholViolationSchema, insertAssetStampSchema, users,
   QUICK_CALL_ROLES
 } from "@shared/schema";
 import { z } from "zod";
@@ -299,6 +301,151 @@ export async function registerRoutes(
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to create user" });
+    }
+  });
+
+  // ============ ADMIN STAFF PIN MANAGEMENT ============
+  
+  // Get all Legends staff with their preset PINs (admin only)
+  app.get("/api/admin/staff-pins", async (req: Request, res: Response) => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      // Filter to Legends employees (management, supervisors, admins, etc.)
+      const legendsStaff = allUsers.filter((u: any) => 
+        u.employmentAffiliation === 'Legends' || 
+        ['Admin', 'OperationsManager', 'Supervisor', 'IT', 'AlcoholCompliance', 'CheckInAssistant', 'ManagementCore', 'ManagementAssistant'].includes(u.role)
+      );
+      
+      // Map to safe response format (show presetPin but never actual PIN if changed)
+      const staffPins = legendsStaff.map((u: any) => ({
+        id: u.id,
+        name: u.name,
+        role: u.role,
+        department: u.department,
+        managementType: u.managementType,
+        presetPin: u.presetPin,
+        pinChanged: u.pinChanged || false,
+        requiresPinReset: u.requiresPinReset,
+        presetPinIssuedAt: u.presetPinIssuedAt,
+        isOnline: u.isOnline,
+        hasDualRole: u.hasDualRole,
+        secondaryRole: u.secondaryRole,
+      }));
+      
+      res.json(staffPins);
+    } catch (error) {
+      console.error("Failed to fetch staff PINs:", error);
+      res.status(500).json({ error: "Failed to fetch staff PINs" });
+    }
+  });
+
+  // Create or update staff member with preset PIN
+  app.post("/api/admin/staff-pins", async (req: Request, res: Response) => {
+    try {
+      const { name, pin, role, department, managementType, hasDualRole, secondaryRole } = req.body;
+      
+      if (!name || !pin || !role) {
+        return res.status(400).json({ error: "Name, PIN, and role are required" });
+      }
+      if (!/^\d{4}$/.test(pin)) {
+        return res.status(400).json({ error: "PIN must be 4 digits" });
+      }
+      
+      // Check if PIN is already in use
+      const existingUser = await storage.getUserByPin(pin);
+      if (existingUser) {
+        return res.status(400).json({ error: "This PIN is already in use" });
+      }
+      
+      // Create user with preset PIN
+      const user = await storage.createUser({
+        name,
+        pin,
+        role,
+        department,
+        managementType,
+        hasDualRole: hasDualRole || false,
+        secondaryRole,
+        requiresPinReset: true, // Force PIN change on first login
+      });
+      
+      // Update the preset PIN fields
+      await db.update(users)
+        .set({
+          presetPin: pin,
+          pinChanged: false,
+          presetPinIssuedAt: new Date(),
+          employmentAffiliation: 'Legends',
+        })
+        .where(eq(users.id, user.id));
+      
+      // Create audit log
+      await createAuditLog(
+        req.body.adminId || 'system',
+        'PresetPinIssued',
+        'User',
+        user.id,
+        { name, role, department, pin: pin.substring(0, 2) + '**' },
+        undefined,
+        req
+      );
+      
+      res.status(201).json({ 
+        success: true, 
+        user: { id: user.id, name, role, presetPin: pin } 
+      });
+    } catch (error) {
+      console.error("Failed to create staff:", error);
+      res.status(500).json({ error: "Failed to create staff member" });
+    }
+  });
+
+  // Force reset a user's PIN back to their preset
+  app.post("/api/admin/staff-pins/:id/reset", async (req: Request, res: Response) => {
+    try {
+      const userId = req.params.id;
+      const { newPin } = req.body;
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      
+      // Use new PIN or generate one
+      const pinToSet = newPin || String(Math.floor(1000 + Math.random() * 9000));
+      
+      // Check if PIN is already in use by another user
+      const existingUser = await storage.getUserByPin(pinToSet);
+      if (existingUser && existingUser.id !== userId) {
+        return res.status(400).json({ error: "This PIN is already in use" });
+      }
+      
+      // Update user's PIN and mark for reset
+      await storage.updateUserPin(userId, pinToSet);
+      await db.update(users)
+        .set({
+          presetPin: pinToSet,
+          pinChanged: false,
+          presetPinIssuedAt: new Date(),
+          requiresPinReset: true,
+        })
+        .where(eq(users.id, userId));
+      
+      // Create audit log
+      await createAuditLog(
+        req.body.adminId || 'system',
+        'PinReset',
+        'User',
+        userId,
+        { newPin: pinToSet.substring(0, 2) + '**', reason: 'Admin reset' },
+        undefined,
+        req
+      );
+      
+      res.json({ success: true, presetPin: pinToSet });
+    } catch (error) {
+      console.error("Failed to reset PIN:", error);
+      res.status(500).json({ error: "Failed to reset PIN" });
     }
   });
 

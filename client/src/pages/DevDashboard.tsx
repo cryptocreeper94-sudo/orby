@@ -18,6 +18,7 @@ import { AssetTracker } from "@/components/AssetTracker";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { DashboardControls } from '@/components/DashboardControls';
+import { StaffPinsPanel } from '@/components/StaffPinsPanel';
 
 interface AccordionSectionProps {
   title: string;
@@ -560,6 +561,17 @@ export default function DevDashboard() {
           badge="Hallmark"
         >
           <AssetTracker />
+        </AccordionSection>
+
+        {/* Staff PINs Management */}
+        <AccordionSection
+          title="Staff PINs"
+          icon={<Users className="h-5 w-5" />}
+          defaultOpen={true}
+          accentColor="purple"
+          badge="Legends"
+        >
+          <StaffPinsPanel />
         </AccordionSection>
 
         {/* System Status */}

@@ -11,6 +11,7 @@ import { ShieldCheck, FlaskConical, Radio, Code, Briefcase, ChevronDown, HelpCir
 import { useMode } from "@/lib/ModeContext";
 import { ModeGate } from "@/components/ModeGate";
 import { scheduleOpsManagerTour, scheduleHRAdminTour } from "@/lib/OnboardingContext";
+import { schedulePersonalizedTour } from "@/components/PersonalizedWelcomeTour";
 import { CompactModeIndicator } from "@/components/GlobalModeBar";
 import { motion, AnimatePresence } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -136,11 +137,19 @@ export default function LoginPage() {
       form.setError("pin", { message: "Invalid PIN" });
       setPendingDevLogin(false);
     } else {
-      // David (PIN 2424) gets the Ops Manager tour on first login (after successful auth)
+      // Get user from store after login
+      const user = useStore.getState().currentUser;
+      
+      // Schedule personalized tour for all users on first login
+      if (user?.id) {
+        schedulePersonalizedTour(user.id);
+      }
+      
+      // David (PIN 2424) also gets the specialized Ops Manager tour
       if (values.pin === '2424') {
         scheduleOpsManagerTour();
       }
-      // KD (PIN 8888) gets the HR Admin tour on first login
+      // KD (PIN 8888) also gets the specialized HR Admin tour
       if (values.pin === '8888') {
         scheduleHRAdminTour();
       }

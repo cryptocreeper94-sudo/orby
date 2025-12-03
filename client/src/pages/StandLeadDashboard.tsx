@@ -21,6 +21,7 @@ import { QuickScanModal } from "@/components/QuickScanModal";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
+import { PersonalizedWelcomeTour } from '@/components/PersonalizedWelcomeTour';
 import {
   Select,
   SelectContent,
@@ -239,6 +240,7 @@ export default function StandLeadDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-20">
+      <PersonalizedWelcomeTour />
       <GlobalModeBar />
       <header className="sticky top-0 z-10 bg-gradient-to-r from-amber-600 to-orange-600 text-white px-4 h-14 flex items-center justify-between shadow-md">
         <div className="font-bold text-lg">Stand Lead</div>

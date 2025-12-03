@@ -18,6 +18,7 @@ import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatC
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { HRAdminTour } from '@/components/HRAdminTour';
+import { PersonalizedWelcomeTour } from '@/components/PersonalizedWelcomeTour';
 
 export default function AdminDashboard() {
   const logout = useStore((state) => state.logout);
@@ -56,6 +57,7 @@ export default function AdminDashboard() {
   return (
     <AnimatedBackground>
       <HRAdminTour />
+      <PersonalizedWelcomeTour />
       <GlobalModeBar />
       <div className="min-h-screen pb-20">
         <PageHeader

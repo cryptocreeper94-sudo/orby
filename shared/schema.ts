@@ -74,6 +74,10 @@ export const users = pgTable("users", {
   department: departmentEnum("department"), // For department staff (Warehouse, Kitchen, Bar, IT, Operations, HR)
   requiresPinReset: boolean("requires_pin_reset").default(true), // First login requires PIN change
   pinSetAt: timestamp("pin_set_at"), // When user set their personal PIN
+  presetPin: varchar("preset_pin", { length: 4 }), // Original preset PIN assigned by admin
+  pinChanged: boolean("pin_changed").default(false), // Has user changed from preset PIN?
+  presetPinIssuedAt: timestamp("preset_pin_issued_at"), // When preset was issued
+  employmentAffiliation: employmentAffiliationEnum("employment_affiliation").default('Legends'), // Legends, NPO, Temp, Other
   isOnline: boolean("is_online").default(false),
   assignedStandId: varchar("assigned_stand_id", { length: 20 }), // Current stand assignment
   standLeadId: varchar("stand_lead_id", { length: 36 }), // NPO Worker's assigned Stand Lead

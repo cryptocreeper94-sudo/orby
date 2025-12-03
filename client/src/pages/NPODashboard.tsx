@@ -27,6 +27,7 @@ import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, PageH
 import { TeamLeadCard } from "@/components/TeamLeadCard";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
+import { PersonalizedWelcomeTour } from '@/components/PersonalizedWelcomeTour';
 
 type CountSession = {
   id: string;
@@ -189,6 +190,7 @@ export default function NPODashboard() {
 
   return (
     <AnimatedBackground>
+      <PersonalizedWelcomeTour />
       <GlobalModeBar />
       <div className="min-h-screen pb-20">
         <LocationAcknowledgement 

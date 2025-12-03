@@ -60,6 +60,7 @@ import { AssetTracker } from '@/components/AssetTracker';
 import { POSDeviceTracker } from '@/components/POSDeviceTracker';
 import { IntegrationHub } from '@/components/IntegrationHub';
 import { OpsManagerTour } from '@/components/OpsManagerTour';
+import { PersonalizedWelcomeTour } from '@/components/PersonalizedWelcomeTour';
 import { Map, Navigation, Wine, Fingerprint, Shield as ShieldIcon, Monitor, Link2 } from 'lucide-react';
 
 const EMERGENCY_TYPES = [
@@ -1051,6 +1052,7 @@ export default function CommandCenter() {
 
       {/* Ops Manager Tour for David on first login */}
       {isDavid && <OpsManagerTour />}
+      <PersonalizedWelcomeTour />
     </AnimatedBackground>
   );
 }

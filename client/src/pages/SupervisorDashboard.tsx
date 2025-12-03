@@ -45,6 +45,7 @@ import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { HeaderTutorialButton } from '@/components/HeaderTutorialButton';
 import { useSupervisorSession } from '@/hooks/useSupervisorSession';
+import { PersonalizedWelcomeTour } from '@/components/PersonalizedWelcomeTour';
 
 type WarehouseProduct = {
   id: string;
@@ -314,6 +315,7 @@ export default function SupervisorDashboard() {
   if (!activeStandId) {
     return (
       <AnimatedBackground>
+        <PersonalizedWelcomeTour />
         <GlobalModeBar />
         <PageHeader 
           title="Supervisor"
