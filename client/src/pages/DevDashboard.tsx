@@ -7,7 +7,7 @@ import {
   Wine, Sparkles, Users, Radio, AlertTriangle, Truck,
   MessageSquare, Activity, ChevronDown, ChevronRight,
   Zap, Eye, RefreshCw, Trash2, Clock, CheckCircle2,
-  XCircle, Wifi, WifiOff, Siren, FlaskConical, ClipboardList, Crown
+  XCircle, Wifi, WifiOff, Siren, FlaskConical, ClipboardList, Crown, Calendar
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWebSocket, useWebSocketStore } from "@/lib/websocket";
@@ -19,6 +19,7 @@ import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { DashboardControls } from '@/components/DashboardControls';
 import { StaffPinsPanel } from '@/components/StaffPinsPanel';
+import { EventControlPanel } from '@/components/EventControlPanel';
 
 interface AccordionSectionProps {
   title: string;
@@ -351,17 +352,32 @@ export default function DevDashboard() {
           <Zap className="h-4 w-4 text-cyan-400" />
         </Button>
 
+        {/* Event Control Panel - Live vs Sandbox Mode */}
+        <AccordionSection 
+          title="Event Control" 
+          icon={<Calendar className="h-5 w-5" />}
+          defaultOpen={true}
+          accentColor="green"
+          badge="LIVE"
+        >
+          <EventControlPanel 
+            userPin={currentUser?.pin || ''} 
+            userId={currentUser?.id || ''} 
+            userName={currentUser?.name || ''} 
+          />
+        </AccordionSection>
+
         {/* Role Sections */}
         <AccordionSection 
           title="Command Center" 
           icon={<Radio className="h-5 w-5" />}
-          defaultOpen={true}
+          defaultOpen={false}
           accentColor="cyan"
           badge={3}
         >
           <div className="space-y-2">
             {roles.command.map(role => (
-              <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
+              <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
             ))}
           </div>
         </AccordionSection>
@@ -374,7 +390,7 @@ export default function DevDashboard() {
         >
           <div className="space-y-2">
             {roles.management.map(role => (
-              <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
+              <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
             ))}
           </div>
         </AccordionSection>
@@ -387,7 +403,7 @@ export default function DevDashboard() {
         >
           <div className="space-y-2">
             {roles.field.map(role => (
-              <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
+              <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
             ))}
           </div>
         </AccordionSection>
@@ -400,7 +416,7 @@ export default function DevDashboard() {
         >
           <div className="space-y-2">
             {roles.specialty.map(role => (
-              <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
+              <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
             ))}
           </div>
         </AccordionSection>
@@ -413,7 +429,7 @@ export default function DevDashboard() {
         >
           <div className="space-y-2">
             {roles.admin.map(role => (
-              <RoleButton key={role.pin + role.route} {...role} onClick={handleRoleSwitch} />
+              <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
             ))}
           </div>
         </AccordionSection>

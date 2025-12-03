@@ -4249,15 +4249,6 @@ Maintain professional composure. Answer inspector questions honestly. Report any
       }
 
       const event = await storage.activateEvent(req.params.id, userId, userName);
-      
-      // Log the activation
-      await storage.createAuditLog({
-        userId,
-        action: 'Event Activated',
-        targetType: 'event',
-        targetId: event.id,
-        details: { eventName: event.eventName, eventDate: event.eventDate }
-      });
 
       res.json({ 
         success: true, 
@@ -4281,15 +4272,6 @@ Maintain professional composure. Answer inspector questions honestly. Report any
       }
 
       const event = await storage.deactivateEvent(req.params.id, userId, userName);
-      
-      // Log the deactivation
-      await storage.createAuditLog({
-        userId,
-        action: 'Event Deactivated',
-        targetType: 'event',
-        targetId: event.id,
-        details: { eventName: event.eventName, eventDate: event.eventDate }
-      });
 
       res.json({ 
         success: true, 

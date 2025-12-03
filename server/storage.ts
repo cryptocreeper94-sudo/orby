@@ -446,8 +446,8 @@ export interface IStorage {
   getEventById(id: string): Promise<ActiveEvent | undefined>;
   getEventByDate(eventDate: string): Promise<ActiveEvent | undefined>;
   createEvent(event: InsertActiveEvent): Promise<ActiveEvent>;
-  activateEvent(id: string, activatedById: string, activatedByName: string): Promise<ActiveEvent>;
-  deactivateEvent(id: string, deactivatedById: string, deactivatedByName: string): Promise<ActiveEvent>;
+  activateEvent(id: string, activatedById: string | null, activatedByName: string): Promise<ActiveEvent>;
+  deactivateEvent(id: string, deactivatedById: string | null, deactivatedByName: string): Promise<ActiveEvent>;
   updateEvent(id: string, updates: Partial<InsertActiveEvent>): Promise<ActiveEvent>;
   isSystemLive(): Promise<boolean>;
 
@@ -2521,17 +2521,20 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
-  async activateEvent(id: string, activatedById: string, activatedByName: string): Promise<ActiveEvent> {
+  async activateEvent(id: string, activatedById: string | null, activatedByName: string): Promise<ActiveEvent> {
     // First deactivate any currently active events
     await db.update(activeEvents)
       .set({ status: 'completed', deactivatedAt: new Date() })
       .where(eq(activeEvents.status, 'active'));
     
     // Now activate the requested event
+    // Set activatedById to null if empty or not a valid UUID format
+    const validUserId = activatedById && activatedById.length > 10 ? activatedById : null;
+    
     const [updated] = await db.update(activeEvents)
       .set({
         status: 'active',
-        activatedById,
+        activatedById: validUserId,
         activatedByName,
         activatedAt: new Date(),
         updatedAt: new Date()
@@ -2541,11 +2544,14 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async deactivateEvent(id: string, deactivatedById: string, deactivatedByName: string): Promise<ActiveEvent> {
+  async deactivateEvent(id: string, deactivatedById: string | null, deactivatedByName: string): Promise<ActiveEvent> {
+    // Set deactivatedById to null if empty or not a valid UUID format
+    const validUserId = deactivatedById && deactivatedById.length > 10 ? deactivatedById : null;
+    
     const [updated] = await db.update(activeEvents)
       .set({
         status: 'completed',
-        deactivatedById,
+        deactivatedById: validUserId,
         deactivatedByName,
         deactivatedAt: new Date(),
         updatedAt: new Date()
