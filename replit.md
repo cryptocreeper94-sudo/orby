@@ -1,15 +1,21 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.1 (Beta)
+## Current Version: v1.0.1 (Beta) - STAMPED
 **Release Date:** December 3, 2024
+**Genesis Hallmark:** ORB-2024-1203-V101-BETA
 
 ### v1.0.1 Release Notes
 - Event Report Builder for combined PDF packages (Finance, Compliance, Operations, Custom templates)
 - Ops Manager Tour for David on first login covering all controls and integrations
-- Document Hub integration with Build Report button
+- HR Admin Tour for KD with staffing-focused walkthrough
+- Personalized Welcome Tours for all roles with name-based greetings
+- Document Hub restricted to Managers and Developers only (enhanced security)
+- Staff PIN Management panel in Dev Dashboard for preset PIN distribution
 - Enhanced PDF generation with full item tables for count reports
 - Integration Hub with PAX Systems, Yellow Dog, and OrbitStaffing preview
 - Orby Commander watermark and enhanced welcome screen
+- Desktop responsive layouts verified across all major dashboards
+- PWA ready for Google Play and web installation
 
 ## Overview
 Orby (getorby.io) is a comprehensive Progressive Web App (PWA) designed to unify venue operations, replacing fragmented communication with a digital platform. It offers an Emergency Command Center, delivery lifecycle tracking, three-phase inventory counting, alcohol compliance monitoring, GPS-guided navigation, and real-time team communications. Orby aims to provide a complete operational solution for venues, from emergency response to inventory and team management.
