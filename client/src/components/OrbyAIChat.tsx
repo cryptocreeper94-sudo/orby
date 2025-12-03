@@ -164,17 +164,15 @@ export function OrbyAIChat() {
       >
         <motion.button
           onClick={() => setIsOpen(true)}
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="relative h-16 w-16 rounded-full flex items-center justify-center"
+          className="relative h-20 w-20 flex items-center justify-center"
           data-testid="floating-orby-ai-button"
         >
-          <div className="absolute inset-0 bg-cyan-400/30 rounded-full blur-xl animate-pulse" />
-          <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-teal-500/20 rounded-full" />
           <img 
             src={orbyImg} 
             alt="Orby AI" 
-            className="relative h-14 w-14 object-contain drop-shadow-[0_0_15px_rgba(6,182,212,0.8)] hover:drop-shadow-[0_0_25px_rgba(6,182,212,1)]"
+            className="h-20 w-20 object-contain drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]"
           />
         </motion.button>
       </motion.div>

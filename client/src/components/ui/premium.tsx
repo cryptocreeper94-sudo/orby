@@ -58,13 +58,11 @@ function Stars() {
 function OrbyWatermark() {
   return (
     <div className="fixed inset-0 flex items-center justify-center pointer-events-none -z-5 select-none overflow-hidden">
-      <div className="relative w-[60vw] h-[60vw] max-w-[500px] max-h-[500px] opacity-[0.04]">
-        <img 
-          src={orbyCommanderImg} 
-          alt="" 
-          className="w-full h-full object-contain drop-shadow-[0_0_50px_rgba(6,182,212,0.3)]"
-        />
-      </div>
+      <img 
+        src={orbyCommanderImg} 
+        alt="" 
+        className="w-[70vw] max-w-[600px] h-auto object-contain opacity-[0.05]"
+      />
     </div>
   );
 }
