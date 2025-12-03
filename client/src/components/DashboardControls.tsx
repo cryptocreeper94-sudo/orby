@@ -1,0 +1,597 @@
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Settings2, Crown, Eye, EyeOff, Bell, BellOff, Users, 
+  LayoutGrid, Sparkles, HelpCircle, X, Check, RotateCcw,
+  Shield, Radio, MapPin, MessageSquare, Package, AlertTriangle,
+  Thermometer, Bot, ChevronDown, ChevronUp, Zap, Lock
+} from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { CONFIGURABLE_ROLES, type DashboardConfig } from "@shared/schema";
+
+interface DashboardControlsProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const ROLE_DISPLAY_NAMES: Record<string, string> = {
+  NPOWorker: "NPO Worker",
+  StandLead: "Stand Lead",
+  StandSupervisor: "Stand Supervisor",
+  Bartender: "Bartender",
+  AlcoholCompliance: "Alcohol Compliance",
+  CheckInAssistant: "Check-in Assistant",
+  ManagementCore: "Core Management",
+  ManagementAssistant: "Assistant Manager",
+  Warehouse: "Warehouse",
+  Kitchen: "Kitchen",
+  IT: "IT Staff",
+};
+
+const WIDGET_OPTIONS = [
+  { key: "showEmergencyFeed", label: "Emergency Feed", icon: AlertTriangle, color: "text-red-400" },
+  { key: "showDeliveries", label: "Deliveries", icon: Package, color: "text-amber-400" },
+  { key: "showCompliance", label: "Compliance", icon: Shield, color: "text-purple-400" },
+  { key: "showAiChat", label: "Orby AI", icon: Bot, color: "text-cyan-400" },
+  { key: "showWeather", label: "Weather", icon: Thermometer, color: "text-sky-400" },
+  { key: "showMap", label: "Stadium Map", icon: MapPin, color: "text-green-400" },
+  { key: "showMessaging", label: "Messaging", icon: MessageSquare, color: "text-blue-400" },
+  { key: "showInventory", label: "Inventory", icon: Package, color: "text-orange-400" },
+];
+
+const ALERT_LEVELS = [
+  { value: "normal", label: "All Alerts", icon: Bell, description: "Receive all notifications" },
+  { value: "priority-only", label: "Priority Only", icon: Zap, description: "Only critical alerts" },
+  { value: "silent", label: "Silent Mode", icon: BellOff, description: "No notifications" },
+];
+
+const LAYOUT_PRESETS = [
+  { value: "ops-lite", label: "Ops Lite", description: "Simplified view for training" },
+  { value: "standard", label: "Standard", description: "Default balanced layout" },
+  { value: "full-command", label: "Full Command", description: "All panels visible" },
+];
+
+export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
+  const [selectedRole, setSelectedRole] = useState<string>("NPOWorker");
+  const [showHelp, setShowHelp] = useState(false);
+  const [expandedSection, setExpandedSection] = useState<string | null>("widgets");
+  const [pendingChanges, setPendingChanges] = useState<Partial<DashboardConfig>>({});
+  const queryClient = useQueryClient();
+
+  const { data: configs = [], isLoading } = useQuery<DashboardConfig[]>({
+    queryKey: ["/api/dashboard-configs"],
+    refetchInterval: 30000,
+  });
+
+  const { data: currentConfig } = useQuery<DashboardConfig | null>({
+    queryKey: ["/api/dashboard-configs", selectedRole],
+    enabled: !!selectedRole,
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async (updates: Partial<DashboardConfig>) => {
+      const response = await fetch(`/api/dashboard-configs/${selectedRole}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!response.ok) throw new Error("Failed to update config");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard-configs"] });
+      setPendingChanges({});
+    },
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch(`/api/dashboard-configs/${selectedRole}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to reset config");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard-configs"] });
+    },
+  });
+
+  const getConfigValue = (key: keyof DashboardConfig) => {
+    if (pendingChanges[key] !== undefined) return pendingChanges[key];
+    if (currentConfig && currentConfig[key] !== undefined) return currentConfig[key];
+    if (key === "alertLevel") return "normal";
+    if (key === "dataScope") return "assigned";
+    if (key === "layoutPreset") return "standard";
+    return true;
+  };
+
+  const handleChange = (key: keyof DashboardConfig, value: any) => {
+    setPendingChanges(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleSave = () => {
+    if (Object.keys(pendingChanges).length > 0) {
+      updateMutation.mutate(pendingChanges);
+    }
+  };
+
+  const handleReset = () => {
+    resetMutation.mutate();
+    setPendingChanges({});
+  };
+
+  const toggleSection = (section: string) => {
+    setExpandedSection(expandedSection === section ? null : section);
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+        onClick={(e) => e.target === e.currentTarget && onClose()}
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.9, opacity: 0, y: 20 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="w-full max-w-lg max-h-[90vh] overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20"
+        >
+          {/* Header */}
+          <div className="relative px-6 py-4 border-b border-cyan-500/20 bg-gradient-to-r from-cyan-600/20 via-transparent to-purple-600/20">
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMtOS45NDEgMC0xOCA4LjA1OS0xOCAxOHM4LjA1OSAxOCAxOCAxOCAxOC04LjA1OSAxOC0xOC04LjA1OS0xOC0xOC0xOHoiIHN0cm9rZT0icmdiYSg2LCAxODIsIDIxMiwgMC4xKSIgc3Ryb2tlLXdpZHRoPSIyIi8+PC9nPjwvc3ZnPg==')] opacity-30" />
+            
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <motion.div
+                  animate={{ rotate: [0, 360] }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="p-2 rounded-xl bg-gradient-to-br from-cyan-500/30 to-purple-500/30 border border-cyan-400/40"
+                >
+                  <Crown className="w-5 h-5 text-cyan-400" />
+                </motion.div>
+                <div>
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    Dashboard Controls
+                    <motion.span
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                      className="text-xs px-2 py-0.5 rounded-full bg-gradient-to-r from-cyan-500/30 to-purple-500/30 border border-cyan-400/40 text-cyan-300"
+                    >
+                      SUPERPOWER
+                    </motion.span>
+                  </h2>
+                  <p className="text-xs text-slate-400">Control what other users see</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowHelp(true)}
+                  className="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-400 hover:text-cyan-400 transition-colors"
+                  data-testid="dashboard-controls-help"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={onClose}
+                  className="p-2 rounded-lg bg-slate-700/50 hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors"
+                  data-testid="dashboard-controls-close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Role Selector */}
+          <div className="px-4 py-3 border-b border-slate-700/50 bg-slate-800/30">
+            <label className="text-xs text-slate-400 mb-2 block">Configure Dashboard For:</label>
+            <div className="flex flex-wrap gap-1.5">
+              {CONFIGURABLE_ROLES.map((role) => (
+                <button
+                  key={role}
+                  onClick={() => {
+                    setSelectedRole(role);
+                    setPendingChanges({});
+                  }}
+                  className={`px-2.5 py-1 text-xs rounded-lg transition-all ${
+                    selectedRole === role
+                      ? "bg-cyan-500/30 text-cyan-300 border border-cyan-400/50"
+                      : "bg-slate-700/50 text-slate-400 border border-transparent hover:border-slate-600"
+                  }`}
+                  data-testid={`role-select-${role}`}
+                >
+                  {ROLE_DISPLAY_NAMES[role] || role}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Scrollable Content */}
+          <div className="overflow-y-auto max-h-[50vh] px-4 py-3 space-y-3">
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <Settings2 className="w-6 h-6 text-cyan-400" />
+                </motion.div>
+              </div>
+            ) : (
+              <>
+                {/* Widget Visibility Section */}
+                <div className="rounded-xl border border-slate-700/50 overflow-hidden">
+                  <button
+                    onClick={() => toggleSection("widgets")}
+                    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <LayoutGrid className="w-4 h-4 text-cyan-400" />
+                      <span className="text-sm font-medium text-white">Widget Visibility</span>
+                    </div>
+                    {expandedSection === "widgets" ? (
+                      <ChevronUp className="w-4 h-4 text-slate-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                    )}
+                  </button>
+                  
+                  <AnimatePresence>
+                    {expandedSection === "widgets" && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="border-t border-slate-700/50"
+                      >
+                        <div className="p-3 grid grid-cols-2 gap-2">
+                          {WIDGET_OPTIONS.map((widget) => {
+                            const isVisible = getConfigValue(widget.key as keyof DashboardConfig);
+                            const Icon = widget.icon;
+                            return (
+                              <button
+                                key={widget.key}
+                                onClick={() => handleChange(widget.key as keyof DashboardConfig, !isVisible)}
+                                className={`flex items-center gap-2 p-2.5 rounded-lg transition-all ${
+                                  isVisible
+                                    ? "bg-slate-700/50 border border-cyan-500/30"
+                                    : "bg-slate-800/30 border border-slate-700/30 opacity-60"
+                                }`}
+                                data-testid={`toggle-${widget.key}`}
+                              >
+                                <Icon className={`w-4 h-4 ${isVisible ? widget.color : "text-slate-500"}`} />
+                                <span className={`text-xs ${isVisible ? "text-white" : "text-slate-500"}`}>
+                                  {widget.label}
+                                </span>
+                                {isVisible ? (
+                                  <Eye className="w-3 h-3 text-green-400 ml-auto" />
+                                ) : (
+                                  <EyeOff className="w-3 h-3 text-slate-500 ml-auto" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Alert Settings Section */}
+                <div className="rounded-xl border border-slate-700/50 overflow-hidden">
+                  <button
+                    onClick={() => toggleSection("alerts")}
+                    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Bell className="w-4 h-4 text-amber-400" />
+                      <span className="text-sm font-medium text-white">Alert Settings</span>
+                    </div>
+                    {expandedSection === "alerts" ? (
+                      <ChevronUp className="w-4 h-4 text-slate-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                    )}
+                  </button>
+                  
+                  <AnimatePresence>
+                    {expandedSection === "alerts" && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="border-t border-slate-700/50"
+                      >
+                        <div className="p-3 space-y-2">
+                          {ALERT_LEVELS.map((level) => {
+                            const isSelected = getConfigValue("alertLevel") === level.value;
+                            const Icon = level.icon;
+                            return (
+                              <button
+                                key={level.value}
+                                onClick={() => handleChange("alertLevel", level.value)}
+                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
+                                  isSelected
+                                    ? "bg-amber-500/20 border border-amber-500/40"
+                                    : "bg-slate-800/30 border border-slate-700/30 hover:border-slate-600"
+                                }`}
+                                data-testid={`alert-level-${level.value}`}
+                              >
+                                <Icon className={`w-4 h-4 ${isSelected ? "text-amber-400" : "text-slate-400"}`} />
+                                <div className="text-left flex-1">
+                                  <div className={`text-sm ${isSelected ? "text-amber-300" : "text-slate-300"}`}>
+                                    {level.label}
+                                  </div>
+                                  <div className="text-xs text-slate-500">{level.description}</div>
+                                </div>
+                                {isSelected && <Check className="w-4 h-4 text-amber-400" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Data Scope Section */}
+                <div className="rounded-xl border border-slate-700/50 overflow-hidden">
+                  <button
+                    onClick={() => toggleSection("scope")}
+                    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-green-400" />
+                      <span className="text-sm font-medium text-white">Data Scope</span>
+                    </div>
+                    {expandedSection === "scope" ? (
+                      <ChevronUp className="w-4 h-4 text-slate-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                    )}
+                  </button>
+                  
+                  <AnimatePresence>
+                    {expandedSection === "scope" && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="border-t border-slate-700/50"
+                      >
+                        <div className="p-3 space-y-3">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleChange("dataScope", "assigned")}
+                              className={`flex-1 p-3 rounded-lg text-center transition-all ${
+                                getConfigValue("dataScope") === "assigned"
+                                  ? "bg-green-500/20 border border-green-500/40 text-green-300"
+                                  : "bg-slate-800/30 border border-slate-700/30 text-slate-400 hover:border-slate-600"
+                              }`}
+                              data-testid="scope-assigned"
+                            >
+                              <Lock className="w-4 h-4 mx-auto mb-1" />
+                              <span className="text-xs">Assigned Only</span>
+                            </button>
+                            <button
+                              onClick={() => handleChange("dataScope", "all")}
+                              className={`flex-1 p-3 rounded-lg text-center transition-all ${
+                                getConfigValue("dataScope") === "all"
+                                  ? "bg-green-500/20 border border-green-500/40 text-green-300"
+                                  : "bg-slate-800/30 border border-slate-700/30 text-slate-400 hover:border-slate-600"
+                              }`}
+                              data-testid="scope-all"
+                            >
+                              <Radio className="w-4 h-4 mx-auto mb-1" />
+                              <span className="text-xs">All Stands</span>
+                            </button>
+                          </div>
+                          
+                          <button
+                            onClick={() => handleChange("showSensitiveMetrics", !getConfigValue("showSensitiveMetrics"))}
+                            className={`w-full flex items-center justify-between p-3 rounded-lg transition-all ${
+                              getConfigValue("showSensitiveMetrics")
+                                ? "bg-purple-500/20 border border-purple-500/40"
+                                : "bg-slate-800/30 border border-slate-700/30"
+                            }`}
+                            data-testid="toggle-sensitive-metrics"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Shield className="w-4 h-4 text-purple-400" />
+                              <span className="text-sm text-slate-300">Show Sensitive Metrics</span>
+                            </div>
+                            <div className={`w-10 h-5 rounded-full transition-all ${
+                              getConfigValue("showSensitiveMetrics") ? "bg-purple-500" : "bg-slate-600"
+                            }`}>
+                              <motion.div
+                                animate={{ x: getConfigValue("showSensitiveMetrics") ? 20 : 2 }}
+                                className="w-4 h-4 mt-0.5 rounded-full bg-white shadow-sm"
+                              />
+                            </div>
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Layout Presets Section */}
+                <div className="rounded-xl border border-slate-700/50 overflow-hidden">
+                  <button
+                    onClick={() => toggleSection("layout")}
+                    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-purple-400" />
+                      <span className="text-sm font-medium text-white">Layout Presets</span>
+                    </div>
+                    {expandedSection === "layout" ? (
+                      <ChevronUp className="w-4 h-4 text-slate-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-slate-400" />
+                    )}
+                  </button>
+                  
+                  <AnimatePresence>
+                    {expandedSection === "layout" && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="border-t border-slate-700/50"
+                      >
+                        <div className="p-3 space-y-2">
+                          {LAYOUT_PRESETS.map((preset) => {
+                            const isSelected = getConfigValue("layoutPreset") === preset.value;
+                            return (
+                              <button
+                                key={preset.value}
+                                onClick={() => handleChange("layoutPreset", preset.value)}
+                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
+                                  isSelected
+                                    ? "bg-purple-500/20 border border-purple-500/40"
+                                    : "bg-slate-800/30 border border-slate-700/30 hover:border-slate-600"
+                                }`}
+                                data-testid={`layout-${preset.value}`}
+                              >
+                                <div className="text-left flex-1">
+                                  <div className={`text-sm ${isSelected ? "text-purple-300" : "text-slate-300"}`}>
+                                    {preset.label}
+                                  </div>
+                                  <div className="text-xs text-slate-500">{preset.description}</div>
+                                </div>
+                                {isSelected && <Check className="w-4 h-4 text-purple-400" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Footer Actions */}
+          <div className="px-4 py-3 border-t border-slate-700/50 bg-slate-800/30 flex items-center gap-2">
+            <button
+              onClick={handleReset}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-700/50 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all text-sm"
+              data-testid="reset-config"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reset
+            </button>
+            <div className="flex-1" />
+            <button
+              onClick={onClose}
+              className="px-4 py-2 rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition-all text-sm"
+              data-testid="cancel-config"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={Object.keys(pendingChanges).length === 0 || updateMutation.isPending}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                Object.keys(pendingChanges).length > 0
+                  ? "bg-gradient-to-r from-cyan-500 to-cyan-600 text-white hover:from-cyan-400 hover:to-cyan-500 shadow-lg shadow-cyan-500/30"
+                  : "bg-slate-700/50 text-slate-500 cursor-not-allowed"
+              }`}
+              data-testid="save-config"
+            >
+              {updateMutation.isPending ? (
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                >
+                  <Settings2 className="w-4 h-4" />
+                </motion.div>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  Apply Changes
+                </>
+              )}
+            </button>
+          </div>
+        </motion.div>
+
+        {/* Help Modal */}
+        <AnimatePresence>
+          {showHelp && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="absolute inset-0 flex items-center justify-center p-4 z-10"
+            >
+              <div className="w-full max-w-md rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-cyan-500/30 p-6 shadow-2xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 rounded-xl bg-cyan-500/20 border border-cyan-400/40">
+                    <Crown className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Your Superpower</h3>
+                    <p className="text-xs text-cyan-400">Exclusive to Operations Manager</p>
+                  </div>
+                </div>
+                
+                <div className="space-y-3 text-sm text-slate-300">
+                  <p>
+                    <span className="text-cyan-400 font-medium">Dashboard Controls</span> gives you the power to customize what every role sees on their dashboard.
+                  </p>
+                  <ul className="space-y-2 ml-4">
+                    <li className="flex items-start gap-2">
+                      <Eye className="w-4 h-4 text-green-400 mt-0.5 shrink-0" />
+                      <span>Toggle which panels are visible for each role</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Bell className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+                      <span>Control notification levels per role</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Lock className="w-4 h-4 text-purple-400 mt-0.5 shrink-0" />
+                      <span>Limit data access to assigned areas only</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Sparkles className="w-4 h-4 text-pink-400 mt-0.5 shrink-0" />
+                      <span>Apply quick layout presets</span>
+                    </li>
+                  </ul>
+                  <div className="mt-4 p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                    <p className="text-xs text-cyan-300">
+                      <strong>Note:</strong> Only you can see and use these controls. Changes apply instantly across all user dashboards.
+                    </p>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => setShowHelp(false)}
+                  className="w-full mt-4 py-2 rounded-lg bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 transition-colors text-sm font-medium"
+                  data-testid="close-help"
+                >
+                  Got it!
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
