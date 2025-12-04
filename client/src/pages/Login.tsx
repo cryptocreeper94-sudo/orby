@@ -394,12 +394,20 @@ export default function LoginPage() {
       </div>
 
       {/* Footer */}
-      <footer className="w-full max-w-md text-center py-6 space-y-2">
+      <footer className="w-full max-w-md text-center py-4 space-y-1">
         <div className="text-xs text-cyan-200/60 font-medium">
-          <span className="font-bold text-cyan-400">Orby</span> by Orbit
+          <span className="font-bold text-cyan-400">Orby Commander</span>
         </div>
         <div className="text-[10px] text-cyan-200/40">
-          Powered by DarkWave Studios, LLC • © 2025
+          © 2025{" "}
+          <a 
+            href="https://darkwavestudios.io" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-cyan-300/60 hover:text-cyan-300 underline"
+          >
+            DarkWave Studios, LLC
+          </a>
         </div>
       </footer>
 
