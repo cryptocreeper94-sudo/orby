@@ -387,7 +387,7 @@ export default function LoginPage() {
                     </div>
 
                     <p className="text-[10px] text-slate-500 mt-3 pt-2 border-t border-slate-700/50">
-                      Managers: Contact your supervisor for your PIN.
+                      Managers: Contact David for your PIN.
                     </p>
                   </div>
                 </motion.div>
