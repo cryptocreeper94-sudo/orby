@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'wouter';
+import { useLocation } from 'wouter';
 import { 
   ArrowLeft, Wind, Droplets, Thermometer, Eye, 
   Sunrise, Sunset, Cloud, ChevronUp, ChevronDown,
-  RefreshCw, MapPin, Gauge, CloudRain
+  RefreshCw, MapPin, Gauge, CloudRain, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { GlassCard } from '@/components/ui/premium';
@@ -35,9 +35,18 @@ interface WeatherData {
 const NISSAN_STADIUM = { lat: 36.1665, lon: -86.7713 };
 
 export default function WeatherMapPage() {
+  const [, navigate] = useLocation();
   const [isLandscape, setIsLandscape] = useState(false);
   const [dataExpanded, setDataExpanded] = useState(true);
   const [mapLayer, setMapLayer] = useState<'radar' | 'temp' | 'wind' | 'precip'>('radar');
+
+  const handleClose = () => {
+    if (window.history.length > 1) {
+      window.history.back();
+    } else {
+      navigate('/');
+    }
+  };
 
   useEffect(() => {
     const checkOrientation = () => {
@@ -219,26 +228,41 @@ export default function WeatherMapPage() {
       <div className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/">
-              <Button variant="ghost" size="sm" className="text-white" data-testid="button-back">
-                <ArrowLeft className="h-4 w-4 mr-1" />
-                Back
-              </Button>
-            </Link>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleClose}
+              className="text-white hover:bg-white/10" 
+              data-testid="button-back"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back
+            </Button>
             <div>
               <h1 className="text-lg font-bold text-white">Weather Map</h1>
               <p className="text-xs text-cyan-400">Interactive Radar & Conditions</p>
             </div>
           </div>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => setDataExpanded(!dataExpanded)}
-            className="text-white/60 hover:text-white lg:hidden"
-            data-testid="button-toggle-data"
-          >
-            {dataExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => setDataExpanded(!dataExpanded)}
+              className="text-white/60 hover:text-white lg:hidden"
+              data-testid="button-toggle-data"
+            >
+              {dataExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            </Button>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={handleClose}
+              className="text-white hover:bg-red-500/20 hover:text-red-400 h-8 w-8"
+              data-testid="button-close-map"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
       </div>
       
