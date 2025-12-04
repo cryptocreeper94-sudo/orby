@@ -1,12 +1,28 @@
+import { useState, useEffect } from 'react';
 import { useMode } from '@/lib/ModeContext';
 import { FlaskConical, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-export function SandboxBanner() {
-  const { isSandbox, exitSandbox } = useMode();
+const BANNER_DISMISSED_KEY = 'orby_sandbox_banner_dismissed';
 
-  if (!isSandbox) return null;
+export function SandboxBanner() {
+  const { isSandbox } = useMode();
+  const [isDismissed, setIsDismissed] = useState(false);
+
+  useEffect(() => {
+    const dismissed = sessionStorage.getItem(BANNER_DISMISSED_KEY);
+    if (dismissed === 'true') {
+      setIsDismissed(true);
+    }
+  }, []);
+
+  const handleDismiss = () => {
+    setIsDismissed(true);
+    sessionStorage.setItem(BANNER_DISMISSED_KEY, 'true');
+  };
+
+  if (!isSandbox || isDismissed) return null;
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 text-white px-4 py-2 shadow-lg shadow-cyan-500/30" data-testid="sandbox-banner">
@@ -26,12 +42,11 @@ export function SandboxBanner() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={exitSandbox}
+          onClick={handleDismiss}
           className="text-white hover:bg-white/20 h-7 px-2"
           data-testid="button-exit-sandbox"
         >
-          <X className="h-4 w-4 mr-1" />
-          <span className="hidden sm:inline">Exit</span>
+          <X className="h-4 w-4" />
         </Button>
       </div>
     </div>
