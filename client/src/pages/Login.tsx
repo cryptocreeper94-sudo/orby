@@ -15,6 +15,7 @@ import { schedulePersonalizedTour } from "@/components/PersonalizedWelcomeTour";
 import { CompactModeIndicator } from "@/components/GlobalModeBar";
 import { motion, AnimatePresence } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
+import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 const loginSchema = z.object({
   pin: z.string().length(4, "PIN must be 4 digits"),
@@ -225,23 +226,18 @@ export default function LoginPage() {
               {/* Glowing aura */}
               <div className="absolute inset-0 bg-cyan-400/25 rounded-full blur-3xl animate-pulse" />
               <div className="absolute inset-4 bg-cyan-500/15 rounded-full blur-2xl animate-pulse" style={{animationDelay: '0.5s'}} />
-              {/* Orby mascot */}
+              {/* Orby Commander mascot */}
               <img 
-                src="/orby-mascot.png" 
-                alt="Orby" 
+                src={orbyCommanderImg} 
+                alt="Orby Commander" 
                 className="relative w-52 h-52 object-contain drop-shadow-[0_0_35px_rgba(6,182,212,0.8)] z-10"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  const fallback = e.currentTarget.parentElement?.querySelector('.fallback-icon');
-                  if (fallback) fallback.classList.remove('hidden');
-                }}
               />
               <div className="hidden fallback-icon absolute w-20 h-20 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-400/30 z-10">
                 <span className="text-4xl">🪐</span>
               </div>
             </div>
-            <h1 className="text-4xl font-black tracking-tight text-white">Orby</h1>
-            <p className="text-cyan-200/80 mt-2 text-sm">Operations Communication Platform</p>
+            <h1 className="text-4xl font-black tracking-tight text-white">Orby Commander</h1>
+            <p className="text-cyan-200/80 mt-2 text-sm">Venue Operations Platform</p>
             <p className="text-cyan-200/60 mt-1 text-xs">Enter your 4-digit PIN to access</p>
           </div>
 
