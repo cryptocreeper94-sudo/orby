@@ -1,8 +1,15 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.5 (Beta) - STAMPED
-**Release Date:** December 3, 2024
-**Genesis Hallmark:** ORB-000000000011
+## Current Version: v1.0.6 (Beta) - STAMPED
+**Release Date:** December 4, 2024
+**Genesis Hallmark:** ORB-000000000012
+
+### v1.0.6 Release Notes
+- **Login Screen Update:** Manager PIN contact info now shows "Contact David" instead of supervisor
+- **Orby AI Chat Optimization:** Speaker button repositioned inside message bubbles for mobile
+  - Fixed overflow issue on narrow screens
+  - Added horizontal scroll prevention
+  - Improved button visibility (always slightly visible)
 
 ### v1.0.5 Release Notes
 - **Complete Manager Roster:** All leadership team added with PINs
