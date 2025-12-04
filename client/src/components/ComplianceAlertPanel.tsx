@@ -3,13 +3,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   AlertTriangle, Shield, ClipboardCheck, Wine, Utensils, 
-  Bell, BellRing, Check, X, ChevronDown, ChevronUp, MapPin
+  Bell, BellRing, Check, X, ChevronDown, ChevronUp, MapPin, FlaskConical, Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { useMode } from '@/lib/ModeContext';
 
 interface ComplianceAlert {
   id: string;
@@ -46,6 +47,7 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
   const [location, setLocation] = useState('');
   const [checkedItems, setCheckedItems] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
+  const { isSandbox } = useMode();
 
   const { data: activeAlerts = [] } = useQuery<ComplianceAlert[]>({
     queryKey: ['compliance-alerts-active'],
@@ -275,9 +277,14 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
             className="w-full flex items-center justify-between text-left gap-2"
             data-testid="button-toggle-abc-checklist"
           >
-            <CardTitle className="text-base flex items-center gap-2 text-purple-400 truncate">
+            <CardTitle className="text-base flex items-center gap-2 text-purple-400 min-w-0">
               <Wine className="h-5 w-5 shrink-0" />
               <span className="truncate">TN ABC Board Checklist</span>
+              {isSandbox && (
+                <Badge className="bg-cyan-500/20 text-cyan-400 shrink-0 text-[10px]">
+                  Practice
+                </Badge>
+              )}
             </CardTitle>
             {showABCChecklist ? <ChevronUp className="h-5 w-5 shrink-0" /> : <ChevronDown className="h-5 w-5 shrink-0" />}
           </button>
@@ -291,41 +298,61 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
               className="overflow-hidden"
             >
               <CardContent className="pt-0 space-y-4">
-                {Object.entries(groupChecklistByCategory(abcChecklist)).map(([category, items]) => (
-                  <div key={category}>
-                    <h4 className="text-sm font-semibold text-slate-400 mb-2">{category}</h4>
-                    <div className="space-y-2">
-                      {items.map((item) => (
-                        <label
-                          key={item.id}
-                          className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
-                            checkedItems.has(`abc-${item.id}`) 
-                              ? 'bg-green-500/20 border border-green-500/30' 
-                              : 'bg-slate-800/50 hover:bg-slate-800/80'
-                          }`}
-                          data-testid={`abc-checklist-item-${item.id}`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checkedItems.has(`abc-${item.id}`)}
-                            onChange={() => toggleCheckItem(`abc-${item.id}`)}
-                            className="mt-0.5 h-4 w-4 rounded border-slate-500 bg-slate-700 text-purple-500 focus:ring-purple-500"
-                          />
-                          <div className="flex-1">
-                            <span className={`text-sm ${checkedItems.has(`abc-${item.id}`) ? 'text-green-300 line-through' : 'text-slate-200'}`}>
-                              {item.item}
-                            </span>
-                            {item.critical && (
-                              <Badge variant="destructive" className="ml-2 text-[10px] px-1.5 py-0">
-                                CRITICAL
-                              </Badge>
-                            )}
-                          </div>
-                        </label>
-                      ))}
+                {isSandbox ? (
+                  <div className="text-center py-6 space-y-3">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-cyan-500/20 border border-cyan-500/30">
+                      <Play className="h-6 w-6 text-cyan-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-cyan-300">Sandbox Mode</h4>
+                      <p className="text-sm text-slate-400 mt-1">
+                        Practice area - no data loaded.
+                      </p>
+                      <p className="text-xs text-slate-500 mt-2">
+                        During live events, this shows the TN ABC Board<br />
+                        alcohol compliance checklist.
+                      </p>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <>
+                    {Object.entries(groupChecklistByCategory(abcChecklist)).map(([category, items]) => (
+                      <div key={category}>
+                        <h4 className="text-sm font-semibold text-slate-400 mb-2">{category}</h4>
+                        <div className="space-y-2">
+                          {items.map((item) => (
+                            <label
+                              key={item.id}
+                              className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                                checkedItems.has(`abc-${item.id}`) 
+                                  ? 'bg-green-500/20 border border-green-500/30' 
+                                  : 'bg-slate-800/50 hover:bg-slate-800/80'
+                              }`}
+                              data-testid={`abc-checklist-item-${item.id}`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checkedItems.has(`abc-${item.id}`)}
+                                onChange={() => toggleCheckItem(`abc-${item.id}`)}
+                                className="mt-0.5 h-4 w-4 rounded border-slate-500 bg-slate-700 text-purple-500 focus:ring-purple-500"
+                              />
+                              <div className="flex-1">
+                                <span className={`text-sm ${checkedItems.has(`abc-${item.id}`) ? 'text-green-300 line-through' : 'text-slate-200'}`}>
+                                  {item.item}
+                                </span>
+                                {item.critical && (
+                                  <Badge variant="destructive" className="ml-2 text-[10px] px-1.5 py-0">
+                                    CRITICAL
+                                  </Badge>
+                                )}
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
               </CardContent>
             </motion.div>
           )}
@@ -342,9 +369,15 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
             <CardTitle className="text-base flex items-center gap-2 text-emerald-400 min-w-0">
               <Utensils className="h-5 w-5 shrink-0" />
               <span className="truncate">TN Health Dept</span>
-              <Badge className="bg-emerald-500/20 text-emerald-400 shrink-0 text-[10px]">
-                {healthChecklist.reduce((sum, item) => sum + (item.points || 0), 0)} pts
-              </Badge>
+              {isSandbox ? (
+                <Badge className="bg-cyan-500/20 text-cyan-400 shrink-0 text-[10px]">
+                  Practice
+                </Badge>
+              ) : (
+                <Badge className="bg-emerald-500/20 text-emerald-400 shrink-0 text-[10px]">
+                  0-100 pts
+                </Badge>
+              )}
             </CardTitle>
             {showHealthChecklist ? <ChevronUp className="h-5 w-5 shrink-0" /> : <ChevronDown className="h-5 w-5 shrink-0" />}
           </button>
@@ -358,57 +391,77 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
               className="overflow-hidden"
             >
               <CardContent className="pt-0 space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
-                  <span className="text-sm text-emerald-300">Current Score</span>
-                  <span className="text-2xl font-bold text-emerald-400">
-                    {healthChecklist
-                      .filter(item => checkedItems.has(`health-${item.id}`))
-                      .reduce((sum, item) => sum + (item.points || 0), 0)
-                    } / {healthChecklist.reduce((sum, item) => sum + (item.points || 0), 0)}
-                  </span>
-                </div>
-                {Object.entries(groupChecklistByCategory(healthChecklist)).map(([category, items]) => (
-                  <div key={category}>
-                    <h4 className="text-sm font-semibold text-slate-400 mb-2">{category}</h4>
-                    <div className="space-y-2">
-                      {items.map((item) => (
-                        <label
-                          key={item.id}
-                          className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
-                            checkedItems.has(`health-${item.id}`) 
-                              ? 'bg-green-500/20 border border-green-500/30' 
-                              : 'bg-slate-800/50 hover:bg-slate-800/80'
-                          }`}
-                          data-testid={`health-checklist-item-${item.id}`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={checkedItems.has(`health-${item.id}`)}
-                            onChange={() => toggleCheckItem(`health-${item.id}`)}
-                            className="mt-0.5 h-4 w-4 rounded border-slate-500 bg-slate-700 text-emerald-500 focus:ring-emerald-500"
-                          />
-                          <div className="flex-1">
-                            <span className={`text-sm ${checkedItems.has(`health-${item.id}`) ? 'text-green-300 line-through' : 'text-slate-200'}`}>
-                              {item.item}
-                            </span>
-                            <div className="flex items-center gap-2 mt-0.5">
-                              {item.points && (
-                                <Badge className="bg-slate-700 text-slate-300 text-[10px] px-1.5 py-0">
-                                  {item.points} pts
-                                </Badge>
-                              )}
-                              {item.critical && (
-                                <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
-                                  CRITICAL
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        </label>
-                      ))}
+                {isSandbox ? (
+                  <div className="text-center py-6 space-y-3">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-cyan-500/20 border border-cyan-500/30">
+                      <Play className="h-6 w-6 text-cyan-400" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-cyan-300">Sandbox Mode</h4>
+                      <p className="text-sm text-slate-400 mt-1">
+                        Practice area - no data loaded.
+                      </p>
+                      <p className="text-xs text-slate-500 mt-2">
+                        During live events, this shows the TN Health Department<br />
+                        inspection checklist scored 0-100.
+                      </p>
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                      <span className="text-sm text-emerald-300">Current Score</span>
+                      <span className="text-2xl font-bold text-emerald-400">
+                        {healthChecklist
+                          .filter(item => checkedItems.has(`health-${item.id}`))
+                          .reduce((sum, item) => sum + (item.points || 0), 0)
+                        } / 100
+                      </span>
+                    </div>
+                    {Object.entries(groupChecklistByCategory(healthChecklist)).map(([category, items]) => (
+                      <div key={category}>
+                        <h4 className="text-sm font-semibold text-slate-400 mb-2">{category}</h4>
+                        <div className="space-y-2">
+                          {items.map((item) => (
+                            <label
+                              key={item.id}
+                              className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
+                                checkedItems.has(`health-${item.id}`) 
+                                  ? 'bg-green-500/20 border border-green-500/30' 
+                                  : 'bg-slate-800/50 hover:bg-slate-800/80'
+                              }`}
+                              data-testid={`health-checklist-item-${item.id}`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checkedItems.has(`health-${item.id}`)}
+                                onChange={() => toggleCheckItem(`health-${item.id}`)}
+                                className="mt-0.5 h-4 w-4 rounded border-slate-500 bg-slate-700 text-emerald-500 focus:ring-emerald-500"
+                              />
+                              <div className="flex-1">
+                                <span className={`text-sm ${checkedItems.has(`health-${item.id}`) ? 'text-green-300 line-through' : 'text-slate-200'}`}>
+                                  {item.item}
+                                </span>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  {item.points && (
+                                    <Badge className="bg-slate-700 text-slate-300 text-[10px] px-1.5 py-0">
+                                      {item.points} pts
+                                    </Badge>
+                                  )}
+                                  {item.critical && (
+                                    <Badge variant="destructive" className="text-[10px] px-1.5 py-0">
+                                      CRITICAL
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
               </CardContent>
             </motion.div>
           )}
