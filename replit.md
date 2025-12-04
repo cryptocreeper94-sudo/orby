@@ -1,8 +1,19 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.6 (Beta) - STAMPED
+## Current Version: v1.0.7 (Beta) - STAMPED
 **Release Date:** December 4, 2024
-**Genesis Hallmark:** ORB-000000000012
+**Genesis Hallmark:** ORB-000000000013
+
+### v1.0.7 Release Notes
+- **Login Screen Rebrand:** Orby Commander mascot and title throughout
+  - Replaced regular Orby with Orby Commander (military hat version)
+  - Updated branding to "Orby Commander - Venue Operations Platform"
+- **Footer Update:** DarkWave Studios LLC with proper hyperlink to darkwavestudios.io
+- **Sandbox Banner:** Now auto-dismisses after 3 seconds (no blocking)
+- **Compliance Checklists:** Sandbox mode shows clean "Practice area" message
+  - No confusing placeholder data in sandbox mode
+  - Health Dept score properly shows 0-100 scale
+- **Manager PIN Info:** "Contact David for your PIN" on login screen
 
 ### v1.0.6 Release Notes
 - **Login Screen Update:** Manager PIN contact info now shows "Contact David" instead of supervisor
