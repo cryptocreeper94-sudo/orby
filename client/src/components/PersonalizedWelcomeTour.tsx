@@ -456,12 +456,15 @@ export function PersonalizedWelcomeTour() {
   const isFirst = currentStepIndex === 0;
   const isLast = currentStepIndex === steps.length - 1;
 
+  const isCentered = !targetRect || currentStep?.position === 'center';
+
   const getCardPosition = () => {
-    if (!targetRect || currentStep?.position === 'center') {
+    if (isCentered) {
+      const cardWidth = 340;
+      const cardHeight = 280;
       return { 
-        top: '50%', 
-        left: '50%', 
-        transform: 'translate(-50%, -50%)' 
+        top: `${Math.max(20, (window.innerHeight - cardHeight) / 2)}px`, 
+        left: `${Math.max(20, (window.innerWidth - cardWidth) / 2)}px`
       };
     }
 
@@ -472,29 +475,30 @@ export function PersonalizedWelcomeTour() {
     switch (currentStep?.position) {
       case 'bottom':
         return {
-          top: `${Math.min(targetRect.bottom + padding, window.innerHeight - cardHeight - padding)}px`,
-          left: `${Math.max(padding, Math.min(targetRect.left + targetRect.width / 2 - cardWidth / 2, window.innerWidth - cardWidth - padding))}px`
+          top: `${Math.min(targetRect!.bottom + padding, window.innerHeight - cardHeight - padding)}px`,
+          left: `${Math.max(padding, Math.min(targetRect!.left + targetRect!.width / 2 - cardWidth / 2, window.innerWidth - cardWidth - padding))}px`
         };
       case 'top':
         return {
-          top: `${Math.max(padding, targetRect.top - cardHeight - padding)}px`,
-          left: `${Math.max(padding, Math.min(targetRect.left + targetRect.width / 2 - cardWidth / 2, window.innerWidth - cardWidth - padding))}px`
+          top: `${Math.max(padding, targetRect!.top - cardHeight - padding)}px`,
+          left: `${Math.max(padding, Math.min(targetRect!.left + targetRect!.width / 2 - cardWidth / 2, window.innerWidth - cardWidth - padding))}px`
         };
       case 'left':
         return {
-          top: `${Math.max(padding, targetRect.top + targetRect.height / 2 - cardHeight / 2)}px`,
-          left: `${Math.max(padding, targetRect.left - cardWidth - padding)}px`
+          top: `${Math.max(padding, targetRect!.top + targetRect!.height / 2 - cardHeight / 2)}px`,
+          left: `${Math.max(padding, targetRect!.left - cardWidth - padding)}px`
         };
       case 'right':
         return {
-          top: `${Math.max(padding, targetRect.top + targetRect.height / 2 - cardHeight / 2)}px`,
-          left: `${Math.min(targetRect.right + padding, window.innerWidth - cardWidth - padding)}px`
+          top: `${Math.max(padding, targetRect!.top + targetRect!.height / 2 - cardHeight / 2)}px`,
+          left: `${Math.min(targetRect!.right + padding, window.innerWidth - cardWidth - padding)}px`
         };
       default:
+        const defaultCardWidth = 340;
+        const defaultCardHeight = 280;
         return { 
-          top: '50%', 
-          left: '50%', 
-          transform: 'translate(-50%, -50%)' 
+          top: `${Math.max(20, (window.innerHeight - defaultCardHeight) / 2)}px`, 
+          left: `${Math.max(20, (window.innerWidth - defaultCardWidth) / 2)}px`
         };
     }
   };
