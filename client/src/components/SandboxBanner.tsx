@@ -1,55 +1,52 @@
 import { useState, useEffect } from 'react';
 import { useMode } from '@/lib/ModeContext';
-import { FlaskConical, X, Sparkles } from 'lucide-react';
+import { FlaskConical, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const BANNER_DISMISSED_KEY = 'orby_sandbox_banner_dismissed';
+const BANNER_SHOWN_KEY = 'orby_sandbox_banner_shown';
 
 export function SandboxBanner() {
   const { isSandbox } = useMode();
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const dismissed = sessionStorage.getItem(BANNER_DISMISSED_KEY);
-    if (dismissed === 'true') {
-      setIsDismissed(true);
+    const alreadyShown = sessionStorage.getItem(BANNER_SHOWN_KEY);
+    if (isSandbox && !alreadyShown) {
+      setIsVisible(true);
+      sessionStorage.setItem(BANNER_SHOWN_KEY, 'true');
+      
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
     }
-  }, []);
-
-  const handleDismiss = () => {
-    setIsDismissed(true);
-    sessionStorage.setItem(BANNER_DISMISSED_KEY, 'true');
-  };
-
-  if (!isSandbox || isDismissed) return null;
+  }, [isSandbox]);
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 text-white px-4 py-2 shadow-lg shadow-cyan-500/30" data-testid="sandbox-banner">
-      <div className="flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <FlaskConical className="h-5 w-5 animate-pulse" />
-            <Sparkles className="h-3 w-3 absolute -top-1 -right-1 text-yellow-300" />
-          </div>
-          <div>
-            <span className="font-bold text-sm">SANDBOX MODE</span>
-            <span className="hidden sm:inline text-cyan-100 text-sm ml-2">
-              - Changes won't affect live operations
-            </span>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleDismiss}
-          className="text-white hover:bg-white/20 h-7 px-2"
-          data-testid="button-exit-sandbox"
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          initial={{ y: -60, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -60, opacity: 0 }}
+          transition={{ type: 'spring', damping: 20, stiffness: 300 }}
+          className="fixed top-0 left-0 right-0 z-[100] bg-gradient-to-r from-cyan-600 via-teal-500 to-cyan-600 text-white px-4 py-2 shadow-lg shadow-cyan-500/30"
+          data-testid="sandbox-banner"
         >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
+          <div className="flex items-center justify-center gap-3 max-w-7xl mx-auto">
+            <div className="relative">
+              <FlaskConical className="h-5 w-5" />
+              <Sparkles className="h-3 w-3 absolute -top-1 -right-1 text-yellow-300" />
+            </div>
+            <span className="font-bold text-sm">SANDBOX MODE</span>
+            <span className="text-cyan-100 text-sm">- Demo data active</span>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
 
