@@ -405,7 +405,7 @@ export function OrbyAIChat() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4">
                 {messages.map((msg) => (
                   <motion.div
                     key={msg.id}
@@ -422,23 +422,23 @@ export function OrbyAIChat() {
                         ? "bg-cyan-500 text-white rounded-br-md" 
                         : "bg-slate-700/50 text-slate-200 rounded-bl-md border border-slate-600/50"
                     )}>
-                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                      <p className="text-sm whitespace-pre-wrap pr-6">{msg.content}</p>
                       
                       {msg.role === 'assistant' && (
                         <button
                           onClick={() => toggleSpeak(msg.id, msg.content)}
                           className={cn(
-                            "absolute -right-2 -bottom-2 w-7 h-7 rounded-full flex items-center justify-center transition-all",
+                            "absolute right-1 bottom-1 w-6 h-6 rounded-full flex items-center justify-center transition-all",
                             speakingId === msg.id
                               ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/50"
-                              : "bg-slate-600 text-slate-300 opacity-0 group-hover:opacity-100 hover:bg-cyan-500 hover:text-white"
+                              : "bg-slate-600/80 text-slate-300 opacity-70 hover:opacity-100 hover:bg-cyan-500 hover:text-white"
                           )}
                           data-testid={`button-speak-${msg.id}`}
                         >
                           {speakingId === msg.id ? (
-                            <VolumeX className="h-3.5 w-3.5" />
+                            <VolumeX className="h-3 w-3" />
                           ) : (
-                            <Volume2 className="h-3.5 w-3.5" />
+                            <Volume2 className="h-3 w-3" />
                           )}
                         </button>
                       )}
