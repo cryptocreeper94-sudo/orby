@@ -245,41 +245,41 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
               <Button
                 onClick={() => triggerABCAlert.mutate()}
                 disabled={triggerABCAlert.isPending}
-                className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 text-white h-auto py-3 flex-col items-center gap-1"
+                className="bg-gradient-to-r from-purple-600 to-purple-800 hover:from-purple-500 hover:to-purple-700 text-white h-auto py-3 flex-col items-center gap-1 overflow-hidden"
                 data-testid="button-trigger-abc"
               >
-                <Wine className="h-5 w-5" />
-                <span className="font-semibold">ABC Board Alert</span>
-                <span className="text-xs text-purple-200">Alcohol Inspection</span>
+                <Wine className="h-5 w-5 shrink-0" />
+                <span className="font-semibold text-sm truncate w-full text-center">ABC Board Alert</span>
+                <span className="text-[10px] text-purple-200 truncate w-full text-center">Alcohol Inspection</span>
               </Button>
               
               <Button
                 onClick={() => triggerHealthAlert.mutate()}
                 disabled={triggerHealthAlert.isPending}
-                className="bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 text-white h-auto py-3 flex-col items-center gap-1"
+                className="bg-gradient-to-r from-emerald-600 to-emerald-800 hover:from-emerald-500 hover:to-emerald-700 text-white h-auto py-3 flex-col items-center gap-1 overflow-hidden"
                 data-testid="button-trigger-health"
               >
-                <Utensils className="h-5 w-5" />
-                <span className="font-semibold">Health Dept Alert</span>
-                <span className="text-xs text-emerald-200">Food Safety Inspection</span>
+                <Utensils className="h-5 w-5 shrink-0" />
+                <span className="font-semibold text-sm truncate w-full text-center">Health Dept Alert</span>
+                <span className="text-[10px] text-emerald-200 truncate w-full text-center">Food Safety</span>
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      <Card className="bg-slate-900/80 border-slate-700/50 backdrop-blur-sm">
+      <Card className="bg-slate-900/80 border-slate-700/50 backdrop-blur-sm overflow-hidden">
         <CardHeader className="pb-2">
           <button
             onClick={() => setShowABCChecklist(!showABCChecklist)}
-            className="w-full flex items-center justify-between text-left"
+            className="w-full flex items-center justify-between text-left gap-2"
             data-testid="button-toggle-abc-checklist"
           >
-            <CardTitle className="text-lg flex items-center gap-2 text-purple-400">
-              <Wine className="h-5 w-5" />
-              Tennessee ABC Board Checklist
+            <CardTitle className="text-base flex items-center gap-2 text-purple-400 truncate">
+              <Wine className="h-5 w-5 shrink-0" />
+              <span className="truncate">TN ABC Board Checklist</span>
             </CardTitle>
-            {showABCChecklist ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            {showABCChecklist ? <ChevronUp className="h-5 w-5 shrink-0" /> : <ChevronDown className="h-5 w-5 shrink-0" />}
           </button>
         </CardHeader>
         <AnimatePresence>
@@ -332,21 +332,21 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
         </AnimatePresence>
       </Card>
 
-      <Card className="bg-slate-900/80 border-slate-700/50 backdrop-blur-sm">
+      <Card className="bg-slate-900/80 border-slate-700/50 backdrop-blur-sm overflow-hidden">
         <CardHeader className="pb-2">
           <button
             onClick={() => setShowHealthChecklist(!showHealthChecklist)}
-            className="w-full flex items-center justify-between text-left"
+            className="w-full flex items-center justify-between text-left gap-2"
             data-testid="button-toggle-health-checklist"
           >
-            <CardTitle className="text-lg flex items-center gap-2 text-emerald-400">
-              <Utensils className="h-5 w-5" />
-              Tennessee Health Department Checklist
-              <Badge className="bg-emerald-500/20 text-emerald-400 ml-2">
-                {healthChecklist.reduce((sum, item) => sum + (item.points || 0), 0)} pts max
+            <CardTitle className="text-base flex items-center gap-2 text-emerald-400 min-w-0">
+              <Utensils className="h-5 w-5 shrink-0" />
+              <span className="truncate">TN Health Dept</span>
+              <Badge className="bg-emerald-500/20 text-emerald-400 shrink-0 text-[10px]">
+                {healthChecklist.reduce((sum, item) => sum + (item.points || 0), 0)} pts
               </Badge>
             </CardTitle>
-            {showHealthChecklist ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+            {showHealthChecklist ? <ChevronUp className="h-5 w-5 shrink-0" /> : <ChevronDown className="h-5 w-5 shrink-0" />}
           </button>
         </CardHeader>
         <AnimatePresence>
