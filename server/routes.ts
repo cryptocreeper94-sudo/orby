@@ -3941,6 +3941,18 @@ Be encouraging and supportive - venue operations can be stressful!`;
     }
   });
 
+  // Request devnet SOL airdrop for testing
+  app.post("/api/blockchain/airdrop", async (_req: Request, res: Response) => {
+    try {
+      const { requestDevnetAirdrop } = await import("./services/blockchain");
+      const result = await requestDevnetAirdrop();
+      res.json(result);
+    } catch (error) {
+      console.error("Error requesting airdrop:", error);
+      res.status(500).json({ error: "Failed to request airdrop" });
+    }
+  });
+
   // Get blockchain verifications by entity
   app.get("/api/blockchain/verifications/:entityType/:entityId", async (req: Request, res: Response) => {
     try {
