@@ -1,8 +1,8 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.8 (Beta)
+## Current Version: v1.0.8 (Beta) - STAMPED
 **Release Date:** December 5, 2024
-**Genesis Hallmark:** ORB-000000000013
+**Genesis Hallmark:** ORB-000000000014
 
 ### v1.0.8 Release Notes
 - **Multi-Tenant Architecture:** SaaS-ready platform with tenant isolation

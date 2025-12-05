@@ -1,12 +1,17 @@
 import { createHash } from 'crypto';
 
 const HELIUS_API_KEY = process.env.HELIUS_API_KEY;
+const PHANTOM_SECRET_KEY = process.env.PHANTOM_SECRET_KEY;
 const HELIUS_RPC_URL = HELIUS_API_KEY 
   ? `https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}`
   : 'https://api.mainnet-beta.solana.com';
 const DEVNET_RPC_URL = HELIUS_API_KEY
   ? `https://devnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}`
   : 'https://api.devnet.solana.com';
+
+export function hasWalletConfigured(): boolean {
+  return !!PHANTOM_SECRET_KEY;
+}
 
 export type EntityType = 'platform' | 'user' | 'version' | 'document' | 'report' | 
   'inventory_count' | 'incident' | 'violation' | 'emergency' | 'delivery' | 
@@ -119,26 +124,47 @@ export async function createVerification(
   };
 }
 
-export async function checkHeliusConnection(): Promise<{ connected: boolean; hasApiKey: boolean; network?: string; error?: string }> {
+export async function checkHeliusConnection(): Promise<{ connected: boolean; hasApiKey: boolean; hasWallet: boolean; network?: string; solanaVersion?: string; error?: string }> {
+  const hasWallet = !!PHANTOM_SECRET_KEY;
+  
   if (!HELIUS_API_KEY) {
-    return { connected: false, hasApiKey: false, error: 'Helius API key not configured - using demo mode' };
+    return { connected: false, hasApiKey: false, hasWallet, error: 'Helius API key not configured - using demo mode' };
   }
   try {
-    const response = await fetch(`${DEVNET_RPC_URL}`, {
+    const response = await fetch(DEVNET_RPC_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         jsonrpc: '2.0',
-        id: 1,
+        id: '1',
         method: 'getVersion',
+        params: []
       }),
     });
-    if (response.ok) {
-      return { connected: true, hasApiKey: true, network: 'devnet' };
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      return { connected: false, hasApiKey: true, hasWallet, error: `HTTP ${response.status}: ${errorText.substring(0, 100)}` };
     }
-    return { connected: false, hasApiKey: true, error: 'Failed to connect to Helius' };
+    
+    const result = await response.json();
+    if (result.result && result.result['solana-core']) {
+      return { 
+        connected: true, 
+        hasApiKey: true, 
+        hasWallet, 
+        network: 'devnet',
+        solanaVersion: result.result['solana-core']
+      };
+    }
+    
+    if (result.error) {
+      return { connected: false, hasApiKey: true, hasWallet, error: result.error.message || 'RPC error' };
+    }
+    
+    return { connected: false, hasApiKey: true, hasWallet, error: 'Unexpected response format' };
   } catch (error) {
-    return { connected: false, hasApiKey: true, error: String(error) };
+    return { connected: false, hasApiKey: true, hasWallet, error: String(error) };
   }
 }
 
