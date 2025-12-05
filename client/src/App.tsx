@@ -13,6 +13,7 @@ import { OrbyAIChat } from "@/components/OrbyAIChat";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import FloatingWeatherButton from "@/components/FloatingWeatherButton";
 import { AppFooter } from "@/components/AppFooter";
+import { AppHeader } from "@/components/AppHeader";
 import legendsLogo from "@assets/stock_images/legends_hospitality_nobg.png";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/Login";
@@ -50,7 +51,8 @@ import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
   const { isSandbox } = useMode();
   return (
-    <div className={`relative z-10 pb-14 ${isSandbox ? 'pt-10' : ''}`}>
+    <div className={`relative z-10 pb-14 pt-14 ${isSandbox ? 'mt-10' : ''}`}>
+      <AppHeader />
       {children}
     </div>
   );
