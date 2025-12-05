@@ -1,8 +1,10 @@
 import { useMode } from '@/lib/ModeContext';
-import { Shield, FlaskConical, Radio, Users, AlertTriangle, Sparkles } from 'lucide-react';
+import { Shield, FlaskConical, Radio, Users, AlertTriangle, Sparkles, BadgeCheck, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import orbyCommanderImg from '@assets/generated_images/orby_commander_nobg.png';
+
+const GENESIS_HALLMARK_URL = 'https://solscan.io/tx/44QArRaRncUfTEP3ZHVQmiMo7zWfRxxD82KxpKHihzJc6KXD7PjQ1XofygiZjtCU6oNK6hCgiT848YqjntsMFMnU';
 
 interface ModeGateProps {
   onModeSelected: () => void;
@@ -151,6 +153,29 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
         <p className="text-center text-cyan-200/50 text-xs mt-6">
           You can switch modes anytime from your dashboard
         </p>
+
+        {/* Genesis Hallmark Badge */}
+        <a
+          href={GENESIS_HALLMARK_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-8 mx-auto flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-emerald-950/80 to-cyan-950/80 border border-emerald-500/40 hover:border-emerald-400 transition-all duration-300 hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] group"
+          data-testid="link-genesis-hallmark"
+        >
+          <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/40 group-hover:bg-emerald-500/30 transition-colors">
+            <BadgeCheck className="h-5 w-5 text-emerald-400" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-bold text-white">Genesis Hallmark</span>
+              <span className="px-1.5 py-0.5 rounded bg-emerald-500/20 text-[9px] font-bold text-emerald-400 uppercase">
+                Verified
+              </span>
+            </div>
+            <div className="text-xs text-emerald-300/70">ORB-000000000001 • Solana Mainnet</div>
+          </div>
+          <ExternalLink className="h-4 w-4 text-emerald-400/60 group-hover:text-emerald-400 transition-colors" />
+        </a>
       </div>
     </div>
   );
