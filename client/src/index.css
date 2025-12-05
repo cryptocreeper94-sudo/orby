@@ -140,13 +140,18 @@
   * {
     @apply border-border;
   }
-  html, body {
+  html, body, #root {
     @apply font-sans antialiased bg-background text-foreground;
     margin: 0;
     padding: 0;
+    min-height: 100dvh;
   }
   
   html {
+    background: #0f172a;
+  }
+  
+  body {
     background: #0f172a;
   }
   h1, h2, h3, h4, h5, h6, .font-mono {
