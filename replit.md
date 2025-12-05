@@ -1,8 +1,22 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.8 (Beta) - STAMPED
+## Current Version: v1.0.9 (Beta) - STAMPED
 **Release Date:** December 5, 2024
 **Genesis Hallmark:** ORB-000000000014
+**Solana TX:** [5YtRFKH32Pt9D2QvFg4Njbb7uwU6oDEQTinAJXZYu2NUztn4BE4M9Q9ebkEF7Ms6EEMZPAKj3EZopNSZfCPZ5v2w](https://solscan.io/tx/5YtRFKH32Pt9D2QvFg4Njbb7uwU6oDEQTinAJXZYu2NUztn4BE4M9Q9ebkEF7Ms6EEMZPAKj3EZopNSZfCPZ5v2w)
+
+### v1.0.9 Release Notes
+- **Genesis Hallmark Badge:** Welcome page now displays blockchain verification
+  - Clickable badge links directly to ORB-000000000001 on Solscan mainnet
+  - Shows "Verified" status with Solana Mainnet indicator
+  - Professional emerald/cyan gradient styling matching app theme
+- **White Margin Fix:** Removed white space at top of screen
+  - HTML/body margin and padding reset to 0
+  - Full-bleed dark background on html element
+- **All 14 Genesis Hallmarks on Solana Mainnet:** Every version now permanently anchored
+  - ORB-000000000001: Orby Platform
+  - ORB-000000000002: Jason (Developer)
+  - ORB-000000000003 through ORB-000000000014: Version releases
 
 ### v1.0.8 Release Notes
 - **Multi-Tenant Architecture:** SaaS-ready platform with tenant isolation
