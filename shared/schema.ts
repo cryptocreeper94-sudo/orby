@@ -1444,6 +1444,140 @@ export type InsertAssetStamp = z.infer<typeof insertAssetStampSchema>;
 export type BlockchainVerification = typeof blockchainVerifications.$inferSelect;
 export type InsertBlockchainVerification = z.infer<typeof insertBlockchainVerificationSchema>;
 
+// ============ MULTI-TENANT PLATFORM ARCHITECTURE ============
+// Tenant types: beta (Nissan Stadium), business (paying customers), franchise (child locations)
+export const tenantTypeEnum = pgEnum('tenant_type', ['beta', 'business', 'franchise']);
+export const tenantStatusEnum = pgEnum('tenant_status', ['active', 'suspended', 'pending', 'cancelled']);
+export const subscriptionPlanEnum = pgEnum('subscription_plan', ['starter', 'professional', 'enterprise']);
+export const subscriptionStatusEnum = pgEnum('subscription_status', ['active', 'past_due', 'cancelled', 'trialing']);
+export const tenantMemberRoleEnum = pgEnum('tenant_member_role', ['owner', 'admin', 'manager', 'member', 'viewer']);
+
+// Tenants table - core multi-tenant entity
+export const tenants = pgTable("tenants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 200 }).notNull(),
+  slug: varchar("slug", { length: 100 }).unique().notNull(),
+  type: tenantTypeEnum("type").notNull().default('business'),
+  status: tenantStatusEnum("status").notNull().default('pending'),
+  parentTenantId: varchar("parent_tenant_id"),
+  domain: varchar("domain", { length: 255 }),
+  logoUrl: text("logo_url"),
+  primaryColor: varchar("primary_color", { length: 7 }).default('#06B6D4'),
+  venueAddress: text("venue_address"),
+  venueCity: varchar("venue_city", { length: 100 }),
+  venueState: varchar("venue_state", { length: 50 }),
+  venueZip: varchar("venue_zip", { length: 20 }),
+  venueCountry: varchar("venue_country", { length: 100 }).default('USA'),
+  timezone: varchar("timezone", { length: 50 }).default('America/Chicago'),
+  isSandbox: boolean("is_sandbox").default(false),
+  showCommercialFeatures: boolean("show_commercial_features").default(false),
+  showSalesContent: boolean("show_sales_content").default(false),
+  showInvestorContent: boolean("show_investor_content").default(false),
+  hallmarkPrefix: varchar("hallmark_prefix", { length: 10 }),
+  assetCounter: integer("asset_counter").default(0),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_tenant_slug").on(table.slug),
+  index("IDX_tenant_type").on(table.type),
+  index("IDX_tenant_status").on(table.status),
+  index("IDX_tenant_parent").on(table.parentTenantId),
+]);
+
+// Subscriptions table - billing and plan information
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").references(() => tenants.id).notNull(),
+  plan: subscriptionPlanEnum("plan").notNull().default('starter'),
+  status: subscriptionStatusEnum("status").notNull().default('trialing'),
+  billingEmail: varchar("billing_email", { length: 255 }),
+  stripeCustomerId: varchar("stripe_customer_id", { length: 100 }),
+  stripeSubscriptionId: varchar("stripe_subscription_id", { length: 100 }),
+  currentPeriodStart: timestamp("current_period_start"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  trialEndsAt: timestamp("trial_ends_at"),
+  cancelledAt: timestamp("cancelled_at"),
+  monthlyPriceCents: integer("monthly_price_cents").default(0),
+  maxUsers: integer("max_users").default(10),
+  maxStands: integer("max_stands").default(25),
+  features: jsonb("features").$type<string[]>().default(sql`'[]'::jsonb`),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("IDX_subscription_tenant").on(table.tenantId),
+  index("IDX_subscription_status").on(table.status),
+  index("IDX_subscription_stripe").on(table.stripeCustomerId),
+]);
+
+// Tenant memberships - links users to tenants with roles
+export const tenantMemberships = pgTable("tenant_memberships", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").references(() => tenants.id).notNull(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  role: tenantMemberRoleEnum("role").notNull().default('member'),
+  isDefault: boolean("is_default").default(false),
+  invitedBy: varchar("invited_by").references(() => users.id),
+  invitedAt: timestamp("invited_at"),
+  acceptedAt: timestamp("accepted_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_membership_tenant").on(table.tenantId),
+  index("IDX_membership_user").on(table.userId),
+  index("IDX_membership_role").on(table.role),
+]);
+
+// Feature flags for tenant-specific functionality
+export const featureFlags = pgTable("feature_flags", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id").references(() => tenants.id),
+  featureKey: varchar("feature_key", { length: 100 }).notNull(),
+  isEnabled: boolean("is_enabled").default(true),
+  config: jsonb("config").$type<Record<string, unknown>>(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("IDX_feature_tenant").on(table.tenantId),
+  index("IDX_feature_key").on(table.featureKey),
+]);
+
+// Insert schemas
+export const insertTenantSchema = createInsertSchema(tenants).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertTenantMembershipSchema = createInsertSchema(tenantMemberships).omit({ id: true, createdAt: true });
+export const insertFeatureFlagSchema = createInsertSchema(featureFlags).omit({ id: true, createdAt: true });
+
+// Types
+export type Tenant = typeof tenants.$inferSelect;
+export type InsertTenant = z.infer<typeof insertTenantSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type TenantMembership = typeof tenantMemberships.$inferSelect;
+export type InsertTenantMembership = z.infer<typeof insertTenantMembershipSchema>;
+export type FeatureFlag = typeof featureFlags.$inferSelect;
+export type InsertFeatureFlag = z.infer<typeof insertFeatureFlagSchema>;
+
+// Default beta tenant configuration for Nissan Stadium
+export const NISSAN_STADIUM_BETA_CONFIG = {
+  name: 'Nissan Stadium',
+  slug: 'nissan-stadium',
+  type: 'beta' as const,
+  status: 'active' as const,
+  venueCity: 'Nashville',
+  venueState: 'Tennessee',
+  timezone: 'America/Chicago',
+  isSandbox: false,
+  showCommercialFeatures: false,
+  showSalesContent: false,
+  showInvestorContent: false,
+  hallmarkPrefix: 'ORB',
+  metadata: {
+    venueName: 'Nissan Stadium',
+    operator: 'Legends Hospitality',
+    genesisHallmark: 'ORB-000000000013',
+    betaVersion: 'v1.0.7',
+  }
+};
+
 // ============ AUDIT LOG, ORBIT INTEGRATION & EMERGENCY ALERTS ============
 // Insert schemas
 export const insertAuditLogSchema = createInsertSchema(auditLogs).omit({ id: true, createdAt: true });
