@@ -1,9 +1,23 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.9 (Beta) - STAMPED
+## Current Version: v1.0.10 (Beta) - STAMPED
 **Release Date:** December 5, 2024
-**Genesis Hallmark:** ORB-000000000014
-**Solana TX:** [5YtRFKH32Pt9D2QvFg4Njbb7uwU6oDEQTinAJXZYu2NUztn4BE4M9Q9ebkEF7Ms6EEMZPAKj3EZopNSZfCPZ5v2w](https://solscan.io/tx/5YtRFKH32Pt9D2QvFg4Njbb7uwU6oDEQTinAJXZYu2NUztn4BE4M9Q9ebkEF7Ms6EEMZPAKj3EZopNSZfCPZ5v2w)
+**Genesis Hallmark:** ORB-000000000015
+**Solana TX:** [61vgX3ZQTMDL2Bz3fr39449wKvLUNEyJymx6LQVEY41usj53DitjEygqJqWdjthgAyyhhuzd5v4EwWHXhCXVpzsQ](https://solscan.io/tx/61vgX3ZQTMDL2Bz3fr39449wKvLUNEyJymx6LQVEY41usj53DitjEygqJqWdjthgAyyhhuzd5v4EwWHXhCXVpzsQ)
+
+### v1.0.10 Release Notes
+- **Genesis Hallmark Badge & QR Modal:** Verified badge in header with interactive modal
+  - Clickable green "Verified" badge in top-right header
+  - Opens modal with QR code linking to ORB-000000000001 on Solscan
+  - Orby Commander mascot pointing at the QR code
+  - "Scan to Verify" label and "Open on Solscan" button
+- **Footer Fix:** Full copyright text now always visible and centered
+  - Shows "© 2025 DarkWave Studios LLC" on all screen sizes
+  - No more abbreviated text on mobile
+- **White Margin Fix:** Full-bleed dark background
+  - PWA status bar style updated to black
+  - Fixed inset positioning for welcome screen
+- **15 Genesis Hallmarks on Solana Mainnet:** All versions permanently anchored
 
 ### v1.0.9 Release Notes
 - **Genesis Hallmark Badge:** Welcome page now displays blockchain verification
