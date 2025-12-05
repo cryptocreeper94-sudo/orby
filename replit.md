@@ -13,7 +13,8 @@
 - **Genesis Hallmark Viewer:** Real-time blockchain certification display
   - Green "Verified" badge in header opens hallmark viewer modal
   - Live data from /api/asset-stamps API endpoint
-  - Shows all 13 genesis hallmarks with ORB-XXXXXXXXXXXX format
+  - Shows all 14 genesis hallmarks with ORB-XXXXXXXXXXXX format
+  - All stamps anchored with SHA-256 cryptographic hashes
   - Expandable stamp details with Solscan links (when blockchain anchored)
   - Error handling with retry capability
 - **Hamburger Menu Navigation:** Slide-out menu with quick access
