@@ -211,6 +211,7 @@ function HallmarkViewerModal({ isOpen, onClose }: HallmarkViewerModalProps) {
   const [selectedStamp, setSelectedStamp] = useState<string | null>(null);
   const [stamps, setStamps] = useState<AssetStamp[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -221,13 +222,16 @@ function HallmarkViewerModal({ isOpen, onClose }: HallmarkViewerModalProps) {
   const fetchStamps = async () => {
     try {
       setLoading(true);
+      setError(null);
       const res = await fetch('/api/asset-stamps');
-      if (res.ok) {
-        const data = await res.json();
-        setStamps(data);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch stamps: ${res.status}`);
       }
-    } catch (error) {
-      console.error('Failed to fetch stamps:', error);
+      const data = await res.json();
+      setStamps(data);
+    } catch (err) {
+      console.error('Failed to fetch stamps:', err);
+      setError('Unable to load hallmarks. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -280,6 +284,17 @@ function HallmarkViewerModal({ isOpen, onClose }: HallmarkViewerModalProps) {
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="w-6 h-6 text-cyan-400 animate-spin" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-8 space-y-3">
+              <p className="text-red-400 text-sm">{error}</p>
+              <button
+                onClick={fetchStamps}
+                className="text-xs text-cyan-400 hover:text-cyan-300 underline"
+                data-testid="button-retry-hallmarks"
+              >
+                Retry
+              </button>
             </div>
           ) : stamps.length === 0 ? (
             <div className="text-center py-8">
@@ -346,8 +361,10 @@ function HallmarkViewerModal({ isOpen, onClose }: HallmarkViewerModalProps) {
         <div className="p-4 border-t border-gray-700/50 bg-gray-800/30">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-xs text-gray-400">All stamps verified on Solana</span>
+              <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="text-xs text-gray-400">
+                {stamps.length} Genesis Hallmarks
+              </span>
             </div>
             <Badge variant="outline" className="text-xs border-gray-600 text-gray-400">
               Nissan Stadium Beta

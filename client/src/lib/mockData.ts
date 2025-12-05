@@ -19,6 +19,26 @@ export type { User, Stand, Item, Message, NPO, StaffingGroup, SupervisorDoc };
 // Constants
 export const SECTIONS = ["2 East", "2 West", "7 East", "7 West"];
 
+// Feature flags for tenant-based content visibility
+export interface TenantFeatures {
+  showCommercialFeatures: boolean;
+  showSalesContent: boolean;
+  showInvestorContent: boolean;
+  showSubscriptionContent: boolean;
+  tenantType: 'business' | 'franchise' | 'beta';
+  tenantName: string;
+}
+
+// Default to Nissan Stadium beta tenant features (no commercial content)
+const DEFAULT_TENANT_FEATURES: TenantFeatures = {
+  showCommercialFeatures: false,
+  showSalesContent: false,
+  showInvestorContent: false,
+  showSubscriptionContent: false,
+  tenantType: 'beta',
+  tenantName: 'Nissan Stadium'
+};
+
 // Store
 interface AppState {
   currentUser: User | null;
@@ -31,6 +51,7 @@ interface AppState {
   supervisorDocs: SupervisorDoc[];
   isLoading: boolean;
   error: string | null;
+  tenantFeatures: TenantFeatures;
 
   // Auth
   login: (pin: string) => Promise<boolean>;
@@ -70,6 +91,7 @@ export const useStore = create<AppState>()(
       countSheets: {},
       isLoading: false,
       error: null,
+      tenantFeatures: DEFAULT_TENANT_FEATURES,
 
       login: async (pin: string) => {
         try {
