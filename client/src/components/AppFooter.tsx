@@ -83,20 +83,16 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
 
               <span className="text-gray-600">|</span>
 
-              <div className="flex items-center gap-1 text-[10px]">
-                <span className="text-gray-500">&copy; 2025</span>
-                <a 
-                  href="https://darkwavestudios.io" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-0.5"
-                  data-testid="link-darkwave"
-                >
-                  <span className="hidden sm:inline">DarkWave Studios, LLC</span>
-                  <span className="sm:hidden">DarkWave</span>
-                  <ExternalLink className="w-2.5 h-2.5" />
-                </a>
-              </div>
+              <a 
+                href="https://darkwavestudios.io" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1 text-[10px]"
+                data-testid="link-darkwave"
+              >
+                <span>&copy; 2025 DarkWave Studios LLC</span>
+                <ExternalLink className="w-2.5 h-2.5" />
+              </a>
             </div>
           </div>
         </div>

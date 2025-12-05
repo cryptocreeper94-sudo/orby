@@ -26,7 +26,7 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
   };
 
   return (
-    <div className="min-h-dvh flex flex-col bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-800">
+    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-800 z-50">
       {/* Header with Verified Badge */}
       <div className="flex items-center justify-between px-4 py-3">
         <div className="text-cyan-400/70 text-xs font-medium">getorby.io</div>
@@ -171,6 +171,20 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
             You can switch modes anytime from your dashboard
           </p>
         </div>
+      </div>
+
+      {/* Footer */}
+      <div className="px-4 py-3 text-center">
+        <a 
+          href="https://darkwavestudios.io" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-purple-400 hover:text-purple-300 transition-colors inline-flex items-center gap-1 text-xs"
+          data-testid="link-darkwave-modegate"
+        >
+          <span>&copy; 2025 DarkWave Studios LLC</span>
+          <ExternalLink className="w-3 h-3" />
+        </a>
       </div>
 
       {/* QR Code Modal */}
