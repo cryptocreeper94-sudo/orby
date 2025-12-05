@@ -1,10 +1,31 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.7 (Beta) - STAMPED
-**Release Date:** December 4, 2024
+## Current Version: v1.0.8 (Beta)
+**Release Date:** December 5, 2024
 **Genesis Hallmark:** ORB-000000000013
 
-### v1.0.7 Release Notes
+### v1.0.8 Release Notes
+- **Multi-Tenant Architecture:** SaaS-ready platform with tenant isolation
+  - Tenant types: business, franchise, beta (Nissan Stadium is beta)
+  - Feature flags control commercial content visibility per tenant
+  - Beta tenants have no sales, investor, or subscription content visible
+  - Database tables: tenants, subscriptions, tenant_memberships, feature_flags
+- **Genesis Hallmark Viewer:** Real-time blockchain certification display
+  - Green "Verified" badge in header opens hallmark viewer modal
+  - Live data from /api/asset-stamps API endpoint
+  - Shows all 13 genesis hallmarks with ORB-XXXXXXXXXXXX format
+  - Expandable stamp details with Solscan links (when blockchain anchored)
+  - Error handling with retry capability
+- **Hamburger Menu Navigation:** Slide-out menu with quick access
+  - Genesis Hallmarks section with blockchain verification access
+  - Settings section for app preferences
+  - Current Venue display showing Nissan Stadium (Beta Tenant)
+  - Sign Out option at bottom
+- **TenantFeatures Interface:** Frontend feature flag system
+  - showCommercialFeatures, showSalesContent, showInvestorContent, showSubscriptionContent
+  - All default to false for Nissan Stadium beta tenant
+
+### v1.0.7 Release Notes (STAMPED)
 - **Login Screen Rebrand:** Orby Commander mascot and title throughout
   - Replaced regular Orby with Orby Commander (military hat version)
   - Updated branding to "Orby Commander - Venue Operations Platform"
