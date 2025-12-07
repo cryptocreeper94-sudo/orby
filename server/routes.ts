@@ -5754,5 +5754,119 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // DARKWAVE DEVELOPER HUB INTEGRATION
+  // ═══════════════════════════════════════════════════════════════════════════════
+  
+  const { EcosystemClient } = await import("./ecosystemHub");
+  
+  const DEV_HUB_URL = process.env.DEV_HUB_URL || "https://darkwavestudios.io";
+  const DEV_HUB_API_KEY = process.env.DEV_HUB_API_KEY || "";
+  const DEV_HUB_API_SECRET = process.env.DEV_HUB_API_SECRET || "";
+  
+  const devHubClient = new EcosystemClient({
+    hubUrl: DEV_HUB_URL,
+    apiKey: DEV_HUB_API_KEY,
+    apiSecret: DEV_HUB_API_SECRET,
+    appName: "Orby"
+  });
+
+  // Test connection to DarkWave Developer Hub
+  app.get("/api/dev-hub/connect", async (_req: Request, res: Response) => {
+    try {
+      const status = await devHubClient.checkConnection();
+      res.json(status);
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Push code snippet to Developer Hub
+  app.post("/api/dev-hub/snippet", async (req: Request, res: Response) => {
+    try {
+      const { name, code, language, category } = req.body;
+      const result = await devHubClient.pushSnippet({ name, code, language, category });
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Sync workers to Developer Hub
+  app.post("/api/dev-hub/sync-workers", async (req: Request, res: Response) => {
+    try {
+      const { workers } = req.body;
+      const result = await devHubClient.syncWorkers(workers);
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Sync contractors to Developer Hub
+  app.post("/api/dev-hub/sync-contractors", async (req: Request, res: Response) => {
+    try {
+      const { contractors } = req.body;
+      const result = await devHubClient.syncContractors(contractors);
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Sync 1099 data to Developer Hub
+  app.post("/api/dev-hub/sync-1099", async (req: Request, res: Response) => {
+    try {
+      const { year, payments } = req.body;
+      const result = await devHubClient.sync1099Data(year, payments);
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Sync timesheets to Developer Hub
+  app.post("/api/dev-hub/sync-timesheets", async (req: Request, res: Response) => {
+    try {
+      const { timesheets } = req.body;
+      const result = await devHubClient.syncTimesheets(timesheets);
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Sync certifications to Developer Hub
+  app.post("/api/dev-hub/sync-certs", async (req: Request, res: Response) => {
+    try {
+      const { certifications } = req.body;
+      const result = await devHubClient.syncCertifications(certifications);
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Get activity logs from Developer Hub
+  app.get("/api/dev-hub/logs", async (_req: Request, res: Response) => {
+    try {
+      const logs = await devHubClient.getActivityLogs();
+      res.json({ success: true, logs });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Log activity to Developer Hub
+  app.post("/api/dev-hub/log", async (req: Request, res: Response) => {
+    try {
+      const { action, details } = req.body;
+      const result = await devHubClient.logActivity(action, details);
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
   return httpServer;
 }
