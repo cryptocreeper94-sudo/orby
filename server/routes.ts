@@ -5952,5 +5952,129 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ============ RELEASE MANAGEMENT SYSTEM ============
+  
+  // Get all releases
+  app.get("/api/releases", async (req: Request, res: Response) => {
+    try {
+      const isPublished = req.query.published === 'true' ? true : req.query.published === 'false' ? false : undefined;
+      const releases = await storage.getReleases(isPublished !== undefined ? { isPublished } : undefined);
+      res.json(releases);
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Get latest published release (for footer)
+  app.get("/api/releases/latest", async (_req: Request, res: Response) => {
+    try {
+      const release = await storage.getLatestRelease();
+      if (!release) {
+        return res.status(404).json({ error: "No published release found" });
+      }
+      res.json(release);
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Get single release
+  app.get("/api/releases/:id", async (req: Request, res: Response) => {
+    try {
+      const release = await storage.getRelease(req.params.id);
+      if (!release) {
+        return res.status(404).json({ error: "Release not found" });
+      }
+      res.json(release);
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Create draft release
+  app.post("/api/releases", async (req: Request, res: Response) => {
+    try {
+      const { version, title, description, changes, releasedById } = req.body;
+      if (!version || !title) {
+        return res.status(400).json({ error: "Version and title are required" });
+      }
+      const release = await storage.createRelease({
+        version,
+        title,
+        description,
+        changes,
+        releasedById,
+        isPublished: false
+      });
+      res.json(release);
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Publish release with Solana verification
+  app.post("/api/releases/:id/publish", async (req: Request, res: Response) => {
+    try {
+      const release = await storage.getRelease(req.params.id);
+      if (!release) {
+        return res.status(404).json({ error: "Release not found" });
+      }
+      if (release.isPublished) {
+        return res.status(400).json({ error: "Release already published" });
+      }
+
+      // Generate SHA-256 hash of version + changelog
+      const dataToHash = JSON.stringify({
+        version: release.version,
+        title: release.title,
+        changes: release.changes,
+        timestamp: new Date().toISOString()
+      });
+      const encoder = new TextEncoder();
+      const data = encoder.encode(dataToHash);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const releaseHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+      // Anchor to Solana mainnet
+      let txSignature: string | undefined;
+      try {
+        const { submitMemoTransaction } = await import("./services/blockchain");
+        const result = await submitMemoTransaction(releaseHash, `RELEASE-${release.version}`, 'mainnet-beta');
+        if (result.success && result.txSignature) {
+          txSignature = result.txSignature;
+        }
+      } catch (blockchainErr) {
+        console.log('Blockchain anchoring skipped:', blockchainErr);
+      }
+
+      const published = await storage.publishRelease(req.params.id, txSignature, releaseHash);
+      res.json({
+        ...published,
+        releaseHash,
+        solscanUrl: txSignature ? `https://solscan.io/tx/${txSignature}` : undefined
+      });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Delete draft release
+  app.delete("/api/releases/:id", async (req: Request, res: Response) => {
+    try {
+      const release = await storage.getRelease(req.params.id);
+      if (!release) {
+        return res.status(404).json({ error: "Release not found" });
+      }
+      if (release.isPublished) {
+        return res.status(400).json({ error: "Cannot delete published release" });
+      }
+      await storage.deleteRelease(req.params.id);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
   return httpServer;
 }
