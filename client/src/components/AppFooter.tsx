@@ -37,8 +37,23 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
     refetchInterval: 60000
   });
 
+  const { data: latestRelease } = useQuery<{
+    id: string;
+    version: string;
+    title: string;
+    solanaTransactionHash: string | null;
+    isPublished: boolean;
+  }>({
+    queryKey: ['/api/releases/latest'],
+    refetchInterval: 60000
+  });
+
   const latestVersion = versionAssets?.[0];
-  const currentVersion = packageVersion?.version ? `v${packageVersion.version}` : 'v1.0';
+  const hasReleaseVerification = latestRelease?.solanaTransactionHash && 
+    !latestRelease.solanaTransactionHash.startsWith('HASH_');
+  const currentVersion = latestRelease?.version 
+    ? `v${latestRelease.version}` 
+    : (packageVersion?.version ? `v${packageVersion.version}` : 'v1.0');
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -81,7 +96,7 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
               >
                 <Shield className="w-3 h-3" />
                 <span className="font-mono">{currentVersion}</span>
-                {latestVersion?.isBlockchainAnchored && (
+                {(latestVersion?.isBlockchainAnchored || hasReleaseVerification) && (
                   <CheckCircle2 className="w-2.5 h-2.5 text-green-400" />
                 )}
               </button>
