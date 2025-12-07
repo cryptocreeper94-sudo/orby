@@ -13,7 +13,14 @@ import {
   Edit2,
   Check,
   X,
-  AlertCircle
+  AlertCircle,
+  TrendingUp,
+  CalendarCheck,
+  UserCheck,
+  ClipboardList,
+  FileText,
+  Shield,
+  BookOpen
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -22,12 +29,10 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { 
   AnimatedBackground, 
-  GlassCard, 
-  GlassCardContent, 
-  GlassCardHeader, 
   PageHeader,
   GlowButton
 } from "@/components/ui/premium";
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
 import { useStore } from "@/lib/mockData";
 import {
   Dialog,
@@ -44,7 +49,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { format, addDays, startOfWeek, isSameDay, parseISO } from "date-fns";
@@ -103,7 +107,6 @@ export default function BarScheduler() {
   const [shifts, setShifts] = useState<Shift[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTab, setSelectedTab] = useState<string>('schedule');
   
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [shiftDialogOpen, setShiftDialogOpen] = useState(false);
@@ -243,20 +246,158 @@ export default function BarScheduler() {
     return bartender?.name || 'Unknown';
   };
 
+  const onlineBartenders = bartenders.filter(b => b.isOnline);
+  const todayShifts = getShiftsForDay(new Date());
+  const weeklyShiftCount = shifts.length;
+  const pendingRequests = 3;
+
+  const metricCards = [
+    <div key="total-staff" className="min-w-[140px] p-3 bg-gradient-to-br from-amber-500/20 to-orange-500/10 rounded-lg border border-amber-500/30" data-testid="metric-total-staff">
+      <div className="flex items-center gap-2 mb-1">
+        <Users className="h-4 w-4 text-amber-400" />
+        <span className="text-xs text-slate-400">Total Staff</span>
+      </div>
+      <div className="text-2xl font-bold text-slate-200">{bartenders.length}</div>
+    </div>,
+    <div key="online-now" className="min-w-[140px] p-3 bg-gradient-to-br from-emerald-500/20 to-green-500/10 rounded-lg border border-emerald-500/30" data-testid="metric-online-now">
+      <div className="flex items-center gap-2 mb-1">
+        <UserCheck className="h-4 w-4 text-emerald-400" />
+        <span className="text-xs text-slate-400">Online Now</span>
+      </div>
+      <div className="text-2xl font-bold text-slate-200">{onlineBartenders.length}</div>
+    </div>,
+    <div key="today-shifts" className="min-w-[140px] p-3 bg-gradient-to-br from-cyan-500/20 to-blue-500/10 rounded-lg border border-cyan-500/30" data-testid="metric-today-shifts">
+      <div className="flex items-center gap-2 mb-1">
+        <CalendarCheck className="h-4 w-4 text-cyan-400" />
+        <span className="text-xs text-slate-400">Today's Shifts</span>
+      </div>
+      <div className="text-2xl font-bold text-slate-200">{todayShifts.length}</div>
+    </div>,
+    <div key="weekly-total" className="min-w-[140px] p-3 bg-gradient-to-br from-purple-500/20 to-violet-500/10 rounded-lg border border-purple-500/30" data-testid="metric-weekly-total">
+      <div className="flex items-center gap-2 mb-1">
+        <TrendingUp className="h-4 w-4 text-purple-400" />
+        <span className="text-xs text-slate-400">Weekly Shifts</span>
+      </div>
+      <div className="text-2xl font-bold text-slate-200">{weeklyShiftCount}</div>
+    </div>,
+    <div key="pending-requests" className="min-w-[140px] p-3 bg-gradient-to-br from-rose-500/20 to-pink-500/10 rounded-lg border border-rose-500/30" data-testid="metric-pending-requests">
+      <div className="flex items-center gap-2 mb-1">
+        <ClipboardList className="h-4 w-4 text-rose-400" />
+        <span className="text-xs text-slate-400">Pending Requests</span>
+      </div>
+      <div className="text-2xl font-bold text-slate-200">{pendingRequests}</div>
+    </div>,
+  ];
+
+  const staffAssignmentCards = filteredBartenders.map((bartender) => (
+    <div
+      key={bartender.id}
+      className="min-w-[200px] p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
+      data-testid={`staff-card-${bartender.id}`}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+          <Beer className="h-4 w-4 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <span className="font-medium text-sm text-slate-200 truncate">{bartender.name}</span>
+            {bartender.isOnline && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />}
+          </div>
+          <span className="text-xs text-slate-500">{shifts.filter(s => s.bartenderId === bartender.id).length} shifts</span>
+        </div>
+      </div>
+      <div className="flex gap-1">
+        <Button
+          size="sm"
+          variant="ghost"
+          className="flex-1 h-7 text-xs text-cyan-400 hover:bg-cyan-500/10"
+          onClick={() => {
+            setSelectedBartender(bartender.id);
+            setShiftDialogOpen(true);
+          }}
+          data-testid={`button-schedule-${bartender.id}`}
+        >
+          <Calendar className="h-3 w-3 mr-1" />
+          Schedule
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 px-2 text-red-400 hover:bg-red-500/10"
+          onClick={() => handleRemoveBartender(bartender.id)}
+          data-testid={`button-remove-${bartender.id}`}
+        >
+          <Trash2 className="h-3 w-3" />
+        </Button>
+      </div>
+    </div>
+  ));
+
+  const shiftRequestItems = [
+    { id: 1, name: "Mike R.", type: "Swap Request", date: format(addDays(new Date(), 1), 'MMM d'), status: "pending" },
+    { id: 2, name: "Sarah L.", type: "Time Off", date: format(addDays(new Date(), 3), 'MMM d'), status: "pending" },
+    { id: 3, name: "John D.", type: "Extra Shift", date: format(addDays(new Date(), 2), 'MMM d'), status: "approved" },
+  ];
+
+  const policyAccordionItems = [
+    {
+      title: "Shift Policies",
+      content: (
+        <div className="space-y-2 text-xs" data-testid="policy-shift-rules">
+          <p>• Minimum 4-hour shift requirement</p>
+          <p>• Maximum 10 hours per day</p>
+          <p>• Required 8-hour rest between shifts</p>
+          <p>• Overtime after 40 hours weekly</p>
+        </div>
+      )
+    },
+    {
+      title: "Scheduling Rules",
+      content: (
+        <div className="space-y-2 text-xs" data-testid="policy-scheduling">
+          <p>• Schedule posted 2 weeks in advance</p>
+          <p>• Shift swaps require manager approval</p>
+          <p>• Cancellations need 24-hour notice</p>
+          <p>• No-shows result in write-up</p>
+        </div>
+      )
+    },
+    {
+      title: "Break Requirements",
+      content: (
+        <div className="space-y-2 text-xs" data-testid="policy-breaks">
+          <p>• 15-min break per 4 hours worked</p>
+          <p>• 30-min meal break for 6+ hour shifts</p>
+          <p>• Breaks must be taken on-site</p>
+        </div>
+      )
+    },
+    {
+      title: "Alcohol Service Guidelines",
+      content: (
+        <div className="space-y-2 text-xs" data-testid="policy-alcohol">
+          <p>• Valid TIPS certification required</p>
+          <p>• ID check for anyone under 40</p>
+          <p>• 2-drink max per customer per visit</p>
+          <p>• No service to intoxicated patrons</p>
+        </div>
+      )
+    },
+  ];
+
   if (!currentUser || !['Developer', 'Admin', 'Management', 'Bar'].includes(currentUser.role)) {
     return (
       <AnimatedBackground>
-        <div className="min-h-screen flex items-center justify-center p-4">
-          <GlassCard className="max-w-md w-full">
-            <GlassCardContent className="text-center py-8">
-              <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-slate-200 mb-2">Access Restricted</h2>
-              <p className="text-slate-400 mb-4">Bar scheduler is only available for bar management.</p>
-              <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600">
-                Return Home
-              </Button>
-            </GlassCardContent>
-          </GlassCard>
+        <div className="min-h-screen flex items-center justify-center p-4" data-testid="access-restricted">
+          <div className="max-w-md w-full p-6 rounded-xl bg-slate-800/60 backdrop-blur-md border border-white/10 text-center">
+            <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
+            <h2 className="text-xl font-bold text-slate-200 mb-2">Access Restricted</h2>
+            <p className="text-slate-400 mb-4">Bar scheduler is only available for bar management.</p>
+            <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-return-home">
+              Return Home
+            </Button>
+          </div>
         </div>
       </AnimatedBackground>
     );
@@ -280,8 +421,8 @@ export default function BarScheduler() {
           }
         />
 
-        <main className="container mx-auto p-4 space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
+        <main className="container mx-auto p-4 space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between gap-3 mb-2">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
@@ -312,181 +453,222 @@ export default function BarScheduler() {
             </div>
           </div>
 
-          <Tabs value={selectedTab} onValueChange={setSelectedTab} data-testid="bar-scheduler-tabs">
-            <TabsList className="grid grid-cols-2 bg-white/5 w-full max-w-xs">
-              <TabsTrigger value="schedule" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-schedule">
-                <Calendar className="h-4 w-4 mr-1" />
-                Schedule
-              </TabsTrigger>
-              <TabsTrigger value="team" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-team">
-                <Users className="h-4 w-4 mr-1" />
-                Team
-              </TabsTrigger>
-            </TabsList>
+          <LayoutShell className="gap-3" data-testid="bento-layout">
+            <BentoCard span={12} className="p-2" data-testid="hero-metrics-card">
+              <CarouselRail
+                items={metricCards}
+                title="Schedule Metrics"
+                showDots
+                autoplay
+              />
+            </BentoCard>
 
-            <TabsContent value="schedule" className="mt-4">
-              <GlassCard data-testid="card-weekly-schedule">
-                <GlassCardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-cyan-500/20">
-                      <Calendar className="h-4 w-4 text-cyan-400" />
-                    </div>
-                    <span className="font-bold text-sm text-slate-200">Weekly Schedule</span>
-                  </div>
-                </GlassCardHeader>
-                <GlassCardContent className="pt-0">
-                  <ScrollArea className="w-full">
-                    <div className="grid grid-cols-7 gap-2 min-w-[700px]">
-                      {weekDays.map((day, idx) => (
-                        <div key={idx} className="min-w-[100px]">
-                          <div className={`text-center p-2 rounded-t-lg ${
-                            isSameDay(day, new Date()) 
-                              ? 'bg-cyan-500/20 border-b-2 border-cyan-400' 
-                              : 'bg-white/5'
-                          }`}>
-                            <div className="text-xs text-slate-400">{format(day, 'EEE')}</div>
-                            <div className="text-lg font-bold text-slate-200">{format(day, 'd')}</div>
-                          </div>
-                          <div className="min-h-[200px] bg-white/5 p-2 space-y-2 rounded-b-lg">
-                            <AnimatePresence>
-                              {getShiftsForDay(day).map((shift, sIdx) => (
-                                <motion.div
-                                  key={shift.id}
-                                  initial={{ opacity: 0, scale: 0.9 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  exit={{ opacity: 0, scale: 0.9 }}
-                                  className="p-2 bg-amber-500/20 rounded-lg border border-amber-500/30 text-xs"
-                                  data-testid={`shift-${shift.id}`}
-                                >
-                                  <div className="font-medium text-slate-200 truncate">
-                                    {getBartenderName(shift.bartenderId)}
-                                  </div>
-                                  <div className="text-slate-400 flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />
-                                    {shift.startTime} - {shift.endTime}
-                                  </div>
-                                  {shift.location && (
-                                    <div className="text-amber-400 truncate text-[10px] mt-1">
-                                      {shift.location}
-                                    </div>
-                                  )}
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="w-full h-6 mt-1 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                    onClick={() => handleRemoveShift(shift.id)}
-                                    data-testid={`button-remove-shift-${shift.id}`}
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </motion.div>
-                              ))}
-                            </AnimatePresence>
-                            {getShiftsForDay(day).length === 0 && (
-                              <div className="text-center text-slate-600 text-xs py-4">
-                                No shifts
+            <BentoCard span={8} rowSpan={2} data-testid="calendar-view-card">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-1.5 rounded-lg bg-cyan-500/20">
+                  <Calendar className="h-4 w-4 text-cyan-400" />
+                </div>
+                <span className="font-bold text-sm text-slate-200">Weekly Schedule</span>
+              </div>
+              <ScrollArea className="w-full">
+                <div className="grid grid-cols-7 gap-1.5 min-w-[600px]">
+                  {weekDays.map((day, idx) => (
+                    <div key={idx} className="min-w-[80px]" data-testid={`day-column-${idx}`}>
+                      <div className={`text-center p-1.5 rounded-t-lg ${
+                        isSameDay(day, new Date()) 
+                          ? 'bg-cyan-500/20 border-b-2 border-cyan-400' 
+                          : 'bg-white/5'
+                      }`}>
+                        <div className="text-xs text-slate-400">{format(day, 'EEE')}</div>
+                        <div className="text-lg font-bold text-slate-200">{format(day, 'd')}</div>
+                      </div>
+                      <div className="min-h-[180px] max-h-[220px] overflow-y-auto bg-white/5 p-1.5 space-y-1 rounded-b-lg">
+                        <AnimatePresence>
+                          {getShiftsForDay(day).map((shift) => (
+                            <motion.div
+                              key={shift.id}
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.9 }}
+                              className="p-1.5 bg-amber-500/20 rounded-lg border border-amber-500/30 text-xs"
+                              data-testid={`shift-${shift.id}`}
+                            >
+                              <div className="font-medium text-slate-200 truncate text-[11px]">
+                                {getBartenderName(shift.bartenderId)}
                               </div>
-                            )}
+                              <div className="text-slate-400 flex items-center gap-0.5 text-[10px]">
+                                <Clock className="h-2.5 w-2.5" />
+                                {shift.startTime}-{shift.endTime}
+                              </div>
+                              {shift.location && (
+                                <div className="text-amber-400 truncate text-[9px] mt-0.5">
+                                  {shift.location}
+                                </div>
+                              )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="w-full h-5 mt-0.5 text-red-400 hover:text-red-300 hover:bg-red-500/10 p-0"
+                                onClick={() => handleRemoveShift(shift.id)}
+                                data-testid={`button-remove-shift-${shift.id}`}
+                              >
+                                <Trash2 className="h-2.5 w-2.5" />
+                              </Button>
+                            </motion.div>
+                          ))}
+                        </AnimatePresence>
+                        {getShiftsForDay(day).length === 0 && (
+                          <div className="text-center text-slate-600 text-[10px] py-4">
+                            No shifts
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </BentoCard>
+
+            <BentoCard span={4} rowSpan={2} data-testid="staff-availability-card">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-1.5 rounded-lg bg-emerald-500/20">
+                  <UserCheck className="h-4 w-4 text-emerald-400" />
+                </div>
+                <span className="font-bold text-sm text-slate-200">Staff Availability</span>
+              </div>
+              {loading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="w-6 h-6 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
+                </div>
+              ) : (
+                <ScrollArea className="h-[280px]">
+                  <div className="space-y-2 pr-2">
+                    {bartenders.map((bartender) => (
+                      <div
+                        key={bartender.id}
+                        className="flex items-center justify-between p-2 bg-white/5 rounded-lg border border-white/10"
+                        data-testid={`availability-${bartender.id}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                            <Beer className="h-3.5 w-3.5 text-white" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-xs font-medium text-slate-200">{bartender.name}</span>
+                              {bartender.isOnline && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                              )}
+                            </div>
+                            <span className="text-[10px] text-slate-500">
+                              {bartender.isOnline ? 'Available' : 'Offline'}
+                            </span>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </GlassCardContent>
-              </GlassCard>
-            </TabsContent>
-
-            <TabsContent value="team" className="mt-4">
-              <GlassCard data-testid="card-bartender-team">
-                <GlassCardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-amber-500/20">
-                        <Users className="h-4 w-4 text-amber-400" />
+                        <Badge 
+                          variant="outline" 
+                          className={`text-[10px] ${bartender.isOnline ? 'border-emerald-500/50 text-emerald-400' : 'border-slate-600 text-slate-500'}`}
+                        >
+                          {bartender.isOnline ? 'On' : 'Off'}
+                        </Badge>
                       </div>
-                      <span className="font-bold text-sm text-slate-200">
-                        Bartender Team ({filteredBartenders.length})
-                      </span>
+                    ))}
+                    {bartenders.length === 0 && (
+                      <div className="text-center py-6 text-slate-500 text-xs">
+                        No staff members added yet
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              )}
+            </BentoCard>
+
+            <BentoCard span={6} data-testid="staff-assignments-card">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-amber-500/20">
+                  <Users className="h-4 w-4 text-amber-400" />
+                </div>
+                <span className="font-bold text-sm text-slate-200">
+                  Staff Assignments ({filteredBartenders.length})
+                </span>
+              </div>
+              {filteredBartenders.length > 0 ? (
+                <CarouselRail
+                  items={staffAssignmentCards}
+                  showDots={filteredBartenders.length > 3}
+                />
+              ) : (
+                <div className="text-center py-6">
+                  <Users className="h-8 w-8 text-slate-600 mx-auto mb-2" />
+                  <p className="text-slate-400 text-xs">No bartenders found</p>
+                </div>
+              )}
+            </BentoCard>
+
+            <BentoCard span={6} data-testid="shift-requests-card">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-rose-500/20">
+                  <ClipboardList className="h-4 w-4 text-rose-400" />
+                </div>
+                <span className="font-bold text-sm text-slate-200">Shift Requests</span>
+              </div>
+              <div className="space-y-2">
+                {shiftRequestItems.map((request) => (
+                  <div
+                    key={request.id}
+                    className="flex items-center justify-between p-2 bg-white/5 rounded-lg border border-white/10"
+                    data-testid={`request-${request.id}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center">
+                        <User className="h-3.5 w-3.5 text-white" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-medium text-slate-200">{request.name}</span>
+                        <div className="text-[10px] text-slate-500">{request.type} • {request.date}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {request.status === 'pending' ? (
+                        <>
+                          <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-emerald-400 hover:bg-emerald-500/10" data-testid={`approve-request-${request.id}`}>
+                            <Check className="h-3 w-3" />
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-red-400 hover:bg-red-500/10" data-testid={`deny-request-${request.id}`}>
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] border-emerald-500/50 text-emerald-400">
+                          Approved
+                        </Badge>
+                      )}
                     </div>
                   </div>
-                </GlassCardHeader>
-                <GlassCardContent className="pt-0">
-                  {loading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="w-6 h-6 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
-                    </div>
-                  ) : filteredBartenders.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Users className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                      <p className="text-slate-400">No bartenders found</p>
-                      <p className="text-sm text-slate-500 mt-1">Add bartenders to get started</p>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      <AnimatePresence>
-                        {filteredBartenders.map((bartender, idx) => (
-                          <motion.div
-                            key={bartender.id}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ delay: idx * 0.05 }}
-                            className="p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
-                            data-testid={`bartender-${bartender.id}`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-                                  <Beer className="h-5 w-5 text-white" />
-                                </div>
-                                <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium text-slate-200">{bartender.name}</span>
-                                    {bartender.isOnline && (
-                                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                    )}
-                                  </div>
-                                  {bartender.phone && (
-                                    <span className="text-xs text-slate-400">{bartender.phone}</span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-cyan-400 hover:bg-cyan-500/10"
-                                  onClick={() => {
-                                    setSelectedBartender(bartender.id);
-                                    setShiftDialogOpen(true);
-                                  }}
-                                  data-testid={`button-schedule-${bartender.id}`}
-                                >
-                                  <Calendar className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-red-400 hover:bg-red-500/10"
-                                  onClick={() => handleRemoveBartender(bartender.id)}
-                                  data-testid={`button-remove-${bartender.id}`}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="mt-3 text-xs text-slate-500">
-                              {shifts.filter(s => s.bartenderId === bartender.id).length} shifts scheduled this week
-                            </div>
-                          </motion.div>
-                        ))}
-                      </AnimatePresence>
-                    </div>
-                  )}
-                </GlassCardContent>
-              </GlassCard>
-            </TabsContent>
-          </Tabs>
+                ))}
+              </div>
+            </BentoCard>
+
+            <BentoCard span={12} data-testid="policies-card">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-purple-500/20">
+                  <BookOpen className="h-4 w-4 text-purple-400" />
+                </div>
+                <span className="font-bold text-sm text-slate-200">Policies & Guidelines</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+                {policyAccordionItems.map((item, idx) => (
+                  <div key={idx} className="min-w-0">
+                    <AccordionStack
+                      items={[item]}
+                      defaultOpen={[0]}
+                      className="[&>div]:bg-transparent [&>div]:border-white/5"
+                    />
+                  </div>
+                ))}
+              </div>
+            </BentoCard>
+          </LayoutShell>
         </main>
 
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>

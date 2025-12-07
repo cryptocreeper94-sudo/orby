@@ -4,22 +4,18 @@ import { useStore } from '@/lib/mockData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useMode } from '@/lib/ModeContext';
-import { SandboxStatusCompact, SandboxBadge } from '@/components/SandboxBanner';
+import { SandboxStatusCompact } from '@/components/SandboxBanner';
 import { useSandboxData } from '@/lib/useSandboxData';
 import { demoDeliveries, demoEmergencies, demoMessages, demoStats } from '@/lib/demoFixtures';
-import { staggerContainer, staggerItem, slideUp, scaleIn, cardHover } from '@/lib/motion';
 import {
-  LogOut, RefreshCw, Package, Utensils, Beer, Monitor, Trash2, MapPin,
-  AlertTriangle, CheckCircle2, Clock, Users, Truck, Zap, Radio, Shield,
-  Activity, Bell, ChevronRight, ChevronDown, Wifi, WifiOff, Flame, ThermometerSun,
-  MessageSquare, FileText, BarChart3, TrendingUp, Timer, Target, Eye,
-  ArrowUpRight, ArrowDownRight, Minus, Search, Filter, Calendar, Layers,
-  Home, Settings, Menu, X, History, ClipboardList
+  LogOut, RefreshCw, Package, Utensils, Beer, Monitor,
+  AlertTriangle, CheckCircle2, Clock, Users, Truck,
+  Activity, MessageSquare, FileText, BarChart3, TrendingUp, Target,
+  ArrowUpRight, ArrowDownRight, Minus, Layers, History, ClipboardList
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
 
 const departmentIcons: Record<string, React.ReactNode> = {
   Warehouse: <Package className="h-4 w-4" />,
@@ -30,22 +26,13 @@ const departmentIcons: Record<string, React.ReactNode> = {
   HR: <Users className="h-4 w-4" />,
 };
 
-const departmentColors: Record<string, string> = {
-  Warehouse: 'from-blue-600/20 to-blue-800/20 border-blue-500/30',
-  Kitchen: 'from-orange-600/20 to-orange-800/20 border-orange-500/30',
-  Bar: 'from-purple-600/20 to-purple-800/20 border-purple-500/30',
-  IT: 'from-cyan-600/20 to-cyan-800/20 border-cyan-500/30',
-  Operations: 'from-green-600/20 to-green-800/20 border-green-500/30',
-  HR: 'from-pink-600/20 to-pink-800/20 border-pink-500/30',
-};
-
-const statusColors: Record<string, { bg: string; text: string; glow: string }> = {
-  requested: { bg: 'bg-amber-500/20', text: 'text-amber-300', glow: 'shadow-amber-500/20' },
-  picking: { bg: 'bg-blue-500/20', text: 'text-blue-300', glow: 'shadow-blue-500/20' },
-  on_the_way: { bg: 'bg-green-500/20', text: 'text-green-300', glow: 'shadow-green-500/20' },
-  delivered: { bg: 'bg-slate-500/20', text: 'text-slate-400', glow: '' },
-  active: { bg: 'bg-red-500/20', text: 'text-red-300', glow: 'shadow-red-500/30' },
-  responding: { bg: 'bg-amber-500/20', text: 'text-amber-300', glow: 'shadow-amber-500/20' },
+const statusColors: Record<string, { bg: string; text: string }> = {
+  requested: { bg: 'bg-amber-500/20', text: 'text-amber-300' },
+  picking: { bg: 'bg-blue-500/20', text: 'text-blue-300' },
+  on_the_way: { bg: 'bg-green-500/20', text: 'text-green-300' },
+  delivered: { bg: 'bg-slate-500/20', text: 'text-slate-400' },
+  active: { bg: 'bg-red-500/20', text: 'text-red-300' },
+  responding: { bg: 'bg-amber-500/20', text: 'text-amber-300' },
 };
 
 function formatTimeAgo(isoString: string): string {
@@ -57,220 +44,12 @@ function formatTimeAgo(isoString: string): string {
   return `${hours}h ago`;
 }
 
-interface PuzzleTileProps {
-  title: string;
-  icon: React.ReactNode;
-  count?: number | string;
-  trend?: 'up' | 'down' | 'stable';
-  status?: 'good' | 'warning' | 'critical';
-  className?: string;
-  children: React.ReactNode;
-  compact?: boolean;
-}
-
-function PuzzleTile({ title, icon, count, trend, status = 'good', className, children, compact }: PuzzleTileProps) {
-  const statusGlow = {
-    good: 'shadow-emerald-500/10',
-    warning: 'shadow-amber-500/20',
-    critical: 'shadow-red-500/30 animate-pulse',
-  };
-
-  const trendIcon = {
-    up: <ArrowUpRight className="h-3 w-3 text-emerald-400" />,
-    down: <ArrowDownRight className="h-3 w-3 text-red-400" />,
-    stable: <Minus className="h-3 w-3 text-slate-400" />,
-  };
-
-  return (
-    <motion.div
-      variants={scaleIn}
-      initial="initial"
-      animate="animate"
-      whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
-      className={cn(
-        "relative overflow-hidden rounded-xl border border-slate-700/50",
-        "bg-gradient-to-br from-slate-900/90 to-slate-950/90 backdrop-blur-sm",
-        "shadow-lg", statusGlow[status],
-        compact ? "p-3" : "p-4",
-        className
-      )}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent pointer-events-none" />
-      <div className="relative">
-        <div className={cn("flex items-center justify-between", compact ? "mb-2" : "mb-3")}>
-          <div className="flex items-center gap-2">
-            <span className="text-cyan-400">{icon}</span>
-            <span className={cn("font-semibold text-slate-200", compact ? "text-xs" : "text-sm")}>{title}</span>
-          </div>
-          {count !== undefined && (
-            <div className="flex items-center gap-1">
-              <span className={cn("font-bold", compact ? "text-lg text-cyan-300" : "text-2xl text-white")}>{count}</span>
-              {trend && trendIcon[trend]}
-            </div>
-          )}
-        </div>
-        {children}
-      </div>
-    </motion.div>
-  );
-}
-
-interface StatBadgeProps {
-  label: string;
-  value: string | number;
-  icon?: React.ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'danger';
-}
-
-function StatBadge({ label, value, icon, variant = 'default' }: StatBadgeProps) {
-  const variants = {
-    default: 'bg-slate-800/50 text-slate-300 border-slate-700/50',
-    success: 'bg-emerald-900/30 text-emerald-300 border-emerald-700/50',
-    warning: 'bg-amber-900/30 text-amber-300 border-amber-700/50',
-    danger: 'bg-red-900/30 text-red-300 border-red-700/50',
-  };
-
-  return (
-    <div className={cn("px-2 py-1 rounded-lg border flex items-center gap-1.5 text-xs", variants[variant])}>
-      {icon}
-      <span className="font-medium">{value}</span>
-      <span className="text-slate-500 hidden sm:inline">{label}</span>
-    </div>
-  );
-}
-
-interface DeliveryItemProps {
-  delivery: typeof demoDeliveries[0];
-  compact?: boolean;
-}
-
-function DeliveryItem({ delivery, compact }: DeliveryItemProps) {
-  const status = statusColors[delivery.status] || statusColors.requested;
-  
-  return (
-    <motion.div
-      variants={staggerItem}
-      className={cn(
-        "flex items-center gap-2 p-2 rounded-lg border border-slate-700/30 bg-slate-800/30",
-        "hover:bg-slate-800/50 transition-colors cursor-pointer",
-        status.glow && `shadow-md ${status.glow}`
-      )}
-    >
-      <div className={cn("w-2 h-2 rounded-full", status.bg.replace('/20', ''))} />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-slate-200 truncate">{delivery.standName}</span>
-          {delivery.eta && (
-            <span className="text-[10px] text-cyan-400 font-mono">{delivery.eta}</span>
-          )}
-        </div>
-        {!compact && (
-          <p className="text-[10px] text-slate-500 truncate">{delivery.items}</p>
-        )}
-      </div>
-      <Badge variant="outline" className={cn("text-[9px] px-1.5 py-0", status.bg, status.text)}>
-        {delivery.status.replace('_', ' ')}
-      </Badge>
-    </motion.div>
-  );
-}
-
-interface EmergencyItemProps {
-  emergency: typeof demoEmergencies[0];
-}
-
-function EmergencyItem({ emergency }: EmergencyItemProps) {
-  const status = statusColors[emergency.status] || statusColors.active;
-  const isActive = emergency.status === 'active';
-  
-  return (
-    <motion.div
-      variants={staggerItem}
-      className={cn(
-        "flex items-center gap-2 p-2 rounded-lg border",
-        isActive ? "border-red-500/50 bg-red-950/30" : "border-amber-500/30 bg-amber-950/20",
-        isActive && "animate-pulse"
-      )}
-    >
-      <AlertTriangle className={cn("h-4 w-4 flex-shrink-0", isActive ? "text-red-400" : "text-amber-400")} />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-slate-200 truncate">{emergency.type}</span>
-          <span className="text-[10px] text-slate-500">{emergency.location}</span>
-        </div>
-        <p className="text-[10px] text-slate-400 truncate">{emergency.description}</p>
-      </div>
-      <Badge variant="outline" className={cn("text-[9px]", status.bg, status.text)}>
-        {emergency.priority}
-      </Badge>
-    </motion.div>
-  );
-}
-
-interface MessageItemProps {
-  message: typeof demoMessages[0];
-}
-
-function MessageItem({ message }: MessageItemProps) {
-  const isUnread = message.status === 'unread';
-  
-  return (
-    <motion.div
-      variants={staggerItem}
-      className={cn(
-        "flex items-start gap-2 p-2 rounded-lg border border-slate-700/30",
-        isUnread ? "bg-cyan-950/20" : "bg-slate-800/20"
-      )}
-    >
-      <div className={cn(
-        "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold",
-        isUnread ? "bg-cyan-500/30 text-cyan-300" : "bg-slate-700/50 text-slate-400"
-      )}>
-        {message.from.charAt(0)}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-slate-200">{message.from}</span>
-          <span className="text-[10px] text-slate-600">{message.fromRole}</span>
-          <span className="text-[10px] text-slate-500 ml-auto">{formatTimeAgo(message.timestamp)}</span>
-        </div>
-        <p className="text-[10px] text-slate-400 truncate">{message.content}</p>
-      </div>
-      {isUnread && <div className="w-2 h-2 rounded-full bg-cyan-400 flex-shrink-0" />}
-    </motion.div>
-  );
-}
-
-interface AuditItemProps {
-  action: string;
-  target: string;
-  user: string;
-  time: string;
-}
-
-function AuditItem({ action, target, user, time }: AuditItemProps) {
-  return (
-    <motion.div
-      variants={staggerItem}
-      className="flex items-center gap-2 py-1.5 border-b border-slate-800/50 last:border-0"
-    >
-      <div className="w-1 h-1 rounded-full bg-cyan-500" />
-      <span className="text-[10px] text-slate-500 font-mono w-12">{time}</span>
-      <span className="text-[10px] text-cyan-400">{action}</span>
-      <span className="text-[10px] text-slate-400">{target}</span>
-      <span className="text-[10px] text-slate-600 ml-auto">by {user}</span>
-    </motion.div>
-  );
-}
-
 export default function ReportingDashboard() {
   const [, navigate] = useLocation();
   const currentUser = useStore((state) => state.currentUser);
   const logout = useStore((state) => state.logout);
   const { isSandbox } = useMode();
   const [loading, setLoading] = useState(true);
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('overview');
 
   const [liveData, setLiveData] = useState({
     deliveries: [] as typeof demoDeliveries,
@@ -365,60 +144,83 @@ export default function ReportingDashboard() {
   const activeEmergencies = emergencies.filter(e => e.status === 'active' || e.status === 'responding');
   const unreadMessages = messages.filter(m => m.status === 'unread');
 
-  const navItems = [
-    { id: 'overview', label: 'Overview', icon: <Layers className="h-4 w-4" /> },
-    { id: 'deliveries', label: 'Deliveries', icon: <Truck className="h-4 w-4" />, badge: activeDeliveries.length },
-    { id: 'emergencies', label: 'Emergencies', icon: <AlertTriangle className="h-4 w-4" />, badge: activeEmergencies.length },
-    { id: 'messages', label: 'Messages', icon: <MessageSquare className="h-4 w-4" />, badge: unreadMessages.length },
-    { id: 'audit', label: 'Audit Trail', icon: <History className="h-4 w-4" /> },
+  const reportMetrics = [
+    { label: "Active Stands", value: stats.activeStands, icon: <Target className="h-4 w-4 text-emerald-400" />, trend: 'up' as const },
+    { label: "Deliveries", value: activeDeliveries.length, icon: <Truck className="h-4 w-4 text-blue-400" />, trend: activeDeliveries.length > 3 ? 'up' as const : 'stable' as const },
+    { label: "Active Alerts", value: activeEmergencies.length, icon: <AlertTriangle className="h-4 w-4 text-red-400" />, trend: activeEmergencies.length > 0 ? 'up' as const : 'stable' as const },
+    { label: "Users Online", value: stats.onlineUsers, icon: <Users className="h-4 w-4 text-cyan-400" />, trend: 'stable' as const },
+    { label: "Unread Messages", value: unreadMessages.length, icon: <MessageSquare className="h-4 w-4 text-purple-400" />, trend: 'stable' as const },
+  ];
+
+  const trendIcon = {
+    up: <ArrowUpRight className="h-3 w-3 text-emerald-400" />,
+    down: <ArrowDownRight className="h-3 w-3 text-red-400" />,
+    stable: <Minus className="h-3 w-3 text-slate-400" />,
+  };
+
+  const recentReports = [
+    { id: "1", title: "End of Day Report", type: "Daily", date: "Today", status: "Complete" },
+    { id: "2", title: "Inventory Count", type: "Weekly", date: "Yesterday", status: "Complete" },
+    { id: "3", title: "Incident Report #42", type: "Incident", date: "2 days ago", status: "Review" },
+    { id: "4", title: "Staff Performance", type: "Monthly", date: "Dec 1", status: "Draft" },
+  ];
+
+  const reportTemplates = [
+    { id: "1", name: "Daily Ops Summary", icon: <FileText className="h-4 w-4" />, color: "cyan" },
+    { id: "2", name: "Incident Report", icon: <AlertTriangle className="h-4 w-4" />, color: "amber" },
+    { id: "3", name: "Inventory Audit", icon: <ClipboardList className="h-4 w-4" />, color: "purple" },
+    { id: "4", name: "Staff Schedule", icon: <Users className="h-4 w-4" />, color: "green" },
+    { id: "5", name: "Revenue Report", icon: <TrendingUp className="h-4 w-4" />, color: "blue" },
+    { id: "6", name: "Activity Log", icon: <History className="h-4 w-4" />, color: "slate" },
+  ];
+
+  const documentationItems = [
+    {
+      title: "Report Guidelines",
+      content: (
+        <ul className="space-y-1 text-xs">
+          <li>• Submit daily reports before 11 PM</li>
+          <li>• Include all incidents regardless of severity</li>
+          <li>• Use standard templates for consistency</li>
+          <li>• Attach photos when applicable</li>
+        </ul>
+      )
+    },
+    {
+      title: "Data Entry Standards",
+      content: (
+        <ul className="space-y-1 text-xs">
+          <li>• Use 24-hour time format</li>
+          <li>• Enter monetary values without symbols</li>
+          <li>• Double-check stand IDs before submitting</li>
+          <li>• Include employee badges in records</li>
+        </ul>
+      )
+    },
+    {
+      title: "Export Options",
+      content: (
+        <p className="text-xs">
+          Reports can be exported as PDF, CSV, or Excel. Use the export button 
+          in the top-right corner of any report view. Batch exports are available 
+          for date ranges up to 30 days.
+        </p>
+      )
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-      {/* Header */}
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" data-testid="reporting-dashboard">
       <header className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-md border-b border-cyan-500/20 px-3 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="md:hidden p-1.5"
-              onClick={() => setMobileNavOpen(!mobileNavOpen)}
-              data-testid="button-mobile-nav"
-            >
-              {mobileNavOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </Button>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
-                <BarChart3 className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <h1 className="text-sm font-bold text-cyan-400">Orby Reports</h1>
-                <p className="text-[10px] text-slate-500 hidden sm:block">Nissan Stadium Operations</p>
-              </div>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+              <BarChart3 className="h-4 w-4 text-white" />
             </div>
-          </div>
-
-          {/* Quick Stats Bar */}
-          <div className="hidden md:flex items-center gap-2">
-            <StatBadge 
-              value={stats.activeStands} 
-              label="Stands" 
-              icon={<Target className="h-3 w-3" />}
-              variant="success"
-            />
-            <StatBadge 
-              value={activeDeliveries.length} 
-              label="Active" 
-              icon={<Truck className="h-3 w-3" />}
-              variant={activeDeliveries.length > 5 ? 'warning' : 'default'}
-            />
-            <StatBadge 
-              value={activeEmergencies.length} 
-              label="Alerts" 
-              icon={<AlertTriangle className="h-3 w-3" />}
-              variant={activeEmergencies.length > 0 ? 'danger' : 'default'}
-            />
+            <div>
+              <h1 className="text-sm font-bold text-cyan-400" data-testid="text-title">Orby Reports</h1>
+              <p className="text-[10px] text-slate-500 hidden sm:block">Nissan Stadium Operations</p>
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -443,301 +245,153 @@ export default function ReportingDashboard() {
             </Button>
           </div>
         </div>
-
-        {/* Mobile Quick Stats */}
-        <div className="flex md:hidden items-center gap-2 mt-2 overflow-x-auto pb-1">
-          <StatBadge value={stats.activeStands} label="Stands" variant="success" />
-          <StatBadge value={activeDeliveries.length} label="Deliveries" variant={activeDeliveries.length > 5 ? 'warning' : 'default'} />
-          <StatBadge value={activeEmergencies.length} label="Alerts" variant={activeEmergencies.length > 0 ? 'danger' : 'default'} />
-          <StatBadge value={unreadMessages.length} label="Unread" />
-        </div>
       </header>
 
-      <div className="flex">
-        {/* Desktop Sidebar Nav */}
-        <aside className="hidden md:flex flex-col w-14 hover:w-48 transition-all duration-300 bg-slate-900/50 border-r border-slate-800/50 sticky top-[60px] h-[calc(100vh-60px)] overflow-hidden group">
-          <nav className="flex-1 py-3 px-2 space-y-1">
-            {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                className={cn(
-                  "w-full flex items-center gap-3 px-2 py-2 rounded-lg transition-all",
-                  activeSection === item.id
-                    ? "bg-cyan-500/20 text-cyan-300"
-                    : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-                )}
-                data-testid={`nav-${item.id}`}
-              >
-                {item.icon}
-                <span className="text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
-                  {item.label}
-                </span>
-                {item.badge !== undefined && item.badge > 0 && (
-                  <span className={cn(
-                    "ml-auto text-[10px] font-bold px-1.5 rounded-full",
-                    item.id === 'emergencies' ? "bg-red-500 text-white" : "bg-cyan-500/30 text-cyan-300"
-                  )}>
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            ))}
-          </nav>
-        </aside>
+      <main className="p-3 max-w-7xl mx-auto">
+        <LayoutShell className="gap-3">
+          <BentoCard span={12} title="Report Metrics" data-testid="card-metrics">
+            <CarouselRail
+              items={reportMetrics.map((metric, idx) => (
+                <div key={idx} className="w-36 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50" data-testid={`metric-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <div className="flex items-center justify-between mb-1">
+                    {metric.icon}
+                    {trendIcon[metric.trend]}
+                  </div>
+                  <p className="text-lg font-bold text-white">{metric.value}</p>
+                  <p className="text-xs text-slate-400">{metric.label}</p>
+                </div>
+              ))}
+              showDots
+            />
+          </BentoCard>
 
-        {/* Mobile Nav Overlay */}
-        <AnimatePresence>
-          {mobileNavOpen && (
-            <motion.div
-              initial={{ opacity: 0, x: -200 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -200 }}
-              className="fixed inset-0 z-40 md:hidden"
-            >
-              <div className="absolute inset-0 bg-black/50" onClick={() => setMobileNavOpen(false)} />
-              <div className="absolute left-0 top-0 bottom-0 w-64 bg-slate-900 border-r border-slate-800 p-4">
-                <h2 className="text-lg font-bold text-cyan-400 mb-4">Navigation</h2>
-                <nav className="space-y-1">
-                  {navItems.map(item => (
-                    <button
-                      key={item.id}
-                      onClick={() => { setActiveSection(item.id); setMobileNavOpen(false); }}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all",
-                        activeSection === item.id
-                          ? "bg-cyan-500/20 text-cyan-300"
-                          : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-                      )}
-                    >
-                      {item.icon}
-                      <span className="text-sm font-medium">{item.label}</span>
-                      {item.badge !== undefined && item.badge > 0 && (
-                        <span className={cn(
-                          "ml-auto text-xs font-bold px-2 py-0.5 rounded-full",
-                          item.id === 'emergencies' ? "bg-red-500 text-white" : "bg-cyan-500/30 text-cyan-300"
-                        )}>
-                          {item.badge}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </nav>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+          <BentoCard span={6} title="Recent Reports" data-testid="card-recent-reports">
+            <CarouselRail
+              items={recentReports.map((report) => (
+                <div key={report.id} className="w-44 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50" data-testid={`report-${report.id}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge variant="outline" className="text-[9px] px-1.5">{report.type}</Badge>
+                    <Badge className={cn(
+                      "text-[9px] px-1.5",
+                      report.status === 'Complete' ? 'bg-green-500/20 text-green-300' :
+                      report.status === 'Review' ? 'bg-amber-500/20 text-amber-300' :
+                      'bg-slate-500/20 text-slate-300'
+                    )}>
+                      {report.status}
+                    </Badge>
+                  </div>
+                  <p className="text-sm font-medium text-slate-200 truncate">{report.title}</p>
+                  <p className="text-xs text-slate-500 mt-1">{report.date}</p>
+                </div>
+              ))}
+            />
+          </BentoCard>
 
-        {/* Main Content - Puzzle Grid */}
-        <main className="flex-1 p-3 md:p-4 overflow-x-hidden">
-          <motion.div
-            variants={staggerContainer}
-            initial="initial"
-            animate="animate"
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 auto-rows-min"
-          >
-            {/* Overview Section */}
-            {(activeSection === 'overview' || activeSection === 'deliveries') && (
-              <PuzzleTile
-                title="Active Deliveries"
-                icon={<Truck className="h-4 w-4" />}
-                count={activeDeliveries.length}
-                trend={activeDeliveries.length > 3 ? 'up' : 'stable'}
-                status={activeDeliveries.length > 5 ? 'warning' : 'good'}
-                className="md:col-span-2 lg:col-span-2"
-              >
-                <Accordion type="single" collapsible className="space-y-1">
-                  <AccordionItem value="in-transit" className="border-0">
-                    <AccordionTrigger className="py-1 text-xs text-slate-400 hover:text-cyan-300 hover:no-underline">
-                      <div className="flex items-center gap-2">
-                        <Truck className="h-3 w-3" />
-                        <span>In Transit ({deliveries.filter(d => d.status === 'on_the_way').length})</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <motion.div variants={staggerContainer} className="space-y-1.5 pt-1">
-                        {deliveries.filter(d => d.status === 'on_the_way').map(d => (
-                          <DeliveryItem key={d.id} delivery={d} />
-                        ))}
-                        {deliveries.filter(d => d.status === 'on_the_way').length === 0 && (
-                          <p className="text-[10px] text-slate-600 text-center py-2">No deliveries in transit</p>
-                        )}
-                      </motion.div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="picking" className="border-0">
-                    <AccordionTrigger className="py-1 text-xs text-slate-400 hover:text-cyan-300 hover:no-underline">
-                      <div className="flex items-center gap-2">
-                        <Package className="h-3 w-3" />
-                        <span>Picking ({deliveries.filter(d => d.status === 'picking').length})</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <motion.div variants={staggerContainer} className="space-y-1.5 pt-1">
-                        {deliveries.filter(d => d.status === 'picking').map(d => (
-                          <DeliveryItem key={d.id} delivery={d} />
-                        ))}
-                        {deliveries.filter(d => d.status === 'picking').length === 0 && (
-                          <p className="text-[10px] text-slate-600 text-center py-2">No items being picked</p>
-                        )}
-                      </motion.div>
-                    </AccordionContent>
-                  </AccordionItem>
-                  <AccordionItem value="requested" className="border-0">
-                    <AccordionTrigger className="py-1 text-xs text-slate-400 hover:text-cyan-300 hover:no-underline">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-3 w-3" />
-                        <span>Requested ({deliveries.filter(d => d.status === 'requested').length})</span>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                      <motion.div variants={staggerContainer} className="space-y-1.5 pt-1">
-                        {deliveries.filter(d => d.status === 'requested').map(d => (
-                          <DeliveryItem key={d.id} delivery={d} />
-                        ))}
-                        {deliveries.filter(d => d.status === 'requested').length === 0 && (
-                          <p className="text-[10px] text-slate-600 text-center py-2">No pending requests</p>
-                        )}
-                      </motion.div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </PuzzleTile>
-            )}
+          <BentoCard span={6} title="Templates" data-testid="card-templates">
+            <div className="grid grid-cols-3 gap-2">
+              {reportTemplates.map((template) => (
+                <div 
+                  key={template.id} 
+                  className={cn(
+                    "p-2 rounded-lg border cursor-pointer transition-all hover:scale-105",
+                    `bg-${template.color}-500/10 border-${template.color}-500/30 hover:border-${template.color}-400/50`
+                  )}
+                  data-testid={`template-${template.id}`}
+                >
+                  <div className={`text-${template.color}-400 mb-1`}>{template.icon}</div>
+                  <p className="text-[10px] text-slate-300 truncate">{template.name}</p>
+                </div>
+              ))}
+            </div>
+          </BentoCard>
 
-            {/* Emergencies */}
-            {(activeSection === 'overview' || activeSection === 'emergencies') && (
-              <PuzzleTile
-                title="Emergency Alerts"
-                icon={<AlertTriangle className="h-4 w-4" />}
-                count={activeEmergencies.length}
-                status={activeEmergencies.length > 0 ? 'critical' : 'good'}
-                className={activeEmergencies.length > 0 ? "md:col-span-2 row-span-1" : ""}
-              >
-                <motion.div variants={staggerContainer} className="space-y-2">
-                  {emergencies.map(e => (
-                    <EmergencyItem key={e.id} emergency={e} />
-                  ))}
-                  {emergencies.length === 0 && (
-                    <div className="text-center py-4">
-                      <CheckCircle2 className="h-8 w-8 text-emerald-500/50 mx-auto mb-2" />
-                      <p className="text-xs text-slate-500">All clear - No active incidents</p>
+          <BentoCard span={4} title="Active Deliveries" data-testid="card-deliveries">
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {activeDeliveries.slice(0, 4).map((d) => {
+                const status = statusColors[d.status] || statusColors.requested;
+                return (
+                  <div key={d.id} className="flex items-center gap-2 p-2 rounded-lg bg-slate-800/30 border border-slate-700/30" data-testid={`delivery-${d.id}`}>
+                    <div className={cn("w-2 h-2 rounded-full", status.bg.replace('/20', ''))} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-slate-200 truncate">{d.standName}</p>
+                      <p className="text-[10px] text-slate-500 truncate">{d.items}</p>
                     </div>
-                  )}
-                </motion.div>
-              </PuzzleTile>
-            )}
-
-            {/* Messages */}
-            {(activeSection === 'overview' || activeSection === 'messages') && (
-              <PuzzleTile
-                title="Recent Messages"
-                icon={<MessageSquare className="h-4 w-4" />}
-                count={unreadMessages.length}
-                status={unreadMessages.length > 3 ? 'warning' : 'good'}
-                className="lg:col-span-2"
-              >
-                <motion.div variants={staggerContainer} className="space-y-1.5 max-h-48 overflow-y-auto">
-                  {messages.slice(0, 5).map(m => (
-                    <MessageItem key={m.id} message={m} />
-                  ))}
-                  {messages.length === 0 && (
-                    <p className="text-[10px] text-slate-600 text-center py-4">No messages</p>
-                  )}
-                </motion.div>
-              </PuzzleTile>
-            )}
-
-            {/* SLA Performance */}
-            {activeSection === 'overview' && (
-              <PuzzleTile
-                title="Response SLA"
-                icon={<Timer className="h-4 w-4" />}
-                compact
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-500">Avg Response</span>
-                    <span className="text-sm font-bold text-emerald-400">{stats.responseTime || '2.3m'}</span>
+                    <Badge variant="outline" className={cn("text-[9px] px-1", status.bg, status.text)}>
+                      {d.status.replace('_', ' ')}
+                    </Badge>
                   </div>
-                  <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full w-[85%] bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full" />
-                  </div>
-                  <div className="flex justify-between text-[9px] text-slate-600">
-                    <span>Target: 3m</span>
-                    <span className="text-emerald-400">On Track</span>
-                  </div>
+                );
+              })}
+              {activeDeliveries.length === 0 && (
+                <div className="flex items-center justify-center py-4 text-slate-500 text-xs">
+                  <CheckCircle2 className="h-4 w-4 mr-2" /> All deliveries complete
                 </div>
-              </PuzzleTile>
-            )}
+              )}
+            </div>
+          </BentoCard>
 
-            {/* Department Summary */}
-            {activeSection === 'overview' && (
-              <PuzzleTile
-                title="Departments"
-                icon={<Users className="h-4 w-4" />}
-                compact
-              >
-                <div className="grid grid-cols-5 gap-1">
-                  {Object.entries(departmentIcons).map(([dept, icon]) => {
-                    const deptDeliveries = deliveries.filter(d => 
-                      d.items?.toLowerCase().includes(dept.toLowerCase()) || 
-                      (dept === 'Warehouse' && d.items)
-                    );
-                    return (
-                      <div 
-                        key={dept} 
-                        className={cn(
-                          "flex flex-col items-center p-1.5 rounded-lg border transition-all",
-                          departmentColors[dept] || "border-slate-700/30 bg-slate-800/30"
-                        )}
-                      >
-                        {icon}
-                        <span className="text-[8px] text-slate-500 mt-0.5">{deptDeliveries.length}</span>
+          <BentoCard span={4} title="Active Alerts" data-testid="card-alerts">
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {activeEmergencies.slice(0, 4).map((e) => {
+                const isActive = e.status === 'active';
+                return (
+                  <div key={e.id} className={cn(
+                    "flex items-center gap-2 p-2 rounded-lg border",
+                    isActive ? "border-red-500/50 bg-red-950/30" : "border-amber-500/30 bg-amber-950/20"
+                  )} data-testid={`alert-${e.id}`}>
+                    <AlertTriangle className={cn("h-4 w-4", isActive ? "text-red-400" : "text-amber-400")} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-slate-200 truncate">{e.type}</p>
+                      <p className="text-[10px] text-slate-500">{e.location}</p>
+                    </div>
+                    <Badge variant="outline" className={cn("text-[9px]", isActive ? "border-red-500/50 text-red-300" : "border-amber-500/50 text-amber-300")}>
+                      {e.priority}
+                    </Badge>
+                  </div>
+                );
+              })}
+              {activeEmergencies.length === 0 && (
+                <div className="flex items-center justify-center py-4 text-slate-500 text-xs">
+                  <CheckCircle2 className="h-4 w-4 mr-2" /> No active alerts
+                </div>
+              )}
+            </div>
+          </BentoCard>
+
+          <BentoCard span={4} title="Recent Messages" data-testid="card-messages">
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {messages.slice(0, 4).map((m) => {
+                const isUnread = m.status === 'unread';
+                return (
+                  <div key={m.id} className={cn(
+                    "flex items-start gap-2 p-2 rounded-lg border border-slate-700/30",
+                    isUnread ? "bg-cyan-950/20" : "bg-slate-800/20"
+                  )} data-testid={`message-${m.id}`}>
+                    <div className={cn(
+                      "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold",
+                      isUnread ? "bg-cyan-500/30 text-cyan-300" : "bg-slate-700/50 text-slate-400"
+                    )}>
+                      {m.from.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1">
+                        <span className="text-xs font-medium text-slate-200">{m.from}</span>
+                        <span className="text-[10px] text-slate-500">{formatTimeAgo(m.timestamp)}</span>
                       </div>
-                    );
-                  })}
-                </div>
-              </PuzzleTile>
-            )}
-
-            {/* Audit Trail */}
-            {(activeSection === 'overview' || activeSection === 'audit') && (
-              <PuzzleTile
-                title="Audit Trail"
-                icon={<History className="h-4 w-4" />}
-                className="md:col-span-2 lg:col-span-2 xl:col-span-2"
-              >
-                <div className="space-y-0.5 max-h-48 overflow-y-auto">
-                  <AuditItem action="Delivery" target="Stand 103" user="Sharrod" time="2m" />
-                  <AuditItem action="Alert Ack" target="Medical" user="David" time="4m" />
-                  <AuditItem action="Message" target="Kitchen" user="James R." time="8m" />
-                  <AuditItem action="Status" target="Stand 202" user="Mike B." time="12m" />
-                  <AuditItem action="Delivery" target="Stand 201" user="AJ" time="25m" />
-                  <AuditItem action="Login" target="System" user="Emily D." time="45m" />
-                </div>
-              </PuzzleTile>
-            )}
-
-            {/* Quick Stats Grid */}
-            {activeSection === 'overview' && (
-              <>
-                <PuzzleTile title="Online Staff" icon={<Users className="h-4 w-4" />} count={stats.onlineUsers || 156} trend="stable" compact>
-                  <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full w-[92%] bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full" />
+                      <p className="text-[10px] text-slate-400 truncate">{m.content}</p>
+                    </div>
+                    {isUnread && <div className="w-2 h-2 rounded-full bg-cyan-400 flex-shrink-0" />}
                   </div>
-                </PuzzleTile>
-                
-                <PuzzleTile title="Satisfaction" icon={<TrendingUp className="h-4 w-4" />} count={stats.satisfaction || '94%'} trend="up" compact>
-                  <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full w-[94%] bg-gradient-to-r from-emerald-500 to-green-400 rounded-full" />
-                  </div>
-                </PuzzleTile>
-              </>
-            )}
-          </motion.div>
-        </main>
-      </div>
+                );
+              })}
+            </div>
+          </BentoCard>
+
+          <BentoCard span={12} title="Documentation" data-testid="card-documentation">
+            <AccordionStack items={documentationItems} />
+          </BentoCard>
+        </LayoutShell>
+      </main>
     </div>
   );
 }

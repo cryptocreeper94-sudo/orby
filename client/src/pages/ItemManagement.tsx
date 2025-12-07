@@ -18,7 +18,9 @@ import {
   Tag,
   SwitchCamera,
   RotateCcw,
-  Loader2
+  Loader2,
+  Settings,
+  Info
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -49,10 +51,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from '@/components/ui/bento';
 
 type Item = {
   id: string;
@@ -364,13 +366,13 @@ export default function ItemManagement() {
   if (!currentUser || !['Developer', 'Admin', 'Management', 'Warehouse', 'Kitchen'].includes(currentUser.role)) {
     return (
       <AnimatedBackground>
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="min-h-screen flex items-center justify-center p-4" data-testid="access-restricted">
           <GlassCard className="max-w-md w-full">
             <GlassCardContent className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-slate-200 mb-2">Access Restricted</h2>
               <p className="text-slate-400 mb-4">Item management is only available for managers.</p>
-              <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600">
+              <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-return-home">
                 Return Home
               </Button>
             </GlassCardContent>
@@ -380,105 +382,154 @@ export default function ItemManagement() {
     );
   }
 
+  const metricsItems = [
+    <div key="total" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-total-items">
+      <Package className="h-5 w-5 text-cyan-400 mb-1" />
+      <span className="text-xl font-bold text-white">{items.length}</span>
+      <span className="text-[10px] text-white/50">Total Items</span>
+    </div>,
+    <div key="beverage" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-beverages">
+      <Tag className="h-5 w-5 text-blue-400 mb-1" />
+      <span className="text-xl font-bold text-white">{items.filter(i => i.category === 'Beverage').length}</span>
+      <span className="text-[10px] text-white/50">Beverages</span>
+    </div>,
+    <div key="beer" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-beer">
+      <Tag className="h-5 w-5 text-amber-400 mb-1" />
+      <span className="text-xl font-bold text-white">{items.filter(i => i.category === 'Beer').length}</span>
+      <span className="text-[10px] text-white/50">Beer</span>
+    </div>,
+    <div key="food" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-food">
+      <Tag className="h-5 w-5 text-orange-400 mb-1" />
+      <span className="text-xl font-bold text-white">{items.filter(i => i.category === 'Food').length}</span>
+      <span className="text-[10px] text-white/50">Food</span>
+    </div>,
+    <div key="snacks" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-snacks">
+      <Tag className="h-5 w-5 text-purple-400 mb-1" />
+      <span className="text-xl font-bold text-white">{items.filter(i => i.category === 'Snacks').length}</span>
+      <span className="text-[10px] text-white/50">Snacks</span>
+    </div>,
+  ];
+
+  const categoryCarouselItems = [
+    <Button
+      key="all"
+      variant={selectedCategory === 'all' ? 'default' : 'outline'}
+      size="sm"
+      onClick={() => setSelectedCategory('all')}
+      className={`min-w-[80px] ${selectedCategory === 'all' ? 'bg-cyan-500' : 'border-white/20 text-slate-300'}`}
+      data-testid="filter-all"
+    >
+      All ({items.length})
+    </Button>,
+    ...categories.map(cat => (
+      <Button
+        key={cat}
+        variant={selectedCategory === cat ? 'default' : 'outline'}
+        size="sm"
+        onClick={() => setSelectedCategory(cat)}
+        className={`min-w-[80px] ${selectedCategory === cat ? 'bg-cyan-500' : 'border-white/20 text-slate-300'}`}
+        data-testid={`filter-${cat.toLowerCase()}`}
+      >
+        {cat} ({items.filter(i => i.category === cat).length})
+      </Button>
+    ))
+  ];
+
+  const settingsAccordionItems = [
+    {
+      title: 'Quick Actions',
+      content: (
+        <div className="flex flex-wrap gap-2" data-testid="quick-actions-content">
+          <GlowButton 
+            variant="cyan"
+            onClick={() => setScanDialogOpen(true)}
+            data-testid="button-scan-sheet"
+          >
+            <ScanLine className="h-4 w-4 mr-2" />
+            Scan Count Sheet
+          </GlowButton>
+          <GlowButton 
+            variant="cyan"
+            onClick={() => setAddDialogOpen(true)}
+            data-testid="button-add-item"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Item
+          </GlowButton>
+        </div>
+      )
+    },
+    {
+      title: 'About Item Management',
+      content: (
+        <div className="space-y-2 text-sm" data-testid="about-content">
+          <p>Configure inventory items that can be counted at any stand. Items are organized by category for easy filtering.</p>
+          <p>Use the AI-powered count sheet scanner to quickly add multiple items from paper inventory sheets.</p>
+        </div>
+      )
+    }
+  ];
+
   return (
     <AnimatedBackground>
       <div className="min-h-screen pb-20" data-testid="item-management-page">
-        <PageHeader
-          title="Item Management"
-          subtitle="Configure inventory items for all stands"
-          icon={<Package className="h-6 w-6 text-cyan-400" />}
-          iconColor="cyan"
-          actions={
-            <Link href="/manager">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-white/10" data-testid="button-back">
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Back
-              </Button>
-            </Link>
-          }
-        />
-
-        <main className="container mx-auto p-4 space-y-6">
-          <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="Search items..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/5 border-white/10 text-slate-200"
-                data-testid="input-search-items"
-              />
-            </div>
-            <div className="flex gap-2">
-              <GlowButton 
-                variant="cyan"
-                onClick={() => setScanDialogOpen(true)}
-                data-testid="button-scan-sheet"
-              >
-                <ScanLine className="h-4 w-4 mr-2" />
-                Scan Count Sheet
-              </GlowButton>
-              <GlowButton 
-                variant="cyan"
-                onClick={() => setAddDialogOpen(true)}
-                data-testid="button-add-item"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add Item
-              </GlowButton>
-            </div>
-          </div>
-
-          <div className="flex gap-2 flex-wrap">
-            <Button
-              variant={selectedCategory === 'all' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setSelectedCategory('all')}
-              className={selectedCategory === 'all' ? 'bg-cyan-500' : 'border-white/20 text-slate-300'}
-              data-testid="filter-all"
-            >
-              All ({items.length})
-            </Button>
-            {categories.map(cat => (
-              <Button
-                key={cat}
-                variant={selectedCategory === cat ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedCategory(cat)}
-                className={selectedCategory === cat ? 'bg-cyan-500' : 'border-white/20 text-slate-300'}
-                data-testid={`filter-${cat.toLowerCase()}`}
-              >
-                {cat} ({items.filter(i => i.category === cat).length})
-              </Button>
-            ))}
-          </div>
-
-          <GlassCard data-testid="card-items-list">
-            <GlassCardHeader className="pb-2">
+        <div className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Link href="/manager">
+                <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-white/10" data-testid="button-back">
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Back
+                </Button>
+              </Link>
               <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-cyan-500/20">
-                  <Package className="h-4 w-4 text-cyan-400" />
+                <Package className="h-5 w-5 text-cyan-400" />
+                <div>
+                  <h1 className="text-lg font-bold text-white" data-testid="text-page-title">Item Management</h1>
+                  <p className="text-xs text-slate-400">Configure inventory items for all stands</p>
                 </div>
-                <span className="font-bold text-sm text-slate-200">
-                  Inventory Items ({filteredItems.length})
-                </span>
               </div>
-            </GlassCardHeader>
-            <GlassCardContent className="pt-0">
+            </div>
+          </div>
+        </div>
+
+        <div className="p-3">
+          <LayoutShell className="gap-3">
+            <BentoCard span={12} className="p-2" title="Item Metrics" data-testid="bento-card-metrics">
+              <CarouselRail items={metricsItems} data-testid="carousel-metrics" />
+            </BentoCard>
+
+            <BentoCard span={12} className="p-2" title="Categories" data-testid="bento-card-categories">
+              <CarouselRail items={categoryCarouselItems} data-testid="carousel-categories" />
+            </BentoCard>
+
+            <BentoCard span={12} className="p-2" data-testid="bento-card-search">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Search items..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 bg-white/5 border-white/10 text-slate-200"
+                  data-testid="input-search-items"
+                />
+              </div>
+            </BentoCard>
+
+            <BentoCard span={12} className="p-2" title={`Inventory Items (${filteredItems.length})`} data-testid="bento-card-items">
               {loading ? (
                 <div className="flex items-center justify-center py-8">
                   <div className="w-6 h-6 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
                 </div>
               ) : filteredItems.length === 0 ? (
-                <div className="text-center py-8">
-                  <Package className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400">No items found</p>
-                  <p className="text-sm text-slate-500 mt-1">Add items or scan a count sheet to get started</p>
+                <div className="text-center py-8" data-testid="empty-items-state">
+                  <Package className="h-10 w-10 text-slate-600 mx-auto mb-3" />
+                  <p className="text-slate-400 text-sm">No items found</p>
+                  <p className="text-xs text-slate-500 mt-1">Add items or scan a count sheet to get started</p>
                 </div>
               ) : (
-                <ScrollArea className="h-[500px]">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pr-4">
+                <ScrollArea className="h-[400px]">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 pr-2">
                     <AnimatePresence>
                       {filteredItems.map((item, idx) => (
                         <motion.div
@@ -492,13 +543,13 @@ export default function ItemManagement() {
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium text-slate-200 truncate">{item.name}</div>
+                              <div className="font-medium text-slate-200 truncate text-sm" data-testid={`item-name-${item.id}`}>{item.name}</div>
                               <div className="flex items-center gap-2 mt-1">
                                 <Badge variant="outline" className="text-[10px] border-white/20 text-slate-400">
                                   {item.category}
                                 </Badge>
                                 {item.price > 0 && (
-                                  <span className="text-xs text-emerald-400">
+                                  <span className="text-xs text-emerald-400" data-testid={`item-price-${item.id}`}>
                                     ${(item.price / 100).toFixed(2)}
                                   </span>
                                 )}
@@ -507,7 +558,7 @@ export default function ItemManagement() {
                             <Button
                               size="sm"
                               variant="ghost"
-                              className="text-red-400 hover:bg-red-500/10"
+                              className="text-red-400 hover:bg-red-500/10 h-8 w-8 p-0"
                               onClick={() => handleDeleteItem(item.id)}
                               data-testid={`button-delete-${item.id}`}
                             >
@@ -520,9 +571,17 @@ export default function ItemManagement() {
                   </div>
                 </ScrollArea>
               )}
-            </GlassCardContent>
-          </GlassCard>
-        </main>
+            </BentoCard>
+
+            <BentoCard span={12} className="p-2" title="Settings & Actions" data-testid="bento-card-settings">
+              <AccordionStack 
+                items={settingsAccordionItems} 
+                defaultOpen={[0]} 
+                data-testid="accordion-settings"
+              />
+            </BentoCard>
+          </LayoutShell>
+        </div>
 
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-700" data-testid="dialog-add-item">
@@ -629,127 +688,104 @@ export default function ItemManagement() {
                       data-testid="button-capture"
                     >
                       <Camera className="h-4 w-4 mr-2" />
-                      Capture
+                      Capture Photo
                     </Button>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-3">
                   <div className="relative rounded-lg overflow-hidden aspect-[4/3]">
-                    <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
+                    <img 
+                      src={capturedImage} 
+                      alt="Captured count sheet" 
+                      className="w-full h-full object-cover"
+                      data-testid="captured-image"
+                    />
                   </div>
                   
-                  {!scanResult && !isScanning && (
-                    <div className="flex gap-2">
-                      <Button 
-                        onClick={retakePhoto}
-                        variant="outline"
-                        className="border-white/20 text-slate-300"
-                        data-testid="button-retake"
-                      >
-                        <RotateCcw className="h-4 w-4 mr-2" />
-                        Retake
-                      </Button>
-                      <Button 
-                        onClick={scanCountSheet}
-                        className="flex-1 bg-cyan-500 hover:bg-cyan-600"
-                        data-testid="button-scan"
-                      >
-                        <ScanLine className="h-4 w-4 mr-2" />
-                        Scan Sheet
-                      </Button>
-                    </div>
-                  )}
-
-                  {isScanning && (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-6 w-6 text-cyan-400 animate-spin mr-2" />
-                      <span className="text-slate-300">Reading count sheet...</span>
-                    </div>
-                  )}
-
                   {scanError && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-                      <div className="flex items-center gap-2 text-red-400">
-                        <AlertCircle className="h-4 w-4" />
-                        <span className="text-sm">{scanError}</span>
-                      </div>
+                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2" data-testid="scan-error">
+                      <AlertCircle className="h-4 w-4 text-red-400" />
+                      <span className="text-sm text-red-400">{scanError}</span>
                     </div>
                   )}
-
+                  
                   {scanResult && (
-                    <div className="space-y-3">
-                      <div className="text-sm text-slate-400">
-                        Found {scanResult.length} items. Select new items to add:
-                      </div>
-                      <ScrollArea className="h-[200px] pr-2">
-                        <div className="space-y-2">
-                          {scanResult.map((item, index) => {
-                            const exists = isItemInInventory(item.name);
+                    <div className="space-y-2">
+                      <p className="text-sm text-slate-300">Found {scanResult.length} items:</p>
+                      <ScrollArea className="h-48">
+                        <div className="space-y-1">
+                          {scanResult.map((scannedItem, index) => {
+                            const inInventory = isItemInInventory(scannedItem.name);
                             return (
                               <div 
                                 key={index}
-                                className={`flex items-center gap-3 p-2 rounded-lg border ${
-                                  exists 
-                                    ? 'bg-emerald-500/10 border-emerald-500/30' 
-                                    : selectedScannedItems.has(index)
-                                      ? 'bg-cyan-500/20 border-cyan-500/30'
-                                      : 'bg-white/5 border-white/10'
+                                className={`p-2 rounded-lg flex items-center gap-2 ${
+                                  inInventory ? 'bg-green-500/10 border border-green-500/30' : 'bg-white/5 border border-white/10'
                                 }`}
+                                data-testid={`scanned-item-${index}`}
                               >
                                 <Checkbox
-                                  checked={exists || selectedScannedItems.has(index)}
-                                  disabled={exists}
+                                  checked={selectedScannedItems.has(index)}
                                   onCheckedChange={() => toggleScannedItem(index)}
-                                  data-testid={`checkbox-item-${index}`}
+                                  disabled={inInventory}
+                                  data-testid={`checkbox-scanned-${index}`}
                                 />
-                                <div className="flex-1 min-w-0">
-                                  <div className="font-medium text-slate-200 text-sm truncate">
-                                    {item.name}
-                                  </div>
-                                  <div className="text-xs text-slate-500">
-                                    {exists ? (
-                                      <span className="text-emerald-400">Already in system</span>
-                                    ) : (
-                                      <span>Will be added as: {guessCategory(item.name)}</span>
-                                    )}
-                                  </div>
-                                </div>
-                                <Badge 
-                                  className={`text-[10px] ${
-                                    item.confidence === 'high' ? 'bg-emerald-500/20 text-emerald-400' :
-                                    item.confidence === 'medium' ? 'bg-amber-500/20 text-amber-400' :
-                                    'bg-red-500/20 text-red-400'
-                                  }`}
-                                >
-                                  {item.confidence}
-                                </Badge>
+                                <span className={`text-sm flex-1 ${inInventory ? 'text-green-400' : 'text-slate-200'}`}>
+                                  {scannedItem.name}
+                                </span>
+                                {inInventory && (
+                                  <Badge className="bg-green-500/20 text-green-400 text-[10px]">In Inventory</Badge>
+                                )}
                               </div>
                             );
                           })}
                         </div>
                       </ScrollArea>
-                      <div className="flex gap-2">
-                        <Button 
-                          onClick={retakePhoto}
-                          variant="outline"
-                          className="border-white/20 text-slate-300"
-                          data-testid="button-scan-again"
-                        >
-                          Scan Another
-                        </Button>
-                        <Button 
-                          onClick={addScannedItems}
-                          className="flex-1 bg-cyan-500 hover:bg-cyan-600"
-                          disabled={selectedScannedItems.size === 0}
-                          data-testid="button-add-scanned"
-                        >
-                          <Plus className="h-4 w-4 mr-2" />
-                          Add {selectedScannedItems.size} Items
-                        </Button>
-                      </div>
                     </div>
                   )}
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      onClick={retakePhoto}
+                      variant="outline"
+                      className="border-white/20 text-slate-300"
+                      data-testid="button-retake"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      Retake
+                    </Button>
+                    {!scanResult ? (
+                      <Button 
+                        onClick={scanCountSheet}
+                        disabled={isScanning}
+                        className="flex-1 bg-cyan-500 hover:bg-cyan-600"
+                        data-testid="button-scan"
+                      >
+                        {isScanning ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Scanning...
+                          </>
+                        ) : (
+                          <>
+                            <ScanLine className="h-4 w-4 mr-2" />
+                            Scan Sheet
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={addScannedItems}
+                        disabled={selectedScannedItems.size === 0}
+                        className="flex-1 bg-cyan-500 hover:bg-cyan-600"
+                        data-testid="button-add-scanned"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Selected ({selectedScannedItems.size})
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

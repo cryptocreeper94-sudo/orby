@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
   Users, 
   Crown, 
   ChevronLeft, 
   Search, 
-  MessageSquare,
   UserPlus,
   Check,
   X,
@@ -19,11 +18,10 @@ import {
   AnimatedBackground, 
   GlassCard, 
   GlassCardContent, 
-  GlassCardHeader, 
   PageHeader,
-  GlowButton
 } from "@/components/ui/premium";
 import { useStore } from "@/lib/mockData";
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
 import {
   Dialog,
   DialogContent,
@@ -147,9 +145,9 @@ export default function TeamManagement() {
       });
       
       if (response.ok) {
-        const response = await fetch('/api/users');
-        if (response.ok) {
-          const data = await response.json();
+        const refreshResponse = await fetch('/api/users');
+        if (refreshResponse.ok) {
+          const data = await refreshResponse.json();
           const workerData = data.filter((u: Worker) => 
             DEPARTMENTS.includes(u.department) && 
             ['NPO', 'StandLead', 'StandSupervisor'].includes(u.role)
@@ -166,13 +164,13 @@ export default function TeamManagement() {
   if (!currentUser || !['Developer', 'Admin', 'Management'].includes(currentUser.role)) {
     return (
       <AnimatedBackground>
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="min-h-screen flex items-center justify-center p-4" data-testid="access-restricted">
           <GlassCard className="max-w-md w-full">
             <GlassCardContent className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-slate-200 mb-2">Access Restricted</h2>
               <p className="text-slate-400 mb-4">Team management is only available for managers.</p>
-              <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600">
+              <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-return-home">
                 Return Home
               </Button>
             </GlassCardContent>
@@ -181,6 +179,79 @@ export default function TeamManagement() {
       </AnimatedBackground>
     );
   }
+
+  const departmentStats = DEPARTMENTS.map(dept => {
+    const deptWorkers = workers.filter(w => w.department === dept);
+    const deptLeads = teamLeads.filter(l => l.department === dept);
+    return { dept, workers: deptWorkers.length, leads: deptLeads.length };
+  });
+
+  const metricsCards = [
+    <div key="total" className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid="metric-total-workers">
+      <Users className="h-4 w-4 text-cyan-400 mb-1" />
+      <div className="text-lg font-bold text-slate-200">{workers.length}</div>
+      <div className="text-xs text-slate-500">Total Workers</div>
+    </div>,
+    <div key="leads" className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 min-w-[120px]" data-testid="metric-team-leads">
+      <Crown className="h-4 w-4 text-yellow-400 mb-1" />
+      <div className="text-lg font-bold text-yellow-400">{teamLeads.length}</div>
+      <div className="text-xs text-slate-500">Team Leads</div>
+    </div>,
+    ...departmentStats.map(({ dept, workers: count, leads }) => (
+      <div key={dept} className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid={`metric-${dept.toLowerCase()}`}>
+        <div className="text-xs text-slate-500 mb-1">{dept}</div>
+        <div className="text-lg font-bold text-slate-200">{count}</div>
+        <div className="text-xs text-cyan-400">{leads} leads</div>
+      </div>
+    ))
+  ];
+
+  const memberCards = departmentTeamLeads.map(lead => (
+    <motion.div
+      key={lead.id}
+      className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 min-w-[180px]"
+      data-testid={`team-lead-card-${lead.id}`}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center">
+          <Crown className="h-4 w-4 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-medium text-slate-200 truncate">{lead.name}</div>
+          <div className="text-xs text-slate-400">{lead.department}</div>
+        </div>
+      </div>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="w-full text-slate-400 hover:text-red-400 hover:bg-red-500/10 h-7 text-xs"
+        onClick={() => handleDemoteFromTeamLead(lead.id)}
+        data-testid={`button-demote-${lead.id}`}
+      >
+        <X className="h-3 w-3 mr-1" />
+        Remove Lead
+      </Button>
+    </motion.div>
+  ));
+
+  const policyItems = [
+    {
+      title: "👑 Team Lead Responsibilities",
+      content: "Team leads are responsible for coordinating staff, ensuring tasks are completed, and reporting to supervisors. They serve as the primary point of contact for their team."
+    },
+    {
+      title: "🔄 Assigning Team Leads",
+      content: "Click the crown icon next to a worker's name to promote them to team lead. Each department can have multiple team leads."
+    },
+    {
+      title: "👥 Worker Assignments",
+      content: "Use the assign button to link workers to their team lead. Workers can be reassigned as needed throughout the event."
+    },
+    {
+      title: "📊 Department Organization",
+      content: "Workers are organized by department: Warehouse, Kitchen, Operations, and Bar. Use the tabs to filter by department."
+    }
+  ];
 
   return (
     <AnimatedBackground>
@@ -200,188 +271,110 @@ export default function TeamManagement() {
           }
         />
 
-        <main className="container mx-auto p-4 space-y-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="Search workers..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/5 border-white/10 text-slate-200"
-                data-testid="input-search-workers"
-              />
-            </div>
-          </div>
+        <main className="container mx-auto p-4">
+          <LayoutShell className="gap-3">
+            <BentoCard span={12} className="p-2" data-testid="metrics-carousel-card">
+              <CarouselRail items={metricsCards} title="Team Overview" data-testid="metrics-carousel" />
+            </BentoCard>
 
-          <Tabs value={selectedDepartment} onValueChange={setSelectedDepartment} data-testid="department-tabs">
-            <TabsList className="grid grid-cols-5 bg-white/5">
-              <TabsTrigger value="all" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-all">
-                All
-              </TabsTrigger>
-              {DEPARTMENTS.map(dept => (
-                <TabsTrigger 
-                  key={dept} 
-                  value={dept} 
-                  className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400"
-                  data-testid={`tab-${dept.toLowerCase()}`}
-                >
-                  {dept}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-
-            <TabsContent value={selectedDepartment} className="mt-4 space-y-6">
-              {departmentTeamLeads.length > 0 && (
-                <GlassCard data-testid="card-team-leads">
-                  <GlassCardHeader className="pb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-yellow-500/20">
-                        <Crown className="h-4 w-4 text-yellow-400" />
-                      </div>
-                      <span className="font-bold text-sm text-slate-200">Current Team Leads</span>
-                    </div>
-                  </GlassCardHeader>
-                  <GlassCardContent className="space-y-2 pt-0">
-                    {departmentTeamLeads.map((lead, idx) => (
-                      <motion.div
-                        key={lead.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: idx * 0.05 }}
-                        className="flex items-center justify-between p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20"
-                        data-testid={`team-lead-${lead.id}`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-amber-600 flex items-center justify-center">
-                            <Crown className="h-5 w-5 text-white" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-slate-200">{lead.name}</span>
-                              <Badge className="text-[10px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
-                                Team Lead
-                              </Badge>
-                            </div>
-                            <span className="text-xs text-slate-400">{lead.department}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-slate-400 hover:text-red-400 hover:bg-red-500/10"
-                            onClick={() => handleDemoteFromTeamLead(lead.id)}
-                            data-testid={`button-demote-${lead.id}`}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </GlassCardContent>
-                </GlassCard>
+            <BentoCard span={12} className="lg:col-span-4" data-testid="members-carousel-card">
+              <div className="text-sm font-medium text-slate-300 mb-2">Current Team Leads</div>
+              {memberCards.length > 0 ? (
+                <CarouselRail items={memberCards} showDots data-testid="members-carousel" />
+              ) : (
+                <div className="text-center py-6 text-slate-500 text-sm" data-testid="no-leads">
+                  No team leads in this department
+                </div>
               )}
+            </BentoCard>
 
-              <GlassCard data-testid="card-workers">
-                <GlassCardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-cyan-500/20">
-                      <Users className="h-4 w-4 text-cyan-400" />
-                    </div>
-                    <span className="font-bold text-sm text-slate-200">
-                      Workers ({filteredWorkers.length})
-                    </span>
-                  </div>
-                </GlassCardHeader>
-                <GlassCardContent className="pt-0">
-                  {loading ? (
-                    <div className="flex items-center justify-center py-8">
-                      <div className="w-6 h-6 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
-                    </div>
-                  ) : filteredWorkers.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Users className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                      <p className="text-slate-400">No workers found</p>
-                      <p className="text-sm text-slate-500 mt-1">
-                        {searchQuery ? 'Try a different search' : 'No workers registered in this department'}
-                      </p>
-                    </div>
-                  ) : (
-                    <ScrollArea className="h-[400px]">
-                      <div className="space-y-2 pr-4">
-                        <AnimatePresence>
-                          {filteredWorkers.map((worker, idx) => (
+            <BentoCard span={12} rowSpan={2} className="lg:col-span-5" data-testid="roles-grid-card">
+              <div className="space-y-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Search workers..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 bg-white/5 border-white/10 text-slate-200"
+                    data-testid="input-search-workers"
+                  />
+                </div>
+
+                <Tabs value={selectedDepartment} onValueChange={setSelectedDepartment} data-testid="department-tabs">
+                  <TabsList className="grid grid-cols-5 bg-white/5 h-8">
+                    <TabsTrigger value="all" className="text-[10px] data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-all">All</TabsTrigger>
+                    {DEPARTMENTS.map(dept => (
+                      <TabsTrigger key={dept} value={dept} className="text-[10px] data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid={`tab-${dept.toLowerCase()}`}>
+                        {dept.slice(0, 4)}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+
+                  <TabsContent value={selectedDepartment} className="mt-2">
+                    {loading ? (
+                      <div className="flex items-center justify-center py-8" data-testid="loading-workers">
+                        <div className="w-6 h-6 border-2 border-cyan-400/30 border-t-cyan-400 rounded-full animate-spin" />
+                      </div>
+                    ) : filteredWorkers.length === 0 ? (
+                      <div className="text-center py-8" data-testid="no-workers">
+                        <Users className="h-10 w-10 text-slate-600 mx-auto mb-2" />
+                        <p className="text-slate-400 text-sm">No workers found</p>
+                      </div>
+                    ) : (
+                      <ScrollArea className="h-[280px]" data-testid="workers-scroll-area">
+                        <div className="space-y-1 pr-2">
+                          {filteredWorkers.map((worker) => (
                             <motion.div
                               key={worker.id}
-                              initial={{ opacity: 0, y: 10 }}
+                              initial={{ opacity: 0, y: 5 }}
                               animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -10 }}
-                              transition={{ delay: idx * 0.03 }}
-                              className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors"
+                              className="flex items-center justify-between p-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
                               data-testid={`worker-${worker.id}`}
                             >
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center">
-                                  <Users className="h-5 w-5 text-slate-300" />
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center">
+                                  <Users className="h-4 w-4 text-slate-300" />
                                 </div>
                                 <div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium text-slate-200">{worker.name}</span>
+                                  <div className="flex items-center gap-1">
+                                    <span className="font-medium text-slate-200 text-sm">{worker.name}</span>
                                     {worker.isTeamLead && (
-                                      <Badge className="text-[10px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
-                                        Lead
-                                      </Badge>
+                                      <Badge className="text-[10px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 h-4 px-1">Lead</Badge>
                                     )}
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-xs text-slate-400">{worker.department}</span>
+                                  <div className="flex items-center gap-1 text-[10px]">
+                                    <span className="text-slate-400">{worker.department}</span>
                                     {worker.teamLeadId && (
-                                      <>
-                                        <span className="text-xs text-slate-600">•</span>
-                                        <span className="text-xs text-cyan-400">
-                                          Lead: {getTeamLeadName(worker.teamLeadId)}
-                                        </span>
-                                      </>
+                                      <span className="text-cyan-400">• {getTeamLeadName(worker.teamLeadId)}</span>
                                     )}
                                   </div>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1">
                                 {!worker.isTeamLead && (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="text-yellow-400 hover:bg-yellow-500/10"
-                                    onClick={() => handlePromoteToTeamLead(worker.id)}
-                                    data-testid={`button-promote-${worker.id}`}
-                                  >
-                                    <Crown className="h-4 w-4" />
+                                  <Button size="sm" variant="ghost" className="text-yellow-400 hover:bg-yellow-500/10 h-7 w-7 p-0" onClick={() => handlePromoteToTeamLead(worker.id)} data-testid={`button-promote-${worker.id}`}>
+                                    <Crown className="h-3.5 w-3.5" />
                                   </Button>
                                 )}
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-cyan-400 hover:bg-cyan-500/10"
-                                  onClick={() => {
-                                    setSelectedWorker(worker);
-                                    setAssignDialogOpen(true);
-                                  }}
-                                  data-testid={`button-assign-${worker.id}`}
-                                >
-                                  <UserPlus className="h-4 w-4" />
+                                <Button size="sm" variant="ghost" className="text-cyan-400 hover:bg-cyan-500/10 h-7 w-7 p-0" onClick={() => { setSelectedWorker(worker); setAssignDialogOpen(true); }} data-testid={`button-assign-${worker.id}`}>
+                                  <UserPlus className="h-3.5 w-3.5" />
                                 </Button>
                               </div>
                             </motion.div>
                           ))}
-                        </AnimatePresence>
-                      </div>
-                    </ScrollArea>
-                  )}
-                </GlassCardContent>
-              </GlassCard>
-            </TabsContent>
-          </Tabs>
+                        </div>
+                      </ScrollArea>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </div>
+            </BentoCard>
+
+            <BentoCard span={12} className="lg:col-span-3" data-testid="policies-accordion-card">
+              <AccordionStack items={policyItems} defaultOpen={[0]} />
+            </BentoCard>
+          </LayoutShell>
         </main>
 
         <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
@@ -424,7 +417,7 @@ export default function TeamManagement() {
                   </Button>
                 ))}
               {teamLeads.filter(lead => lead.department === selectedWorker?.department).length === 0 && (
-                <div className="text-center py-4">
+                <div className="text-center py-4" data-testid="no-leads-in-dept">
                   <p className="text-sm text-slate-500">No team leads in this department</p>
                   <p className="text-xs text-slate-600 mt-1">Promote a worker to team lead first</p>
                 </div>

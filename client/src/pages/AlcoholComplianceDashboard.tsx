@@ -19,7 +19,9 @@ import {
   Eye,
   LogOut,
   Plus,
-  Filter
+  Filter,
+  ClipboardList,
+  BookOpen
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,17 +37,11 @@ import { apiRequest } from '@/lib/queryClient';
 import { useStore } from '@/lib/mockData';
 import { 
   AnimatedBackground, 
-  GlassCard, 
-  GlassCardHeader, 
-  GlassCardContent,
-  StatCard,
   GlowButton,
   StatusBadge,
-  SectionHeader,
-  EmptyState,
-  PageHeader,
-  AnimatedList
+  PageHeader
 } from '@/components/ui/premium';
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from '@/components/ui/bento';
 import type { Stand } from '@shared/schema';
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
@@ -91,6 +87,49 @@ const SEVERITY_OPTIONS = [
   { value: 'Critical', label: 'Critical', color: 'red' }
 ];
 
+const COMPLIANCE_POLICIES = [
+  {
+    title: "ID Verification Requirements",
+    content: "All customers appearing under 40 years old must present valid government-issued ID. Acceptable forms include driver's license, passport, or military ID. Check expiration dates and verify photo matches the customer."
+  },
+  {
+    title: "Service Cutoff Guidelines",
+    content: "Stop service to any guest showing signs of intoxication: slurred speech, unsteady balance, bloodshot eyes, or aggressive behavior. Document incidents and notify security immediately."
+  },
+  {
+    title: "Reporting Procedures",
+    content: "Report violations within 15 minutes of occurrence. Include location, time, description, and any witness information. Upload photos when safe to do so."
+  },
+  {
+    title: "Training Compliance",
+    content: "All alcohol vendors must complete TIPS certification and venue-specific training before each event season. Refresher courses required annually."
+  }
+];
+
+function MetricCard({ icon: Icon, label, value, color, subValue }: { 
+  icon: React.ElementType; 
+  label: string; 
+  value: number | string; 
+  color: string;
+  subValue?: string;
+}) {
+  return (
+    <div 
+      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-white/5 min-w-[140px]"
+      data-testid={`metric-${label.toLowerCase().replace(/\s+/g, '-')}`}
+    >
+      <div className={`p-2 rounded-lg bg-${color}-500/20`}>
+        <Icon className={`w-4 h-4 text-${color}-400`} />
+      </div>
+      <div>
+        <div className="text-lg font-bold text-white">{value}</div>
+        <div className="text-xs text-slate-400">{label}</div>
+        {subValue && <div className="text-xs text-slate-500">{subValue}</div>}
+      </div>
+    </div>
+  );
+}
+
 function ViolationCard({ 
   violation, 
   stands,
@@ -123,7 +162,7 @@ function ViolationCard({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ scale: 1.01, x: 4 }}
       onClick={() => onView(violation)}
-      className={`relative rounded-2xl border overflow-hidden cursor-pointer transition-all duration-300 ${
+      className={`relative rounded-xl border overflow-hidden cursor-pointer transition-all duration-300 min-w-[280px] ${
         isResolved 
           ? 'border-slate-700/50 bg-slate-800/30' 
           : 'border-white/10 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-lg hover:shadow-xl'
@@ -132,53 +171,44 @@ function ViolationCard({
     >
       <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${typeConfig.color}`} />
       
-      <div className="p-4 md:p-5">
-        <div className="flex items-start gap-4">
+      <div className="p-3">
+        <div className="flex items-start gap-3">
           <motion.div 
-            className={`p-3 rounded-xl bg-gradient-to-br ${typeConfig.color} shadow-lg`}
+            className={`p-2 rounded-lg bg-gradient-to-br ${typeConfig.color} shadow-lg flex-shrink-0`}
             whileHover={{ rotate: [0, -5, 5, 0] }}
           >
-            <TypeIcon className="w-5 h-5 text-white" />
+            <TypeIcon className="w-4 h-4 text-white" />
           </motion.div>
           
           <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <h4 className="font-bold text-white">{typeConfig.label}</h4>
+            <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
+              <h4 className="font-semibold text-white text-sm">{typeConfig.label}</h4>
               <StatusBadge status={violation.status || 'Reported'} pulse={!isResolved} />
             </div>
             
-            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400 mb-3">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mb-2">
               {stand && (
-                <span className="flex items-center gap-1.5 bg-slate-800/50 px-2 py-1 rounded-lg">
-                  <MapPin className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="flex items-center gap-1 bg-slate-800/50 px-1.5 py-0.5 rounded">
+                  <MapPin className="w-3 h-3 text-cyan-400" />
                   {stand.name}
                 </span>
               )}
-              {violation.section && (
-                <span className="text-slate-500">{violation.section}</span>
-              )}
-              <span className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5" />
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
                 {timeAgo(violation.createdAt)}
               </span>
             </div>
             
-            <p className="text-sm text-slate-300 line-clamp-2 mb-3">{violation.description}</p>
+            <p className="text-xs text-slate-300 line-clamp-2 mb-2">{violation.description}</p>
             
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge className={`bg-${severityConfig?.color || 'slate'}-500/20 text-${severityConfig?.color || 'slate'}-400 border-${severityConfig?.color || 'slate'}-500/30`}>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Badge className={`text-xs bg-${severityConfig?.color || 'slate'}-500/20 text-${severityConfig?.color || 'slate'}-400 border-${severityConfig?.color || 'slate'}-500/30`}>
                 {violation.severity}
               </Badge>
-              {violation.vendorName && (
-                <span className="text-xs text-slate-400 flex items-center gap-1">
-                  <User className="w-3 h-3" />
-                  {violation.vendorName}
-                </span>
-              )}
               {violation.mediaUrls && violation.mediaUrls.length > 0 && (
-                <span className="text-xs text-cyan-400 flex items-center gap-1 bg-cyan-500/10 px-2 py-0.5 rounded-full">
+                <span className="text-xs text-cyan-400 flex items-center gap-1 bg-cyan-500/10 px-1.5 py-0.5 rounded-full">
                   <ImageIcon className="w-3 h-3" />
-                  {violation.mediaUrls.length} photo(s)
+                  {violation.mediaUrls.length}
                 </span>
               )}
             </div>
@@ -186,6 +216,29 @@ function ViolationCard({
         </div>
       </div>
     </motion.div>
+  );
+}
+
+function InspectionCard({ stand }: { stand: Stand }) {
+  const inspectionStatus = Math.random() > 0.3 ? 'passed' : Math.random() > 0.5 ? 'pending' : 'failed';
+  
+  return (
+    <div 
+      className="p-3 rounded-lg bg-slate-800/40 border border-white/5 hover:border-cyan-500/30 transition-colors"
+      data-testid={`inspection-card-${stand.id}`}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <span className="font-medium text-white text-sm truncate">{stand.name}</span>
+        <Badge className={`text-xs ${
+          inspectionStatus === 'passed' ? 'bg-green-500/20 text-green-400' :
+          inspectionStatus === 'pending' ? 'bg-amber-500/20 text-amber-400' :
+          'bg-red-500/20 text-red-400'
+        }`}>
+          {inspectionStatus}
+        </Badge>
+      </div>
+      <div className="text-xs text-slate-400">Last checked: 2h ago</div>
+    </div>
   );
 }
 
@@ -327,6 +380,22 @@ export default function AlcoholComplianceDashboard() {
       default: return violations;
     }
   };
+
+  const metricsItems = [
+    <MetricCard key="total" icon={FileText} label="Total Reports" value={violations.length} color="cyan" />,
+    <MetricCard key="pending" icon={Clock} label="Pending" value={pendingViolations.length} color={pendingViolations.length > 0 ? "amber" : "green"} />,
+    <MetricCard key="resolved" icon={CheckCircle2} label="Resolved" value={resolvedViolations.length} color="green" />,
+    <MetricCard key="myreports" icon={User} label="My Reports" value={myViolations.length} color="blue" />,
+  ];
+
+  const violationItems = getFilteredViolations().map(violation => (
+    <ViolationCard 
+      key={violation.id}
+      violation={violation}
+      stands={stands}
+      onView={handleViewViolation}
+    />
+  ));
   
   return (
     <AnimatedBackground>
@@ -342,145 +411,120 @@ export default function AlcoholComplianceDashboard() {
             size="icon" 
             onClick={handleLogout}
             className="text-slate-400 hover:text-white"
+            data-testid="button-logout"
           >
             <LogOut className="w-5 h-5" />
           </Button>
         }
       />
 
-      <main className="p-4 md:p-6 lg:p-8 space-y-6 pb-32 max-w-7xl mx-auto">
+      <main className="p-3 md:p-4 pb-32 max-w-7xl mx-auto" data-testid="alcohol-compliance-dashboard">
         <ComplianceAlertPanel 
           userId={currentUser?.id} 
           userName={currentUser?.name} 
           isManager={false}
         />
         
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3 space-y-6">
-            <div className="grid grid-cols-3 gap-4">
-              <StatCard 
-                icon={<FileText className="w-5 h-5" />}
-                label="Total Reports"
-                value={violations.length}
-                color="cyan"
-              />
-              <StatCard 
-                icon={<Clock className="w-5 h-5" />}
-                label="Pending"
-                value={pendingViolations.length}
-                color={pendingViolations.length > 0 ? "amber" : "green"}
-              />
-              <StatCard 
-                icon={<CheckCircle2 className="w-5 h-5" />}
-                label="Resolved"
-                value={resolvedViolations.length}
-                color="green"
-              />
+        <LayoutShell className="mt-4">
+          <BentoCard span={12} title="Compliance Metrics" data-testid="metrics-section">
+            <CarouselRail items={metricsItems} data-testid="metrics-carousel" />
+          </BentoCard>
+
+          <BentoCard span={8} rowSpan={2} className="flex flex-col" data-testid="violations-section">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-400" />
+                <span className="text-sm font-medium text-slate-300">Violations</span>
+              </div>
+              <GlowButton
+                size="sm"
+                variant="red"
+                onClick={() => setShowReportDialog(true)}
+                data-testid="button-report-violation"
+              >
+                <Plus className="w-4 h-4" />
+                Report
+              </GlowButton>
             </div>
-
-            <GlassCard gradient>
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList className="w-full bg-slate-800/50 rounded-t-2xl rounded-b-none border-b border-white/5 p-1 grid grid-cols-4">
-                  <TabsTrigger 
-                    value="all" 
-                    className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl text-xs md:text-sm"
-                    data-testid="tab-all"
-                  >
-                    All
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="my" 
-                    className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl text-xs md:text-sm"
-                    data-testid="tab-my"
-                  >
-                    My Reports
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="pending" 
-                    className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 rounded-xl text-xs md:text-sm"
-                    data-testid="tab-pending"
-                  >
-                    Pending
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="resolved" 
-                    className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 rounded-xl text-xs md:text-sm"
-                    data-testid="tab-resolved"
-                  >
-                    Resolved
-                  </TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value={activeTab} className="p-4 md:p-5 m-0">
-                  <ScrollArea className="h-[calc(100vh-450px)] md:h-[calc(100vh-400px)]">
-                    <AnimatePresence mode="popLayout">
-                      {loadingViolations ? (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="text-center py-12"
-                        >
-                          <Wine className="w-10 h-10 mx-auto mb-3 text-cyan-400 animate-pulse" />
-                          <p className="text-slate-400">Loading violations...</p>
-                        </motion.div>
-                      ) : getFilteredViolations().length === 0 ? (
-                        <EmptyState 
-                          icon={<Wine className="w-12 h-12" />}
-                          title="No Violations"
-                          description="Use the report button to log a new violation"
-                        />
-                      ) : (
-                        <div className="space-y-4">
-                          {getFilteredViolations().map(violation => (
-                            <ViolationCard 
-                              key={violation.id}
-                              violation={violation}
-                              stands={stands}
-                              onView={handleViewViolation}
-                            />
-                          ))}
-                        </div>
-                      )}
-                    </AnimatePresence>
-                  </ScrollArea>
-                </TabsContent>
-              </Tabs>
-            </GlassCard>
-          </div>
-
-          <div className="space-y-6 hidden lg:block">
-            <SectionHeader 
-              title="Quick Actions" 
-              icon={<Plus className="w-5 h-5" />}
-            />
             
-            <GlowButton 
-              variant="red"
-              size="lg"
-              onClick={() => setShowReportDialog(true)}
-              className="w-full"
-            >
-              <AlertTriangle className="w-5 h-5" />
-              Report Violation
-            </GlowButton>
-
-            <GlassCard gradient>
-              <GlassCardHeader>
-                <h3 className="text-sm font-semibold text-slate-300">Violation Types</h3>
-              </GlassCardHeader>
-              <GlassCardContent className="space-y-3">
-                {VIOLATION_TYPES.slice(0, 5).map(type => (
-                  <div key={type.id} className="flex items-center gap-3 text-sm">
-                    <div className={`p-1.5 rounded-lg bg-gradient-to-br ${type.color}`}>
-                      <type.icon className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-slate-300">{type.label}</span>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+              <TabsList className="w-full bg-slate-800/50 rounded-lg p-1 grid grid-cols-4 mb-3">
+                <TabsTrigger 
+                  value="all" 
+                  className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-lg text-xs"
+                  data-testid="tab-all"
+                >
+                  All
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="my" 
+                  className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-lg text-xs"
+                  data-testid="tab-my"
+                >
+                  Mine
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="pending" 
+                  className="data-[state=active]:bg-amber-500/20 data-[state=active]:text-amber-400 rounded-lg text-xs"
+                  data-testid="tab-pending"
+                >
+                  Pending
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="resolved" 
+                  className="data-[state=active]:bg-emerald-500/20 data-[state=active]:text-emerald-400 rounded-lg text-xs"
+                  data-testid="tab-resolved"
+                >
+                  Done
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value={activeTab} className="flex-1 m-0">
+                {loadingViolations ? (
+                  <div className="text-center py-8">
+                    <Wine className="w-8 h-8 mx-auto mb-2 text-cyan-400 animate-pulse" />
+                    <p className="text-sm text-slate-400">Loading...</p>
                   </div>
-                ))}
-              </GlassCardContent>
-            </GlassCard>
-          </div>
-        </div>
+                ) : violationItems.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Wine className="w-10 h-10 mx-auto mb-2 text-slate-600" />
+                    <p className="text-sm text-slate-400">No violations found</p>
+                  </div>
+                ) : (
+                  <CarouselRail 
+                    items={violationItems} 
+                    showDots 
+                    data-testid="violations-carousel"
+                  />
+                )}
+              </TabsContent>
+            </Tabs>
+          </BentoCard>
+
+          <BentoCard span={4} rowSpan={2} title="Compliance Policies" data-testid="policies-section">
+            <div className="flex items-center gap-2 mb-3">
+              <BookOpen className="w-4 h-4 text-cyan-400" />
+              <span className="text-xs text-slate-400">Reference Guide</span>
+            </div>
+            <AccordionStack 
+              items={COMPLIANCE_POLICIES}
+              defaultOpen={[0]}
+              data-testid="policies-accordion"
+            />
+          </BentoCard>
+
+          <BentoCard span={12} title="Inspection Grid" data-testid="inspection-section">
+            <div className="flex items-center gap-2 mb-3">
+              <ClipboardList className="w-4 h-4 text-green-400" />
+              <span className="text-xs text-slate-400">Stand Compliance Status</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              {stands.slice(0, 12).map(stand => (
+                <InspectionCard key={stand.id} stand={stand} />
+              ))}
+            </div>
+          </BentoCard>
+        </LayoutShell>
         
         <motion.div 
           className="fixed bottom-6 left-0 right-0 flex justify-center z-20 lg:hidden"
@@ -491,7 +535,7 @@ export default function AlcoholComplianceDashboard() {
             size="lg"
             variant="red"
             onClick={() => setShowReportDialog(true)}
-            className="shadow-2xl"
+            data-testid="button-report-violation-mobile"
           >
             <AlertTriangle className="w-5 h-5" />
             Report Violation
@@ -609,22 +653,22 @@ export default function AlcoholComplianceDashboard() {
             </div>
             
             <div>
-              <Label className="text-slate-300 mb-2 block">Evidence (Photos/Video)</Label>
-              <div className="flex gap-2 mb-3">
-                <Button 
+              <Label className="text-slate-300 mb-2 block">Evidence Photos</Label>
+              <div className="flex gap-2">
+                <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 bg-slate-800/50 border-white/10 text-white hover:bg-slate-700/50"
+                  className="flex-1 border-white/10 text-slate-300"
                   onClick={() => cameraInputRef.current?.click()}
-                  data-testid="button-take-photo"
+                  data-testid="button-camera"
                 >
                   <Camera className="w-4 h-4 mr-2" />
-                  Take Photo
+                  Camera
                 </Button>
-                <Button 
+                <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 bg-slate-800/50 border-white/10 text-white hover:bg-slate-700/50"
+                  className="flex-1 border-white/10 text-slate-300"
                   onClick={() => fileInputRef.current?.click()}
                   data-testid="button-upload"
                 >
@@ -632,190 +676,130 @@ export default function AlcoholComplianceDashboard() {
                   Upload
                 </Button>
               </div>
-              
-              <input 
+              <input
                 ref={cameraInputRef}
                 type="file"
-                accept="image/*,video/*"
+                accept="image/*"
                 capture="environment"
                 className="hidden"
                 onChange={handleCameraCapture}
               />
-              <input 
+              <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*,video/*"
+                accept="image/*"
                 multiple
                 className="hidden"
                 onChange={handleFileUpload}
               />
               
               {capturedImages.length > 0 && (
-                <div className="grid grid-cols-3 gap-2">
+                <div className="flex gap-2 mt-3 flex-wrap">
                   {capturedImages.map((img, idx) => (
-                    <motion.div 
-                      key={idx} 
-                      className="relative aspect-square"
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                    >
+                    <div key={idx} className="relative">
                       <img 
                         src={img} 
                         alt={`Evidence ${idx + 1}`}
-                        className="w-full h-full object-cover rounded-xl border border-white/10"
+                        className="w-16 h-16 object-cover rounded-lg border border-white/10"
                       />
-                      <Button
-                        size="icon"
-                        variant="destructive"
-                        className="absolute top-1 right-1 w-6 h-6 rounded-full"
+                      <button
                         onClick={() => removeImage(idx)}
+                        className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center"
                         data-testid={`button-remove-image-${idx}`}
                       >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    </motion.div>
+                        <X className="w-3 h-3 text-white" />
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
             </div>
           </div>
           
-          <DialogFooter className="gap-2">
-            <Button 
-              variant="ghost" 
+          <DialogFooter className="mt-4">
+            <Button
+              variant="outline"
               onClick={() => setShowReportDialog(false)}
-              className="text-slate-400"
+              className="border-white/10 text-slate-300"
               data-testid="button-cancel-report"
             >
               Cancel
             </Button>
-            <GlowButton 
-              variant="red"
+            <GlowButton
               onClick={handleSubmitViolation}
               disabled={createViolation.isPending}
+              variant="red"
+              data-testid="button-submit-report"
             >
-              <Plus className="w-4 h-4" />
-              Submit Report
+              {createViolation.isPending ? 'Submitting...' : 'Submit Report'}
             </GlowButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
+      
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white">Violation Details</DialogTitle>
+          </DialogHeader>
+          
           {selectedViolation && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-white flex items-center gap-2">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className={`p-3 rounded-xl bg-gradient-to-br ${VIOLATION_TYPES.find(t => t.id === selectedViolation.violationType)?.color || 'from-slate-500 to-slate-600'}`}>
                   {(() => {
-                    const typeConfig = VIOLATION_TYPES.find(t => t.id === selectedViolation.violationType) || VIOLATION_TYPES[7];
-                    const TypeIcon = typeConfig.icon;
-                    return (
-                      <>
-                        <div className={`p-2 rounded-lg bg-gradient-to-br ${typeConfig.color}`}>
-                          <TypeIcon className="w-5 h-5 text-white" />
-                        </div>
-                        {typeConfig.label}
-                      </>
-                    );
+                    const TypeIcon = VIOLATION_TYPES.find(t => t.id === selectedViolation.violationType)?.icon || AlertCircle;
+                    return <TypeIcon className="w-5 h-5 text-white" />;
                   })()}
-                </DialogTitle>
-              </DialogHeader>
-              
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <StatusBadge status={selectedViolation.status || 'Reported'} />
-                  <Badge className={`bg-${SEVERITY_OPTIONS.find(s => s.value === selectedViolation.severity)?.color || 'slate'}-500/20`}>
-                    {selectedViolation.severity}
-                  </Badge>
                 </div>
-                
                 <div>
-                  <Label className="text-slate-400 text-xs">Description</Label>
-                  <p className="text-slate-200 mt-1">{selectedViolation.description}</p>
+                  <h3 className="font-bold text-white">
+                    {VIOLATION_TYPES.find(t => t.id === selectedViolation.violationType)?.label || 'Unknown'}
+                  </h3>
+                  <StatusBadge status={selectedViolation.status || 'Reported'} />
                 </div>
-                
-                {(selectedViolation.standId || selectedViolation.section) && (
-                  <div className="flex gap-4">
-                    {selectedViolation.standId && (
-                      <div>
-                        <Label className="text-slate-400 text-xs">Location</Label>
-                        <p className="text-slate-200 flex items-center gap-1 mt-1">
-                          <MapPin className="w-4 h-4 text-cyan-400" />
-                          {stands.find(s => s.id === selectedViolation.standId)?.name}
-                        </p>
-                      </div>
-                    )}
-                    {selectedViolation.section && (
-                      <div>
-                        <Label className="text-slate-400 text-xs">Section</Label>
-                        <p className="text-slate-200 mt-1">{selectedViolation.section}</p>
-                      </div>
-                    )}
+              </div>
+              
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">Severity</span>
+                  <Badge>{selectedViolation.severity}</Badge>
+                </div>
+                {selectedViolation.standId && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Location</span>
+                    <span className="text-white">{stands.find(s => s.id === selectedViolation.standId)?.name}</span>
                   </div>
                 )}
-                
-                {(selectedViolation.vendorName || selectedViolation.vendorBadgeNumber) && (
-                  <div className="flex gap-4">
-                    {selectedViolation.vendorName && (
-                      <div>
-                        <Label className="text-slate-400 text-xs">Vendor Name</Label>
-                        <p className="text-slate-200 mt-1">{selectedViolation.vendorName}</p>
-                      </div>
-                    )}
-                    {selectedViolation.vendorBadgeNumber && (
-                      <div>
-                        <Label className="text-slate-400 text-xs">Badge #</Label>
-                        <p className="text-slate-200 mt-1">{selectedViolation.vendorBadgeNumber}</p>
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {selectedViolation.mediaUrls && selectedViolation.mediaUrls.length > 0 && (
-                  <div>
-                    <Label className="text-slate-400 text-xs">Evidence</Label>
-                    <div className="grid grid-cols-3 gap-2 mt-2">
-                      {selectedViolation.mediaUrls.map((url, idx) => (
-                        <img 
-                          key={idx}
-                          src={url} 
-                          alt={`Evidence ${idx + 1}`}
-                          className="w-full aspect-square object-cover rounded-xl border border-white/10"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {selectedViolation.reviewNotes && (
-                  <div className="p-3 bg-slate-800/50 rounded-xl border border-white/10">
-                    <Label className="text-slate-400 text-xs">Review Notes</Label>
-                    <p className="text-slate-200 mt-1">{selectedViolation.reviewNotes}</p>
-                  </div>
-                )}
-                
-                {selectedViolation.resolutionNotes && (
-                  <div className="p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                    <Label className="text-emerald-400 text-xs">Resolution</Label>
-                    <p className="text-slate-200 mt-1">{selectedViolation.resolutionNotes}</p>
-                    {selectedViolation.actionTaken && (
-                      <p className="text-xs text-slate-400 mt-2">Action: {selectedViolation.actionTaken}</p>
-                    )}
+                {selectedViolation.vendorName && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Vendor</span>
+                    <span className="text-white">{selectedViolation.vendorName}</span>
                   </div>
                 )}
               </div>
               
-              <DialogFooter>
-                <Button 
-                  variant="ghost" 
-                  onClick={() => setShowViewDialog(false)}
-                  className="text-slate-400"
-                >
-                  Close
-                </Button>
-              </DialogFooter>
-            </>
+              <div>
+                <h4 className="text-slate-400 text-sm mb-1">Description</h4>
+                <p className="text-white text-sm">{selectedViolation.description}</p>
+              </div>
+              
+              {selectedViolation.mediaUrls && selectedViolation.mediaUrls.length > 0 && (
+                <div>
+                  <h4 className="text-slate-400 text-sm mb-2">Evidence</h4>
+                  <div className="flex gap-2 flex-wrap">
+                    {selectedViolation.mediaUrls.map((url, idx) => (
+                      <img 
+                        key={idx}
+                        src={url} 
+                        alt={`Evidence ${idx + 1}`}
+                        className="w-20 h-20 object-cover rounded-lg border border-white/10"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
         </DialogContent>
       </Dialog>

@@ -1,6 +1,6 @@
 import { useStore } from "@/lib/mockData";
 import { Button } from "@/components/ui/button";
-import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck, Send, Package, Warehouse, Plus, Minus, Truck, ScanLine, ChevronDown } from "lucide-react";
+import { LogOut, ChevronLeft, ChevronRight, QrCode, Beer, UtensilsCrossed, AlertCircle, CheckCircle2, FileText, CheckSquare, PenTool, Loader2, Map, ClipboardList, ClipboardCheck, Send, Package, Warehouse, Plus, Minus, Truck, ScanLine, ChevronDown, Users, Activity, Clock, AlertTriangle } from "lucide-react";
 import { useLocation } from "wouter";
 import SignatureCanvas from 'react-signature-canvas';
 import jsPDF from 'jspdf';
@@ -46,6 +46,7 @@ import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { HeaderTutorialButton } from '@/components/HeaderTutorialButton';
 import { useSupervisorSession } from '@/hooks/useSupervisorSession';
 import { PersonalizedWelcomeTour } from '@/components/PersonalizedWelcomeTour';
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
 
 type WarehouseProduct = {
   id: string;
@@ -312,6 +313,187 @@ export default function SupervisorDashboard() {
     }
   };
 
+  const openStands = stands.filter(s => s.status === 'Open').length;
+  const closedStands = stands.filter(s => s.status !== 'Open').length;
+
+  const keyMetricsItems = [
+    <div key="metric-stands" data-testid="metric-card-stands" className="w-32 md:w-40 p-3 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30">
+      <div className="flex items-center gap-2 mb-1">
+        <Activity className="h-4 w-4 text-emerald-400" />
+        <span className="text-xs text-slate-400">Stands</span>
+      </div>
+      <div className="text-2xl font-bold text-emerald-400">{stands.length}</div>
+      <div className="text-xs text-slate-500">{openStands} open</div>
+    </div>,
+    <div key="metric-open" data-testid="metric-card-open" className="w-32 md:w-40 p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30">
+      <div className="flex items-center gap-2 mb-1">
+        <CheckCircle2 className="h-4 w-4 text-blue-400" />
+        <span className="text-xs text-slate-400">Open</span>
+      </div>
+      <div className="text-2xl font-bold text-blue-400">{openStands}</div>
+      <div className="text-xs text-slate-500">operational</div>
+    </div>,
+    <div key="metric-closed" data-testid="metric-card-closed" className="w-32 md:w-40 p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30">
+      <div className="flex items-center gap-2 mb-1">
+        <Clock className="h-4 w-4 text-amber-400" />
+        <span className="text-xs text-slate-400">Closed</span>
+      </div>
+      <div className="text-2xl font-bold text-amber-400">{closedStands}</div>
+      <div className="text-xs text-slate-500">pending</div>
+    </div>,
+    <div key="metric-sections" data-testid="metric-card-sections" className="w-32 md:w-40 p-3 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-600/10 border border-violet-500/30">
+      <div className="flex items-center gap-2 mb-1">
+        <Users className="h-4 w-4 text-violet-400" />
+        <span className="text-xs text-slate-400">Sections</span>
+      </div>
+      <div className="text-2xl font-bold text-violet-400">{sortedSections.length}</div>
+      <div className="text-xs text-slate-500">areas</div>
+    </div>,
+  ];
+
+  const quickActionsItems = [
+    <motion.button
+      key="action-scan"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className="w-24 h-20 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 p-3 shadow-lg shadow-cyan-500/20 flex flex-col items-center justify-center gap-1"
+      onClick={() => setShowQuickScan(true)}
+      data-testid="quick-scan-btn"
+    >
+      <ScanLine className="h-5 w-5 text-white" />
+      <span className="text-xs font-semibold text-white">AI Scan</span>
+    </motion.button>,
+    <motion.button
+      key="action-pack"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className="w-24 h-20 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 p-3 shadow-lg shadow-amber-500/20 flex flex-col items-center justify-center gap-1"
+      onClick={() => setShowSupervisorPack(true)}
+      data-testid="open-supervisor-pack"
+    >
+      <FileText className="h-5 w-5 text-white" />
+      <span className="text-xs font-semibold text-white">Pack</span>
+    </motion.button>,
+    <motion.button
+      key="action-map"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className="w-24 h-20 rounded-xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-3 flex flex-col items-center justify-center gap-1 hover:bg-slate-700/50 transition-colors"
+      onClick={() => setShowMap(true)}
+      data-testid="open-map"
+    >
+      <Map className="h-5 w-5 text-blue-400" />
+      <span className="text-xs font-medium text-slate-200">Map</span>
+    </motion.button>,
+    <motion.button
+      key="action-warehouse"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      className="w-24 h-20 rounded-xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-3 flex flex-col items-center justify-center gap-1 hover:bg-slate-700/50 transition-colors"
+      onClick={() => setShowWarehouseRequest(true)}
+      data-testid="open-warehouse-request"
+    >
+      <Warehouse className="h-5 w-5 text-amber-400" />
+      <span className="text-xs font-medium text-slate-200">Supplies</span>
+    </motion.button>,
+  ];
+
+  const standCarouselItems = sortedSections.flatMap(section => 
+    groupedStands[section].map(stand => (
+      <motion.button
+        key={stand.id}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => { setActiveStandId(stand.id); updateStand(stand.id, stand.name, getStandSection(stand.name)); }}
+        className={cn(
+          "w-36 md:w-44 p-3 rounded-xl flex flex-col",
+          "bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-200",
+          "border-l-3",
+          stand.status === 'Open' ? "border-l-emerald-500" : "border-l-red-500"
+        )}
+        data-testid={`stand-carousel-${stand.id}`}
+      >
+        <span className="text-slate-200 font-medium text-sm truncate">{stand.name}</span>
+        <div className="flex items-center gap-2 mt-1">
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "text-xs px-1.5",
+              stand.status === 'Open' 
+                ? "border-emerald-500/50 text-emerald-400 bg-emerald-500/10" 
+                : "border-red-500/50 text-red-400 bg-red-500/10"
+            )}
+          >
+            {stand.status}
+          </Badge>
+          <span className="text-xs text-slate-500">{section}</span>
+        </div>
+      </motion.button>
+    ))
+  );
+
+  const supportAccordionItems = [
+    {
+      title: "Standard Operating Procedures",
+      content: (
+        <div className="space-y-2" data-testid="sop-content">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+            <FileText className="h-4 w-4 text-blue-400" />
+            <span className="text-sm">Opening Procedures</span>
+          </div>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+            <FileText className="h-4 w-4 text-blue-400" />
+            <span className="text-sm">Closing Procedures</span>
+          </div>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+            <FileText className="h-4 w-4 text-blue-400" />
+            <span className="text-sm">Emergency Protocols</span>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Compliance Documents",
+      content: (
+        <div className="space-y-2" data-testid="compliance-content">
+          {supervisorDocs.filter(d => d.category === 'Compliance').map(doc => (
+            <div key={doc.id} className="flex items-center justify-between p-2 rounded-lg bg-slate-700/30">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-amber-400" />
+                <span className="text-sm">{doc.title}</span>
+              </div>
+              {doc.requiresSignature && (
+                <Badge variant="outline" className="text-xs border-amber-500/50 text-amber-400">Requires Signature</Badge>
+              )}
+            </div>
+          ))}
+          {supervisorDocs.filter(d => d.category === 'Compliance').length === 0 && (
+            <p className="text-sm text-slate-500">No compliance documents</p>
+          )}
+        </div>
+      )
+    },
+    {
+      title: "Documentation & Resources",
+      content: (
+        <div className="space-y-2" data-testid="documentation-content">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+            <FileText className="h-4 w-4 text-violet-400" />
+            <span className="text-sm">Training Materials</span>
+          </div>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+            <FileText className="h-4 w-4 text-violet-400" />
+            <span className="text-sm">Contact Directory</span>
+          </div>
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+            <FileText className="h-4 w-4 text-violet-400" />
+            <span className="text-sm">Equipment Manuals</span>
+          </div>
+        </div>
+      )
+    }
+  ];
+
   if (!activeStandId) {
     return (
       <AnimatedBackground>
@@ -325,146 +507,91 @@ export default function SupervisorDashboard() {
           actions={
             <div className="flex items-center gap-2">
               <HeaderTutorialButton variant="icon" />
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-400 hover:text-white">
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-400 hover:text-white" data-testid="btn-logout">
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
           }
         />
 
-        <main className="px-4 md:px-6 lg:px-8 py-4 space-y-4 max-w-4xl mx-auto pb-24">
-          <ComplianceAlertPanel 
-            userId={currentUser?.id} 
-            userName={currentUser?.name} 
-            isManager={false}
-          />
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <motion.button
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="h-16 md:h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 p-4 shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-3"
-              onClick={() => setShowQuickScan(true)}
-              data-testid="quick-scan-btn"
-            >
-              <ScanLine className="h-5 w-5 md:h-6 md:w-6 text-white" />
-              <span className="text-sm md:text-base font-semibold text-white">AI Scan</span>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="h-16 md:h-20 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-4 shadow-lg shadow-amber-500/20 flex items-center justify-center gap-3"
-              onClick={() => setShowSupervisorPack(true)}
-              data-testid="open-supervisor-pack"
-            >
-              <FileText className="h-5 w-5 md:h-6 md:w-6 text-white" />
-              <span className="text-sm md:text-base font-semibold text-white">Pack</span>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="h-16 md:h-20 rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-4 flex items-center justify-center gap-3 hover:bg-slate-700/50 transition-colors"
-              onClick={() => setShowMap(true)}
-              data-testid="open-map"
-            >
-              <Map className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />
-              <span className="text-sm md:text-base font-medium text-slate-200">Map</span>
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              className="h-16 md:h-20 rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-4 flex items-center justify-center gap-3 hover:bg-slate-700/50 transition-colors"
-              onClick={() => setShowWarehouseRequest(true)}
-              data-testid="open-warehouse-request"
-            >
-              <Warehouse className="h-5 w-5 md:h-6 md:w-6 text-amber-400" />
-              <span className="text-sm md:text-base font-medium text-slate-200">Supplies</span>
-            </motion.button>
-          </div>
+        <main className="px-4 md:px-6 lg:px-8 py-4 max-w-7xl mx-auto pb-24" data-testid="supervisor-dashboard-main">
+          <LayoutShell className="gap-3">
+            <BentoCard span={12} className="p-0 bg-transparent border-none" data-testid="hero-row">
+              <CarouselRail 
+                items={keyMetricsItems} 
+                title="Key Metrics"
+                showDots={false}
+              />
+            </BentoCard>
 
-          <div className="relative">
-            <Input
-              placeholder="Search stands..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-slate-800/50 backdrop-blur-sm border-white/10 text-slate-200 placeholder:text-slate-500 pl-4 pr-10 rounded-xl h-12"
-              data-testid="input-search-stands"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
-              >
-                ×
-              </button>
-            )}
-          </div>
+            <BentoCard span={6} title="Quick Actions" data-testid="operations-actions">
+              <CarouselRail items={quickActionsItems} showDots={false} />
+            </BentoCard>
 
-          <Accordion type="multiple" className="space-y-3" defaultValue={['100 Level']}>
-            {sortedSections.map(section => (
-              <AccordionItem 
-                key={section} 
-                value={section}
-                className="rounded-2xl border border-white/10 bg-slate-800/40 backdrop-blur-sm overflow-hidden"
-              >
-                <AccordionTrigger className="px-4 py-4 hover:no-underline hover:bg-white/5 [&[data-state=open]]:bg-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold bg-gradient-to-br shadow-lg",
-                      SECTION_COLORS[section] || 'from-slate-500 to-slate-600'
-                    )}>
-                      <span className="text-white">{groupedStands[section].length}</span>
-                    </div>
-                    <span className="text-slate-200 font-semibold">{section}</span>
+            <BentoCard span={6} title="Stand Status" data-testid="operations-status">
+              <div className="flex items-center gap-4">
+                <div className="flex-1 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                    <span className="text-sm text-slate-300">Open</span>
                   </div>
-                </AccordionTrigger>
-                <AccordionContent className="px-2 pb-2">
-                  <div className="space-y-2">
-                    {groupedStands[section].map(stand => (
-                      <motion.button
-                        key={stand.id}
-                        whileHover={{ x: 4 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => { setActiveStandId(stand.id); updateStand(stand.id, stand.name, getStandSection(stand.name)); }}
-                        className={cn(
-                          "w-full px-4 py-3 rounded-xl flex items-center justify-between",
-                          "bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-200",
-                          "border-l-3",
-                          stand.status === 'Open' ? "border-l-emerald-500" : "border-l-red-500"
-                        )}
-                        data-testid={`stand-${stand.id}`}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <span className="text-slate-200 font-medium truncate">{stand.name}</span>
-                          <Badge 
-                            variant="outline" 
-                            className={cn(
-                              "text-xs px-2",
-                              stand.status === 'Open' 
-                                ? "border-emerald-500/50 text-emerald-400 bg-emerald-500/10" 
-                                : "border-red-500/50 text-red-400 bg-red-500/10"
-                            )}
-                          >
-                            {stand.status}
-                          </Badge>
-                        </div>
-                        <ChevronRight className="h-4 w-4 text-slate-500 flex-shrink-0" />
-                      </motion.button>
-                    ))}
+                  <div className="text-xl font-bold text-emerald-400 mt-1">{openStands}</div>
+                </div>
+                <div className="flex-1 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-red-400" />
+                    <span className="text-sm text-slate-300">Closed</span>
                   </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
+                  <div className="text-xl font-bold text-red-400 mt-1">{closedStands}</div>
+                </div>
+              </div>
+            </BentoCard>
 
-          {stands.length === 0 && (
-            <div className="text-center py-12 text-slate-500">
-              <ClipboardList className="h-16 w-16 mx-auto mb-4 opacity-30" />
-              <p className="text-lg">No stands available</p>
-            </div>
-          )}
+            <BentoCard span={8} title="Active Stands" data-testid="tasks-carousel">
+              <div className="relative">
+                <Input
+                  placeholder="Search stands..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="bg-slate-800/50 border-white/10 text-slate-200 placeholder:text-slate-500 pl-4 pr-10 rounded-xl h-10 mb-3"
+                  data-testid="input-search-stands"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300"
+                    data-testid="btn-clear-search"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+              {standCarouselItems.length > 0 ? (
+                <CarouselRail items={standCarouselItems} showDots />
+              ) : (
+                <div className="text-center py-6 text-slate-500">
+                  <ClipboardList className="h-10 w-10 mx-auto mb-2 opacity-30" />
+                  <p className="text-sm">No stands found</p>
+                </div>
+              )}
+            </BentoCard>
 
-          <Notepad storageKey="supervisor-notes" className="bg-slate-800/40 backdrop-blur-sm border-white/10 rounded-2xl" />
+            <BentoCard span={4} title="Alerts" data-testid="tasks-alerts">
+              <ComplianceAlertPanel 
+                userId={currentUser?.id} 
+                userName={currentUser?.name} 
+                isManager={false}
+              />
+            </BentoCard>
+
+            <BentoCard span={12} title="Support & Resources" data-testid="support-row">
+              <AccordionStack items={supportAccordionItems} defaultOpen={[0]} />
+            </BentoCard>
+
+            <BentoCard span={12} data-testid="notepad-card">
+              <Notepad storageKey="supervisor-notes" className="bg-transparent border-none p-0" />
+            </BentoCard>
+          </LayoutShell>
         </main>
 
         <Dialog open={showWarehouseRequest} onOpenChange={setShowWarehouseRequest}>
@@ -559,6 +686,7 @@ export default function SupervisorDashboard() {
                               <div 
                                 key={product.id} 
                                 className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5"
+                                data-testid={`warehouse-product-${product.id}`}
                               >
                                 <div className="flex-1 min-w-0">
                                   <span className="text-sm text-slate-200 truncate block">{product.name}</span>
@@ -574,6 +702,7 @@ export default function SupervisorDashboard() {
                                       [product.id]: Math.max(0, (prev[product.id] || 0) - 1)
                                     }))}
                                     disabled={(requestItems[product.id] || 0) === 0}
+                                    data-testid={`btn-decrease-${product.id}`}
                                   >
                                     <Minus className="h-3 w-3" />
                                   </Button>
@@ -588,6 +717,7 @@ export default function SupervisorDashboard() {
                                       ...prev,
                                       [product.id]: (prev[product.id] || 0) + 1
                                     }))}
+                                    data-testid={`btn-increase-${product.id}`}
                                   >
                                     <Plus className="h-3 w-3" />
                                   </Button>
@@ -616,13 +746,14 @@ export default function SupervisorDashboard() {
             </div>
 
             <DialogFooter className="gap-2 mt-4">
-              <Button variant="ghost" onClick={() => setShowWarehouseRequest(false)} className="text-slate-400">
+              <Button variant="ghost" onClick={() => setShowWarehouseRequest(false)} className="text-slate-400" data-testid="btn-cancel-request">
                 Cancel
               </Button>
               <GlowButton 
                 variant="amber"
                 onClick={() => createRequestMutation.mutate()}
                 disabled={createRequestMutation.isPending || getTotalItemsInRequest() === 0}
+                data-testid="btn-submit-request"
               >
                 {createRequestMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -679,7 +810,7 @@ export default function SupervisorDashboard() {
         backAction={() => setActiveStandId(null)}
       />
 
-      <main className="p-4 md:p-6 max-w-4xl mx-auto pb-24">
+      <main className="p-4 md:p-6 max-w-7xl mx-auto pb-24" data-testid="stand-detail-main">
         {showScanner && (
            <div className="fixed inset-0 z-50 bg-black flex flex-col">
              <div className="relative flex-1 bg-black">
@@ -694,226 +825,235 @@ export default function SupervisorDashboard() {
                 </div>
              </div>
              <div className="p-6 bg-black flex justify-between items-center">
-               <Button variant="secondary" onClick={() => setShowScanner(false)} className="bg-slate-800">Cancel</Button>
-               <GlowButton variant="cyan" onClick={() => setShowScanner(false)}>Capture</GlowButton>
+               <Button variant="secondary" onClick={() => setShowScanner(false)} className="bg-slate-800" data-testid="btn-cancel-scanner">Cancel</Button>
+               <GlowButton variant="cyan" onClick={() => setShowScanner(false)} data-testid="btn-capture-scanner">Capture</GlowButton>
              </div>
            </div>
         )}
 
-        <GlassCard gradient className="mb-6">
-          <Tabs defaultValue="inventory" className="w-full" onValueChange={(tab) => { setActiveTab(tab); updateTab(tab); }}>
-            <div className="flex items-center justify-between px-4 pt-3">
-              <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 rounded-2xl p-1">
-                <TabsTrigger value="inventory" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl">
-                  Inventory
-                </TabsTrigger>
-                <TabsTrigger value="compliance" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl">
-                  Docs
-                </TabsTrigger>
-                <TabsTrigger value="closeout" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl" data-testid="tab-closeout">
-                  <ClipboardCheck className="h-3 w-3 mr-1" />
-                  Close
-                </TabsTrigger>
-              </TabsList>
-              <SectionHelp
-                title="Stand Management Tabs"
-                description="Three core functions for managing your stand: Inventory counting, compliance documents, and end-of-event closeout procedures."
-                tips={[
-                  "Inventory: Count items at start, add deliveries, count at end",
-                  "Docs: Sign required compliance forms",
-                  "Close: Complete closeout checklist and submit"
-                ]}
-                keywords={['count-session', 'variance', 'violation', 'par-level']}
-              />
-            </div>
-            
-            <TabsContent value="inventory" className="p-4 md:p-5 space-y-4">
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                className="w-full py-3 px-4 rounded-xl border border-white/10 bg-slate-800/50 flex items-center justify-center gap-2 hover:bg-slate-700/50 transition-colors"
-                onClick={() => setShowScanner(true)}
-              >
-                <QrCode className="h-4 w-4 text-cyan-400" /> 
-                <span className="text-slate-200 font-medium">Scan Item</span>
-              </motion.button>
-
-              <Accordion type="single" collapsible className="w-full space-y-2">
-                {items.map(item => {
-                   const standCounts = countSheets[activeStandId!] || {};
-                   const count = standCounts[item.id] || { startCount: 0, adds: 0, endCount: 0, spoilage: 0, sold: 0 };
-                   
-                   return (
-                    <AccordionItem key={item.id} value={item.id} className="bg-slate-800/40 border border-white/10 rounded-xl px-4">
-                      <AccordionTrigger className="hover:no-underline py-3">
-                        <div className="flex items-center gap-3 w-full text-left">
-                          <div className={cn(
-                            "p-2.5 rounded-xl",
-                            item.category === 'Beverage' 
-                              ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
-                              : 'bg-gradient-to-br from-orange-500 to-orange-600'
-                          )}>
-                            {item.category === 'Beverage' ? <Beer className="h-4 w-4 text-white" /> : <UtensilsCrossed className="h-4 w-4 text-white" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-bold text-sm text-slate-200 truncate">{item.name}</div>
-                            <div className="text-xs text-slate-500">Sold: <span className="font-mono font-bold text-cyan-400">{count.sold}</span></div>
-                          </div>
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="pb-4">
-                        <div className="grid grid-cols-2 gap-4 pt-2">
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-slate-400 uppercase">Start</label>
-                            <Input 
-                              type="number" 
-                              className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-slate-200 rounded-xl" 
-                              value={count.startCount}
-                              onChange={(e) => updateCount(activeStandId!, item.id, 'startCount', parseInt(e.target.value) || 0)}
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-emerald-400 uppercase">Adds</label>
-                            <Input 
-                              type="number" 
-                              className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-emerald-400 rounded-xl" 
-                              value={count.adds}
-                              onChange={(e) => updateCount(activeStandId!, item.id, 'adds', parseInt(e.target.value) || 0)}
-                            />
-                          </div>
-                          <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-blue-400 uppercase">End</label>
-                            <Input 
-                              type="number" 
-                              className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-blue-400 rounded-xl" 
-                              value={count.endCount}
-                              onChange={(e) => updateCount(activeStandId!, item.id, 'endCount', parseInt(e.target.value) || 0)}
-                            />
-                          </div>
-                           <div className="space-y-1.5">
-                            <label className="text-xs font-medium text-red-400 uppercase">Spoilage</label>
-                            <Input 
-                              type="number" 
-                              className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-red-400 rounded-xl" 
-                              value={count.spoilage}
-                              onChange={(e) => updateCount(activeStandId!, item.id, 'spoilage', parseInt(e.target.value) || 0)}
-                            />
-                          </div>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                   )
-                })}
-              </Accordion>
-            </TabsContent>
-            
-            <TabsContent value="compliance" className="p-4 md:p-5">
-              <div className="space-y-4">
-                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-sm text-amber-300 flex items-center gap-3">
-                  <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                  <span>Ensure all staff have signed the TABC compliance sheet.</span>
-                </div>
-
-                <div className="space-y-2">
-                   {supervisorDocs.map(doc => (
-                     <motion.div 
-                       key={doc.id} 
-                       whileHover={{ x: 4 }}
-                       className="border border-white/10 rounded-xl p-4 bg-slate-800/40 flex items-center justify-between"
-                     >
-                       <div className="flex items-center gap-3">
-                         <div className={cn(
-                           "p-2 rounded-lg",
-                           doc.category === 'Compliance' ? 'bg-amber-500/20' : 
-                           doc.category === 'Checklist' ? 'bg-emerald-500/20' : 'bg-blue-500/20'
-                         )}>
-                           {doc.category === 'Compliance' ? <AlertCircle className="text-amber-400 w-4 h-4" /> : 
-                            doc.category === 'Checklist' ? <CheckSquare className="text-emerald-400 w-4 h-4" /> :
-                            <FileText className="text-blue-400 w-4 h-4" />}
-                         </div>
-                         <div>
-                           <div className="font-bold text-sm text-slate-200">{doc.title}</div>
-                           <div className="text-xs text-slate-500">{doc.category}</div>
-                         </div>
-                       </div>
-                       {doc.requiresSignature ? (
-                         <Button size="sm" variant="outline" className="gap-2 border-white/10 hover:bg-white/5">
-                           <PenTool className="w-3.5 h-3.5" /> Sign
-                         </Button>
-                       ) : (
-                         <Button size="sm" variant="ghost" className="text-slate-400">View</Button>
-                       )}
-                     </motion.div>
-                   ))}
-                </div>
-
-                {complianceError && (
-                  <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-sm text-red-400 flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4" />
-                    {complianceError}
-                  </div>
-                )}
-
-                <div className="space-y-2 pt-4 border-t border-white/10 mt-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-sm font-medium text-slate-300">Supervisor Signature</label>
-                      <Button variant="ghost" size="sm" onClick={clearSignature} disabled={complianceSubmitted} className="text-slate-400">
-                        Clear
-                      </Button>
-                    </div>
-                    <div className="border-2 border-white/10 rounded-xl bg-white overflow-hidden">
-                      <SignatureCanvas
-                        ref={signatureRef}
-                        canvasProps={{
-                          className: 'w-full h-32',
-                          style: { width: '100%', height: '128px' }
-                        }}
-                        backgroundColor="white"
-                      />
-                    </div>
-                </div>
-                
-                {!complianceSubmitted ? (
-                  <GlowButton 
-                    variant="cyan"
-                    className="w-full mt-4"
-                    onClick={submitComplianceSheet}
-                    disabled={complianceSubmitting}
-                  >
-                    {complianceSubmitting ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                    Submit to Operations Manager
-                  </GlowButton>
-                ) : (
-                  <div className="flex items-center justify-center gap-2 text-emerald-400 bg-emerald-500/10 p-3 rounded-xl mt-4 border border-emerald-500/30">
-                    <CheckCircle2 className="h-5 w-5" />
-                    <span className="font-medium">Submitted to Operations Manager</span>
-                  </div>
-                )}
+        <LayoutShell className="gap-3">
+          <BentoCard span={12} data-testid="stand-tabs-card">
+            <Tabs defaultValue="inventory" className="w-full" onValueChange={(tab) => { setActiveTab(tab); updateTab(tab); }}>
+              <div className="flex items-center justify-between mb-4">
+                <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 rounded-2xl p-1">
+                  <TabsTrigger value="inventory" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl" data-testid="tab-inventory">
+                    Inventory
+                  </TabsTrigger>
+                  <TabsTrigger value="compliance" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl" data-testid="tab-compliance">
+                    Docs
+                  </TabsTrigger>
+                  <TabsTrigger value="closeout" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl" data-testid="tab-closeout">
+                    <ClipboardCheck className="h-3 w-3 mr-1" />
+                    Close
+                  </TabsTrigger>
+                </TabsList>
+                <SectionHelp
+                  title="Stand Management Tabs"
+                  description="Three core functions for managing your stand: Inventory counting, compliance documents, and end-of-event closeout procedures."
+                  tips={[
+                    "Inventory: Count items at start, add deliveries, count at end",
+                    "Docs: Sign required compliance forms",
+                    "Close: Complete closeout checklist and submit"
+                  ]}
+                  keywords={['count-session', 'variance', 'violation', 'par-level']}
+                />
               </div>
-            </TabsContent>
+              
+              <TabsContent value="inventory" className="space-y-4 mt-0">
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="w-full py-3 px-4 rounded-xl border border-white/10 bg-slate-800/50 flex items-center justify-center gap-2 hover:bg-slate-700/50 transition-colors"
+                  onClick={() => setShowScanner(true)}
+                  data-testid="btn-scan-item"
+                >
+                  <QrCode className="h-4 w-4 text-cyan-400" /> 
+                  <span className="text-slate-200 font-medium">Scan Item</span>
+                </motion.button>
 
-            <TabsContent value="closeout" className="p-4 md:p-5 space-y-4">
-              <FacilityIssuePanel
-                standId={activeStandId!}
-                standName={selectedStand?.name || ''}
-                reporterId={currentUser?.id || ''}
-                reporterName={currentUser?.name}
-                eventDate={new Date().toISOString().split('T')[0]}
-              />
-              <SupervisorClosingPanel
-                standId={activeStandId!}
-                standName={selectedStand?.name || ''}
-                eventDate={new Date().toISOString().split('T')[0]}
-                supervisorId={currentUser?.id || ''}
-                supervisorName={currentUser?.name}
-              />
-            </TabsContent>
-          </Tabs>
-        </GlassCard>
+                <Accordion type="single" collapsible className="w-full space-y-2">
+                  {items.map(item => {
+                     const standCounts = countSheets[activeStandId!] || {};
+                     const count = standCounts[item.id] || { startCount: 0, adds: 0, endCount: 0, spoilage: 0, sold: 0 };
+                     
+                     return (
+                      <AccordionItem key={item.id} value={item.id} className="bg-slate-800/40 border border-white/10 rounded-xl px-4" data-testid={`inventory-item-${item.id}`}>
+                        <AccordionTrigger className="hover:no-underline py-3">
+                          <div className="flex items-center gap-3 w-full text-left">
+                            <div className={cn(
+                              "p-2.5 rounded-xl",
+                              item.category === 'Beverage' 
+                                ? 'bg-gradient-to-br from-blue-500 to-blue-600' 
+                                : 'bg-gradient-to-br from-orange-500 to-orange-600'
+                            )}>
+                              {item.category === 'Beverage' ? <Beer className="h-4 w-4 text-white" /> : <UtensilsCrossed className="h-4 w-4 text-white" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-bold text-sm text-slate-200 truncate">{item.name}</div>
+                              <div className="text-xs text-slate-500">Sold: <span className="font-mono font-bold text-cyan-400">{count.sold}</span></div>
+                            </div>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-4">
+                          <div className="grid grid-cols-2 gap-4 pt-2">
+                            <div className="space-y-1.5">
+                              <label className="text-xs font-medium text-slate-400 uppercase">Start</label>
+                              <Input 
+                                type="number" 
+                                className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-slate-200 rounded-xl" 
+                                value={count.startCount}
+                                onChange={(e) => updateCount(activeStandId!, item.id, 'startCount', parseInt(e.target.value) || 0)}
+                                data-testid={`input-start-${item.id}`}
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-xs font-medium text-emerald-400 uppercase">Adds</label>
+                              <Input 
+                                type="number" 
+                                className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-emerald-400 rounded-xl" 
+                                value={count.adds}
+                                onChange={(e) => updateCount(activeStandId!, item.id, 'adds', parseInt(e.target.value) || 0)}
+                                data-testid={`input-adds-${item.id}`}
+                              />
+                            </div>
+                            <div className="space-y-1.5">
+                              <label className="text-xs font-medium text-blue-400 uppercase">End</label>
+                              <Input 
+                                type="number" 
+                                className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-blue-400 rounded-xl" 
+                                value={count.endCount}
+                                onChange={(e) => updateCount(activeStandId!, item.id, 'endCount', parseInt(e.target.value) || 0)}
+                                data-testid={`input-end-${item.id}`}
+                              />
+                            </div>
+                             <div className="space-y-1.5">
+                              <label className="text-xs font-medium text-red-400 uppercase">Spoilage</label>
+                              <Input 
+                                type="number" 
+                                className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-red-400 rounded-xl" 
+                                value={count.spoilage}
+                                onChange={(e) => updateCount(activeStandId!, item.id, 'spoilage', parseInt(e.target.value) || 0)}
+                                data-testid={`input-spoilage-${item.id}`}
+                              />
+                            </div>
+                          </div>
+                        </AccordionContent>
+                      </AccordionItem>
+                     )
+                  })}
+                </Accordion>
+              </TabsContent>
+              
+              <TabsContent value="compliance" className="mt-0">
+                <div className="space-y-4">
+                  <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-sm text-amber-300 flex items-center gap-3" data-testid="compliance-warning">
+                    <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                    <span>Ensure all staff have signed the TABC compliance sheet.</span>
+                  </div>
+
+                  <div className="space-y-2">
+                     {supervisorDocs.map(doc => (
+                       <motion.div 
+                         key={doc.id} 
+                         whileHover={{ x: 4 }}
+                         className="border border-white/10 rounded-xl p-4 bg-slate-800/40 flex items-center justify-between"
+                         data-testid={`compliance-doc-${doc.id}`}
+                       >
+                         <div className="flex items-center gap-3">
+                           <div className={cn(
+                             "p-2 rounded-lg",
+                             doc.category === 'Compliance' ? 'bg-amber-500/20' : 
+                             doc.category === 'Checklist' ? 'bg-emerald-500/20' : 'bg-blue-500/20'
+                           )}>
+                             {doc.category === 'Compliance' ? <AlertCircle className="text-amber-400 w-4 h-4" /> : 
+                              doc.category === 'Checklist' ? <CheckSquare className="text-emerald-400 w-4 h-4" /> :
+                              <FileText className="text-blue-400 w-4 h-4" />}
+                           </div>
+                           <div>
+                             <div className="font-bold text-sm text-slate-200">{doc.title}</div>
+                             <div className="text-xs text-slate-500">{doc.category}</div>
+                           </div>
+                         </div>
+                         {doc.requiresSignature ? (
+                           <Button size="sm" variant="outline" className="gap-2 border-white/10 hover:bg-white/5" data-testid={`btn-sign-doc-${doc.id}`}>
+                             <PenTool className="w-3.5 h-3.5" /> Sign
+                           </Button>
+                         ) : (
+                           <Button size="sm" variant="ghost" className="text-slate-400" data-testid={`btn-view-doc-${doc.id}`}>View</Button>
+                         )}
+                       </motion.div>
+                     ))}
+                  </div>
+
+                  {complianceError && (
+                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-sm text-red-400 flex items-center gap-2" data-testid="compliance-error">
+                      <AlertCircle className="h-4 w-4" />
+                      {complianceError}
+                    </div>
+                  )}
+
+                  <div className="space-y-2 pt-4 border-t border-white/10 mt-4">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-medium text-slate-300">Supervisor Signature</label>
+                        <Button variant="ghost" size="sm" onClick={clearSignature} disabled={complianceSubmitted} className="text-slate-400" data-testid="btn-clear-signature">
+                          Clear
+                        </Button>
+                      </div>
+                      <div className="border-2 border-white/10 rounded-xl bg-white overflow-hidden" data-testid="signature-canvas-container">
+                        <SignatureCanvas
+                          ref={signatureRef}
+                          canvasProps={{
+                            className: 'w-full h-32',
+                            style: { width: '100%', height: '128px' }
+                          }}
+                          backgroundColor="white"
+                        />
+                      </div>
+                  </div>
+                  
+                  {!complianceSubmitted ? (
+                    <GlowButton 
+                      variant="cyan"
+                      className="w-full mt-4"
+                      onClick={submitComplianceSheet}
+                      disabled={complianceSubmitting}
+                      data-testid="btn-submit-compliance"
+                    >
+                      {complianceSubmitting ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                      Submit to Operations Manager
+                    </GlowButton>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2 text-emerald-400 bg-emerald-500/10 p-3 rounded-xl mt-4 border border-emerald-500/30" data-testid="compliance-success">
+                      <CheckCircle2 className="h-5 w-5" />
+                      <span className="font-medium">Submitted to Operations Manager</span>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="closeout" className="space-y-4 mt-0">
+                <FacilityIssuePanel
+                  standId={activeStandId!}
+                  standName={selectedStand?.name || ''}
+                  reporterId={currentUser?.id || ''}
+                  reporterName={currentUser?.name}
+                  eventDate={new Date().toISOString().split('T')[0]}
+                />
+                <SupervisorClosingPanel
+                  standId={activeStandId!}
+                  standName={selectedStand?.name || ''}
+                  eventDate={new Date().toISOString().split('T')[0]}
+                  supervisorId={currentUser?.id || ''}
+                  supervisorName={currentUser?.name}
+                />
+              </TabsContent>
+            </Tabs>
+          </BentoCard>
+        </LayoutShell>
       </main>
       
       <TutorialHelpButton page="supervisor" />

@@ -5,9 +5,9 @@ import { useLocation } from "wouter";
 import { 
   Shield, UserCog, Monitor, LogOut, ChefHat, Package, 
   Wine, Sparkles, Users, Radio, AlertTriangle, Truck,
-  MessageSquare, Activity, ChevronDown, ChevronRight,
-  Zap, Eye, RefreshCw, Trash2, Clock, CheckCircle2,
-  XCircle, Wifi, WifiOff, Siren, FlaskConical, ClipboardList, Crown, Calendar
+  Activity, Zap, Eye, RefreshCw, Trash2, CheckCircle2,
+  XCircle, Wifi, WifiOff, Siren, FlaskConical, ClipboardList, Crown, Calendar,
+  Database, Server, Globe, FileText, BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWebSocket, useWebSocketStore } from "@/lib/websocket";
@@ -21,74 +21,7 @@ import { DashboardControls } from '@/components/DashboardControls';
 import { StaffPinsPanel } from '@/components/StaffPinsPanel';
 import { EventControlPanel } from '@/components/EventControlPanel';
 import { ReleaseManager } from '@/components/ReleaseManager';
-
-interface AccordionSectionProps {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-  accentColor?: string;
-  badge?: string | number;
-}
-
-function AccordionSection({ title, icon, children, defaultOpen = false, accentColor = "cyan", badge }: AccordionSectionProps) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-  
-  const colorClasses: Record<string, string> = {
-    cyan: "border-cyan-500/50 bg-cyan-500/10",
-    teal: "border-teal-500/50 bg-teal-500/10",
-    green: "border-emerald-500/50 bg-emerald-500/10",
-    red: "border-rose-500/50 bg-rose-500/10",
-    purple: "border-violet-500/50 bg-violet-500/10",
-    blue: "border-sky-500/50 bg-sky-500/10",
-  };
-
-  const textColors: Record<string, string> = {
-    cyan: "text-cyan-400",
-    teal: "text-teal-400",
-    green: "text-emerald-400",
-    red: "text-rose-400",
-    purple: "text-violet-400",
-    blue: "text-sky-400",
-  };
-
-  return (
-    <div className={cn(
-      "rounded-lg border overflow-hidden transition-all duration-200",
-      isOpen ? colorClasses[accentColor] : "border-slate-700/50 bg-slate-900/50"
-    )}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-4 py-3 flex items-center justify-between text-left"
-        data-testid={`accordion-${title.toLowerCase().replace(/\s+/g, '-')}`}
-      >
-        <div className="flex items-center gap-3">
-          <span className={textColors[accentColor]}>{icon}</span>
-          <span className="font-semibold text-slate-200">{title}</span>
-          {badge !== undefined && (
-            <span className={cn(
-              "px-2 py-0.5 rounded-full text-xs font-bold",
-              colorClasses[accentColor],
-              textColors[accentColor]
-            )}>
-              {badge}
-            </span>
-          )}
-        </div>
-        {isOpen ? (
-          <ChevronDown className="h-5 w-5 text-slate-400" />
-        ) : (
-          <ChevronRight className="h-5 w-5 text-slate-400" />
-        )}
-      </button>
-      {isOpen && (
-        <div className="px-4 pb-4 space-y-2">
-          {children}
-        </div>
-      )}
-    </div>
-  );
-}
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from '@/components/ui/bento';
 
 interface RoleButtonProps {
   name: string;
@@ -143,28 +76,65 @@ function RoleButton({ name, description, pin, route, icon, color, onClick }: Rol
   );
 }
 
-interface StatCardProps {
+interface MetricCardProps {
   label: string;
   value: string | number;
   icon: React.ReactNode;
   status?: 'good' | 'warning' | 'error';
 }
 
-function StatCard({ label, value, icon, status = 'good' }: StatCardProps) {
+function MetricCard({ label, value, icon, status = 'good' }: MetricCardProps) {
   const statusColors = {
-    good: "text-emerald-400",
-    warning: "text-cyan-300",
-    error: "text-rose-400",
+    good: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+    warning: "text-amber-400 border-amber-500/30 bg-amber-500/10",
+    error: "text-rose-400 border-rose-500/30 bg-rose-500/10",
   };
 
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/30">
-      <span className={statusColors[status]}>{icon}</span>
+    <div 
+      className={cn(
+        "flex items-center gap-3 p-4 rounded-xl border min-w-[160px]",
+        statusColors[status]
+      )}
+      data-testid={`metric-${label.toLowerCase().replace(/\s+/g, '-')}`}
+    >
+      {icon}
       <div>
-        <div className="text-lg font-bold text-slate-200">{value}</div>
-        <div className="text-xs text-slate-500">{label}</div>
+        <div className="text-xl font-bold">{value}</div>
+        <div className="text-xs opacity-70">{label}</div>
       </div>
     </div>
+  );
+}
+
+interface QuickToolButtonProps {
+  label: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+  variant?: 'default' | 'success' | 'danger' | 'warning';
+}
+
+function QuickToolButton({ label, icon, onClick, variant = 'default' }: QuickToolButtonProps) {
+  const variantClasses = {
+    default: "border-slate-600 text-slate-300 hover:border-cyan-500 hover:bg-cyan-500/10",
+    success: "border-green-700 text-green-400 hover:bg-green-500/20",
+    danger: "border-red-700 text-red-400 hover:bg-red-500/20",
+    warning: "border-amber-700 text-amber-400 hover:bg-amber-500/20",
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex flex-col items-center gap-2 p-4 rounded-xl border min-w-[100px]",
+        "transition-all duration-200",
+        variantClasses[variant]
+      )}
+      data-testid={`tool-${label.toLowerCase().replace(/\s+/g, '-')}`}
+    >
+      {icon}
+      <span className="text-xs font-medium">{label}</span>
+    </button>
   );
 }
 
@@ -246,12 +216,195 @@ export default function DevDashboard() {
     ]
   };
 
+  const heroMetrics = [
+    <MetricCard 
+      key="api" 
+      label="API Status" 
+      value="Online" 
+      icon={<Globe className="h-5 w-5" />} 
+      status="good" 
+    />,
+    <MetricCard 
+      key="db" 
+      label="Database" 
+      value="Healthy" 
+      icon={<Database className="h-5 w-5" />} 
+      status="good" 
+    />,
+    <MetricCard 
+      key="ws" 
+      label="WebSocket" 
+      value={isConnected ? "Live" : "Offline"} 
+      icon={isConnected ? <Wifi className="h-5 w-5" /> : <WifiOff className="h-5 w-5" />} 
+      status={isConnected ? "good" : "error"} 
+    />,
+    <MetricCard 
+      key="deliveries" 
+      label="Deliveries" 
+      value={systemStats.pendingDeliveries} 
+      icon={<Truck className="h-5 w-5" />} 
+      status={systemStats.pendingDeliveries > 5 ? "warning" : "good"} 
+    />,
+    <MetricCard 
+      key="emergencies" 
+      label="Emergencies" 
+      value={systemStats.activeEmergencies} 
+      icon={<AlertTriangle className="h-5 w-5" />} 
+      status={systemStats.activeEmergencies > 0 ? "error" : "good"} 
+    />,
+    <MetricCard 
+      key="server" 
+      label="Server" 
+      value="Running" 
+      icon={<Server className="h-5 w-5" />} 
+      status="good" 
+    />,
+  ];
+
+  const quickTools = [
+    <QuickToolButton 
+      key="refresh" 
+      label="Refresh" 
+      icon={<RefreshCw className="h-5 w-5" />} 
+      onClick={() => window.location.reload()} 
+    />,
+    <QuickToolButton 
+      key="stats" 
+      label="Reload Stats" 
+      icon={<Activity className="h-5 w-5" />} 
+      onClick={() => loadSystemStats()} 
+    />,
+    <QuickToolButton 
+      key="bypass" 
+      label="Auto-Bypass" 
+      icon={<CheckCircle2 className="h-5 w-5" />} 
+      onClick={() => localStorage.setItem("stadiumops_dev_bypass", "true")} 
+      variant="success" 
+    />,
+    <QuickToolButton 
+      key="clear" 
+      label="Clear Bypass" 
+      icon={<XCircle className="h-5 w-5" />} 
+      onClick={() => localStorage.removeItem("stadiumops_dev_bypass")} 
+      variant="danger" 
+    />,
+    <QuickToolButton 
+      key="controls" 
+      label="Dashboard" 
+      icon={<Crown className="h-5 w-5" />} 
+      onClick={() => setShowDashboardControls(true)} 
+      variant="warning" 
+    />,
+    <QuickToolButton 
+      key="reset" 
+      label="Reset All" 
+      icon={<Trash2 className="h-5 w-5" />} 
+      onClick={() => { localStorage.clear(); window.location.reload(); }} 
+      variant="danger" 
+    />,
+  ];
+
+  const supportItems = [
+    {
+      title: "Command Center Roles",
+      content: (
+        <div className="space-y-2">
+          {roles.command.map(role => (
+            <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
+          ))}
+        </div>
+      )
+    },
+    {
+      title: "Department Managers",
+      content: (
+        <div className="space-y-2">
+          {roles.management.map(role => (
+            <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
+          ))}
+        </div>
+      )
+    },
+    {
+      title: "Field Operations",
+      content: (
+        <div className="space-y-2">
+          {roles.field.map(role => (
+            <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
+          ))}
+        </div>
+      )
+    },
+    {
+      title: "Specialty Roles",
+      content: (
+        <div className="space-y-2">
+          {roles.specialty.map(role => (
+            <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
+          ))}
+        </div>
+      )
+    },
+    {
+      title: "Admin & Executive",
+      content: (
+        <div className="space-y-2">
+          {roles.admin.map(role => (
+            <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
+          ))}
+        </div>
+      )
+    },
+    {
+      title: "Sandbox Mode",
+      content: (
+        <div className="space-y-3">
+          <p className="text-xs text-slate-400">
+            Train staff, demo to stakeholders, or test features safely without affecting live operations.
+          </p>
+          {isSandbox ? (
+            <Button 
+              onClick={exitSandbox}
+              className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500"
+              data-testid="button-exit-sandbox"
+            >
+              <FlaskConical className="h-4 w-4 mr-2" />
+              Exit Sandbox Mode
+            </Button>
+          ) : (
+            <Button 
+              onClick={() => enterSandbox('/dev')}
+              variant="outline"
+              className="w-full border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/20"
+              data-testid="button-enter-sandbox"
+            >
+              <FlaskConical className="h-4 w-4 mr-2" />
+              Enter Sandbox Mode
+            </Button>
+          )}
+        </div>
+      )
+    },
+    {
+      title: "Feature Inventory",
+      content: <FeatureInventory />
+    },
+    {
+      title: "Asset Tracker (Hallmark)",
+      content: <AssetTracker />
+    },
+    {
+      title: "Staff PINs (Legends)",
+      content: <StaffPinsPanel />
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" data-testid="dev-dashboard">
       <GlobalModeBar />
-      {/* Compact Header */}
-      <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3">
-        <div className="flex items-center justify-between">
+      
+      <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3" data-testid="dev-dashboard-header">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
@@ -267,12 +420,12 @@ export default function DevDashboard() {
           <div className="flex items-center gap-2">
             <SandboxStatusCompact />
             {isConnected ? (
-              <div className="flex items-center gap-1 text-green-400 text-xs">
+              <div className="flex items-center gap-1 text-green-400 text-xs" data-testid="status-connected">
                 <Wifi className="h-4 w-4" />
                 <span className="hidden sm:inline">Live</span>
               </div>
             ) : (
-              <div className="flex items-center gap-1 text-red-400 text-xs">
+              <div className="flex items-center gap-1 text-red-400 text-xs" data-testid="status-disconnected">
                 <WifiOff className="h-4 w-4" />
                 <span className="hidden sm:inline">Offline</span>
               </div>
@@ -290,347 +443,201 @@ export default function DevDashboard() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="px-4 py-4 space-y-4 max-w-lg mx-auto pb-24">
+      <main className="px-4 py-4 max-w-7xl mx-auto pb-24" data-testid="dev-dashboard-main">
         <ComplianceAlertPanel 
           userId={currentUser?.id} 
           userName={currentUser?.name} 
           isManager={true}
         />
-        
-        {/* Quick Stats Row */}
-        <div className="grid grid-cols-2 gap-3">
-          <StatCard 
-            label="Active Deliveries" 
-            value={systemStats.pendingDeliveries} 
-            icon={<Truck className="h-5 w-5" />}
-            status={systemStats.pendingDeliveries > 5 ? 'warning' : 'good'}
-          />
-          <StatCard 
-            label="Emergencies" 
-            value={systemStats.activeEmergencies} 
-            icon={<AlertTriangle className="h-5 w-5" />}
-            status={systemStats.activeEmergencies > 0 ? 'error' : 'good'}
-          />
-        </div>
 
-        {/* Emergency Command Center Quick Access */}
-        <Button
-          onClick={() => setLocation('/command-center')}
-          className={cn(
-            "w-full py-4 text-left justify-start gap-3 font-bold",
-            systemStats.activeEmergencies > 0 
-              ? "bg-red-600 hover:bg-red-700 animate-pulse" 
-              : "bg-gradient-to-r from-red-900/50 to-red-800/50 border border-red-700/50 hover:from-red-800/60 hover:to-red-700/60"
-          )}
-          data-testid="button-command-center"
-        >
-          <Siren className="h-5 w-5" />
-          <div className="flex-1">
-            <div className="text-sm">Emergency Command Center</div>
-            <div className="text-xs text-white/70 font-normal">
-              {systemStats.activeEmergencies > 0 
-                ? `${systemStats.activeEmergencies} active incident${systemStats.activeEmergencies > 1 ? 's' : ''}` 
-                : 'All clear - No active incidents'}
+        <LayoutShell className="mt-4">
+          {/* Hero Row - span-12: Dev metrics carousel */}
+          <BentoCard span={12} className="!p-4" data-testid="bento-hero-metrics">
+            <div className="flex items-center gap-2 mb-3">
+              <Activity className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm font-medium text-slate-300">System Metrics</span>
             </div>
-          </div>
-          <AlertTriangle className={cn("h-4 w-4", systemStats.activeEmergencies > 0 ? "text-cyan-300" : "text-slate-400")} />
-        </Button>
+            <CarouselRail items={heroMetrics} showDots autoplay />
+          </BentoCard>
 
-        {/* Reporting Dashboard Quick Access */}
-        <Button
-          onClick={() => setLocation('/reports')}
-          className="w-full py-4 text-left justify-start gap-3 font-bold bg-gradient-to-r from-cyan-900/50 to-teal-900/50 border border-cyan-700/50 hover:from-cyan-800/60 hover:to-teal-800/60"
-          data-testid="button-reports"
-        >
-          <Activity className="h-5 w-5 text-cyan-400" />
-          <div className="flex-1">
-            <div className="text-sm">Ultimate Reporting Dashboard</div>
-            <div className="text-xs text-white/70 font-normal">
-              Puzzle-style unified operations view
+          {/* Quick Actions Row - Mobile Only */}
+          <BentoCard span={12} className="!p-4 lg:hidden col-span-4 md:col-span-6" data-testid="bento-quick-actions-mobile">
+            <div className="flex items-center gap-2 mb-3">
+              <Siren className="h-4 w-4 text-red-400" />
+              <span className="text-sm font-medium text-slate-300">Quick Actions</span>
             </div>
-          </div>
-          <Zap className="h-4 w-4 text-cyan-400" />
-        </Button>
-
-        {/* Event Control Panel - Live vs Sandbox Mode */}
-        <AccordionSection 
-          title="Event Control" 
-          icon={<Calendar className="h-5 w-5" />}
-          defaultOpen={true}
-          accentColor="green"
-          badge="LIVE"
-        >
-          <EventControlPanel 
-            userPin={currentUser?.pin || ''} 
-            userId={currentUser?.id || ''} 
-            userName={currentUser?.name || ''} 
-          />
-        </AccordionSection>
-
-        {/* Role Sections */}
-        <AccordionSection 
-          title="Command Center" 
-          icon={<Radio className="h-5 w-5" />}
-          defaultOpen={false}
-          accentColor="cyan"
-          badge={3}
-        >
-          <div className="space-y-2">
-            {roles.command.map(role => (
-              <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
-            ))}
-          </div>
-        </AccordionSection>
-
-        <AccordionSection 
-          title="Department Managers" 
-          icon={<UserCog className="h-5 w-5" />}
-          accentColor="teal"
-          badge={4}
-        >
-          <div className="space-y-2">
-            {roles.management.map(role => (
-              <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
-            ))}
-          </div>
-        </AccordionSection>
-
-        <AccordionSection 
-          title="Field Operations" 
-          icon={<Users className="h-5 w-5" />}
-          accentColor="green"
-          badge={3}
-        >
-          <div className="space-y-2">
-            {roles.field.map(role => (
-              <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
-            ))}
-          </div>
-        </AccordionSection>
-
-        <AccordionSection 
-          title="Specialty Roles" 
-          icon={<ClipboardList className="h-5 w-5" />}
-          accentColor="red"
-          badge={2}
-        >
-          <div className="space-y-2">
-            {roles.specialty.map(role => (
-              <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
-            ))}
-          </div>
-        </AccordionSection>
-
-        <AccordionSection 
-          title="Admin & Executive" 
-          icon={<Shield className="h-5 w-5" />}
-          accentColor="purple"
-          badge={2}
-        >
-          <div className="space-y-2">
-            {roles.admin.map(role => (
-              <RoleButton key={role.name} {...role} onClick={handleRoleSwitch} />
-            ))}
-          </div>
-        </AccordionSection>
-
-        {/* Sandbox Mode Toggle */}
-        <AccordionSection 
-          title="Sandbox Mode" 
-          icon={<FlaskConical className="h-5 w-5" />}
-          defaultOpen={isSandbox}
-          accentColor="cyan"
-          badge={isSandbox ? "Active" : undefined}
-        >
-          <div className="space-y-3">
-            <p className="text-xs text-slate-400">
-              Train staff, demo to stakeholders, or test features safely without affecting live operations.
-            </p>
-            {isSandbox ? (
-              <Button 
-                onClick={exitSandbox}
-                className="w-full bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500"
-                data-testid="button-exit-sandbox"
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                onClick={() => setLocation('/command-center')}
+                className={cn(
+                  "flex-1 py-3 text-left justify-start gap-2 font-bold",
+                  systemStats.activeEmergencies > 0 
+                    ? "bg-red-600 hover:bg-red-700 animate-pulse" 
+                    : "bg-gradient-to-r from-red-900/50 to-red-800/50 border border-red-700/50"
+                )}
+                data-testid="button-command-center"
               >
-                <FlaskConical className="h-4 w-4 mr-2" />
-                Exit Sandbox Mode
+                <Siren className="h-4 w-4" />
+                <span className="text-xs">Emergency</span>
               </Button>
-            ) : (
-              <Button 
-                onClick={() => enterSandbox('/dev')}
-                variant="outline"
-                className="w-full border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/20"
-                data-testid="button-enter-sandbox"
+              <Button
+                onClick={() => setLocation('/reports')}
+                className="flex-1 py-3 text-left justify-start gap-2 font-bold bg-gradient-to-r from-cyan-900/50 to-teal-900/50 border border-cyan-700/50"
+                data-testid="button-reports"
               >
-                <FlaskConical className="h-4 w-4 mr-2" />
-                Enter Sandbox Mode
+                <Activity className="h-4 w-4 text-cyan-400" />
+                <span className="text-xs">Reports</span>
               </Button>
-            )}
-            <div className="text-[10px] text-slate-500 space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                <span>All changes are simulated - no real data affected</span>
+            </div>
+          </BentoCard>
+
+          {/* Tools Row - Quick tools carousel (span-6), Release Manager (span-6) */}
+          <BentoCard span={6} className="!p-4 col-span-4 md:col-span-6" data-testid="bento-quick-tools">
+            <div className="flex items-center gap-2 mb-3">
+              <Zap className="h-4 w-4 text-amber-400" />
+              <span className="text-sm font-medium text-slate-300">Quick Tools</span>
+            </div>
+            <CarouselRail items={quickTools} />
+          </BentoCard>
+
+          <BentoCard span={6} className="!p-4 col-span-4 md:col-span-6" data-testid="bento-release-manager">
+            <div className="flex items-center gap-2 mb-3">
+              <Package className="h-4 w-4 text-green-400" />
+              <span className="text-sm font-medium text-slate-300">Release Manager</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30">Solana</span>
+            </div>
+            <ReleaseManager />
+          </BentoCard>
+
+          {/* Integration Row: ORBIT Hub status (span-8), System Logs (span-4) */}
+          <BentoCard span={8} className="!p-4 col-span-4 md:col-span-4 lg:col-span-8" data-testid="bento-orbit-hub">
+            <div className="flex items-center gap-2 mb-3">
+              <Globe className="h-4 w-4 text-violet-400" />
+              <span className="text-sm font-medium text-slate-300">ORBIT Hub Status</span>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-api-gateway">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs text-slate-400">API Gateway</span>
+                </div>
+                <div className="text-lg font-bold text-green-400">Active</div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
-                <span>Demo fixtures loaded automatically</span>
+              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-database">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs text-slate-400">Database</span>
+                </div>
+                <div className="text-lg font-bold text-green-400">Online</div>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-violet-500"></span>
-                <span>Clear visual indicator when in sandbox</span>
+              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-websocket">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={cn("w-2 h-2 rounded-full", isConnected ? "bg-green-500 animate-pulse" : "bg-red-500")} />
+                  <span className="text-xs text-slate-400">WebSocket</span>
+                </div>
+                <div className={cn("text-lg font-bold", isConnected ? "text-green-400" : "text-red-400")}>
+                  {isConnected ? "Connected" : "Offline"}
+                </div>
+              </div>
+              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-messages">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
+                  <span className="text-xs text-slate-400">Messages</span>
+                </div>
+                <div className="text-lg font-bold text-cyan-400">
+                  {wsStore.messages.length > 0 ? wsStore.messages.length : "—"}
+                </div>
               </div>
             </div>
-          </div>
-        </AccordionSection>
-
-        {/* Quick Actions */}
-        <AccordionSection 
-          title="Developer Tools" 
-          icon={<Zap className="h-5 w-5" />}
-          accentColor="red"
-        >
-          <div className="grid grid-cols-2 gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="border-slate-700 text-slate-300 text-xs justify-start"
-              onClick={() => window.location.reload()}
-              data-testid="button-refresh"
-            >
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="border-slate-700 text-slate-300 text-xs justify-start"
-              onClick={() => loadSystemStats()}
-              data-testid="button-reload-stats"
-            >
-              <Activity className="h-4 w-4 mr-2" />
-              Reload Stats
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="border-green-800 text-green-400 text-xs justify-start"
-              onClick={() => {
-                localStorage.setItem("stadiumops_dev_bypass", "true");
-              }}
-              data-testid="button-enable-bypass"
-            >
-              <CheckCircle2 className="h-4 w-4 mr-2" />
-              Auto-Bypass
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="border-red-800 text-red-400 text-xs justify-start"
-              onClick={() => {
-                localStorage.removeItem("stadiumops_dev_bypass");
-              }}
-              data-testid="button-disable-bypass"
-            >
-              <XCircle className="h-4 w-4 mr-2" />
-              Clear Bypass
-            </Button>
-          </div>
-          <Button 
-            variant="destructive" 
-            size="sm"
-            className="w-full mt-2 text-xs"
-            onClick={() => { localStorage.clear(); window.location.reload(); }}
-            data-testid="button-reset-all"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Reset All Local Data
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="w-full mt-2 text-xs border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 bg-gradient-to-r from-cyan-500/10 to-purple-500/10"
-            onClick={() => setShowDashboardControls(true)}
-            data-testid="button-dashboard-controls"
-          >
-            <Crown className="h-4 w-4 mr-2" />
-            Dashboard Controls (David's Superpower)
-          </Button>
-        </AccordionSection>
-
-        {/* Feature Inventory */}
-        <AccordionSection
-          title="Feature Inventory"
-          icon={<ClipboardList className="h-5 w-5" />}
-          defaultOpen={false}
-          accentColor="purple"
-          badge="Track"
-        >
-          <FeatureInventory />
-        </AccordionSection>
-
-        {/* Genesis Hallmark Asset Tracker */}
-        <AccordionSection
-          title="Asset Tracker"
-          icon={<Shield className="h-5 w-5" />}
-          defaultOpen={false}
-          accentColor="cyan"
-          badge="Hallmark"
-        >
-          <AssetTracker />
-        </AccordionSection>
-
-        {/* Release Manager */}
-        <AccordionSection
-          title="Release Manager"
-          icon={<Package className="h-5 w-5" />}
-          defaultOpen={false}
-          accentColor="green"
-          badge="Solana"
-        >
-          <ReleaseManager />
-        </AccordionSection>
-
-        {/* Staff PINs Management */}
-        <AccordionSection
-          title="Staff PINs"
-          icon={<Users className="h-5 w-5" />}
-          defaultOpen={true}
-          accentColor="purple"
-          badge="Legends"
-        >
-          <StaffPinsPanel />
-        </AccordionSection>
-
-        {/* System Status */}
-        <div className="rounded-lg border border-slate-700/30 bg-slate-900/30 p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Activity className="h-4 w-4 text-cyan-400" />
-            <span className="text-sm font-medium text-slate-300">System Status</span>
-          </div>
-          <div className="space-y-2 text-xs">
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">WebSocket</span>
-              <span className={isConnected ? "text-green-400" : "text-red-400"}>
-                {isConnected ? "Connected" : "Disconnected"}
-              </span>
+            
+            {/* Event Control Inline */}
+            <div className="mt-4 pt-4 border-t border-slate-700/30">
+              <div className="flex items-center gap-2 mb-3">
+                <Calendar className="h-4 w-4 text-emerald-400" />
+                <span className="text-sm font-medium text-slate-300">Event Control</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">LIVE</span>
+              </div>
+              <EventControlPanel 
+                userPin={currentUser?.pin || ''} 
+                userId={currentUser?.id || ''} 
+                userName={currentUser?.name || ''} 
+              />
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">Messages</span>
-              <span className="text-slate-400">
-                {wsStore.messages.length > 0 ? `${wsStore.messages.length} received` : "—"}
-              </span>
+          </BentoCard>
+
+          <BentoCard span={4} className="!p-4 col-span-4 md:col-span-2 lg:col-span-4" data-testid="bento-system-logs">
+            <div className="flex items-center gap-2 mb-3">
+              <FileText className="h-4 w-4 text-slate-400" />
+              <span className="text-sm font-medium text-slate-300">System Logs</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-slate-500">Database</span>
-              <span className="text-green-400">Online</span>
+            <div className="space-y-2 text-xs max-h-[200px] overflow-y-auto" data-testid="system-logs-container">
+              <div className="flex items-start gap-2 p-2 rounded bg-slate-800/50" data-testid="log-entry-init">
+                <span className="text-green-400 shrink-0">[OK]</span>
+                <span className="text-slate-400">System initialized successfully</span>
+              </div>
+              <div className="flex items-start gap-2 p-2 rounded bg-slate-800/50" data-testid="log-entry-ws">
+                <span className="text-cyan-400 shrink-0">[WS]</span>
+                <span className="text-slate-400">{isConnected ? "WebSocket connected" : "WebSocket disconnected"}</span>
+              </div>
+              <div className="flex items-start gap-2 p-2 rounded bg-slate-800/50" data-testid="log-entry-db">
+                <span className="text-violet-400 shrink-0">[DB]</span>
+                <span className="text-slate-400">Database connection pool active</span>
+              </div>
+              {systemStats.activeEmergencies > 0 && (
+                <div className="flex items-start gap-2 p-2 rounded bg-red-900/30 border border-red-500/30" data-testid="log-entry-alert">
+                  <span className="text-red-400 shrink-0">[ALERT]</span>
+                  <span className="text-red-300">{systemStats.activeEmergencies} active emergency alert(s)</span>
+                </div>
+              )}
+              <div className="flex items-start gap-2 p-2 rounded bg-slate-800/50" data-testid="log-entry-api">
+                <span className="text-amber-400 shrink-0">[API]</span>
+                <span className="text-slate-400">All endpoints responding</span>
+              </div>
             </div>
-          </div>
-        </div>
+            
+            {/* Desktop Quick Actions */}
+            <div className="hidden lg:block mt-4 pt-4 border-t border-slate-700/30">
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setLocation('/command-center')}
+                  size="sm"
+                  className={cn(
+                    "flex-1 text-xs",
+                    systemStats.activeEmergencies > 0 
+                      ? "bg-red-600 hover:bg-red-700 animate-pulse" 
+                      : "bg-red-900/50 border border-red-700/50 hover:bg-red-800/50"
+                  )}
+                  data-testid="button-command-center-desktop"
+                >
+                  <Siren className="h-3 w-3 mr-1" />
+                  Emergency
+                </Button>
+                <Button
+                  onClick={() => setLocation('/reports')}
+                  size="sm"
+                  className="flex-1 text-xs bg-cyan-900/50 border border-cyan-700/50 hover:bg-cyan-800/50"
+                  data-testid="button-reports-desktop"
+                >
+                  <Activity className="h-3 w-3 mr-1" />
+                  Reports
+                </Button>
+              </div>
+            </div>
+          </BentoCard>
+
+          {/* Support Row: AccordionStack for documentation, debug tools, roles */}
+          <BentoCard span={12} className="!p-4" data-testid="bento-support-section">
+            <div className="flex items-center gap-2 mb-3">
+              <BookOpen className="h-4 w-4 text-violet-400" />
+              <span className="text-sm font-medium text-slate-300">Documentation & Tools</span>
+            </div>
+            <AccordionStack items={supportItems} defaultOpen={[5, 8]} />
+          </BentoCard>
+        </LayoutShell>
       </main>
 
       {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6">
+      <div className="fixed bottom-6 right-6" data-testid="fab-container">
         <Button
           size="lg"
           className="rounded-full w-14 h-14 bg-gradient-to-br from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 shadow-lg shadow-cyan-500/40"

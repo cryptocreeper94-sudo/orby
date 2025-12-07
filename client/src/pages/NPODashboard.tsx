@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
   LogOut, Map, MessageSquare, Navigation, MapPin, 
   CheckCircle2, AlertTriangle, Clock, Users, Building2, Route, ClipboardList,
-  ScanLine, Sparkles
+  ScanLine, Sparkles, BookOpen, Shield
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { Notepad } from "@/components/Notepad";
@@ -23,11 +23,12 @@ import {
   GEOFENCE_RADIUS_FEET 
 } from "@/components/LocationAcknowledgement";
 import { motion } from "framer-motion";
-import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, PageHeader, GlowButton } from "@/components/ui/premium";
+import { AnimatedBackground, PageHeader, GlowButton } from "@/components/ui/premium";
 import { TeamLeadCard } from "@/components/TeamLeadCard";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { PersonalizedWelcomeTour } from '@/components/PersonalizedWelcomeTour';
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
 
 type CountSession = {
   id: string;
@@ -188,11 +189,106 @@ export default function NPODashboard() {
     supervisor: "Mike Smith"
   };
 
+  const donationMetrics = [
+    { label: 'Section', value: assignedSection.name, icon: <Building2 className="h-4 w-4" />, color: 'blue' },
+    { label: 'Floor', value: assignedSection.floor, icon: <MapPin className="h-4 w-4" />, color: 'emerald' },
+    { label: 'Stand', value: assignedSection.stand, icon: <ClipboardList className="h-4 w-4" />, color: 'amber' },
+    { label: 'Supervisor', value: assignedSection.supervisor, icon: <Users className="h-4 w-4" />, color: 'purple' },
+  ];
+
+  const metricsCarouselItems = donationMetrics.map((metric, idx) => (
+    <div 
+      key={idx}
+      data-testid={`donation-metric-${metric.label.toLowerCase()}`}
+      className={`p-4 rounded-xl bg-slate-800/60 border border-white/10 min-w-[130px] hover:border-${metric.color}-400/50 transition-colors`}
+    >
+      <div className={`p-2 rounded-lg bg-${metric.color}-500/20 w-fit mb-2`}>
+        <div className={`text-${metric.color}-400`}>{metric.icon}</div>
+      </div>
+      <p className="text-[10px] text-slate-500 uppercase tracking-wider">{metric.label}</p>
+      <p className="font-bold text-sm text-slate-200">{metric.value}</p>
+    </div>
+  ));
+
+  const volunteerActions = [
+    { icon: <Route className="h-5 w-5" />, label: "Directions", color: "blue", onClick: () => setShowDirections(true), testId: "action-directions" },
+    { icon: <ClipboardList className="h-5 w-5" />, label: "Pre-Event Count", color: "emerald", onClick: () => setShowCounterLogin(true), testId: "start-pre-event-count" },
+  ];
+
+  const volunteersCarouselItems = volunteerActions.map((action, idx) => (
+    <motion.div 
+      key={idx}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      data-testid={action.testId}
+      className={`p-5 rounded-xl bg-gradient-to-br from-${action.color}-500 to-${action.color}-600 min-w-[160px] cursor-pointer shadow-lg`}
+      onClick={action.onClick}
+    >
+      <div className="p-2 bg-white/20 rounded-lg w-fit mb-2">
+        <div className="text-white">{action.icon}</div>
+      </div>
+      <div className="font-bold text-white">{action.label}</div>
+    </motion.div>
+  ));
+
+  const eventsGridItems = [
+    { icon: <Map className="h-5 w-5" />, label: "Map", color: "blue", onClick: () => setShowMap(true), testId: "nav-map" },
+    { icon: <Route className="h-5 w-5" />, label: "Directions", color: "emerald", onClick: () => setShowDirections(true), testId: "nav-directions" },
+    { icon: <MessageSquare className="h-5 w-5" />, label: "Messages", color: "violet", onClick: () => setLocation('/messages'), testId: "nav-messages" },
+  ];
+
+  const complianceAccordionItems = [
+    {
+      title: "NPO Guidelines",
+      content: (
+        <ul className="space-y-2 text-sm">
+          <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Arrive 30 minutes before shift starts</li>
+          <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Wear required uniform and badge</li>
+          <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Follow food safety protocols</li>
+          <li className="flex items-start gap-2"><span className="text-emerald-400">•</span> Report to supervisor for shift assignment</li>
+        </ul>
+      )
+    },
+    {
+      title: "Food Safety Compliance",
+      content: (
+        <ul className="space-y-2 text-sm">
+          <li className="flex items-start gap-2"><span className="text-amber-400">•</span> Wash hands before handling food</li>
+          <li className="flex items-start gap-2"><span className="text-amber-400">•</span> Use gloves when required</li>
+          <li className="flex items-start gap-2"><span className="text-amber-400">•</span> Check food temperatures regularly</li>
+          <li className="flex items-start gap-2"><span className="text-amber-400">•</span> Report any food safety concerns</li>
+        </ul>
+      )
+    },
+    {
+      title: "Cash Handling Rules",
+      content: (
+        <ul className="space-y-2 text-sm">
+          <li className="flex items-start gap-2"><span className="text-cyan-400">•</span> Count cash with supervisor present</li>
+          <li className="flex items-start gap-2"><span className="text-cyan-400">•</span> Use register for all transactions</li>
+          <li className="flex items-start gap-2"><span className="text-cyan-400">•</span> Report discrepancies immediately</li>
+          <li className="flex items-start gap-2"><span className="text-cyan-400">•</span> Never leave register unattended</li>
+        </ul>
+      )
+    },
+    {
+      title: "Emergency Procedures",
+      content: (
+        <ul className="space-y-2 text-sm">
+          <li className="flex items-start gap-2"><span className="text-red-400">•</span> Know your nearest exit</li>
+          <li className="flex items-start gap-2"><span className="text-red-400">•</span> Follow supervisor instructions</li>
+          <li className="flex items-start gap-2"><span className="text-red-400">•</span> Help customers evacuate calmly</li>
+          <li className="flex items-start gap-2"><span className="text-red-400">•</span> Report to designated meeting point</li>
+        </ul>
+      )
+    },
+  ];
+
   return (
     <AnimatedBackground>
       <PersonalizedWelcomeTour />
       <GlobalModeBar />
-      <div className="min-h-screen pb-20">
+      <div className="min-h-screen pb-20" data-testid="npo-dashboard">
         <LocationAcknowledgement 
           onAccept={() => setLocationAccepted(true)}
           onDecline={() => setLocation("/")}
@@ -211,10 +307,11 @@ export default function NPODashboard() {
                 size="icon" 
                 className="text-slate-300 hover:bg-white/10"
                 onClick={() => setShowMap(true)}
+                data-testid="button-map"
               >
                 <Map className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-300 hover:bg-white/10">
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-300 hover:bg-white/10" data-testid="button-logout">
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
@@ -279,62 +376,60 @@ export default function NPODashboard() {
           />
         )}
 
-        <main className="p-4 sm:px-6 space-y-4 max-w-4xl mx-auto">
-          <ComplianceAlertPanel 
-            userId={currentUser?.id} 
-            userName={currentUser?.name} 
-            isManager={false}
-          />
-          
-          <GlassCard className={`border-2 ${isOnSite ? 'border-emerald-500/40' : 'border-amber-500/40'}`}>
-            <GlassCardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <div className={`p-1.5 rounded-lg ${isOnSite ? 'bg-emerald-500/20' : 'bg-amber-500/20'}`}>
-                  <MapPin className={`h-4 w-4 ${isOnSite ? 'text-emerald-400' : 'text-amber-400'}`} />
-                </div>
-                <span className="font-bold text-sm text-slate-200">Location Status</span>
-              </div>
-            </GlassCardHeader>
-            <GlassCardContent className="pt-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  {isLoading ? (
-                    <p className="text-sm text-slate-400">Checking location...</p>
-                  ) : error ? (
-                    <p className="text-sm text-red-400">{error}</p>
-                  ) : isOnSite ? (
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                      <span className="text-emerald-400 font-medium text-sm">You are on-site at the stadium</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-5 w-5 text-amber-400" />
-                      <span className="text-amber-400 font-medium text-sm">Outside stadium geofence</span>
-                    </div>
-                  )}
-                </div>
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  onClick={requestLocation}
-                  disabled={isLoading}
-                  className="bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
-                >
-                  <Navigation className="h-4 w-4 mr-1" />
-                  Refresh
-                </Button>
-              </div>
-            </GlassCardContent>
-          </GlassCard>
+        <main className="p-4 sm:px-6 max-w-6xl mx-auto">
+          <div className="mb-4">
+            <ComplianceAlertPanel 
+              userId={currentUser?.id} 
+              userName={currentUser?.name} 
+              isManager={false}
+            />
+          </div>
 
-          {!checkedIn ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <GlassCard className="border-2 border-violet-500/40" glow>
-                <GlassCardContent className="p-6 text-center space-y-4">
+          <LayoutShell data-testid="bento-layout">
+            <BentoCard span={12} data-testid="location-status-card">
+              <div className={`p-4 rounded-xl border-2 ${isOnSite ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-amber-500/40 bg-amber-500/5'}`}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${isOnSite ? 'bg-emerald-500/20' : 'bg-amber-500/20'}`}>
+                      <MapPin className={`h-5 w-5 ${isOnSite ? 'text-emerald-400' : 'text-amber-400'}`} />
+                    </div>
+                    <div>
+                      <span className="font-bold text-sm text-slate-200">Location Status</span>
+                      {isLoading ? (
+                        <p className="text-sm text-slate-400">Checking location...</p>
+                      ) : error ? (
+                        <p className="text-sm text-red-400">{error}</p>
+                      ) : isOnSite ? (
+                        <div className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                          <span className="text-emerald-400 font-medium text-sm">On-site at stadium</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <AlertTriangle className="h-4 w-4 text-amber-400" />
+                          <span className="text-amber-400 font-medium text-sm">Outside geofence</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={requestLocation}
+                    disabled={isLoading}
+                    className="bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
+                    data-testid="refresh-location"
+                  >
+                    <Navigation className="h-4 w-4 mr-1" />
+                    Refresh
+                  </Button>
+                </div>
+              </div>
+            </BentoCard>
+
+            {!checkedIn ? (
+              <BentoCard span={12} className="border-2 border-violet-500/40" data-testid="checkin-card">
+                <div className="p-4 text-center space-y-4">
                   <div className="p-4 rounded-2xl bg-violet-500/20 w-fit mx-auto">
                     <Clock className="h-10 w-10 text-violet-400" />
                   </div>
@@ -359,69 +454,46 @@ export default function NPODashboard() {
                   {process.env.NODE_ENV === 'development' && !isOnSite && (
                     <p className="text-xs text-slate-500">(Dev mode: Check-in available regardless of location)</p>
                   )}
-                </GlassCardContent>
-              </GlassCard>
-            </motion.div>
-          ) : (
-            <>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-              >
-                <GlassCard className="border-2 border-emerald-500/40">
-                  <GlassCardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 bg-emerald-500/20 rounded-xl">
-                          <CheckCircle2 className="h-6 w-6 text-emerald-400" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-emerald-200">Checked In</p>
-                          <p className="text-sm text-emerald-400/80">
-                            {checkInTime?.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                          </p>
-                        </div>
+                </div>
+              </BentoCard>
+            ) : (
+              <>
+                <BentoCard span={12} className="border-2 border-emerald-500/40" data-testid="checked-in-card">
+                  <div className="flex items-center justify-between p-2">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-emerald-500/20 rounded-xl">
+                        <CheckCircle2 className="h-6 w-6 text-emerald-400" />
                       </div>
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Active</Badge>
+                      <div>
+                        <p className="font-bold text-emerald-200">Checked In</p>
+                        <p className="text-sm text-emerald-400/80">
+                          {checkInTime?.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                        </p>
+                      </div>
                     </div>
-                  </GlassCardContent>
-                </GlassCard>
-              </motion.div>
+                    <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Active</Badge>
+                  </div>
+                </BentoCard>
 
-              <GlassCard>
-                <GlassCardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-violet-500/20">
-                      <Building2 className="h-4 w-4 text-violet-400" />
-                    </div>
-                    <span className="font-bold text-sm text-slate-200">Your Assignment</span>
-                  </div>
-                </GlassCardHeader>
-                <GlassCardContent className="space-y-3 pt-0">
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { label: 'Section', value: assignedSection.name },
-                      { label: 'Floor', value: assignedSection.floor },
-                      { label: 'Stand', value: assignedSection.stand },
-                      { label: 'Supervisor', value: assignedSection.supervisor },
-                    ].map((item) => (
-                      <div key={item.label} className="p-3 bg-white/5 rounded-xl border border-white/10">
-                        <p className="text-[10px] text-slate-500 uppercase tracking-wider">{item.label}</p>
-                        <p className="font-bold text-sm text-slate-200">{item.value}</p>
-                      </div>
-                    ))}
-                  </div>
-                  
+                <BentoCard span={12} title="Your Assignment" data-testid="assignment-metrics-card">
+                  <CarouselRail 
+                    items={metricsCarouselItems} 
+                    showDots
+                    data-testid="donation-metrics-carousel"
+                  />
+                </BentoCard>
+
+                <BentoCard span={12} data-testid="quick-scan-card">
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                     className="w-full p-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25"
                     onClick={() => setShowQuickScan(true)}
                     data-testid="quick-scan-btn"
                   >
                     <div className="flex items-center justify-center gap-3">
                       <div className="p-2 bg-white/20 rounded-lg">
-                        <ScanLine className="h-5 w-5" />
+                        <ScanLine className="h-6 w-6" />
                       </div>
                       <div className="text-left">
                         <div className="font-bold flex items-center gap-1">
@@ -432,54 +504,71 @@ export default function NPODashboard() {
                       </div>
                     </div>
                   </motion.button>
-                  
-                  <div className="grid grid-cols-2 gap-2">
-                    <GlowButton 
-                      onClick={() => setShowDirections(true)}
-                      className="bg-gradient-to-r from-blue-500 to-blue-600"
-                    >
-                      <Route className="h-4 w-4 mr-2" />
-                      Directions
-                    </GlowButton>
-                    <GlowButton 
-                      onClick={() => setShowCounterLogin(true)}
-                      className="bg-gradient-to-r from-emerald-500 to-emerald-600"
-                      data-testid="start-pre-event-count"
-                    >
-                      <ClipboardList className="h-4 w-4 mr-2" />
-                      Pre-Event Count
-                    </GlowButton>
-                  </div>
-                </GlassCardContent>
-              </GlassCard>
-            </>
-          )}
+                </BentoCard>
+              </>
+            )}
 
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: 'Map', icon: Map, color: 'blue', onClick: () => setShowMap(true) },
-              { label: 'Directions', icon: Route, color: 'emerald', onClick: () => setShowDirections(true) },
-              { label: 'Messages', icon: MessageSquare, color: 'violet', onClick: () => setLocation('/messages') },
-            ].map((item) => (
-              <motion.div key={item.label} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                <GlassCard 
-                  className={`cursor-pointer hover:border-${item.color}-500/30 transition-colors`}
-                  onClick={item.onClick}
-                >
-                  <GlassCardContent className="p-4 flex flex-col items-center justify-center text-center space-y-2">
-                    <div className={`p-3 rounded-xl bg-${item.color}-500/20`}>
-                      <item.icon className={`h-5 w-5 text-${item.color}-400`} />
+            <BentoCard span={8} className="lg:col-span-8 md:col-span-6 col-span-4" data-testid="volunteers-card">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-1.5 rounded-lg bg-emerald-500/20">
+                  <ClipboardList className="h-4 w-4 text-emerald-400" />
+                </div>
+                <span className="font-bold text-sm text-slate-200">Quick Actions</span>
+              </div>
+              <CarouselRail 
+                items={volunteersCarouselItems}
+                data-testid="volunteers-carousel"
+              />
+            </BentoCard>
+
+            <BentoCard span={4} className="lg:col-span-4 md:col-span-6 col-span-4 row-span-2" data-testid="compliance-card">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-1.5 rounded-lg bg-violet-500/20">
+                  <Shield className="h-4 w-4 text-violet-400" />
+                </div>
+                <span className="font-bold text-sm text-slate-200">Compliance</span>
+              </div>
+              <AccordionStack 
+                items={complianceAccordionItems} 
+                defaultOpen={[0]}
+                data-testid="compliance-accordion"
+              />
+            </BentoCard>
+
+            <BentoCard span={8} className="lg:col-span-8 md:col-span-6 col-span-4" data-testid="events-grid-card">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-1.5 rounded-lg bg-blue-500/20">
+                  <Map className="h-4 w-4 text-blue-400" />
+                </div>
+                <span className="font-bold text-sm text-slate-200">Navigation</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {eventsGridItems.map((item) => (
+                  <motion.div
+                    key={item.testId}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className={`p-4 rounded-xl bg-slate-800/40 border border-white/10 cursor-pointer text-center hover:border-${item.color}-500/30 transition-colors`}
+                    onClick={item.onClick}
+                    data-testid={item.testId}
+                  >
+                    <div className={`p-3 rounded-xl bg-${item.color}-500/20 w-fit mx-auto mb-2`}>
+                      <div className={`text-${item.color}-400`}>{item.icon}</div>
                     </div>
                     <div className="font-bold text-xs text-slate-200">{item.label}</div>
-                  </GlassCardContent>
-                </GlassCard>
-              </motion.div>
-            ))}
-          </div>
+                  </motion.div>
+                ))}
+              </div>
+            </BentoCard>
 
-          <TeamLeadCard />
+            <BentoCard span={6} className="lg:col-span-6 md:col-span-6 col-span-4" data-testid="team-lead-card">
+              <TeamLeadCard />
+            </BentoCard>
 
-          <Notepad storageKey="npo-notes" title="My Shift Notes" />
+            <BentoCard span={6} className="lg:col-span-6 md:col-span-6 col-span-4" data-testid="notepad-card">
+              <Notepad storageKey="npo-notes" title="My Shift Notes" />
+            </BentoCard>
+          </LayoutShell>
         </main>
         
         <TutorialHelpButton page="npo" />

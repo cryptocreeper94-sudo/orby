@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { LogOut, MessageSquare, Package, Warehouse, ArrowRight, Map, Plus, Minus, AlertCircle, Info, RefreshCw, Search, Check, Truck, Clock, Box, ChevronRight, Layers, AlertTriangle } from "lucide-react";
+import { LogOut, MessageSquare, Package, Warehouse, ArrowRight, Map, Plus, Minus, AlertCircle, Info, RefreshCw, Search, Check, Truck, Clock, Box, ChevronRight, Layers, AlertTriangle, FileText, ClipboardList } from "lucide-react";
 import { useLocation, Link } from "wouter";
 import { TutorialHelpButton } from "@/components/TutorialCoach";
 import { useEffect, useState } from "react";
@@ -12,9 +12,10 @@ import { InteractiveMap } from "@/components/InteractiveMap";
 import { TeamLeadCard } from "@/components/TeamLeadCard";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, StatCard, PageHeader, GlowButton } from "@/components/ui/premium";
+import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, PageHeader, GlowButton } from "@/components/ui/premium";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
 
 type WarehouseCategory = {
   id: string;
@@ -231,10 +232,211 @@ export default function WarehouseDashboard() {
     }
   };
 
+  const lowStockProducts = products.filter(p => getProductStock(p.id) < 10);
+
+  const inventoryMetricItems = [
+    <div key="products" className="min-w-[140px] p-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20" data-testid="metric-products">
+      <div className="flex items-center gap-2 mb-2">
+        <Package className="h-5 w-5 text-amber-400" />
+        <span className="text-xs text-slate-400">Products</span>
+      </div>
+      <div className="text-2xl font-bold text-amber-300">{stats?.totalProducts ?? 0}</div>
+    </div>,
+    <div key="categories" className="min-w-[140px] p-4 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20" data-testid="metric-categories">
+      <div className="flex items-center gap-2 mb-2">
+        <Layers className="h-5 w-5 text-blue-400" />
+        <span className="text-xs text-slate-400">Categories</span>
+      </div>
+      <div className="text-2xl font-bold text-blue-300">{stats?.totalCategories ?? 0}</div>
+    </div>,
+    <div key="pending" className="min-w-[140px] p-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/20" data-testid="metric-pending">
+      <div className="flex items-center gap-2 mb-2">
+        <Clock className="h-5 w-5 text-purple-400" />
+        <span className="text-xs text-slate-400">Pending</span>
+      </div>
+      <div className="text-2xl font-bold text-purple-300">{stats?.pendingRequestCount ?? 0}</div>
+    </div>,
+    <div key="lowstock" className="min-w-[140px] p-4 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/20" data-testid="metric-low-stock">
+      <div className="flex items-center gap-2 mb-2">
+        <AlertTriangle className="h-5 w-5 text-red-400" />
+        <span className="text-xs text-slate-400">Low Stock</span>
+      </div>
+      <div className="text-2xl font-bold text-red-300">{stats?.lowStockCount ?? 0}</div>
+    </div>,
+  ];
+
+  const pendingOrderItems = pendingRequests.length > 0 
+    ? pendingRequests.map((req) => {
+        const stand = stands.find(s => s.id === req.standId);
+        const nextStatus: Record<string, string> = {
+          'Pending': 'Approved',
+          'Approved': 'Picking',
+          'Picking': 'InTransit',
+          'InTransit': 'Delivered',
+          'Delivered': 'Confirmed'
+        };
+        return (
+          <div key={req.id} className="min-w-[280px] p-4 rounded-xl bg-white/5 border border-white/10" data-testid={`carousel-request-${req.id}`}>
+            <div className="flex items-start justify-between mb-2">
+              <div className="font-semibold text-slate-200 text-sm">{stand?.name ?? 'Unknown Stand'}</div>
+              <div className="flex gap-1">
+                <Badge className={`text-[10px] border ${getStatusColor(req.status)}`}>{req.status}</Badge>
+                <Badge className={`text-[10px] border ${getPriorityColor(req.priority)}`}>{req.priority}</Badge>
+              </div>
+            </div>
+            <div className="text-xs text-slate-500 mb-3">
+              {req.createdAt ? new Date(req.createdAt).toLocaleString() : 'Unknown time'}
+            </div>
+            {req.notes && (
+              <p className="text-xs text-slate-400 mb-3 italic bg-white/5 rounded-lg p-2 line-clamp-2">"{req.notes}"</p>
+            )}
+            <div className="flex gap-2">
+              {nextStatus[req.status] && (
+                <GlowButton
+                  size="sm"
+                  className="flex-1 text-xs"
+                  onClick={() => updateRequestMutation.mutate({ requestId: req.id, status: nextStatus[req.status] })}
+                  disabled={updateRequestMutation.isPending}
+                  data-testid={`button-advance-${req.id}`}
+                >
+                  → {nextStatus[req.status]}
+                </GlowButton>
+              )}
+              {req.status !== 'Cancelled' && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-red-400 border-red-500/30 hover:bg-red-500/10 bg-transparent text-xs"
+                  onClick={() => updateRequestMutation.mutate({ requestId: req.id, status: 'Cancelled' })}
+                  disabled={updateRequestMutation.isPending}
+                  data-testid={`button-cancel-${req.id}`}
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
+          </div>
+        );
+      })
+    : [
+        <div key="no-requests" className="min-w-[280px] p-6 rounded-xl bg-white/5 border border-white/10 text-center" data-testid="no-pending-requests">
+          <Truck className="h-10 w-10 text-slate-500 mx-auto mb-2" />
+          <p className="text-sm text-slate-400">No pending requests</p>
+        </div>
+      ];
+
+  const stockLevelItems = categories.length > 0 
+    ? categories.map((category) => {
+        const categoryProducts = products.filter(p => p.categoryId === category.id);
+        const totalStock = categoryProducts.reduce((sum, p) => sum + getProductStock(p.id), 0);
+        const lowCount = categoryProducts.filter(p => getProductStock(p.id) < 10).length;
+        return (
+          <div key={category.id} className="min-w-[200px] p-4 rounded-xl bg-white/5 border border-white/10" data-testid={`stock-category-${category.id}`}>
+            <div className="flex items-center gap-2 mb-3">
+              <div 
+                className="w-3 h-3 rounded-full" 
+                style={{ backgroundColor: category.color ?? '#F59E0B' }}
+              />
+              <span className="font-medium text-sm text-slate-200">{category.name}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-center">
+              <div className="p-2 rounded-lg bg-white/5">
+                <div className="text-lg font-bold text-slate-200">{categoryProducts.length}</div>
+                <div className="text-[10px] text-slate-500">Products</div>
+              </div>
+              <div className="p-2 rounded-lg bg-white/5">
+                <div className="text-lg font-bold text-slate-200">{totalStock}</div>
+                <div className="text-[10px] text-slate-500">Units</div>
+              </div>
+            </div>
+            {lowCount > 0 && (
+              <div className="mt-2 text-xs text-red-400 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {lowCount} low stock
+              </div>
+            )}
+          </div>
+        );
+      })
+    : [
+        <div key="no-stock" className="min-w-[200px] p-6 rounded-xl bg-white/5 border border-white/10 text-center" data-testid="no-stock-data">
+          <Package className="h-10 w-10 text-slate-500 mx-auto mb-2" />
+          <p className="text-sm text-slate-400">No inventory data</p>
+          <GlowButton 
+            size="sm" 
+            className="mt-2"
+            onClick={() => seedMutation.mutate()}
+            disabled={seedMutation.isPending}
+            data-testid="button-load-stock-data"
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Load Example
+          </GlowButton>
+        </div>
+      ];
+
+  const supportAccordionItems = [
+    {
+      title: "📋 Warehouse Procedures",
+      content: (
+        <div className="space-y-2" data-testid="accordion-procedures">
+          <div className="p-2 rounded-lg bg-white/5 text-xs">
+            <div className="font-medium text-slate-300">Receiving Shipments</div>
+            <div className="text-slate-500">1. Verify PO number • 2. Count items • 3. Log in system</div>
+          </div>
+          <div className="p-2 rounded-lg bg-white/5 text-xs">
+            <div className="font-medium text-slate-300">Order Picking</div>
+            <div className="text-slate-500">1. Print pick list • 2. Verify quantities • 3. Update status</div>
+          </div>
+          <div className="p-2 rounded-lg bg-white/5 text-xs">
+            <div className="font-medium text-slate-300">Inventory Counts</div>
+            <div className="text-slate-500">1. Print count sheets • 2. Physical count • 3. Reconcile</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "📦 Recent Receiving Logs",
+      content: (
+        <div className="space-y-2" data-testid="accordion-receiving-logs">
+          <div className="p-2 rounded-lg bg-white/5 text-xs flex items-center justify-between">
+            <div>
+              <div className="font-medium text-slate-300">Beverage Restock</div>
+              <div className="text-slate-500">12 cases received</div>
+            </div>
+            <div className="text-slate-500">2h ago</div>
+          </div>
+          <div className="p-2 rounded-lg bg-white/5 text-xs flex items-center justify-between">
+            <div>
+              <div className="font-medium text-slate-300">Paper Goods</div>
+              <div className="text-slate-500">50 units received</div>
+            </div>
+            <div className="text-slate-500">5h ago</div>
+          </div>
+          <div className="p-2 rounded-lg bg-white/5 text-xs flex items-center justify-between">
+            <div>
+              <div className="font-medium text-slate-300">Condiments</div>
+              <div className="text-slate-500">24 units received</div>
+            </div>
+            <div className="text-slate-500">1d ago</div>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "📝 Notes",
+      content: (
+        <div data-testid="accordion-notes">
+          <Notepad storageKey="warehouse-notes" />
+        </div>
+      )
+    }
+  ];
+
   return (
     <AnimatedBackground>
       <GlobalModeBar />
-      <div className="min-h-screen pb-20">
+      <div className="min-h-screen pb-20" data-testid="warehouse-dashboard">
         <PageHeader
           title="Warehouse"
           subtitle={`Welcome, ${currentUser?.name}`}
@@ -259,7 +461,7 @@ export default function WarehouseDashboard() {
           }
         />
 
-        <main className="p-4 sm:px-6 space-y-4 max-w-6xl mx-auto">
+        <main className="p-4 sm:px-6 max-w-6xl mx-auto" data-testid="warehouse-main">
           <ComplianceAlertPanel 
             userId={currentUser?.id} 
             userName={currentUser?.name} 
@@ -271,6 +473,7 @@ export default function WarehouseDashboard() {
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
+              className="mb-3"
             >
               <GlassCard className="border-blue-500/30" data-testid="card-config-notice">
                 <GlassCardContent className="p-4">
@@ -316,7 +519,7 @@ export default function WarehouseDashboard() {
             </motion.div>
           )}
 
-          <div className="flex gap-2 overflow-x-auto pb-2 hide-scrollbar">
+          <div className="flex gap-2 overflow-x-auto pb-3 hide-scrollbar mb-3">
             {['overview', 'inventory', 'requests'].map((tab) => (
               <motion.button
                 key={tab}
@@ -341,7 +544,6 @@ export default function WarehouseDashboard() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                className="space-y-4"
               >
                 {showMap && (
                   <div className="fixed inset-0 z-50 bg-slate-950">
@@ -352,121 +554,112 @@ export default function WarehouseDashboard() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                  <StatCard
-                    icon={<Package className="h-5 w-5" />}
-                    label="Products"
-                    value={stats?.totalProducts ?? 0}
-                    color="amber"
-                    data-testid="stat-products"
-                  />
-                  <StatCard
-                    icon={<Layers className="h-5 w-5" />}
-                    label="Categories"
-                    value={stats?.totalCategories ?? 0}
-                    color="blue"
-                    data-testid="stat-categories"
-                  />
-                  <StatCard
-                    icon={<Clock className="h-5 w-5" />}
-                    label="Pending"
-                    value={stats?.pendingRequestCount ?? 0}
-                    color="purple"
-                    data-testid="stat-pending"
-                  />
-                  <StatCard
-                    icon={<AlertTriangle className="h-5 w-5" />}
-                    label="Low Stock"
-                    value={stats?.lowStockCount ?? 0}
-                    color="red"
-                    data-testid="stat-low-stock"
-                  />
-                </div>
+                <LayoutShell className="gap-3" data-testid="bento-layout-overview">
+                  <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-hero-metrics">
+                    <CarouselRail 
+                      items={inventoryMetricItems} 
+                      title="Inventory Metrics"
+                      showDots
+                      data-testid="carousel-inventory-metrics"
+                    />
+                  </BentoCard>
 
-                <TeamLeadCard department="Warehouse" />
+                  <BentoCard span={8} className="col-span-4 md:col-span-4 lg:col-span-8" data-testid="bento-pending-orders">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Clock className="h-4 w-4 text-orange-400" />
+                      <span className="text-sm font-medium text-slate-300">Pending Orders ({pendingRequests.length})</span>
+                    </div>
+                    <CarouselRail 
+                      items={pendingOrderItems}
+                      data-testid="carousel-pending-orders"
+                    />
+                  </BentoCard>
 
-                <Notepad storageKey="warehouse-notes" />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <GlassCard 
-                      className="cursor-pointer hover:border-blue-500/30 transition-colors h-full" 
-                      onClick={() => setShowMap(true)} 
-                      data-testid="card-stadium-map"
-                    >
-                      <GlassCardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-                        <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500/20 to-blue-600/10">
-                          <Map className="h-8 w-8 text-blue-400" />
-                        </div>
-                        <div className="font-bold text-sm text-slate-200">Stadium Map</div>
-                        <p className="text-xs text-slate-400">View venue layout</p>
-                      </GlassCardContent>
-                    </GlassCard>
-                  </motion.div>
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <GlassCard 
-                      className="cursor-pointer hover:border-amber-500/30 transition-colors h-full" 
-                      onClick={() => setActiveTab('inventory')} 
-                      data-testid="card-inventory"
-                    >
-                      <GlassCardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-                        <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 to-amber-600/10">
-                          <Package className="h-8 w-8 text-amber-400" />
-                        </div>
-                        <div className="font-bold text-sm text-slate-200">Inventory</div>
-                        <p className="text-xs text-slate-400">{products.length} products</p>
-                      </GlassCardContent>
-                    </GlassCard>
-                  </motion.div>
-                </div>
-
-                {pendingRequests.length > 0 && (
-                  <GlassCard data-testid="card-pending-requests">
-                    <GlassCardHeader className="pb-2">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded-lg bg-orange-500/20">
-                          <Clock className="h-4 w-4 text-orange-400" />
-                        </div>
-                        <span className="font-bold text-sm text-slate-200">
-                          Pending Requests ({pendingRequests.length})
-                        </span>
-                      </div>
-                    </GlassCardHeader>
-                    <GlassCardContent className="space-y-2 pt-0">
-                      {pendingRequests.slice(0, 3).map((req, idx) => {
-                        const stand = stands.find(s => s.id === req.standId);
-                        return (
-                          <motion.div 
-                            key={req.id} 
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.1 }}
-                            className="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between hover:bg-white/10 transition-colors cursor-pointer" 
-                            data-testid={`request-${req.id}`}
-                          >
-                            <div>
-                              <div className="font-medium text-sm text-slate-200">{stand?.name ?? 'Unknown Stand'}</div>
-                              <div className="flex gap-2 mt-1">
-                                <Badge className={`text-[10px] border ${getStatusColor(req.status)}`}>{req.status}</Badge>
-                                <Badge className={`text-[10px] border ${getPriorityColor(req.priority)}`}>{req.priority}</Badge>
+                  <BentoCard span={4} className="col-span-4 md:col-span-2 lg:col-span-4" data-testid="bento-alerts">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertTriangle className="h-4 w-4 text-red-400" />
+                      <span className="text-sm font-medium text-slate-300">Low Stock Alerts</span>
+                    </div>
+                    {lowStockProducts.length > 0 ? (
+                      <div className="space-y-2 max-h-[200px] overflow-y-auto" data-testid="low-stock-list">
+                        {lowStockProducts.slice(0, 5).map((product) => {
+                          const qty = getProductStock(product.id);
+                          return (
+                            <div key={product.id} className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-between" data-testid={`low-stock-${product.id}`}>
+                              <div className="flex items-center gap-2">
+                                <AlertCircle className="h-3 w-3 text-red-400" />
+                                <span className="text-xs text-slate-300 truncate max-w-[100px]">{product.name}</span>
                               </div>
+                              <span className="text-xs font-bold text-red-400">{qty}</span>
                             </div>
-                            <ChevronRight className="h-4 w-4 text-slate-500" />
-                          </motion.div>
-                        );
-                      })}
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="w-full text-xs text-amber-400 hover:bg-amber-500/10"
-                        onClick={() => setActiveTab('requests')}
-                        data-testid="button-view-all-requests"
+                          );
+                        })}
+                        {lowStockProducts.length > 5 && (
+                          <div className="text-xs text-slate-500 text-center pt-1">
+                            +{lowStockProducts.length - 5} more items
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="p-4 text-center" data-testid="no-low-stock">
+                        <Check className="h-8 w-8 text-emerald-400 mx-auto mb-2" />
+                        <p className="text-xs text-slate-400">All stock levels OK</p>
+                      </div>
+                    )}
+                  </BentoCard>
+
+                  <BentoCard span={6} className="col-span-4 md:col-span-3 lg:col-span-6" data-testid="bento-stock-levels">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Package className="h-4 w-4 text-amber-400" />
+                      <span className="text-sm font-medium text-slate-300">Stock by Category</span>
+                    </div>
+                    <CarouselRail 
+                      items={stockLevelItems}
+                      data-testid="carousel-stock-levels"
+                    />
+                  </BentoCard>
+
+                  <BentoCard span={6} className="col-span-4 md:col-span-3 lg:col-span-6" data-testid="bento-quick-actions">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Map className="h-4 w-4 text-blue-400" />
+                      <span className="text-sm font-medium text-slate-300">Quick Actions</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setShowMap(true)}
+                        className="p-4 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20 text-center"
+                        data-testid="quick-action-map"
                       >
-                        View All <ArrowRight className="h-3 w-3 ml-1" />
-                      </Button>
-                    </GlassCardContent>
-                  </GlassCard>
-                )}
+                        <Map className="h-6 w-6 text-blue-400 mx-auto mb-1" />
+                        <span className="text-xs text-slate-300">Stadium Map</span>
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setActiveTab('inventory')}
+                        className="p-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20 text-center"
+                        data-testid="quick-action-inventory"
+                      >
+                        <Package className="h-6 w-6 text-amber-400 mx-auto mb-1" />
+                        <span className="text-xs text-slate-300">Inventory</span>
+                      </motion.button>
+                    </div>
+                  </BentoCard>
+
+                  <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-support">
+                    <AccordionStack 
+                      items={supportAccordionItems}
+                      defaultOpen={[0]}
+                      data-testid="accordion-support"
+                    />
+                  </BentoCard>
+
+                  <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-team-lead">
+                    <TeamLeadCard department="Warehouse" />
+                  </BentoCard>
+                </LayoutShell>
               </motion.div>
             )}
 
@@ -476,74 +669,75 @@ export default function WarehouseDashboard() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                className="space-y-4"
               >
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      placeholder="Search products..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-9 bg-white/5 border-white/10 text-slate-200 placeholder:text-slate-500"
-                      data-testid="input-search-products"
-                    />
-                  </div>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-[140px] bg-white/5 border-white/10 text-slate-200" data-testid="select-category">
-                      <SelectValue placeholder="Category" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-white/10">
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map(cat => (
-                        <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {categories.length === 0 ? (
-                  <GlassCard className="border-dashed border-2 border-white/20" data-testid="card-no-data">
-                    <GlassCardContent className="p-8 text-center">
-                      <div className="p-4 rounded-2xl bg-amber-500/10 w-fit mx-auto mb-4">
-                        <Package className="h-12 w-12 text-amber-400" />
+                <LayoutShell className="gap-3" data-testid="bento-layout-inventory">
+                  <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-inventory-search">
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Input
+                          placeholder="Search products..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-9 bg-white/5 border-white/10 text-slate-200 placeholder:text-slate-500"
+                          data-testid="input-search-products"
+                        />
                       </div>
-                      <h3 className="font-semibold text-lg mb-2 text-slate-200">No Inventory Data</h3>
-                      <p className="text-sm text-slate-400 mb-4">
-                        Load example data to see how the warehouse inventory system works.
-                      </p>
-                      <GlowButton 
-                        onClick={() => seedMutation.mutate()}
-                        disabled={seedMutation.isPending}
-                        data-testid="button-load-example-2"
-                      >
-                        {seedMutation.isPending ? (
-                          <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                        ) : (
-                          <Plus className="h-4 w-4 mr-2" />
-                        )}
-                        Load Example Data
-                      </GlowButton>
-                    </GlassCardContent>
-                  </GlassCard>
-                ) : (
-                  <div className="space-y-3">
-                    {categories.map((category, catIdx) => {
+                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <SelectTrigger className="w-[140px] bg-white/5 border-white/10 text-slate-200" data-testid="select-category">
+                          <SelectValue placeholder="Category" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-slate-900 border-white/10">
+                          <SelectItem value="all">All Categories</SelectItem>
+                          {categories.map(cat => (
+                            <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </BentoCard>
+
+                  {categories.length === 0 ? (
+                    <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-no-inventory">
+                      <div className="p-8 text-center border-2 border-dashed border-white/20 rounded-xl">
+                        <div className="p-4 rounded-2xl bg-amber-500/10 w-fit mx-auto mb-4">
+                          <Package className="h-12 w-12 text-amber-400" />
+                        </div>
+                        <h3 className="font-semibold text-lg mb-2 text-slate-200">No Inventory Data</h3>
+                        <p className="text-sm text-slate-400 mb-4">
+                          Load example data to see how the warehouse inventory system works.
+                        </p>
+                        <GlowButton 
+                          onClick={() => seedMutation.mutate()}
+                          disabled={seedMutation.isPending}
+                          data-testid="button-load-example-2"
+                        >
+                          {seedMutation.isPending ? (
+                            <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Plus className="h-4 w-4 mr-2" />
+                          )}
+                          Load Example Data
+                        </GlowButton>
+                      </div>
+                    </BentoCard>
+                  ) : (
+                    categories.map((category, catIdx) => {
                       const categoryProducts = filteredProducts.filter(p => p.categoryId === category.id);
                       if (categoryProducts.length === 0 && selectedCategory !== 'all' && selectedCategory !== category.id) return null;
                       const isExpanded = expandedCategories.includes(category.id);
                       
                       return (
-                        <motion.div
-                          key={category.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: catIdx * 0.1 }}
-                        >
-                          <GlassCard className="overflow-hidden" data-testid={`category-${category.id}`}>
+                        <BentoCard key={category.id} span={12} className="col-span-4 md:col-span-6 lg:col-span-12 p-0 overflow-hidden" data-testid={`bento-category-${category.id}`}>
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: catIdx * 0.1 }}
+                          >
                             <button
                               onClick={() => toggleCategory(category.id)}
                               className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                              data-testid={`button-toggle-category-${category.id}`}
                             >
                               <div className="flex items-center gap-3">
                                 <div 
@@ -640,12 +834,12 @@ export default function WarehouseDashboard() {
                                 </motion.div>
                               )}
                             </AnimatePresence>
-                          </GlassCard>
-                        </motion.div>
+                          </motion.div>
+                        </BentoCard>
                       );
-                    })}
-                  </div>
-                )}
+                    })
+                  )}
+                </LayoutShell>
               </motion.div>
             )}
 
@@ -655,13 +849,10 @@ export default function WarehouseDashboard() {
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 20 }}
-                className="space-y-4"
               >
-                <GlassCard data-testid="card-request-workflow">
-                  <GlassCardHeader className="pb-2">
-                    <span className="font-bold text-sm text-slate-200">Request Workflow</span>
-                  </GlassCardHeader>
-                  <GlassCardContent className="pt-0">
+                <LayoutShell className="gap-3" data-testid="bento-layout-requests">
+                  <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-request-workflow">
+                    <div className="text-sm font-medium text-slate-300 mb-3">Request Workflow</div>
                     <div className="flex items-center justify-between text-xs">
                       {[
                         { label: 'Pending', icon: Clock, color: 'amber' },
@@ -683,24 +874,22 @@ export default function WarehouseDashboard() {
                         </div>
                       ))}
                     </div>
-                  </GlassCardContent>
-                </GlassCard>
+                  </BentoCard>
 
-                {pendingRequests.length === 0 ? (
-                  <GlassCard className="border-dashed border-2 border-white/20" data-testid="card-no-requests">
-                    <GlassCardContent className="p-8 text-center">
-                      <div className="p-4 rounded-2xl bg-slate-500/10 w-fit mx-auto mb-4">
-                        <Truck className="h-12 w-12 text-slate-400" />
+                  {pendingRequests.length === 0 ? (
+                    <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-no-requests">
+                      <div className="p-8 text-center border-2 border-dashed border-white/20 rounded-xl">
+                        <div className="p-4 rounded-2xl bg-slate-500/10 w-fit mx-auto mb-4">
+                          <Truck className="h-12 w-12 text-slate-400" />
+                        </div>
+                        <h3 className="font-semibold text-lg mb-2 text-slate-200">No Pending Requests</h3>
+                        <p className="text-sm text-slate-400">
+                          Stand leads can submit requests from their dashboard.
+                        </p>
                       </div>
-                      <h3 className="font-semibold text-lg mb-2 text-slate-200">No Pending Requests</h3>
-                      <p className="text-sm text-slate-400">
-                        Stand leads can submit requests from their dashboard.
-                      </p>
-                    </GlassCardContent>
-                  </GlassCard>
-                ) : (
-                  <div className="space-y-3">
-                    {pendingRequests.map((req, idx) => {
+                    </BentoCard>
+                  ) : (
+                    pendingRequests.map((req, idx) => {
                       const stand = stands.find(s => s.id === req.standId);
                       const nextStatus: Record<string, string> = {
                         'Pending': 'Approved',
@@ -711,61 +900,58 @@ export default function WarehouseDashboard() {
                       };
                       
                       return (
-                        <motion.div
-                          key={req.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.1 }}
-                        >
-                          <GlassCard data-testid={`request-card-${req.id}`}>
-                            <GlassCardContent className="p-4">
-                              <div className="flex items-start justify-between mb-3">
-                                <div>
-                                  <div className="font-semibold text-slate-200">{stand?.name ?? 'Unknown Stand'}</div>
-                                  <div className="text-xs text-slate-500">
-                                    {req.createdAt ? new Date(req.createdAt).toLocaleString() : 'Unknown time'}
-                                  </div>
-                                </div>
-                                <div className="flex gap-2">
-                                  <Badge className={`border ${getStatusColor(req.status)}`}>{req.status}</Badge>
-                                  <Badge className={`border ${getPriorityColor(req.priority)}`}>{req.priority}</Badge>
+                        <BentoCard key={req.id} span={6} className="col-span-4 md:col-span-3 lg:col-span-6" data-testid={`bento-request-${req.id}`}>
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div>
+                                <div className="font-semibold text-slate-200">{stand?.name ?? 'Unknown Stand'}</div>
+                                <div className="text-xs text-slate-500">
+                                  {req.createdAt ? new Date(req.createdAt).toLocaleString() : 'Unknown time'}
                                 </div>
                               </div>
-                              {req.notes && (
-                                <p className="text-sm text-slate-400 mb-3 italic bg-white/5 rounded-lg p-2">"{req.notes}"</p>
-                              )}
                               <div className="flex gap-2">
-                                {nextStatus[req.status] && (
-                                  <GlowButton
-                                    size="sm"
-                                    className="flex-1"
-                                    onClick={() => updateRequestMutation.mutate({ requestId: req.id, status: nextStatus[req.status] })}
-                                    disabled={updateRequestMutation.isPending}
-                                    data-testid={`button-advance-${req.id}`}
-                                  >
-                                    Mark as {nextStatus[req.status]}
-                                  </GlowButton>
-                                )}
-                                {req.status !== 'Cancelled' && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="text-red-400 border-red-500/30 hover:bg-red-500/10 bg-transparent"
-                                    onClick={() => updateRequestMutation.mutate({ requestId: req.id, status: 'Cancelled' })}
-                                    disabled={updateRequestMutation.isPending}
-                                    data-testid={`button-cancel-${req.id}`}
-                                  >
-                                    Cancel
-                                  </Button>
-                                )}
+                                <Badge className={`border ${getStatusColor(req.status)}`}>{req.status}</Badge>
+                                <Badge className={`border ${getPriorityColor(req.priority)}`}>{req.priority}</Badge>
                               </div>
-                            </GlassCardContent>
-                          </GlassCard>
-                        </motion.div>
+                            </div>
+                            {req.notes && (
+                              <p className="text-sm text-slate-400 mb-3 italic bg-white/5 rounded-lg p-2">"{req.notes}"</p>
+                            )}
+                            <div className="flex gap-2">
+                              {nextStatus[req.status] && (
+                                <GlowButton
+                                  size="sm"
+                                  className="flex-1"
+                                  onClick={() => updateRequestMutation.mutate({ requestId: req.id, status: nextStatus[req.status] })}
+                                  disabled={updateRequestMutation.isPending}
+                                  data-testid={`button-advance-${req.id}`}
+                                >
+                                  Mark as {nextStatus[req.status]}
+                                </GlowButton>
+                              )}
+                              {req.status !== 'Cancelled' && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-red-400 border-red-500/30 hover:bg-red-500/10 bg-transparent"
+                                  onClick={() => updateRequestMutation.mutate({ requestId: req.id, status: 'Cancelled' })}
+                                  disabled={updateRequestMutation.isPending}
+                                  data-testid={`button-cancel-${req.id}`}
+                                >
+                                  Cancel
+                                </Button>
+                              )}
+                            </div>
+                          </motion.div>
+                        </BentoCard>
                       );
-                    })}
-                  </div>
-                )}
+                    })
+                  )}
+                </LayoutShell>
               </motion.div>
             )}
           </AnimatePresence>

@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { MenuBoardEditor } from '@/components/MenuBoardEditor';
-import { ChevronLeft, Plus, LayoutGrid, Trash2, Edit2, Copy, Download, Calendar } from 'lucide-react';
+import { ChevronLeft, Plus, LayoutGrid, Trash2, Edit2, Copy, Download, Calendar, FileText, Settings, Info } from 'lucide-react';
 import { useLocation } from 'wouter';
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from '@/components/ui/bento';
 
 interface MenuBoard {
   id: string;
@@ -138,31 +137,137 @@ export default function MenuBoardCreator() {
     );
   }
 
+  const metricsItems = [
+    <div key="total" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-total-boards">
+      <LayoutGrid className="h-5 w-5 text-cyan-400 mb-1" />
+      <span className="text-xl font-bold text-white">{menuBoards.length}</span>
+      <span className="text-[10px] text-white/50">Total Boards</span>
+    </div>,
+    <div key="templates" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-templates">
+      <FileText className="h-5 w-5 text-purple-400 mb-1" />
+      <span className="text-xl font-bold text-white">{menuBoards.filter((b: MenuBoard) => b.isTemplate).length}</span>
+      <span className="text-[10px] text-white/50">Templates</span>
+    </div>,
+    <div key="recent" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-recent">
+      <Calendar className="h-5 w-5 text-emerald-400 mb-1" />
+      <span className="text-xl font-bold text-white">
+        {menuBoards.filter((b: MenuBoard) => {
+          const updated = new Date(b.updatedAt || b.createdAt);
+          const weekAgo = new Date();
+          weekAgo.setDate(weekAgo.getDate() - 7);
+          return updated > weekAgo;
+        }).length}
+      </span>
+      <span className="text-[10px] text-white/50">Updated This Week</span>
+    </div>,
+  ];
+
+  const boardCarouselItems = menuBoards.map((board: MenuBoard) => (
+    <div 
+      key={board.id}
+      className="flex flex-col p-3 bg-slate-800/60 rounded-lg min-w-[200px] max-w-[200px] border border-white/10 hover:border-cyan-400/50 transition-colors cursor-pointer group"
+      onClick={() => loadBoard(board)}
+      data-testid={`menu-board-card-${board.id}`}
+    >
+      <div className="aspect-video bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+        <LayoutGrid className="h-6 w-6 text-slate-500" />
+      </div>
+      <div className="flex-1">
+        <h3 className="text-sm font-medium text-white truncate" data-testid={`board-name-${board.id}`}>{board.name}</h3>
+        {board.description && (
+          <p className="text-[10px] text-white/50 truncate">{board.description}</p>
+        )}
+      </div>
+      <div className="flex items-center justify-between mt-2">
+        <span className="text-[10px] text-white/40">
+          {new Date(board.updatedAt || board.createdAt).toLocaleDateString()}
+        </span>
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-6 w-6 text-white/60 hover:text-cyan-400"
+            onClick={(e) => {
+              e.stopPropagation();
+              loadBoard(board);
+            }}
+            data-testid={`edit-board-${board.id}`}
+          >
+            <Edit2 className="h-3 w-3" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-6 w-6 text-white/60 hover:text-red-400"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (confirm('Delete this menu board?')) {
+                deleteBoardMutation.mutate(board.id);
+              }
+            }}
+            data-testid={`delete-board-${board.id}`}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  ));
+
+  const settingsAccordionItems = [
+    {
+      title: 'Tips for Creating Great Menus',
+      content: (
+        <ul className="space-y-1 text-sm" data-testid="tips-content">
+          <li>• Use high contrast colors for better readability from a distance</li>
+          <li>• Keep text large - aim for 32px or larger for menu items</li>
+          <li>• Use the "Export All" button to download slides for your USB drive</li>
+          <li>• Create multiple slides to rotate through different categories</li>
+        </ul>
+      )
+    },
+    {
+      title: 'Quick Actions',
+      content: (
+        <div className="flex flex-wrap gap-2" data-testid="quick-actions-content">
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-white/20 text-slate-300"
+            onClick={() => setIsCreateDialogOpen(true)}
+            data-testid="quick-create-board"
+          >
+            <Plus className="h-3 w-3 mr-1" /> New Board
+          </Button>
+        </div>
+      )
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" data-testid="menu-board-creator-page">
+      <div className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 px-4 py-3">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={() => setLocation('/manager')} data-testid="back-to-manager" className="text-slate-300 hover:text-slate-100">
-              <ChevronLeft className="h-4 w-4 mr-1" /> Back to Dashboard
+              <ChevronLeft className="h-4 w-4 mr-1" /> Back
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-slate-200 flex items-center gap-2">
-                <LayoutGrid className="h-6 w-6 text-cyan-400" />
+              <h1 className="text-lg font-bold text-slate-200 flex items-center gap-2" data-testid="text-page-title">
+                <LayoutGrid className="h-5 w-5 text-cyan-400" />
                 Menu Board Creator
               </h1>
-              <p className="text-slate-400 text-sm">Create and manage digital menu displays</p>
+              <p className="text-xs text-slate-400">Create and manage digital menu displays</p>
             </div>
           </div>
           
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-600 hover:bg-blue-700" data-testid="create-menu-board">
-                <Plus className="h-4 w-4 mr-1" /> New Menu Board
+              <Button className="bg-cyan-600 hover:bg-cyan-700" data-testid="create-menu-board">
+                <Plus className="h-4 w-4 mr-1" /> New Board
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent data-testid="dialog-create-board">
               <DialogHeader>
                 <DialogTitle>Create New Menu Board</DialogTitle>
                 <DialogDescription>
@@ -192,7 +297,7 @@ export default function MenuBoardCreator() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)} data-testid="cancel-create-board">
                   Cancel
                 </Button>
                 <Button
@@ -206,97 +311,43 @@ export default function MenuBoardCreator() {
             </DialogContent>
           </Dialog>
         </div>
+      </div>
 
-        {/* Menu Boards Grid */}
-        {isLoading ? (
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400" />
-          </div>
-        ) : menuBoards.length === 0 ? (
-          <Card className="border-dashed border-slate-700 bg-slate-900/80">
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <LayoutGrid className="h-12 w-12 text-slate-500 mb-4" />
-              <h3 className="text-lg font-medium text-slate-300 mb-2">No Menu Boards Yet</h3>
-              <p className="text-slate-400 text-center mb-4">
-                Create your first menu board to display on your digital screens
-              </p>
-              <Button onClick={() => setIsCreateDialogOpen(true)} data-testid="create-first-board" className="bg-cyan-600 hover:bg-cyan-700">
-                <Plus className="h-4 w-4 mr-1" /> Create Your First Menu Board
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {menuBoards.map((board: MenuBoard) => (
-              <Card 
-                key={board.id} 
-                className="border-slate-700 bg-slate-900/80 hover:shadow-lg transition-shadow cursor-pointer group"
-                data-testid={`menu-board-card-${board.id}`}
-              >
-                <CardHeader className="pb-2">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg text-slate-200">{board.name}</CardTitle>
-                      {board.description && (
-                        <CardDescription className="mt-1">{board.description}</CardDescription>
-                      )}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="opacity-0 group-hover:opacity-100 transition-opacity text-red-500 hover:text-red-700"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (confirm('Delete this menu board?')) {
-                          deleteBoardMutation.mutate(board.id);
-                        }
-                      }}
-                      data-testid={`delete-board-${board.id}`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div 
-                    className="aspect-video bg-slate-800 rounded-lg mb-3 flex items-center justify-center border border-slate-700"
-                    onClick={() => loadBoard(board)}
-                  >
-                    <LayoutGrid className="h-8 w-8 text-slate-500" />
-                  </div>
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(board.updatedAt || board.createdAt).toLocaleDateString()}
-                    </div>
-                  </div>
-                  <div className="flex gap-2 mt-3">
-                    <Button 
-                      variant="secondary" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => loadBoard(board)}
-                      data-testid={`edit-board-${board.id}`}
-                    >
-                      <Edit2 className="h-3 w-3 mr-1" /> Edit
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+      <div className="p-3">
+        <LayoutShell className="gap-3">
+          <BentoCard span={12} className="p-2" title="Menu Board Metrics" data-testid="bento-card-metrics">
+            <CarouselRail items={metricsItems} data-testid="carousel-metrics" />
+          </BentoCard>
 
-        {/* Tips Section */}
-        <div className="mt-8 p-4 bg-cyan-950/40 rounded-lg border border-cyan-500/30">
-          <h3 className="font-medium text-cyan-300 mb-2">Tips for Creating Great Menus</h3>
-          <ul className="text-sm text-cyan-400/80 space-y-1">
-            <li>• Use high contrast colors for better readability from a distance</li>
-            <li>• Keep text large - aim for 32px or larger for menu items</li>
-            <li>• Use the "Export All" button to download slides for your USB drive</li>
-            <li>• Create multiple slides to rotate through different categories</li>
-          </ul>
-        </div>
+          <BentoCard span={12} className="p-2" title="Your Menu Boards" data-testid="bento-card-boards">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-cyan-400" />
+              </div>
+            ) : menuBoards.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8" data-testid="empty-boards-state">
+                <LayoutGrid className="h-10 w-10 text-slate-500 mb-3" />
+                <h3 className="text-sm font-medium text-slate-300 mb-1">No Menu Boards Yet</h3>
+                <p className="text-xs text-slate-400 text-center mb-3">
+                  Create your first menu board to display on your digital screens
+                </p>
+                <Button onClick={() => setIsCreateDialogOpen(true)} data-testid="create-first-board" className="bg-cyan-600 hover:bg-cyan-700">
+                  <Plus className="h-4 w-4 mr-1" /> Create Your First Board
+                </Button>
+              </div>
+            ) : (
+              <CarouselRail items={boardCarouselItems} data-testid="carousel-boards" />
+            )}
+          </BentoCard>
+
+          <BentoCard span={12} className="p-2" title="Settings & Tips" data-testid="bento-card-settings">
+            <AccordionStack 
+              items={settingsAccordionItems} 
+              defaultOpen={[0]} 
+              data-testid="accordion-settings"
+            />
+          </BentoCard>
+        </LayoutShell>
       </div>
     </div>
   );

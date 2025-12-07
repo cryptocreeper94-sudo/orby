@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Webcam from 'react-webcam';
 import { 
   Store, 
@@ -8,7 +8,6 @@ import {
   Plus,
   Trash2,
   Check,
-  X,
   AlertCircle,
   Camera,
   ScanLine,
@@ -25,16 +24,15 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 import { 
   AnimatedBackground, 
   GlassCard, 
   GlassCardContent, 
-  GlassCardHeader, 
   PageHeader,
   GlowButton
 } from "@/components/ui/premium";
 import { useStore } from "@/lib/mockData";
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
 import {
   Dialog,
   DialogContent,
@@ -43,13 +41,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -440,13 +431,13 @@ export default function StandSetup() {
   if (!currentUser || !['Developer', 'Admin', 'Management', 'Warehouse', 'Kitchen'].includes(currentUser.role)) {
     return (
       <AnimatedBackground>
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="min-h-screen flex items-center justify-center p-4" data-testid="access-restricted">
           <GlassCard className="max-w-md w-full">
             <GlassCardContent className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-slate-200 mb-2">Access Restricted</h2>
               <p className="text-slate-400 mb-4">Stand setup is only available for managers.</p>
-              <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600">
+              <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-return-home">
                 Return Home
               </Button>
             </GlassCardContent>
@@ -455,6 +446,75 @@ export default function StandSetup() {
       </AnimatedBackground>
     );
   }
+
+  const configuredCount = standsWithTemplates.length;
+  const unconfiguredCount = stands.length - configuredCount;
+
+  const metricsCards = [
+    <div key="total" className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid="metric-total-stands">
+      <Store className="h-4 w-4 text-cyan-400 mb-1" />
+      <div className="text-lg font-bold text-slate-200">{stands.length}</div>
+      <div className="text-xs text-slate-500">Total Stands</div>
+    </div>,
+    <div key="configured" className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 min-w-[120px]" data-testid="metric-configured">
+      <CheckCircle2 className="h-4 w-4 text-emerald-400 mb-1" />
+      <div className="text-lg font-bold text-emerald-400">{configuredCount}</div>
+      <div className="text-xs text-slate-500">Configured</div>
+    </div>,
+    <div key="pending" className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 min-w-[120px]" data-testid="metric-pending">
+      <XCircle className="h-4 w-4 text-amber-400 mb-1" />
+      <div className="text-lg font-bold text-amber-400">{unconfiguredCount}</div>
+      <div className="text-xs text-slate-500">Pending</div>
+    </div>,
+    <div key="items" className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid="metric-items">
+      <Package className="h-4 w-4 text-cyan-400 mb-1" />
+      <div className="text-lg font-bold text-slate-200">{allItems.length}</div>
+      <div className="text-xs text-slate-500">Total Items</div>
+    </div>
+  ];
+
+  const standCards = filteredStands.map(stand => (
+    <motion.div
+      key={stand.id}
+      whileTap={{ scale: 0.98 }}
+      onClick={() => selectStand(stand)}
+      className={`p-3 rounded-lg border cursor-pointer transition-all min-w-[160px] ${
+        selectedStand?.id === stand.id
+          ? 'bg-cyan-500/20 border-cyan-500/50'
+          : 'bg-white/5 border-white/10 hover:bg-white/10'
+      }`}
+      data-testid={`stand-card-${stand.id}`}
+    >
+      <div className="flex items-center justify-between mb-1">
+        <span className="font-medium text-slate-200 text-sm truncate">{stand.name}</span>
+        {hasTemplate(stand.id) ? (
+          <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
+        ) : (
+          <XCircle className="h-4 w-4 text-slate-500 shrink-0" />
+        )}
+      </div>
+      <div className="text-xs text-slate-500">{stand.id}</div>
+    </motion.div>
+  ));
+
+  const procedureItems = [
+    {
+      title: "📋 Scan Count Sheet",
+      content: "Use the camera to scan a paper count sheet. The AI will extract items and add them to the template automatically."
+    },
+    {
+      title: "➕ Add Items Manually",
+      content: "Browse the item catalog and select items to add to the stand's inventory template one by one."
+    },
+    {
+      title: "🔄 Edit Template",
+      content: "Remove items from the template by clicking the trash icon next to each item. Changes are saved automatically."
+    },
+    {
+      title: "✅ Verify Setup",
+      content: "Once configured, the stand will show a green checkmark. Staff can then use this template for event counts."
+    }
+  ];
 
   return (
     <AnimatedBackground>
@@ -475,204 +535,99 @@ export default function StandSetup() {
         />
 
         <main className="container mx-auto p-4">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-1">
-              <GlassCard data-testid="card-stand-list">
-                <GlassCardHeader className="pb-2">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-cyan-500/20">
-                      <Store className="h-4 w-4 text-cyan-400" />
-                    </div>
-                    <span className="font-bold text-sm text-slate-200">
-                      Select a Stand
-                    </span>
-                  </div>
-                </GlassCardHeader>
-                <GlassCardContent className="pt-0">
-                  <div className="relative mb-3">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      placeholder="Search stands..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10 bg-white/5 border-white/10 text-slate-200"
-                      data-testid="input-search-stands"
-                    />
-                  </div>
+          <LayoutShell className="gap-3">
+            <BentoCard span={12} className="p-2" data-testid="metrics-carousel-card">
+              <CarouselRail items={metricsCards} title="Setup Overview" data-testid="metrics-carousel" />
+            </BentoCard>
 
-                  <ScrollArea className="h-[400px]">
-                    <div className="space-y-2 pr-2">
-                      {loading ? (
-                        <div className="flex items-center justify-center py-8">
-                          <Loader2 className="h-6 w-6 text-cyan-400 animate-spin" />
-                        </div>
-                      ) : (
-                        filteredStands.map(stand => (
-                          <motion.div
-                            key={stand.id}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => selectStand(stand)}
-                            className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                              selectedStand?.id === stand.id
-                                ? 'bg-cyan-500/20 border-cyan-500/50'
-                                : 'bg-white/5 border-white/10 hover:bg-white/10'
-                            }`}
-                            data-testid={`stand-${stand.id}`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <div className="font-medium text-slate-200 text-sm">{stand.name}</div>
-                                <div className="text-xs text-slate-500">{stand.id}</div>
-                              </div>
-                              {hasTemplate(stand.id) ? (
-                                <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                              ) : (
-                                <XCircle className="h-4 w-4 text-slate-500" />
-                              )}
-                            </div>
-                          </motion.div>
-                        ))
-                      )}
-                    </div>
-                  </ScrollArea>
+            <BentoCard span={12} className="lg:col-span-5" data-testid="stands-carousel-card">
+              <div className="mb-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Search stands..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 bg-white/5 border-white/10 text-slate-200"
+                    data-testid="input-search-stands"
+                  />
+                </div>
+              </div>
+              <CarouselRail items={standCards} showDots data-testid="stands-carousel" />
+            </BentoCard>
 
-                  <div className="mt-3 pt-3 border-t border-white/10">
-                    <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span>Configured: {standsWithTemplates.length}</span>
-                      <span>Total: {stands.length}</span>
-                    </div>
-                  </div>
-                </GlassCardContent>
-              </GlassCard>
-            </div>
-
-            <div className="lg:col-span-2">
+            <BentoCard span={12} rowSpan={2} className="lg:col-span-4" data-testid="equipment-grid-card">
               {selectedStand ? (
-                <GlassCard data-testid="card-stand-config">
-                  <GlassCardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="p-1.5 rounded-lg bg-cyan-500/20">
-                          <Settings className="h-4 w-4 text-cyan-400" />
-                        </div>
-                        <div>
-                          <span className="font-bold text-sm text-slate-200">
-                            {selectedStand.name}
-                          </span>
-                          <span className="text-xs text-slate-500 ml-2">({selectedStand.id})</span>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => setAddItemsDialogOpen(true)}
-                          className="border-white/20 text-slate-300"
-                          data-testid="button-add-items"
-                        >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Add Items
-                        </Button>
-                        <GlowButton
-                          variant="cyan"
-                          size="sm"
-                          onClick={() => setScanDialogOpen(true)}
-                          data-testid="button-scan-template"
-                        >
-                          <ScanLine className="h-4 w-4 mr-1" />
-                          Scan Sheet
-                        </GlowButton>
-                      </div>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Settings className="h-4 w-4 text-cyan-400" />
+                      <span className="font-medium text-slate-200 text-sm">{selectedStand.name}</span>
+                      <span className="text-xs text-slate-500">({selectedStand.id})</span>
                     </div>
-                  </GlassCardHeader>
-                  <GlassCardContent className="pt-0">
-                    {loadingStandItems ? (
-                      <div className="flex items-center justify-center py-12">
-                        <Loader2 className="h-6 w-6 text-cyan-400 animate-spin" />
-                      </div>
-                    ) : standItems.length === 0 ? (
-                      <div className="text-center py-12">
-                        <Package className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                        <p className="text-slate-400 mb-2">No inventory template configured</p>
-                        <p className="text-sm text-slate-500 mb-4">
-                          Scan a count sheet or add items manually to create this stand's inventory template
-                        </p>
-                        <div className="flex justify-center gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setAddItemsDialogOpen(true)}
-                            className="border-white/20 text-slate-300"
-                          >
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Items
-                          </Button>
-                          <GlowButton variant="cyan" onClick={() => setScanDialogOpen(true)}>
-                            <ScanLine className="h-4 w-4 mr-2" />
-                            Scan Count Sheet
-                          </GlowButton>
-                        </div>
-                      </div>
-                    ) : (
-                      <ScrollArea className="h-[400px]">
-                        <div className="space-y-2 pr-2">
-                          {standItems.map((si, idx) => (
-                            <motion.div
-                              key={si.id}
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: idx * 0.02 }}
-                              className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10"
-                              data-testid={`stand-item-${si.itemId}`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <span className="text-xs text-slate-500 w-6">{idx + 1}</span>
-                                <div>
-                                  <div className="font-medium text-slate-200 text-sm">{si.item.name}</div>
-                                  <Badge variant="outline" className="text-[10px] border-white/20 text-slate-400">
-                                    {si.item.category}
-                                  </Badge>
-                                </div>
-                              </div>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-red-400 hover:bg-red-500/10"
-                                onClick={() => removeStandItem(si.itemId)}
-                                data-testid={`button-remove-${si.itemId}`}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </motion.div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    )}
+                    <div className="flex gap-1">
+                      <Button size="sm" variant="outline" onClick={() => setAddItemsDialogOpen(true)} className="border-white/20 text-slate-300 h-7 text-xs" data-testid="button-add-items">
+                        <Plus className="h-3 w-3 mr-1" />Add
+                      </Button>
+                      <GlowButton variant="cyan" size="sm" onClick={() => setScanDialogOpen(true)} className="h-7 text-xs" data-testid="button-scan-template">
+                        <ScanLine className="h-3 w-3 mr-1" />Scan
+                      </GlowButton>
+                    </div>
+                  </div>
 
-                    {standItems.length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs text-slate-400">
-                        <span>{standItems.length} items in template</span>
-                        <Badge className="bg-emerald-500/20 text-emerald-400">
-                          Template Active
-                        </Badge>
-                      </div>
-                    )}
-                  </GlassCardContent>
-                </GlassCard>
-              ) : (
-                <GlassCard className="h-full">
-                  <GlassCardContent className="flex items-center justify-center h-full min-h-[400px]">
-                    <div className="text-center">
-                      <Store className="h-16 w-16 text-slate-600 mx-auto mb-4" />
-                      <p className="text-slate-400 text-lg mb-2">Select a Stand</p>
-                      <p className="text-sm text-slate-500">
-                        Choose a stand from the list to configure its inventory template
-                      </p>
+                  {loadingStandItems ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 text-cyan-400 animate-spin" />
                     </div>
-                  </GlassCardContent>
-                </GlassCard>
+                  ) : standItems.length === 0 ? (
+                    <div className="text-center py-8" data-testid="empty-template">
+                      <Package className="h-10 w-10 text-slate-600 mx-auto mb-2" />
+                      <p className="text-slate-400 text-sm mb-2">No template configured</p>
+                      <p className="text-xs text-slate-500">Scan a sheet or add items manually</p>
+                    </div>
+                  ) : (
+                    <ScrollArea className="h-[280px]" data-testid="items-scroll-area">
+                      <div className="space-y-1 pr-2">
+                        {standItems.map((si, idx) => (
+                          <div key={si.id} className="flex items-center justify-between p-2 bg-white/5 rounded border border-white/10" data-testid={`stand-item-${si.itemId}`}>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] text-slate-500 w-4">{idx + 1}</span>
+                              <div>
+                                <div className="font-medium text-slate-200 text-xs">{si.item.name}</div>
+                                <Badge variant="outline" className="text-[10px] border-white/20 text-slate-400">{si.item.category}</Badge>
+                              </div>
+                            </div>
+                            <Button size="sm" variant="ghost" className="text-red-400 hover:bg-red-500/10 h-6 w-6 p-0" onClick={() => removeStandItem(si.itemId)} data-testid={`button-remove-${si.itemId}`}>
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  )}
+
+                  {standItems.length > 0 && (
+                    <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-white/10" data-testid="template-status">
+                      <span>{standItems.length} items</span>
+                      <Badge className="bg-emerald-500/20 text-emerald-400 text-[10px]">Active</Badge>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full min-h-[200px]" data-testid="no-stand-selected">
+                  <div className="text-center">
+                    <Store className="h-12 w-12 text-slate-600 mx-auto mb-3" />
+                    <p className="text-slate-400 text-sm">Select a Stand</p>
+                    <p className="text-xs text-slate-500">Choose from the carousel above</p>
+                  </div>
+                </div>
               )}
-            </div>
-          </div>
+            </BentoCard>
+
+            <BentoCard span={12} className="lg:col-span-3" data-testid="procedures-accordion-card">
+              <AccordionStack items={procedureItems} defaultOpen={[0]} />
+            </BentoCard>
+          </LayoutShell>
         </main>
 
         <Dialog open={scanDialogOpen} onOpenChange={setScanDialogOpen}>
@@ -704,17 +659,10 @@ export default function StandSetup() {
                     />
                   </div>
                   <div className="flex gap-2">
-                    <Button 
-                      onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
-                      variant="outline"
-                      className="border-white/20 text-slate-300"
-                    >
+                    <Button onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')} variant="outline" className="border-white/20 text-slate-300" data-testid="button-switch-camera">
                       <SwitchCamera className="h-4 w-4" />
                     </Button>
-                    <Button 
-                      onClick={captureImage}
-                      className="flex-1 bg-cyan-500 hover:bg-cyan-600"
-                    >
+                    <Button onClick={captureImage} className="flex-1 bg-cyan-500 hover:bg-cyan-600" data-testid="button-capture">
                       <Camera className="h-4 w-4 mr-2" />
                       Capture
                     </Button>
@@ -728,18 +676,11 @@ export default function StandSetup() {
                   
                   {!scanResult && !isScanning && (
                     <div className="flex gap-2">
-                      <Button 
-                        onClick={retakePhoto}
-                        variant="outline"
-                        className="border-white/20 text-slate-300"
-                      >
+                      <Button onClick={retakePhoto} variant="outline" className="border-white/20 text-slate-300" data-testid="button-retake">
                         <RotateCcw className="h-4 w-4 mr-2" />
                         Retake
                       </Button>
-                      <Button 
-                        onClick={scanCountSheet}
-                        className="flex-1 bg-cyan-500 hover:bg-cyan-600"
-                      >
+                      <Button onClick={scanCountSheet} className="flex-1 bg-cyan-500 hover:bg-cyan-600" data-testid="button-scan">
                         <ScanLine className="h-4 w-4 mr-2" />
                         Scan Sheet
                       </Button>
@@ -747,14 +688,14 @@ export default function StandSetup() {
                   )}
 
                   {isScanning && (
-                    <div className="flex items-center justify-center py-4">
+                    <div className="flex items-center justify-center py-4" data-testid="scanning-indicator">
                       <Loader2 className="h-6 w-6 text-cyan-400 animate-spin mr-2" />
                       <span className="text-slate-300">Reading count sheet...</span>
                     </div>
                   )}
 
                   {scanError && (
-                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
+                    <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg" data-testid="scan-error">
                       <div className="flex items-center gap-2 text-red-400">
                         <AlertCircle className="h-4 w-4" />
                         <span className="text-sm">{scanError}</span>
@@ -763,40 +704,20 @@ export default function StandSetup() {
                   )}
 
                   {scanResult && (
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-testid="scan-results">
                       <div className="text-sm text-slate-400">
                         Found {scanResult.length} items. Select items to include in template:
                       </div>
                       <ScrollArea className="h-[200px] pr-2">
                         <div className="space-y-2">
                           {scanResult.map((item, index) => (
-                            <div 
-                              key={index}
-                              className={`flex items-center gap-3 p-2 rounded-lg border ${
-                                selectedScannedItems.has(index)
-                                  ? 'bg-cyan-500/20 border-cyan-500/30'
-                                  : 'bg-white/5 border-white/10'
-                              }`}
-                            >
-                              <Checkbox
-                                checked={selectedScannedItems.has(index)}
-                                onCheckedChange={() => toggleScannedItem(index)}
-                              />
+                            <div key={index} className={`flex items-center gap-3 p-2 rounded-lg border ${selectedScannedItems.has(index) ? 'bg-cyan-500/20 border-cyan-500/30' : 'bg-white/5 border-white/10'}`} data-testid={`scanned-item-${index}`}>
+                              <Checkbox checked={selectedScannedItems.has(index)} onCheckedChange={() => toggleScannedItem(index)} />
                               <div className="flex-1 min-w-0">
-                                <div className="font-medium text-slate-200 text-sm truncate">
-                                  {item.name}
-                                </div>
-                                <div className="text-xs text-slate-500">
-                                  Category: {guessCategory(item.name)}
-                                </div>
+                                <div className="font-medium text-slate-200 text-sm truncate">{item.name}</div>
+                                <div className="text-xs text-slate-500">Category: {guessCategory(item.name)}</div>
                               </div>
-                              <Badge 
-                                className={`text-[10px] ${
-                                  item.confidence === 'high' ? 'bg-emerald-500/20 text-emerald-400' :
-                                  item.confidence === 'medium' ? 'bg-amber-500/20 text-amber-400' :
-                                  'bg-red-500/20 text-red-400'
-                                }`}
-                              >
+                              <Badge className={`text-[10px] ${item.confidence === 'high' ? 'bg-emerald-500/20 text-emerald-400' : item.confidence === 'medium' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400'}`}>
                                 {item.confidence}
                               </Badge>
                             </div>
@@ -804,18 +725,8 @@ export default function StandSetup() {
                         </div>
                       </ScrollArea>
                       <div className="flex gap-2">
-                        <Button 
-                          onClick={retakePhoto}
-                          variant="outline"
-                          className="border-white/20 text-slate-300"
-                        >
-                          Scan Another
-                        </Button>
-                        <Button 
-                          onClick={processScannedItems}
-                          className="flex-1 bg-cyan-500 hover:bg-cyan-600"
-                          disabled={selectedScannedItems.size === 0}
-                        >
+                        <Button onClick={retakePhoto} variant="outline" className="border-white/20 text-slate-300" data-testid="button-scan-another">Scan Another</Button>
+                        <Button onClick={processScannedItems} className="flex-1 bg-cyan-500 hover:bg-cyan-600" disabled={selectedScannedItems.size === 0} data-testid="button-create-template">
                           <Check className="h-4 w-4 mr-2" />
                           Create Template ({selectedScannedItems.size} items)
                         </Button>
@@ -840,12 +751,7 @@ export default function StandSetup() {
             <div className="space-y-4 mt-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                  placeholder="Search items..."
-                  value={itemSearchQuery}
-                  onChange={(e) => setItemSearchQuery(e.target.value)}
-                  className="pl-10 bg-white/5 border-white/10 text-slate-200"
-                />
+                <Input placeholder="Search items..." value={itemSearchQuery} onChange={(e) => setItemSearchQuery(e.target.value)} className="pl-10 bg-white/5 border-white/10 text-slate-200" data-testid="input-search-items" />
               </div>
 
               <ScrollArea className="h-[300px] pr-2">
@@ -853,32 +759,13 @@ export default function StandSetup() {
                   {filteredItemsForAdd.map(item => {
                     const isExisting = existingItemIds.has(item.id);
                     return (
-                      <div 
-                        key={item.id}
-                        className={`flex items-center gap-3 p-2 rounded-lg border ${
-                          isExisting
-                            ? 'bg-emerald-500/10 border-emerald-500/30'
-                            : selectedItemsToAdd.has(item.id)
-                              ? 'bg-cyan-500/20 border-cyan-500/30'
-                              : 'bg-white/5 border-white/10'
-                        }`}
-                      >
-                        <Checkbox
-                          checked={isExisting || selectedItemsToAdd.has(item.id)}
-                          disabled={isExisting}
-                          onCheckedChange={() => toggleItemToAdd(item.id)}
-                        />
+                      <div key={item.id} className={`flex items-center gap-3 p-2 rounded-lg border ${isExisting ? 'bg-emerald-500/10 border-emerald-500/30' : selectedItemsToAdd.has(item.id) ? 'bg-cyan-500/20 border-cyan-500/30' : 'bg-white/5 border-white/10'}`} data-testid={`add-item-${item.id}`}>
+                        <Checkbox checked={isExisting || selectedItemsToAdd.has(item.id)} disabled={isExisting} onCheckedChange={() => toggleItemToAdd(item.id)} />
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-slate-200 text-sm truncate">
-                            {item.name}
-                          </div>
-                          <Badge variant="outline" className="text-[10px] border-white/20 text-slate-400">
-                            {item.category}
-                          </Badge>
+                          <div className="font-medium text-slate-200 text-sm truncate">{item.name}</div>
+                          <Badge variant="outline" className="text-[10px] border-white/20 text-slate-400">{item.category}</Badge>
                         </div>
-                        {isExisting && (
-                          <span className="text-xs text-emerald-400">In template</span>
-                        )}
+                        {isExisting && <span className="text-xs text-emerald-400">In template</span>}
                       </div>
                     );
                   })}
@@ -887,14 +774,8 @@ export default function StandSetup() {
             </div>
 
             <DialogFooter className="mt-4">
-              <Button variant="ghost" onClick={() => setAddItemsDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={addSelectedItems}
-                className="bg-cyan-500 hover:bg-cyan-600"
-                disabled={selectedItemsToAdd.size === 0}
-              >
+              <Button variant="ghost" onClick={() => setAddItemsDialogOpen(false)} data-testid="button-cancel-add">Cancel</Button>
+              <Button onClick={addSelectedItems} className="bg-cyan-500 hover:bg-cyan-600" disabled={selectedItemsToAdd.size === 0} data-testid="button-confirm-add">
                 Add {selectedItemsToAdd.size} Items
               </Button>
             </DialogFooter>

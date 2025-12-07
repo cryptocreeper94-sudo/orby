@@ -18,7 +18,9 @@ import {
   AlertCircle,
   FileStack,
   BookOpen,
-  ScanLine
+  ScanLine,
+  Files,
+  TrendingUp
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -28,7 +30,6 @@ import {
   AnimatedBackground, 
   GlassCard, 
   GlassCardContent, 
-  GlassCardHeader, 
   PageHeader,
   GlowButton
 } from "@/components/ui/premium";
@@ -44,15 +45,15 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EventReportBuilder } from "@/components/EventReportBuilder";
 import { UniversalDocumentScanner } from "@/components/UniversalDocumentScanner";
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
+import { cn } from "@/lib/utils";
 
 type DocumentCategory = 'count_report' | 'incident' | 'violation' | 'closing' | 'other';
 
@@ -76,31 +77,11 @@ interface Stand {
 }
 
 const CATEGORY_CONFIG: Record<string, { label: string; icon: any; color: string }> = {
-  count_report: {
-    label: 'Count Reports',
-    icon: ClipboardList,
-    color: 'cyan'
-  },
-  incident: {
-    label: 'Incidents',
-    icon: AlertTriangle,
-    color: 'amber'
-  },
-  violation: {
-    label: 'Violations',
-    icon: Wine,
-    color: 'red'
-  },
-  closing: {
-    label: 'Closing Docs',
-    icon: FileText,
-    color: 'purple'
-  },
-  other: {
-    label: 'Other',
-    icon: FolderOpen,
-    color: 'slate'
-  }
+  count_report: { label: 'Count Reports', icon: ClipboardList, color: 'cyan' },
+  incident: { label: 'Incidents', icon: AlertTriangle, color: 'amber' },
+  violation: { label: 'Violations', icon: Wine, color: 'red' },
+  closing: { label: 'Closing Docs', icon: FileText, color: 'purple' },
+  other: { label: 'Other', icon: FolderOpen, color: 'slate' }
 };
 
 const normalizeCategory = (category: string): DocumentCategory => {
@@ -212,16 +193,9 @@ export default function DocumentHub() {
       await fetch(`/api/manager-documents/${id}`, { method: 'DELETE' });
       setDocuments(prev => prev.filter(d => d.id !== id));
       setViewingDoc(null);
-      toast({
-        title: "Deleted",
-        description: "Document has been removed.",
-      });
+      toast({ title: "Deleted", description: "Document has been removed." });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete document.",
-        variant: "destructive"
-      });
+      toast({ title: "Error", description: "Failed to delete document.", variant: "destructive" });
     }
   };
 
@@ -246,6 +220,49 @@ export default function DocumentHub() {
       </AnimatedBackground>
     );
   }
+
+  const docMetrics = [
+    { label: "Total Documents", value: documents.length, icon: <Files className="h-4 w-4 text-cyan-400" /> },
+    { label: "Count Reports", value: documentsByCategory['count_report']?.length || 0, icon: <ClipboardList className="h-4 w-4 text-blue-400" /> },
+    { label: "Incidents", value: documentsByCategory['incident']?.length || 0, icon: <AlertTriangle className="h-4 w-4 text-amber-400" /> },
+    { label: "Violations", value: documentsByCategory['violation']?.length || 0, icon: <Wine className="h-4 w-4 text-red-400" /> },
+    { label: "This Week", value: documents.filter(d => new Date(d.createdAt) > new Date(Date.now() - 7*24*60*60*1000)).length, icon: <TrendingUp className="h-4 w-4 text-green-400" /> },
+  ];
+
+  const policyItems = [
+    {
+      title: "Document Retention",
+      content: (
+        <ul className="space-y-1 text-xs">
+          <li>• Count reports: 90 days</li>
+          <li>• Incidents: 1 year minimum</li>
+          <li>• Violations: 3 years</li>
+          <li>• Closing docs: 90 days</li>
+        </ul>
+      )
+    },
+    {
+      title: "Access Levels",
+      content: (
+        <ul className="space-y-1 text-xs">
+          <li>• Managers: Full access</li>
+          <li>• Supervisors: View only</li>
+          <li>• Staff: No access</li>
+          <li>• Auditors: Read-only export</li>
+        </ul>
+      )
+    },
+    {
+      title: "Submission Guidelines",
+      content: (
+        <p className="text-xs">
+          All documents must include the event date, stand ID (if applicable), 
+          and submitter information. Use descriptive titles and include 
+          relevant notes for context.
+        </p>
+      )
+    },
+  ];
 
   return (
     <AnimatedBackground>
@@ -285,50 +302,66 @@ export default function DocumentHub() {
           }
         />
 
-        <main className="container mx-auto p-4 max-w-6xl">
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3 mb-6">
-            {Object.entries(CATEGORY_CONFIG).map(([key, config]) => {
-              const count = documentsByCategory[key]?.length || 0;
-              const Icon = config.icon;
-              const isSelected = selectedCategory === key;
-              return (
-                <motion.div
-                  key={key}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedCategory(isSelected ? 'all' : key as DocumentCategory)}
-                  className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                    isSelected
-                      ? `bg-${config.color}-500/20 border-${config.color}-500/50`
-                      : 'bg-white/5 border-white/10 hover:bg-white/10'
-                  }`}
-                  data-testid={`category-${key}`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Icon className={`h-5 w-5 text-${config.color}-400`} />
-                    <span className="text-sm font-medium text-slate-200">{count}</span>
+        <main className="container mx-auto p-3 max-w-7xl">
+          <LayoutShell className="gap-3">
+            <BentoCard span={12} title="Document Metrics" data-testid="card-metrics">
+              <CarouselRail
+                items={docMetrics.map((metric, idx) => (
+                  <div key={idx} className="w-32 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50" data-testid={`metric-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      {metric.icon}
+                    </div>
+                    <p className="text-lg font-bold text-white">{metric.value}</p>
+                    <p className="text-[10px] text-slate-400">{metric.label}</p>
                   </div>
-                  <p className="text-xs text-slate-400 mt-1">{config.label}</p>
-                </motion.div>
-              );
-            })}
-          </div>
+                ))}
+                showDots
+              />
+            </BentoCard>
 
-          <GlassCard className="mb-4">
-            <GlassCardContent className="py-3">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
+            <BentoCard span={12} title="Categories" data-testid="card-categories">
+              <CarouselRail
+                items={Object.entries(CATEGORY_CONFIG).map(([key, config]) => {
+                  const count = documentsByCategory[key]?.length || 0;
+                  const Icon = config.icon;
+                  const isSelected = selectedCategory === key;
+                  return (
+                    <div
+                      key={key}
+                      onClick={() => setSelectedCategory(isSelected ? 'all' : key as DocumentCategory)}
+                      className={cn(
+                        "w-28 p-3 rounded-lg border cursor-pointer transition-all",
+                        isSelected
+                          ? `bg-${config.color}-500/20 border-${config.color}-500/50`
+                          : 'bg-slate-800/50 border-slate-700/50 hover:bg-slate-800'
+                      )}
+                      data-testid={`category-${key}`}
+                    >
+                      <div className="flex items-center gap-2 mb-1">
+                        <Icon className={`h-4 w-4 text-${config.color}-400`} />
+                        <span className="text-sm font-bold text-white">{count}</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400">{config.label}</p>
+                    </div>
+                  );
+                })}
+              />
+            </BentoCard>
+
+            <BentoCard span={12} data-testid="card-filters">
+              <div className="flex flex-wrap gap-2 items-center">
+                <div className="relative flex-1 min-w-[200px]">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input
                     placeholder="Search documents..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-white/5 border-white/10 text-slate-200"
+                    className="pl-10 bg-slate-800/50 border-slate-700/50 text-slate-200 h-9"
                     data-testid="input-search"
                   />
                 </div>
-                
                 <Select value={selectedStand} onValueChange={setSelectedStand}>
-                  <SelectTrigger className="w-full sm:w-[180px] bg-white/5 border-white/10">
+                  <SelectTrigger className="w-[150px] bg-slate-800/50 border-slate-700/50 h-9" data-testid="select-stand">
                     <Store className="h-4 w-4 mr-2 text-slate-400" />
                     <SelectValue placeholder="All Stands" />
                   </SelectTrigger>
@@ -339,140 +372,87 @@ export default function DocumentHub() {
                     ))}
                   </SelectContent>
                 </Select>
-
                 <Input
                   type="date"
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
-                  className="w-full sm:w-[160px] bg-white/5 border-white/10 text-slate-200"
+                  className="w-[140px] bg-slate-800/50 border-slate-700/50 text-slate-200 h-9"
                   data-testid="input-date-filter"
                 />
-
                 {(searchQuery || selectedCategory !== 'all' || selectedStand !== 'all' || dateFilter) && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => {
-                      setSearchQuery('');
-                      setSelectedCategory('all');
-                      setSelectedStand('all');
-                      setDateFilter('');
-                    }}
-                    className="text-slate-400"
+                    onClick={() => { setSearchQuery(''); setSelectedCategory('all'); setSelectedStand('all'); setDateFilter(''); }}
+                    className="text-slate-400 h-9"
+                    data-testid="button-clear-filters"
                   >
                     Clear
                   </Button>
                 )}
               </div>
-            </GlassCardContent>
-          </GlassCard>
+            </BentoCard>
 
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 text-cyan-400 animate-spin" />
-            </div>
-          ) : filteredDocuments.length === 0 ? (
-            <GlassCard>
-              <GlassCardContent className="text-center py-12">
-                <FolderOpen className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-400 mb-2">No documents found</p>
-                <p className="text-sm text-slate-500">
-                  {documents.length === 0 
-                    ? "Reports will appear here as they're generated"
-                    : "Try adjusting your filters"
-                  }
-                </p>
-              </GlassCardContent>
-            </GlassCard>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm text-slate-400 px-2">
-                <span>{filteredDocuments.length} document{filteredDocuments.length !== 1 ? 's' : ''}</span>
-                <span>Sorted by date</span>
-              </div>
-              
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-2 pr-2">
-                  <AnimatePresence mode="popLayout">
-                    {filteredDocuments.map((doc, idx) => {
-                      const config = CATEGORY_CONFIG[doc.category] || CATEGORY_CONFIG.other;
+            <BentoCard span={8} title={`Recent Documents (${filteredDocuments.length})`} rowSpan={2} data-testid="card-documents">
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 text-cyan-400 animate-spin" />
+                </div>
+              ) : filteredDocuments.length === 0 ? (
+                <div className="text-center py-8">
+                  <FolderOpen className="h-10 w-10 text-slate-600 mx-auto mb-2" />
+                  <p className="text-slate-400 text-sm">No documents found</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {documents.length === 0 ? "Reports will appear here" : "Try adjusting filters"}
+                  </p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[320px]">
+                  <div className="space-y-2 pr-2">
+                    {filteredDocuments.map((doc) => {
+                      const config = CATEGORY_CONFIG[normalizeCategory(doc.category)] || CATEGORY_CONFIG.other;
                       const Icon = config.icon;
                       return (
                         <motion.div
                           key={doc.id}
-                          initial={{ opacity: 0, y: 10 }}
+                          initial={{ opacity: 0, y: 5 }}
                           animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ delay: idx * 0.02 }}
                           onClick={() => setViewingDoc(doc)}
-                          className="p-3 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 cursor-pointer transition-all"
+                          className="p-2 bg-slate-800/30 rounded-lg border border-slate-700/30 hover:bg-slate-800/50 cursor-pointer transition-all"
                           data-testid={`doc-${doc.id}`}
                         >
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg bg-${config.color}-500/20`}>
-                              <Icon className={`h-4 w-4 text-${config.color}-400`} />
+                          <div className="flex items-center gap-2">
+                            <div className={`p-1.5 rounded bg-${config.color}-500/20`}>
+                              <Icon className={`h-3 w-3 text-${config.color}-400`} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium text-slate-200 text-sm truncate">
-                                  {doc.title}
-                                </h3>
-                                {doc.subcategory && (
-                                  <Badge variant="outline" className="text-[10px] border-white/20 text-slate-400">
-                                    {doc.subcategory}
-                                  </Badge>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-                                {doc.standId && (
-                                  <span className="flex items-center gap-1">
-                                    <Store className="h-3 w-3" />
-                                    {getStandName(doc.standId)}
-                                  </span>
-                                )}
-                                {doc.eventDate && (
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="h-3 w-3" />
-                                    {doc.eventDate}
-                                  </span>
-                                )}
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  {formatDate(doc.createdAt)}
-                                </span>
+                              <p className="text-xs font-medium text-slate-200 truncate">{doc.title}</p>
+                              <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                                {doc.standId && <span>{getStandName(doc.standId)}</span>}
+                                <span>{formatDate(doc.createdAt)}</span>
                               </div>
                             </div>
                             <div className="flex items-center gap-1">
                               {doc.pdfUrl && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-8 w-8 p-0"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    window.open(doc.pdfUrl, '_blank');
-                                  }}
-                                >
-                                  <Download className="h-4 w-4 text-cyan-400" />
+                                <Button size="icon" variant="ghost" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); window.open(doc.pdfUrl, '_blank'); }}>
+                                  <Download className="h-3 w-3 text-cyan-400" />
                                 </Button>
                               )}
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 w-8 p-0"
-                              >
-                                <Eye className="h-4 w-4 text-slate-400" />
-                              </Button>
+                              <Eye className="h-3 w-3 text-slate-400" />
                             </div>
                           </div>
                         </motion.div>
                       );
                     })}
-                  </AnimatePresence>
-                </div>
-              </ScrollArea>
-            </div>
-          )}
+                  </div>
+                </ScrollArea>
+              )}
+            </BentoCard>
+
+            <BentoCard span={4} title="Policies" rowSpan={2} data-testid="card-policies">
+              <AccordionStack items={policyItems} defaultOpen={[0]} />
+            </BentoCard>
+          </LayoutShell>
         </main>
 
         <Dialog open={!!viewingDoc} onOpenChange={() => setViewingDoc(null)}>
@@ -483,8 +463,8 @@ export default function DocumentHub() {
                 {viewingDoc?.title}
               </DialogTitle>
               {viewingDoc?.category && (
-                <Badge className={`w-fit bg-${CATEGORY_CONFIG[viewingDoc.category].color}-500/20 text-${CATEGORY_CONFIG[viewingDoc.category].color}-300`}>
-                  {CATEGORY_CONFIG[viewingDoc.category].label}
+                <Badge className={`w-fit bg-${CATEGORY_CONFIG[normalizeCategory(viewingDoc.category)].color}-500/20 text-${CATEGORY_CONFIG[normalizeCategory(viewingDoc.category)].color}-300`}>
+                  {CATEGORY_CONFIG[normalizeCategory(viewingDoc.category)].label}
                 </Badge>
               )}
             </DialogHeader>
@@ -536,11 +516,7 @@ export default function DocumentHub() {
 
                 <div className="flex gap-2 pt-2">
                   {viewingDoc.pdfUrl && (
-                    <GlowButton
-                      variant="cyan"
-                      className="flex-1"
-                      onClick={() => window.open(viewingDoc.pdfUrl, '_blank')}
-                    >
+                    <GlowButton variant="cyan" className="flex-1" onClick={() => window.open(viewingDoc.pdfUrl, '_blank')}>
                       <Download className="h-4 w-4 mr-2" />
                       Download PDF
                     </GlowButton>
@@ -549,6 +525,7 @@ export default function DocumentHub() {
                     variant="outline"
                     className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                     onClick={() => viewingDoc && deleteDocument(viewingDoc.id)}
+                    data-testid="button-delete-doc"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -558,20 +535,12 @@ export default function DocumentHub() {
           </DialogContent>
         </Dialog>
 
-        {/* Event Report Builder */}
-        <EventReportBuilder
-          isOpen={showReportBuilder}
-          onClose={() => setShowReportBuilder(false)}
-        />
+        <EventReportBuilder isOpen={showReportBuilder} onClose={() => setShowReportBuilder(false)} />
 
-        {/* Universal Document Scanner */}
         {showScanner && (
           <UniversalDocumentScanner
             onClose={() => setShowScanner(false)}
-            onDocumentSaved={() => {
-              fetchData();
-              setShowScanner(false);
-            }}
+            onDocumentSaved={() => { fetchData(); setShowScanner(false); }}
           />
         )}
       </div>

@@ -8,8 +8,7 @@ import {
   RefreshCw, MapPin, Gauge, CloudRain, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { GlassCard } from '@/components/ui/premium';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from '@/components/ui/bento';
 
 interface WeatherData {
   location: { city: string; state?: string; country: string; lat: number; lon: number };
@@ -36,8 +35,6 @@ const NISSAN_STADIUM = { lat: 36.1665, lon: -86.7713 };
 
 export default function WeatherMapPage() {
   const [, navigate] = useLocation();
-  const [isLandscape, setIsLandscape] = useState(false);
-  const [dataExpanded, setDataExpanded] = useState(true);
   const [mapLayer, setMapLayer] = useState<'radar' | 'temp' | 'wind' | 'precip'>('radar');
 
   const handleClose = () => {
@@ -47,15 +44,6 @@ export default function WeatherMapPage() {
       navigate('/');
     }
   };
-
-  useEffect(() => {
-    const checkOrientation = () => {
-      setIsLandscape(window.innerWidth > window.innerHeight && window.innerWidth >= 640);
-    };
-    checkOrientation();
-    window.addEventListener('resize', checkOrientation);
-    return () => window.removeEventListener('resize', checkOrientation);
-  }, []);
 
   const { data: weather, isLoading, refetch } = useQuery<WeatherData>({
     queryKey: ['/api/weather/coords', NISSAN_STADIUM.lat, NISSAN_STADIUM.lon],
@@ -68,9 +56,6 @@ export default function WeatherMapPage() {
     staleTime: 60000,
   });
 
-  const radarTimestamp = Math.floor(Date.now() / 1000);
-  const radarUrl = `https://tilecache.rainviewer.com/v2/radar/${radarTimestamp}/256/{z}/{x}/{y}/2/1_1.png`;
-
   const getWeatherEmoji = (desc: string) => {
     const d = desc.toLowerCase();
     if (d.includes('thunder') || d.includes('storm')) return '⛈️';
@@ -82,149 +67,85 @@ export default function WeatherMapPage() {
     return '🌤️';
   };
 
-  const WeatherDataPanel = () => (
-    <div className="h-full flex flex-col bg-gradient-to-b from-slate-900/95 to-slate-800/95 backdrop-blur-xl">
-      <div className="p-3 border-b border-white/10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-3 w-3 text-cyan-400" />
-            <span className="text-xs font-medium text-white">Nissan Stadium</span>
-          </div>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => refetch()}
-            className="text-white/60 hover:text-white h-6 w-6 p-0"
-            data-testid="button-refresh-weather"
-          >
-            <RefreshCw className="h-3 w-3" />
-          </Button>
-        </div>
-        
-        {weather && (
-          <div className="flex items-center gap-3 mt-2">
-            <div className="text-2xl">{getWeatherEmoji(weather.current.description)}</div>
-            <div className="flex-1">
-              <div className="flex items-baseline gap-2">
-                <span className="text-2xl font-bold text-white">{weather.current.temp}°F</span>
-                <span className="text-xs text-cyan-400">Feels {weather.current.feelsLike}°</span>
-              </div>
-              <div className="text-xs text-white/60">{weather.current.description}</div>
-            </div>
-          </div>
-        )}
-      </div>
-      
-      <ScrollArea className="flex-1 p-3">
-        {weather && (
-          <div className="space-y-3">
-            <div className="grid grid-cols-4 gap-2">
-              <GlassCard className="p-2 text-center">
-                <Wind className="h-3 w-3 text-white/60 mx-auto" />
-                <div className="text-sm font-semibold text-white">{weather.current.windSpeed}</div>
-                <div className="text-[10px] text-white/40">mph {weather.current.windDirection}</div>
-              </GlassCard>
-              
-              <GlassCard className="p-2 text-center">
-                <Droplets className="h-3 w-3 text-blue-400 mx-auto" />
-                <div className="text-sm font-semibold text-white">{weather.current.humidity}%</div>
-                <div className="text-[10px] text-white/40">Humidity</div>
-              </GlassCard>
-              
-              <GlassCard className="p-2 text-center">
-                <Eye className="h-3 w-3 text-white/60 mx-auto" />
-                <div className="text-sm font-semibold text-white">{weather.current.visibility}</div>
-                <div className="text-[10px] text-white/40">mi Vis</div>
-              </GlassCard>
-              
-              <GlassCard className="p-2 text-center">
-                <Gauge className="h-3 w-3 text-white/60 mx-auto" />
-                <div className="text-sm font-semibold text-white">{weather.current.pressure}</div>
-                <div className="text-[10px] text-white/40">in</div>
-              </GlassCard>
-            </div>
-            
-            <div>
-              <div className="text-xs font-medium text-white/60 mb-1">Hourly</div>
-              <div className="flex gap-1.5 overflow-x-auto pb-1">
-                {weather.hourly.slice(0, 8).map((hour, i) => (
-                  <GlassCard key={i} className="p-1.5 min-w-[48px] text-center shrink-0">
-                    <div className="text-[10px] text-white/60">{hour.time}</div>
-                    <div className="text-sm my-0.5">{hour.icon}</div>
-                    <div className="text-xs font-medium text-white">{hour.temp}°</div>
-                  </GlassCard>
-                ))}
-              </div>
-            </div>
-            
-            <div>
-              <div className="text-xs font-medium text-white/60 mb-1">7-Day</div>
-              <div className="space-y-1">
-                {weather.daily.slice(0, 4).map((day, i) => (
-                  <GlassCard key={i} className="p-2 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base">{day.icon}</span>
-                      <span className="text-xs font-medium text-white w-8">{day.date}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-semibold text-white">{day.tempHigh}°</span>
-                      <span className="text-[10px] text-white/40">{day.tempLow}°</span>
-                    </div>
-                  </GlassCard>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {isLoading && (
-          <div className="flex items-center justify-center h-32">
-            <RefreshCw className="h-6 w-6 text-cyan-400 animate-spin" />
-          </div>
-        )}
-      </ScrollArea>
-    </div>
-  );
+  const weatherMetrics = weather ? [
+    <div key="temp" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-temp">
+      <Thermometer className="h-5 w-5 text-orange-400 mb-1" />
+      <span className="text-xl font-bold text-white">{weather.current.temp}°F</span>
+      <span className="text-[10px] text-white/50">Temperature</span>
+    </div>,
+    <div key="feels" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-feels">
+      <Thermometer className="h-5 w-5 text-cyan-400 mb-1" />
+      <span className="text-xl font-bold text-white">{weather.current.feelsLike}°F</span>
+      <span className="text-[10px] text-white/50">Feels Like</span>
+    </div>,
+    <div key="wind" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-wind">
+      <Wind className="h-5 w-5 text-slate-400 mb-1" />
+      <span className="text-xl font-bold text-white">{weather.current.windSpeed}</span>
+      <span className="text-[10px] text-white/50">mph {weather.current.windDirection}</span>
+    </div>,
+    <div key="humidity" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-humidity">
+      <Droplets className="h-5 w-5 text-blue-400 mb-1" />
+      <span className="text-xl font-bold text-white">{weather.current.humidity}%</span>
+      <span className="text-[10px] text-white/50">Humidity</span>
+    </div>,
+    <div key="visibility" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-visibility">
+      <Eye className="h-5 w-5 text-slate-400 mb-1" />
+      <span className="text-xl font-bold text-white">{weather.current.visibility}</span>
+      <span className="text-[10px] text-white/50">mi Visibility</span>
+    </div>,
+    <div key="pressure" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-pressure">
+      <Gauge className="h-5 w-5 text-slate-400 mb-1" />
+      <span className="text-xl font-bold text-white">{weather.current.pressure}</span>
+      <span className="text-[10px] text-white/50">in Pressure</span>
+    </div>,
+    <div key="clouds" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-clouds">
+      <Cloud className="h-5 w-5 text-slate-400 mb-1" />
+      <span className="text-xl font-bold text-white">{weather.current.cloudCover}%</span>
+      <span className="text-[10px] text-white/50">Cloud Cover</span>
+    </div>,
+  ] : [];
 
-  const WeatherMap = () => (
-    <div className="relative h-full w-full bg-slate-900">
-      <div className="absolute top-3 left-3 z-10 flex gap-2">
-        {(['radar', 'temp', 'precip'] as const).map((layer) => (
-          <Button
-            key={layer}
-            variant={mapLayer === layer ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setMapLayer(layer)}
-            className={`text-xs ${mapLayer === layer ? 'bg-cyan-500 text-white' : 'bg-slate-800/80 text-white border-white/20'}`}
-            data-testid={`button-layer-${layer}`}
-          >
-            {layer === 'radar' && <CloudRain className="h-3 w-3 mr-1" />}
-            {layer === 'temp' && <Thermometer className="h-3 w-3 mr-1" />}
-            {layer === 'precip' && <Droplets className="h-3 w-3 mr-1" />}
-            {layer.charAt(0).toUpperCase() + layer.slice(1)}
-          </Button>
-        ))}
-      </div>
-      
-      <iframe
-        src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=9&overlay=${mapLayer === 'radar' ? 'radar' : mapLayer === 'temp' ? 'temp' : 'rainAccu'}&product=radar&level=surface&lat=${NISSAN_STADIUM.lat}&lon=${NISSAN_STADIUM.lon}&detailLat=${NISSAN_STADIUM.lat}&detailLon=${NISSAN_STADIUM.lon}&marker=true&message=true`}
-        className="w-full h-full border-0"
-        title="Weather Radar Map"
-        allow="fullscreen"
-        data-testid="weather-map-iframe"
-      />
-      
-      <div className="absolute bottom-3 left-3 z-10">
-        <GlassCard className="px-3 py-2 flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-cyan-400" />
-          <span className="text-xs text-white">Nissan Stadium</span>
-        </GlassCard>
-      </div>
+  const hourlyItems = weather?.hourly.slice(0, 12).map((hour, i) => (
+    <div 
+      key={i} 
+      className="flex flex-col items-center p-2 bg-slate-800/60 rounded-lg min-w-[60px]"
+      data-testid={`hourly-${i}`}
+    >
+      <span className="text-[10px] text-white/60">{hour.time}</span>
+      <span className="text-lg my-1">{hour.icon}</span>
+      <span className="text-sm font-bold text-white">{hour.temp}°</span>
+      {hour.precipitation > 0 && (
+        <span className="text-[10px] text-blue-400">{hour.precipitation}%</span>
+      )}
     </div>
-  );
+  )) || [];
+
+  const forecastAccordionItems = weather?.daily.map((day, i) => ({
+    title: `${day.date} - ${day.icon} ${day.tempHigh}°/${day.tempLow}°`,
+    content: (
+      <div className="space-y-2" data-testid={`forecast-detail-${i}`}>
+        <div className="flex items-center justify-between">
+          <span className="text-slate-400">Description</span>
+          <span className="text-white">{day.description}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-slate-400">Precipitation</span>
+          <span className="text-blue-400">{day.precipitation}%</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-slate-400">Sunrise</span>
+          <span className="text-orange-400">{day.sunrise}</span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-slate-400">Sunset</span>
+          <span className="text-indigo-400">{day.sunset}</span>
+        </div>
+      </div>
+    )
+  })) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900" data-testid="weather-map-page">
       <div className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -239,7 +160,7 @@ export default function WeatherMapPage() {
               Back
             </Button>
             <div>
-              <h1 className="text-lg font-bold text-white">Weather Map</h1>
+              <h1 className="text-lg font-bold text-white" data-testid="text-page-title">Weather Map</h1>
               <p className="text-xs text-cyan-400">Interactive Radar & Conditions</p>
             </div>
           </div>
@@ -247,11 +168,11 @@ export default function WeatherMapPage() {
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => setDataExpanded(!dataExpanded)}
-              className="text-white/60 hover:text-white lg:hidden"
-              data-testid="button-toggle-data"
+              onClick={() => refetch()}
+              className="text-white/60 hover:text-white"
+              data-testid="button-refresh-weather"
             >
-              {dataExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
             <Button 
               variant="ghost" 
@@ -266,46 +187,90 @@ export default function WeatherMapPage() {
         </div>
       </div>
       
-      {isLandscape ? (
-        <div className="flex h-[calc(100vh-60px)]">
-          <motion.div 
-            className="h-full overflow-hidden border-r border-white/10"
-            initial={{ width: '33%' }}
-            animate={{ width: dataExpanded ? '33%' : '0%' }}
-            transition={{ duration: 0.3 }}
-          >
-            <WeatherDataPanel />
-          </motion.div>
-          <div className="flex-1 h-full">
-            <WeatherMap />
-          </div>
-        </div>
-      ) : (
-        <div className="flex flex-col h-[calc(100vh-60px)]">
-          <div className="flex-1 min-h-0">
-            <WeatherMap />
-          </div>
-          <motion.div
-            className="border-t border-white/10 overflow-hidden"
-            initial={{ height: '50%' }}
-            animate={{ height: dataExpanded ? '50%' : '60px' }}
-            transition={{ duration: 0.3 }}
-          >
-            {dataExpanded ? (
-              <WeatherDataPanel />
+      <div className="p-3">
+        <LayoutShell className="gap-3">
+          {weather && (
+            <BentoCard span={12} className="p-2" data-testid="bento-card-current-weather">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="text-4xl">{getWeatherEmoji(weather.current.description)}</div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-cyan-400" />
+                    <span className="text-sm font-medium text-white" data-testid="text-location">Nissan Stadium</span>
+                  </div>
+                  <div className="text-2xl font-bold text-white" data-testid="text-current-temp">{weather.current.temp}°F</div>
+                  <div className="text-xs text-white/60" data-testid="text-description">{weather.current.description}</div>
+                </div>
+              </div>
+            </BentoCard>
+          )}
+
+          <BentoCard span={12} className="p-2" title="Weather Metrics" data-testid="bento-card-metrics">
+            {isLoading ? (
+              <div className="flex items-center justify-center h-20">
+                <RefreshCw className="h-6 w-6 text-cyan-400 animate-spin" />
+              </div>
+            ) : weather ? (
+              <CarouselRail items={weatherMetrics} data-testid="carousel-metrics" />
             ) : (
-              <button 
-                onClick={() => setDataExpanded(true)}
-                className="w-full h-full flex items-center justify-center gap-2 text-white/60 hover:text-white bg-slate-900/95"
-                data-testid="button-expand-data"
-              >
-                <ChevronUp className="h-5 w-5" />
-                <span className="text-sm">Show Weather Details</span>
-              </button>
+              <div className="text-center text-white/50 py-4">No weather data available</div>
             )}
-          </motion.div>
-        </div>
-      )}
+          </BentoCard>
+
+          <BentoCard span={12} rowSpan={2} className="p-0 overflow-hidden" data-testid="bento-card-map">
+            <div className="relative h-[400px] lg:h-[500px] w-full bg-slate-900">
+              <div className="absolute top-3 left-3 z-10 flex gap-2">
+                {(['radar', 'temp', 'precip'] as const).map((layer) => (
+                  <Button
+                    key={layer}
+                    variant={mapLayer === layer ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setMapLayer(layer)}
+                    className={`text-xs ${mapLayer === layer ? 'bg-cyan-500 text-white' : 'bg-slate-800/80 text-white border-white/20'}`}
+                    data-testid={`button-layer-${layer}`}
+                  >
+                    {layer === 'radar' && <CloudRain className="h-3 w-3 mr-1" />}
+                    {layer === 'temp' && <Thermometer className="h-3 w-3 mr-1" />}
+                    {layer === 'precip' && <Droplets className="h-3 w-3 mr-1" />}
+                    {layer.charAt(0).toUpperCase() + layer.slice(1)}
+                  </Button>
+                ))}
+              </div>
+              
+              <iframe
+                src={`https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=in&metricTemp=°F&metricWind=mph&zoom=9&overlay=${mapLayer === 'radar' ? 'radar' : mapLayer === 'temp' ? 'temp' : 'rainAccu'}&product=radar&level=surface&lat=${NISSAN_STADIUM.lat}&lon=${NISSAN_STADIUM.lon}&detailLat=${NISSAN_STADIUM.lat}&detailLon=${NISSAN_STADIUM.lon}&marker=true&message=true`}
+                className="w-full h-full border-0"
+                title="Weather Radar Map"
+                allow="fullscreen"
+                data-testid="weather-map-iframe"
+              />
+              
+              <div className="absolute bottom-3 left-3 z-10">
+                <div className="px-3 py-2 flex items-center gap-2 bg-slate-800/80 backdrop-blur-sm rounded-lg border border-white/10">
+                  <MapPin className="h-4 w-4 text-cyan-400" />
+                  <span className="text-xs text-white">Nissan Stadium</span>
+                </div>
+              </div>
+            </div>
+          </BentoCard>
+
+          {weather && weather.hourly.length > 0 && (
+            <BentoCard span={12} className="p-2" title="Hourly Forecast" data-testid="bento-card-hourly">
+              <CarouselRail items={hourlyItems} data-testid="carousel-hourly" />
+            </BentoCard>
+          )}
+
+          {weather && weather.daily.length > 0 && (
+            <BentoCard span={12} className="p-2" title="7-Day Forecast" data-testid="bento-card-forecast">
+              <AccordionStack 
+                items={forecastAccordionItems} 
+                defaultOpen={[0]} 
+                data-testid="accordion-forecast"
+              />
+            </BentoCard>
+          )}
+        </LayoutShell>
+      </div>
     </div>
   );
 }

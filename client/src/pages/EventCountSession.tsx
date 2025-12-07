@@ -1,29 +1,20 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { 
   ClipboardList, 
   ChevronLeft, 
-  ChevronDown,
   User, 
   Phone,
   Clock,
   Check,
   AlertCircle,
   Play,
-  FileText,
   Users,
-  Badge as BadgeIcon,
-  CheckCircle2,
-  Circle,
   Loader2,
-  Download,
   Package,
   Plus,
   Minus,
-  Save,
-  Building2,
-  ScanLine,
-  Edit3
+  Save
 } from "lucide-react";
 import { Link, useLocation, useParams } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -34,17 +25,11 @@ import {
   AnimatedBackground, 
   GlassCard, 
   GlassCardContent, 
-  GlassCardHeader, 
   PageHeader,
   GlowButton
 } from "@/components/ui/premium";
 import { useStore } from "@/lib/mockData";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
 import {
   Select,
   SelectContent,
@@ -104,18 +89,6 @@ interface StandItem {
   item: Item;
 }
 
-interface InventoryCount {
-  id: string;
-  itemId: string;
-  standId: string;
-  sessionId: string;
-  startCount: number;
-  adds: number;
-  endCount: number;
-  spoilage: number;
-  sold: number;
-}
-
 interface Stand {
   id: string;
   name: string;
@@ -171,7 +144,7 @@ export default function EventCountSession() {
   const [loading, setLoading] = useState(true);
   const [savingCounts, setSavingCounts] = useState<Record<string, boolean>>({});
 
-  const [expandedPhases, setExpandedPhases] = useState<string[]>([]);
+  const [activeStage, setActiveStage] = useState<CountStage>('PreEvent');
   const [startSessionDialogOpen, setStartSessionDialogOpen] = useState(false);
   const [startingStage, setStartingStage] = useState<CountStage | null>(null);
 
@@ -230,12 +203,12 @@ export default function EventCountSession() {
         
         const inProgressSession = sessionsData.find((s: CountSession) => s.status === 'InProgress');
         if (inProgressSession) {
-          setExpandedPhases([inProgressSession.stage]);
+          setActiveStage(inProgressSession.stage);
         } else {
           const stages: CountStage[] = ['PreEvent', 'PostEvent', 'DayAfter'];
           const nextStage = stages.find(stage => !sessionsData.some((s: CountSession) => s.stage === stage));
           if (nextStage) {
-            setExpandedPhases([nextStage]);
+            setActiveStage(nextStage);
           }
         }
       }
@@ -306,7 +279,7 @@ export default function EventCountSession() {
       if (response.ok) {
         const newSession = await response.json();
         setSessions(prev => [...prev, newSession]);
-        setExpandedPhases([startingStage]);
+        setActiveStage(startingStage);
         
         toast({
           title: "Count Started",
@@ -435,7 +408,7 @@ export default function EventCountSession() {
       const stages: CountStage[] = ['PreEvent', 'PostEvent', 'DayAfter'];
       const currentIndex = stages.indexOf(stage);
       if (currentIndex < stages.length - 1) {
-        setExpandedPhases([stages[currentIndex + 1]]);
+        setActiveStage(stages[currentIndex + 1]);
       }
     } catch (error) {
       toast({
@@ -485,11 +458,12 @@ export default function EventCountSession() {
   }, {} as Record<string, StandItem[]>);
 
   const categories = Object.keys(itemsByCategory);
+  const stages: CountStage[] = ['PreEvent', 'PostEvent', 'DayAfter'];
 
   if (loading) {
     return (
       <AnimatedBackground>
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-screen flex items-center justify-center" data-testid="loading-spinner">
           <Loader2 className="h-8 w-8 text-cyan-400 animate-spin" />
         </div>
       </AnimatedBackground>
@@ -499,13 +473,13 @@ export default function EventCountSession() {
   if (!stand) {
     return (
       <AnimatedBackground>
-        <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="min-h-screen flex items-center justify-center p-4" data-testid="stand-not-found">
           <GlassCard className="max-w-md w-full">
             <GlassCardContent className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
               <h2 className="text-xl font-bold text-slate-200 mb-2">Stand Not Found</h2>
               <p className="text-slate-400 mb-4">Could not find stand {standId}.</p>
-              <Button onClick={() => setLocation('/manager')} className="bg-cyan-500 hover:bg-cyan-600">
+              <Button onClick={() => setLocation('/manager')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-return-dashboard">
                 Return to Dashboard
               </Button>
             </GlassCardContent>
@@ -515,7 +489,68 @@ export default function EventCountSession() {
     );
   }
 
-  const stages: CountStage[] = ['PreEvent', 'PostEvent', 'DayAfter'];
+  const session = getSessionForStage(activeStage);
+  const status = getStageStatus(activeStage);
+  const stageCounts = counts[activeStage] || {};
+  const countedItems = Object.keys(stageCounts).length;
+  const progress = standItems.length > 0 ? Math.round((countedItems / standItems.length) * 100) : 0;
+
+  const metricsCards = stages.map(stage => {
+    const stageStatus = getStageStatus(stage);
+    const config = STAGE_CONFIG[stage];
+    const stageSession = getSessionForStage(stage);
+    const stageCountedItems = Object.keys(counts[stage] || {}).length;
+    return (
+      <div
+        key={stage}
+        onClick={() => setActiveStage(stage)}
+        className={`p-3 rounded-lg border cursor-pointer transition-all min-w-[140px] ${
+          activeStage === stage ? 'bg-cyan-500/20 border-cyan-500/50' : 'bg-white/5 border-white/10 hover:bg-white/10'
+        }`}
+        data-testid={`metric-card-${stage}`}
+      >
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg">{config.icon}</span>
+          <Badge className={`text-[10px] ${
+            stageStatus === 'verified' ? 'bg-purple-500/20 text-purple-300' :
+            stageStatus === 'completed' ? 'bg-emerald-500/20 text-emerald-300' :
+            stageStatus === 'in_progress' ? 'bg-cyan-500/20 text-cyan-300' :
+            'bg-slate-500/20 text-slate-400'
+          }`}>
+            {stageStatus === 'verified' ? '✓✓' : 
+             stageStatus === 'completed' ? '✓' : 
+             stageStatus === 'in_progress' ? '●' : '○'}
+          </Badge>
+        </div>
+        <div className="text-sm font-medium text-slate-200">{config.label.split(' ')[0]}</div>
+        <div className="text-xs text-slate-500">
+          {stageSession ? `${stageCountedItems}/${standItems.length}` : 'Not started'}
+        </div>
+      </div>
+    );
+  });
+
+  const itemCards = categories.map(category => (
+    <div key={category} className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid={`category-card-${category}`}>
+      <Package className="h-4 w-4 text-cyan-400 mb-1" />
+      <div className="text-sm font-medium text-slate-200">{category}</div>
+      <div className="text-xs text-slate-500">{itemsByCategory[category].length} items</div>
+    </div>
+  ));
+
+  const instructionItems = stages.map(stage => ({
+    title: `${STAGE_CONFIG[stage].icon} ${STAGE_CONFIG[stage].label}`,
+    content: (
+      <div className="space-y-2">
+        <p>{STAGE_CONFIG[stage].description}</p>
+        {getSessionForStage(stage) && (
+          <div className="text-xs text-cyan-400">
+            Counter: {getSessionForStage(stage)?.counterName}
+          </div>
+        )}
+      </div>
+    )
+  }));
 
   return (
     <AnimatedBackground>
@@ -535,286 +570,151 @@ export default function EventCountSession() {
           }
         />
 
-        <main className="container mx-auto p-4 max-w-3xl">
-          <div className="mb-4 flex items-center gap-2 flex-wrap">
-            {stages.map((stage, idx) => {
-              const status = getStageStatus(stage);
-              const config = STAGE_CONFIG[stage];
-              return (
-                <Badge 
-                  key={stage}
-                  className={`text-xs ${
-                    status === 'verified' ? 'bg-purple-500/20 text-purple-300' :
-                    status === 'completed' ? 'bg-emerald-500/20 text-emerald-300' :
-                    status === 'in_progress' ? 'bg-cyan-500/20 text-cyan-300' :
-                    'bg-slate-500/20 text-slate-400'
-                  }`}
-                >
-                  {status === 'verified' ? '✓✓' : 
-                   status === 'completed' ? '✓' : 
-                   status === 'in_progress' ? '●' : '○'} {config.label}
-                </Badge>
-              );
-            })}
-          </div>
-
+        <main className="container mx-auto p-4">
           {standItems.length === 0 ? (
-            <GlassCard>
+            <GlassCard data-testid="no-template-card">
               <GlassCardContent className="text-center py-12">
                 <Package className="h-12 w-12 text-slate-600 mx-auto mb-3" />
                 <p className="text-slate-400 mb-2">No inventory template configured for this stand</p>
-                <p className="text-sm text-slate-500 mb-4">
-                  Set up the stand's inventory template before counting
-                </p>
-                <Button 
-                  onClick={() => setLocation('/stand-setup')}
-                  className="bg-cyan-500 hover:bg-cyan-600"
-                >
+                <p className="text-sm text-slate-500 mb-4">Set up the stand's inventory template before counting</p>
+                <Button onClick={() => setLocation('/stand-setup')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-configure-template">
                   Configure Stand Template
                 </Button>
               </GlassCardContent>
             </GlassCard>
           ) : (
-            <Accordion 
-              type="multiple" 
-              value={expandedPhases}
-              onValueChange={setExpandedPhases}
-              className="space-y-3"
-            >
-              {stages.map(stage => {
-                const config = STAGE_CONFIG[stage];
-                const session = getSessionForStage(stage);
-                const status = getStageStatus(stage);
-                const stageCounts = counts[stage] || {};
-                const countedItems = Object.keys(stageCounts).length;
-                const progress = Math.round((countedItems / standItems.length) * 100);
+            <LayoutShell className="gap-3">
+              <BentoCard span={12} className="p-2" data-testid="metrics-carousel-card">
+                <CarouselRail items={metricsCards} title="Count Stages" data-testid="metrics-carousel" />
+              </BentoCard>
 
-                return (
-                  <AccordionItem 
-                    key={stage} 
-                    value={stage}
-                    className="border-0"
-                  >
-                    <GlassCard className="overflow-hidden">
-                      <AccordionTrigger className="px-4 py-3 hover:no-underline [&[data-state=open]>div>.chevron]:rotate-180">
-                        <div className="flex items-center gap-3 flex-1">
-                          <span className="text-2xl">{config.icon}</span>
-                          <div className="flex-1 text-left">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-slate-200">{config.label}</span>
-                              {status === 'verified' && (
-                                <Badge className="bg-purple-500/20 text-purple-300 text-[10px]">Verified</Badge>
-                              )}
-                              {status === 'completed' && (
-                                <Badge className="bg-emerald-500/20 text-emerald-300 text-[10px]">Complete</Badge>
-                              )}
-                              {status === 'in_progress' && (
-                                <Badge className="bg-cyan-500/20 text-cyan-300 text-[10px] animate-pulse">In Progress</Badge>
-                              )}
-                            </div>
-                            <p className="text-xs text-slate-500">{config.description}</p>
+              <BentoCard span={4} className="hidden lg:block" data-testid="items-carousel-card">
+                <CarouselRail items={itemCards} title="Categories" showDots data-testid="items-carousel" />
+              </BentoCard>
+
+              <BentoCard span={12} rowSpan={2} className="lg:col-span-5" data-testid="progress-grid-card">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-slate-300">{STAGE_CONFIG[activeStage].label}</span>
+                    <Badge className={`text-[10px] ${
+                      status === 'verified' ? 'bg-purple-500/20 text-purple-300' :
+                      status === 'completed' ? 'bg-emerald-500/20 text-emerald-300' :
+                      status === 'in_progress' ? 'bg-cyan-500/20 text-cyan-300 animate-pulse' :
+                      'bg-slate-500/20 text-slate-400'
+                    }`} data-testid="status-badge">
+                      {status.replace('_', ' ')}
+                    </Badge>
+                  </div>
+
+                  {status === 'not_started' ? (
+                    <div className="text-center py-8">
+                      <GlowButton variant="cyan" onClick={() => openStartDialog(activeStage)} data-testid={`button-start-${activeStage}`}>
+                        <Play className="h-4 w-4 mr-2" />
+                        Start {STAGE_CONFIG[activeStage].label}
+                      </GlowButton>
+                    </div>
+                  ) : (
+                    <>
+                      {session && (
+                        <div className="p-2 bg-white/5 rounded-lg border border-white/10 text-xs" data-testid="counter-info">
+                          <div className="flex items-center gap-2">
+                            <User className="h-3 w-3 text-slate-400" />
+                            <span className="text-slate-300">{session.counterName}</span>
+                            <Badge variant="outline" className="text-[10px] border-white/20">{ROLE_LABELS[session.counterRole]}</Badge>
                           </div>
-                          <ChevronDown className="chevron h-5 w-5 text-slate-400 transition-transform duration-200" />
+                          {session.assistingCounterName && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <Users className="h-3 w-3 text-slate-500" />
+                              <span className="text-slate-400">with {session.assistingCounterName}</span>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-3 mt-1 text-slate-500">
+                            <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{formatTime(session.startedAt)}</span>
+                            {session.completedAt && <span className="flex items-center gap-1"><Check className="h-3 w-3 text-emerald-400" />{formatTime(session.completedAt)}</span>}
+                          </div>
                         </div>
-                      </AccordionTrigger>
-                      
-                      <AccordionContent className="px-4 pb-4">
-                        {status === 'not_started' ? (
-                          <div className="text-center py-8">
-                            <Circle className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                            <p className="text-slate-400 mb-4">This count phase hasn't started yet</p>
-                            <GlowButton 
-                              variant="cyan"
-                              onClick={() => openStartDialog(stage)}
-                              data-testid={`button-start-${stage}`}
-                            >
-                              <Play className="h-4 w-4 mr-2" />
-                              Start {config.label}
-                            </GlowButton>
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <User className="h-4 w-4 text-slate-400" />
-                                  <span className="text-sm text-slate-300 font-medium">
-                                    {session?.counterName}
-                                  </span>
-                                  <Badge variant="outline" className="text-[10px] border-white/20">
-                                    {ROLE_LABELS[session?.counterRole || 'StandLead']}
-                                  </Badge>
-                                  <Badge variant="outline" className="text-[10px] border-white/20">
-                                    {session?.counterAffiliation}
-                                  </Badge>
-                                </div>
-                                <div className="flex items-center gap-1 text-xs text-slate-500">
-                                  <Phone className="h-3 w-3" />
-                                  ***{session?.counterPhoneLast4}
-                                </div>
-                              </div>
+                      )}
 
-                              {session?.assistingCounterName && (
-                                <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/10">
-                                  <Users className="h-4 w-4 text-slate-500" />
-                                  <span className="text-xs text-slate-400">
-                                    Assisted by: {session.assistingCounterName}
-                                    {session.assistingCounterPhone4 && ` (***${session.assistingCounterPhone4})`}
-                                  </span>
-                                </div>
-                              )}
+                      <div className="flex items-center gap-2 text-sm" data-testid="progress-bar">
+                        <div className="flex-1 bg-white/5 rounded-full h-2 overflow-hidden">
+                          <motion.div 
+                            className={`h-full ${
+                              STAGE_CONFIG[activeStage].color === 'emerald' ? 'bg-emerald-500' :
+                              STAGE_CONFIG[activeStage].color === 'blue' ? 'bg-blue-500' : 'bg-purple-500'
+                            }`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                          />
+                        </div>
+                        <span className="text-slate-400 text-xs">{countedItems}/{standItems.length}</span>
+                      </div>
 
-                              <div className="flex items-center gap-4 mt-2 pt-2 border-t border-white/10 text-xs text-slate-500">
-                                <div className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  Started: {formatTime(session?.startedAt)}
-                                </div>
-                                {session?.completedAt && (
-                                  <div className="flex items-center gap-1">
-                                    <Check className="h-3 w-3 text-emerald-400" />
-                                    Completed: {formatTime(session.completedAt)}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-2 text-sm">
-                              <div className="flex-1 bg-white/5 rounded-full h-2 overflow-hidden">
-                                <motion.div 
-                                  className={`h-full ${
-                                    config.color === 'emerald' ? 'bg-emerald-500' :
-                                    config.color === 'blue' ? 'bg-blue-500' :
-                                    'bg-purple-500'
-                                  }`}
-                                  initial={{ width: 0 }}
-                                  animate={{ width: `${progress}%` }}
-                                />
-                              </div>
-                              <span className="text-slate-400 text-xs">{countedItems}/{standItems.length}</span>
-                            </div>
-
-                            {status === 'in_progress' && (
-                              <ScrollArea className="h-[300px]">
-                                <div className="space-y-3 pr-2">
-                                  {categories.map(category => (
-                                    <div key={category} className="space-y-2">
-                                      <div className="flex items-center gap-2 text-xs font-medium text-slate-400 uppercase tracking-wider">
-                                        <Package className="h-3 w-3" />
-                                        {category}
+                      {status === 'in_progress' && (
+                        <ScrollArea className="h-[240px]" data-testid="items-scroll-area">
+                          <div className="space-y-2 pr-2">
+                            {categories.map(category => (
+                              <div key={category} className="space-y-1">
+                                <div className="text-[10px] font-medium text-slate-500 uppercase">{category}</div>
+                                {itemsByCategory[category].map(si => {
+                                  const key = `${activeStage}-${si.itemId}`;
+                                  const count = stageCounts[si.itemId] || 0;
+                                  return (
+                                    <div key={si.id} className="flex items-center gap-2 p-1.5 bg-white/5 rounded border border-white/10" data-testid={`count-item-${si.itemId}`}>
+                                      <span className="flex-1 text-xs text-slate-200 truncate">{si.item.name}</span>
+                                      <div className="flex items-center gap-0.5">
+                                        <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-white/20" onClick={() => handleCountChange(activeStage, si.itemId, count - 1)} data-testid={`button-minus-${si.itemId}`}>
+                                          <Minus className="h-2.5 w-2.5" />
+                                        </Button>
+                                        <Input type="number" min="0" value={count || ''} onChange={(e) => handleCountChange(activeStage, si.itemId, parseInt(e.target.value) || 0)} className="w-12 h-6 text-center text-sm bg-white/5 border-white/20 px-1" data-testid={`input-count-${si.itemId}`} />
+                                        <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-white/20" onClick={() => handleCountChange(activeStage, si.itemId, count + 1)} data-testid={`button-plus-${si.itemId}`}>
+                                          <Plus className="h-2.5 w-2.5" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => saveCount(activeStage, si.itemId)} disabled={savingCounts[key]} data-testid={`button-save-${si.itemId}`}>
+                                          {savingCounts[key] ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3 text-cyan-400" />}
+                                        </Button>
                                       </div>
-                                      {itemsByCategory[category].map(si => {
-                                        const key = `${stage}-${si.itemId}`;
-                                        const count = stageCounts[si.itemId] || 0;
-                                        return (
-                                          <motion.div
-                                            key={si.id}
-                                            className="flex items-center gap-2 p-2 bg-white/5 rounded-lg border border-white/10"
-                                          >
-                                            <div className="flex-1 min-w-0">
-                                              <p className="font-medium text-slate-200 text-sm truncate">
-                                                {si.item.name}
-                                              </p>
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                              <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-8 w-8 rounded-full border-white/20"
-                                                onClick={() => handleCountChange(stage, si.itemId, count - 1)}
-                                              >
-                                                <Minus className="h-3 w-3" />
-                                              </Button>
-                                              <Input
-                                                type="number"
-                                                min="0"
-                                                value={count || ''}
-                                                onChange={(e) => handleCountChange(stage, si.itemId, parseInt(e.target.value) || 0)}
-                                                className="w-16 text-center text-lg font-bold bg-white/5 border-white/20"
-                                              />
-                                              <Button
-                                                variant="outline"
-                                                size="icon"
-                                                className="h-8 w-8 rounded-full border-white/20"
-                                                onClick={() => handleCountChange(stage, si.itemId, count + 1)}
-                                              >
-                                                <Plus className="h-3 w-3" />
-                                              </Button>
-                                              <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8"
-                                                onClick={() => saveCount(stage, si.itemId)}
-                                                disabled={savingCounts[key]}
-                                              >
-                                                {savingCounts[key] ? (
-                                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                                ) : (
-                                                  <Save className="h-4 w-4 text-cyan-400" />
-                                                )}
-                                              </Button>
-                                            </div>
-                                          </motion.div>
-                                        );
-                                      })}
                                     </div>
-                                  ))}
-                                </div>
-                              </ScrollArea>
-                            )}
-
-                            {status === 'completed' || status === 'verified' ? (
-                              <div className="space-y-3">
-                                <ScrollArea className="h-[200px]">
-                                  <div className="space-y-1 pr-2">
-                                    {standItems.map(si => (
-                                      <div 
-                                        key={si.id}
-                                        className="flex items-center justify-between p-2 bg-white/5 rounded border border-white/10"
-                                      >
-                                        <span className="text-sm text-slate-300">{si.item.name}</span>
-                                        <span className="font-bold text-slate-200">
-                                          {stageCounts[si.itemId] || 0}
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </ScrollArea>
-                                
-                                {session && (
-                                  <PDFActionButtons
-                                    generatePDF={() => generatePDFForStage(stage, session)}
-                                    filename={`count-${stage.toLowerCase()}-${stand.id}-${eventDate.replace(/\//g, '-')}.pdf`}
-                                    title={`${config.label} Report`}
-                                    variant="compact"
-                                  />
-                                )}
+                                  );
+                                })}
                               </div>
-                            ) : null}
-
-                            {status === 'in_progress' && (
-                              <div className="pt-3 border-t border-white/10">
-                                <GlowButton 
-                                  variant="cyan"
-                                  className="w-full py-6"
-                                  onClick={() => completeSession(stage)}
-                                  data-testid={`button-complete-${stage}`}
-                                >
-                                  <Check className="h-5 w-5 mr-2" />
-                                  Complete {config.label}
-                                </GlowButton>
-                                <p className="text-xs text-center text-slate-500 mt-2">
-                                  This will finalize the count and record completion time
-                                </p>
-                              </div>
-                            )}
+                            ))}
                           </div>
-                        )}
-                      </AccordionContent>
-                    </GlassCard>
-                  </AccordionItem>
-                );
-              })}
-            </Accordion>
+                        </ScrollArea>
+                      )}
+
+                      {(status === 'completed' || status === 'verified') && (
+                        <div className="space-y-2" data-testid="completed-items-view">
+                          <ScrollArea className="h-[160px]">
+                            <div className="space-y-1 pr-2">
+                              {standItems.map(si => (
+                                <div key={si.id} className="flex items-center justify-between p-1.5 bg-white/5 rounded border border-white/10" data-testid={`completed-item-${si.itemId}`}>
+                                  <span className="text-xs text-slate-300">{si.item.name}</span>
+                                  <span className="font-bold text-xs text-slate-200">{stageCounts[si.itemId] || 0}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </ScrollArea>
+                          {session && (
+                            <PDFActionButtons generatePDF={() => generatePDFForStage(activeStage, session)} filename={`count-${activeStage.toLowerCase()}-${stand.id}-${eventDate.replace(/\//g, '-')}.pdf`} title={`${STAGE_CONFIG[activeStage].label} Report`} variant="compact" />
+                          )}
+                        </div>
+                      )}
+
+                      {status === 'in_progress' && (
+                        <GlowButton variant="cyan" className="w-full" onClick={() => completeSession(activeStage)} data-testid={`button-complete-${activeStage}`}>
+                          <Check className="h-4 w-4 mr-2" />
+                          Complete {STAGE_CONFIG[activeStage].label}
+                        </GlowButton>
+                      )}
+                    </>
+                  )}
+                </div>
+              </BentoCard>
+
+              <BentoCard span={12} className="lg:col-span-3" data-testid="instructions-accordion-card">
+                <AccordionStack items={instructionItems} defaultOpen={[stages.indexOf(activeStage)]} />
+              </BentoCard>
+            </LayoutShell>
           )}
         </main>
 
@@ -825,34 +725,22 @@ export default function EventCountSession() {
                 <Play className="h-5 w-5 text-cyan-400" />
                 Start {startingStage ? STAGE_CONFIG[startingStage].label : 'Count'}
               </DialogTitle>
-              <DialogDescription className="text-slate-400">
-                Document who is performing this count
-              </DialogDescription>
+              <DialogDescription className="text-slate-400">Document who is performing this count</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 mt-4">
               <div className="p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
                 <h4 className="text-sm font-medium text-cyan-300 mb-3">Primary Counter</h4>
-                
                 <div className="space-y-3">
                   <div className="space-y-1">
                     <Label className="text-slate-400 text-xs">Name</Label>
-                    <Input
-                      value={counterName}
-                      onChange={(e) => setCounterName(e.target.value)}
-                      placeholder="Counter's full name"
-                      className="bg-white/5 border-white/10"
-                      data-testid="input-counter-name"
-                    />
+                    <Input value={counterName} onChange={(e) => setCounterName(e.target.value)} placeholder="Counter's full name" className="bg-white/5 border-white/10" data-testid="input-counter-name" />
                   </div>
-
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-slate-400 text-xs">Role</Label>
                       <Select value={counterRole} onValueChange={(v) => setCounterRole(v as CounterRole)}>
-                        <SelectTrigger className="bg-white/5 border-white/10">
-                          <SelectValue />
-                        </SelectTrigger>
+                        <SelectTrigger className="bg-white/5 border-white/10"><SelectValue /></SelectTrigger>
                         <SelectContent>
                           {Object.entries(ROLE_LABELS).map(([value, label]) => (
                             <SelectItem key={value} value={value}>{label}</SelectItem>
@@ -862,23 +750,13 @@ export default function EventCountSession() {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-slate-400 text-xs">Phone (last 4)</Label>
-                      <Input
-                        value={counterPhone4}
-                        onChange={(e) => setCounterPhone4(e.target.value.slice(0, 4))}
-                        placeholder="1234"
-                        maxLength={4}
-                        className="bg-white/5 border-white/10"
-                        data-testid="input-counter-phone"
-                      />
+                      <Input value={counterPhone4} onChange={(e) => setCounterPhone4(e.target.value.slice(0, 4))} placeholder="1234" maxLength={4} className="bg-white/5 border-white/10" data-testid="input-counter-phone" />
                     </div>
                   </div>
-
                   <div className="space-y-1">
                     <Label className="text-slate-400 text-xs">Affiliation</Label>
                     <Select value={counterAffiliation} onValueChange={(v) => setCounterAffiliation(v as EmploymentAffiliation)}>
-                      <SelectTrigger className="bg-white/5 border-white/10">
-                        <SelectValue />
-                      </SelectTrigger>
+                      <SelectTrigger className="bg-white/5 border-white/10"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {Object.entries(AFFILIATION_LABELS).map(([value, label]) => (
                           <SelectItem key={value} value={value}>{label}</SelectItem>
@@ -894,36 +772,21 @@ export default function EventCountSession() {
                   <Users className="h-4 w-4" />
                   Assisting Counter (Optional)
                 </h4>
-                
                 <div className="space-y-3">
                   <div className="space-y-1">
                     <Label className="text-slate-400 text-xs">Name</Label>
-                    <Input
-                      value={assistingName}
-                      onChange={(e) => setAssistingName(e.target.value)}
-                      placeholder="Helper's full name (optional)"
-                      className="bg-white/5 border-white/10"
-                    />
+                    <Input value={assistingName} onChange={(e) => setAssistingName(e.target.value)} placeholder="Helper's full name (optional)" className="bg-white/5 border-white/10" data-testid="input-assisting-name" />
                   </div>
-
                   {assistingName && (
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
                         <Label className="text-slate-400 text-xs">Phone (last 4)</Label>
-                        <Input
-                          value={assistingPhone4}
-                          onChange={(e) => setAssistingPhone4(e.target.value.slice(0, 4))}
-                          placeholder="1234"
-                          maxLength={4}
-                          className="bg-white/5 border-white/10"
-                        />
+                        <Input value={assistingPhone4} onChange={(e) => setAssistingPhone4(e.target.value.slice(0, 4))} placeholder="1234" maxLength={4} className="bg-white/5 border-white/10" data-testid="input-assisting-phone" />
                       </div>
                       <div className="space-y-1">
                         <Label className="text-slate-400 text-xs">Affiliation</Label>
                         <Select value={assistingAffiliation} onValueChange={(v) => setAssistingAffiliation(v as EmploymentAffiliation)}>
-                          <SelectTrigger className="bg-white/5 border-white/10">
-                            <SelectValue />
-                          </SelectTrigger>
+                          <SelectTrigger className="bg-white/5 border-white/10"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             {Object.entries(AFFILIATION_LABELS).map(([value, label]) => (
                               <SelectItem key={value} value={value}>{label}</SelectItem>
@@ -938,14 +801,8 @@ export default function EventCountSession() {
             </div>
 
             <DialogFooter className="mt-4">
-              <Button variant="ghost" onClick={() => setStartSessionDialogOpen(false)}>
-                Cancel
-              </Button>
-              <GlowButton 
-                variant="cyan"
-                onClick={startCountSession}
-                disabled={!counterName || !counterPhone4}
-              >
+              <Button variant="ghost" onClick={() => setStartSessionDialogOpen(false)} data-testid="button-cancel-start">Cancel</Button>
+              <GlowButton variant="cyan" onClick={startCountSession} disabled={!counterName || !counterPhone4} data-testid="button-confirm-start">
                 <Play className="h-4 w-4 mr-2" />
                 Start Count
               </GlowButton>

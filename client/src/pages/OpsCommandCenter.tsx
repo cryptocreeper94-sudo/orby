@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useStore } from '@/lib/mockData';
-import { useWebSocket, useWebSocketStore, fetchOpsDashboard, fetchDeliveries, fetchEmergencyAlerts, updateDeliveryStatus, acknowledgeEmergencyAlert, resolveEmergencyAlert } from '@/lib/websocket';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useWebSocket, useWebSocketStore, fetchOpsDashboard, updateDeliveryStatus, acknowledgeEmergencyAlert, resolveEmergencyAlert } from '@/lib/websocket';
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from '@/components/ui/bento';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  LogOut, RefreshCw, Package, Utensils, Beer, Monitor, Trash2, MapPin,
+  LogOut, RefreshCw, Package, Utensils, Beer, Monitor, MapPin,
   AlertTriangle, CheckCircle2, Clock, Users, Truck, Zap, Radio, Shield,
-  Activity, Bell, ChevronRight, Wifi, WifiOff, Flame, ThermometerSun, ChefHat
+  Activity, Bell, Wifi, WifiOff, Flame, ThermometerSun, ChefHat
 } from 'lucide-react';
 
 interface DashboardSummary {
@@ -241,8 +240,195 @@ export default function OpsCommandCenter() {
   const emergencyDeliveries = activeDeliveries.filter(d => d.priority === 'Emergency');
   const normalDeliveries = activeDeliveries.filter(d => d.priority !== 'Emergency');
 
+  const heroCarouselItems = [
+    <div key="stats" className="flex gap-3 min-w-[320px]" data-testid="hero-stats">
+      <StatCard 
+        value={summary.activeDeliveries} 
+        label="Active Deliveries" 
+        icon={<Truck className="h-5 w-5 text-cyan-400" />}
+        bgColor="bg-cyan-500/20"
+        testId="stat-active-deliveries"
+      />
+      <StatCard 
+        value={summary.activeEmergencies} 
+        label="Active Alerts" 
+        icon={<AlertTriangle className="h-5 w-5 text-red-400" />}
+        bgColor="bg-red-500/20"
+        testId="stat-emergencies"
+      />
+    </div>,
+    <div key="stats2" className="flex gap-3 min-w-[320px]" data-testid="hero-stats-2">
+      <StatCard 
+        value={summary.emergencyDeliveries} 
+        label="Emergency Requests" 
+        icon={<Zap className="h-5 w-5 text-orange-400" />}
+        bgColor="bg-orange-500/20"
+        testId="stat-emergency-deliveries"
+      />
+      <StatCard 
+        value={summary.onlineStaff} 
+        label="Staff Online" 
+        icon={<Users className="h-5 w-5 text-green-400" />}
+        bgColor="bg-green-500/20"
+        testId="stat-online-staff"
+      />
+    </div>,
+    ...emergencies.map((alert) => (
+      <div 
+        key={alert.id} 
+        className="p-3 rounded-lg bg-red-900/40 border border-red-500/40 min-w-[280px]"
+        data-testid={`alert-${alert.id}`}
+      >
+        <div className="flex items-start gap-2">
+          {alertTypeIcons[alert.alertType] || <AlertTriangle className="h-4 w-4 text-red-400 mt-0.5" />}
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-white truncate">{alert.title}</p>
+            <p className="text-xs text-gray-400 truncate">{alert.description}</p>
+            {alert.standId && (
+              <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                <MapPin className="h-3 w-3" /> Stand {alert.standId}
+              </p>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-2 mt-2">
+          {!alert.acknowledgedBy ? (
+            <Button
+              size="sm"
+              onClick={() => handleAcknowledgeEmergency(alert.id)}
+              className="bg-red-600 hover:bg-red-700 text-white text-xs"
+              data-testid={`button-acknowledge-${alert.id}`}
+            >
+              Acknowledge
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              onClick={() => setSelectedEmergency(alert)}
+              className="bg-green-600 hover:bg-green-700 text-white text-xs"
+              data-testid={`button-resolve-${alert.id}`}
+            >
+              Resolve
+            </Button>
+          )}
+        </div>
+      </div>
+    ))
+  ];
+
+  const incidentCarouselItems = [
+    ...emergencyDeliveries.map((delivery) => (
+      <DeliveryCard 
+        key={delivery.id} 
+        delivery={delivery}
+        onSelect={() => setSelectedDelivery(delivery)}
+      />
+    )),
+    ...normalDeliveries.slice(0, 5).map((delivery) => (
+      <DeliveryCard 
+        key={delivery.id} 
+        delivery={delivery}
+        onSelect={() => setSelectedDelivery(delivery)}
+      />
+    ))
+  ];
+
+  const teamItems = culinaryStats.assignments.slice(0, 6).map((assignment, idx) => (
+    <div
+      key={idx}
+      className="flex items-center justify-between p-2 rounded bg-slate-900/50 min-w-[180px]"
+      data-testid={`culinary-assignment-${idx}`}
+    >
+      <div className="flex items-center gap-2">
+        <ChefHat className="h-4 w-4 text-orange-400" />
+        <span className="text-xs text-white truncate max-w-[80px]">{assignment.cookName}</span>
+      </div>
+      {assignment.checkInTime ? (
+        <Badge className="bg-green-500/20 text-green-300 border-green-500/30 text-xs">
+          <CheckCircle2 className="h-3 w-3 mr-1" /> In
+        </Badge>
+      ) : (
+        <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30 text-xs">
+          <Clock className="h-3 w-3 mr-1" /> Pending
+        </Badge>
+      )}
+    </div>
+  ));
+
+  const protocolItems = [
+    {
+      title: 'Active Deliveries by Department',
+      content: (
+        <div className="space-y-2" data-testid="section-deliveries">
+          {['Warehouse', 'Kitchen', 'Bar', 'IT', 'Operations', 'HR'].map((dept) => {
+            const deptDeliveries = normalDeliveries.filter(d => d.department === dept);
+            if (deptDeliveries.length === 0) return null;
+            return (
+              <div key={dept} className="space-y-1">
+                <div className="flex items-center gap-2" data-testid={`accordion-${dept}`}>
+                  <span className={`p-1 rounded ${departmentColors[dept]}`}>
+                    {departmentIcons[dept]}
+                  </span>
+                  <span className="text-white text-sm">{dept}</span>
+                  <Badge variant="secondary" className="ml-1 bg-slate-700 text-xs">
+                    {deptDeliveries.length}
+                  </Badge>
+                </div>
+                <div className="pl-6 space-y-1">
+                  {deptDeliveries.slice(0, 3).map((delivery) => (
+                    <button
+                      key={delivery.id}
+                      onClick={() => setSelectedDelivery(delivery)}
+                      className="w-full text-left p-2 rounded bg-slate-900/60 hover:bg-slate-800/60 text-xs"
+                      data-testid={`delivery-item-${delivery.id}`}
+                    >
+                      <span className="text-gray-300 truncate block">{delivery.description}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+          {normalDeliveries.length === 0 && (
+            <div className="text-center py-4 text-gray-500">
+              <Truck className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">No active deliveries</p>
+            </div>
+          )}
+        </div>
+      )
+    },
+    {
+      title: 'Communication Log',
+      content: (
+        <ScrollArea className="h-[150px]" data-testid="section-activity">
+          <div className="space-y-2">
+            {recentActivity.length > 0 ? (
+              recentActivity.map((log) => (
+                <div
+                  key={log.id}
+                  className="flex items-center gap-2 p-2 rounded bg-slate-900/50"
+                  data-testid={`activity-${log.id}`}
+                >
+                  <div className="h-2 w-2 rounded-full bg-cyan-400" />
+                  <span className="text-xs text-gray-300 flex-1">{log.action}</span>
+                  <span className="text-xs text-gray-500">{formatTimeAgo(log.createdAt)}</span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No recent activity</p>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      )
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950" data-testid="ops-command-center">
       <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-900/80 border-b border-cyan-500/20">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
@@ -291,223 +477,77 @@ export default function OpsCommandCenter() {
         </div>
       </header>
 
-      <main className="p-4 pb-24 space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="bg-slate-800/50 border-cyan-500/20" data-testid="stat-active-deliveries">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-white">{summary.activeDeliveries}</p>
-                  <p className="text-xs text-gray-400">Active Deliveries</p>
-                </div>
-                <div className="h-10 w-10 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                  <Truck className="h-5 w-5 text-cyan-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+      <main className="p-4 pb-24">
+        <LayoutShell className="gap-3">
+          <BentoCard span={12} className="bg-red-950/20 border-red-500/20" data-testid="hero-row">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="h-4 w-4 text-red-400" />
+              <span className="text-sm font-medium text-red-400">Critical Alerts & Status</span>
+            </div>
+            <CarouselRail 
+              items={heroCarouselItems} 
+              autoplay={emergencies.length > 0}
+              showDots={heroCarouselItems.length > 2}
+            />
+          </BentoCard>
 
-          <Card className="bg-slate-800/50 border-red-500/20" data-testid="stat-emergencies">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-white">{summary.activeEmergencies}</p>
-                  <p className="text-xs text-gray-400">Active Alerts</p>
-                </div>
-                <div className="h-10 w-10 rounded-full bg-red-500/20 flex items-center justify-center">
-                  <AlertTriangle className="h-5 w-5 text-red-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-slate-800/50 border-orange-500/20" data-testid="stat-emergency-deliveries">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-white">{summary.emergencyDeliveries}</p>
-                  <p className="text-xs text-gray-400">Emergency Requests</p>
-                </div>
-                <div className="h-10 w-10 rounded-full bg-orange-500/20 flex items-center justify-center">
-                  <Zap className="h-5 w-5 text-orange-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-slate-800/50 border-green-500/20" data-testid="stat-online-staff">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-white">{summary.onlineStaff}</p>
-                  <p className="text-xs text-gray-400">Staff Online</p>
-                </div>
-                <div className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-green-400" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {emergencies.length > 0 && (
-          <Card className="bg-red-950/30 border-red-500/30 animate-pulse-slow" data-testid="section-emergencies">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-red-400 flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5" />
-                Active Emergency Alerts
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {emergencies.map((alert) => (
-                <div
-                  key={alert.id}
-                  className="p-3 rounded-lg bg-red-900/30 border border-red-500/30"
-                  data-testid={`alert-${alert.id}`}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-2">
-                      {alertTypeIcons[alert.alertType] || <AlertTriangle className="h-4 w-4 text-red-400 mt-0.5" />}
-                      <div>
-                        <p className="font-medium text-white">{alert.title}</p>
-                        <p className="text-sm text-gray-400">{alert.description}</p>
-                        {alert.standId && (
-                          <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                            <MapPin className="h-3 w-3" />
-                            Stand {alert.standId}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <span className="text-xs text-gray-500">{formatTimeAgo(alert.createdAt)}</span>
-                  </div>
-                  <div className="flex gap-2 mt-2">
-                    {!alert.acknowledgedBy ? (
-                      <Button
-                        size="sm"
-                        onClick={() => handleAcknowledgeEmergency(alert.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white"
-                        data-testid={`button-acknowledge-${alert.id}`}
-                      >
-                        Acknowledge
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        onClick={() => setSelectedEmergency(alert)}
-                        className="bg-green-600 hover:bg-green-700 text-white"
-                        data-testid={`button-resolve-${alert.id}`}
-                      >
-                        Resolve
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {emergencyDeliveries.length > 0 && (
-          <Card className="bg-orange-950/30 border-orange-500/30" data-testid="section-emergency-deliveries">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg text-orange-400 flex items-center gap-2">
-                <Zap className="h-5 w-5" />
-                Emergency Delivery Requests
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {emergencyDeliveries.map((delivery) => (
-                <DeliveryCard 
-                  key={delivery.id} 
-                  delivery={delivery}
-                  onSelect={() => setSelectedDelivery(delivery)}
-                />
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        <Card className="bg-slate-800/50 border-cyan-500/20" data-testid="section-deliveries">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-cyan-400 flex items-center gap-2">
-              <Truck className="h-5 w-5" />
-              Active Deliveries ({normalDeliveries.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Accordion type="single" collapsible className="w-full">
-              {['Warehouse', 'Kitchen', 'Bar', 'IT', 'Operations', 'HR'].map((dept) => {
-                const deptDeliveries = normalDeliveries.filter(d => d.department === dept);
-                if (deptDeliveries.length === 0) return null;
-                
-                return (
-                  <AccordionItem key={dept} value={dept} className="border-slate-700/50">
-                    <AccordionTrigger className="py-2 hover:no-underline" data-testid={`accordion-${dept}`}>
-                      <div className="flex items-center gap-2">
-                        <span className={`p-1.5 rounded ${departmentColors[dept]}`}>
-                          {departmentIcons[dept]}
-                        </span>
-                        <span className="text-white">{dept}</span>
-                        <Badge variant="secondary" className="ml-1 bg-slate-700">
-                          {deptDeliveries.length}
-                        </Badge>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="space-y-2 pt-2">
-                      {deptDeliveries.map((delivery) => (
-                        <DeliveryCard 
-                          key={delivery.id} 
-                          delivery={delivery}
-                          onSelect={() => setSelectedDelivery(delivery)}
-                        />
-                      ))}
-                    </AccordionContent>
-                  </AccordionItem>
-                );
-              })}
-            </Accordion>
-            
-            {normalDeliveries.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                <Truck className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                <p>No active deliveries</p>
+          <BentoCard span={8} className="lg:col-span-8 md:col-span-6 col-span-4" data-testid="command-incidents">
+            <div className="flex items-center gap-2 mb-2">
+              <Truck className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm font-medium text-cyan-400">Active Incidents ({activeDeliveries.length})</span>
+            </div>
+            {incidentCarouselItems.length > 0 ? (
+              <CarouselRail items={incidentCarouselItems} showDots />
+            ) : (
+              <div className="text-center py-6 text-gray-500">
+                <Truck className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No active incidents</p>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </BentoCard>
 
-        <Card className="bg-slate-800/50 border-orange-500/20" data-testid="section-culinary">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-orange-400 flex items-center gap-2">
-              <ChefHat className="h-5 w-5" />
-              Culinary Team Status
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="p-3 rounded bg-slate-900/50 text-center">
-                <p className="text-2xl font-bold text-white">{culinaryStats.total}</p>
+          <BentoCard span={4} className="lg:col-span-4 md:col-span-6 col-span-4" data-testid="command-teams">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="h-4 w-4 text-orange-400" />
+              <span className="text-sm font-medium text-orange-400">Response Teams</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              <div className="p-2 rounded bg-slate-900/50 text-center">
+                <p className="text-lg font-bold text-white">{culinaryStats.total}</p>
                 <p className="text-xs text-gray-400">Assigned</p>
               </div>
-              <div className="p-3 rounded bg-green-900/30 text-center">
-                <p className="text-2xl font-bold text-green-400">{culinaryStats.checkedIn}</p>
-                <p className="text-xs text-gray-400">Checked In</p>
+              <div className="p-2 rounded bg-green-900/30 text-center">
+                <p className="text-lg font-bold text-green-400">{culinaryStats.checkedIn}</p>
+                <p className="text-xs text-gray-400">In</p>
               </div>
-              <div className="p-3 rounded bg-yellow-900/30 text-center">
-                <p className="text-2xl font-bold text-yellow-400">{culinaryStats.pending}</p>
+              <div className="p-2 rounded bg-yellow-900/30 text-center">
+                <p className="text-lg font-bold text-yellow-400">{culinaryStats.pending}</p>
                 <p className="text-xs text-gray-400">Pending</p>
               </div>
             </div>
-            
-            {culinaryStats.assignments.length > 0 ? (
-              <ScrollArea className="h-[150px]">
-                <div className="space-y-2">
-                  {culinaryStats.assignments.map((assignment, idx) => (
+            {teamItems.length > 0 ? (
+              <CarouselRail items={teamItems} />
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                <ChefHat className="h-6 w-6 mx-auto mb-1 opacity-50" />
+                <p className="text-xs">No assignments</p>
+              </div>
+            )}
+          </BentoCard>
+
+          <BentoCard span={6} className="lg:col-span-6 md:col-span-6 col-span-4" data-testid="resources-staff">
+            <div className="flex items-center gap-2 mb-2">
+              <ChefHat className="h-4 w-4 text-orange-400" />
+              <span className="text-sm font-medium text-orange-400">Staff Deployment</span>
+            </div>
+            <ScrollArea className="h-[120px]" data-testid="section-culinary">
+              <div className="space-y-2">
+                {culinaryStats.assignments.length > 0 ? (
+                  culinaryStats.assignments.map((assignment, idx) => (
                     <div
                       key={idx}
                       className="flex items-center justify-between p-2 rounded bg-slate-900/50"
-                      data-testid={`culinary-assignment-${idx}`}
+                      data-testid={`staff-assignment-${idx}`}
                     >
                       <div className="flex items-center gap-2">
                         <ChefHat className="h-4 w-4 text-orange-400" />
@@ -516,60 +556,74 @@ export default function OpsCommandCenter() {
                       </div>
                       {assignment.checkInTime ? (
                         <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
-                          In
+                          <CheckCircle2 className="h-3 w-3 mr-1" /> In
                         </Badge>
                       ) : (
                         <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
-                          <Clock className="h-3 w-3 mr-1" />
-                          Pending
+                          <Clock className="h-3 w-3 mr-1" /> Pending
                         </Badge>
                       )}
                     </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            ) : (
-              <div className="text-center py-4 text-gray-500">
-                <ChefHat className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">No culinary assignments for current event</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-800/50 border-cyan-500/20" data-testid="section-activity">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg text-cyan-400 flex items-center gap-2">
-              <Activity className="h-5 w-5" />
-              Recent Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[200px]">
-              <div className="space-y-2">
-                {recentActivity.length > 0 ? (
-                  recentActivity.map((log) => (
-                    <div
-                      key={log.id}
-                      className="flex items-center gap-2 p-2 rounded bg-slate-900/50"
-                      data-testid={`activity-${log.id}`}
-                    >
-                      <div className="h-2 w-2 rounded-full bg-cyan-400" />
-                      <span className="text-sm text-gray-300 flex-1">{log.action}</span>
-                      <span className="text-xs text-gray-500">{formatTimeAgo(log.createdAt)}</span>
-                    </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <Activity className="h-10 w-10 mx-auto mb-2 opacity-50" />
-                    <p>No recent activity</p>
+                  <div className="text-center py-4 text-gray-500">
+                    <ChefHat className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">No culinary assignments</p>
                   </div>
                 )}
               </div>
             </ScrollArea>
-          </CardContent>
-        </Card>
+          </BentoCard>
+
+          <BentoCard span={6} className="lg:col-span-6 md:col-span-6 col-span-4" data-testid="resources-equipment">
+            <div className="flex items-center gap-2 mb-2">
+              <Activity className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm font-medium text-cyan-400">Equipment Status</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-3 rounded bg-slate-900/50 flex items-center gap-2" data-testid="equipment-pos">
+                <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <Monitor className="h-4 w-4 text-green-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">POS Systems</p>
+                  <p className="text-xs text-green-400">All Online</p>
+                </div>
+              </div>
+              <div className="p-3 rounded bg-slate-900/50 flex items-center gap-2" data-testid="equipment-comms">
+                <div className="h-8 w-8 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                  <Radio className="h-4 w-4 text-cyan-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Radios</p>
+                  <p className="text-xs text-cyan-400">Active</p>
+                </div>
+              </div>
+              <div className="p-3 rounded bg-slate-900/50 flex items-center gap-2" data-testid="equipment-kitchen">
+                <div className="h-8 w-8 rounded-full bg-orange-500/20 flex items-center justify-center">
+                  <Utensils className="h-4 w-4 text-orange-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Kitchen</p>
+                  <p className="text-xs text-orange-400">Operational</p>
+                </div>
+              </div>
+              <div className="p-3 rounded bg-slate-900/50 flex items-center gap-2" data-testid="equipment-delivery">
+                <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center">
+                  <Truck className="h-4 w-4 text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">Delivery</p>
+                  <p className="text-xs text-purple-400">Ready</p>
+                </div>
+              </div>
+            </div>
+          </BentoCard>
+
+          <BentoCard span={12} data-testid="support-row">
+            <AccordionStack items={protocolItems} defaultOpen={[0]} />
+          </BentoCard>
+        </LayoutShell>
       </main>
 
       <Dialog open={!!selectedDelivery} onOpenChange={() => setSelectedDelivery(null)}>
@@ -692,26 +746,48 @@ export default function OpsCommandCenter() {
         </DialogContent>
       </Dialog>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-cyan-500/20 px-4 py-3">
+      <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-cyan-500/20 px-4 py-3" data-testid="nav-bottom">
         <div className="flex justify-around items-center">
-          <Button variant="ghost" className="flex-col gap-1 h-auto text-cyan-400">
+          <Button variant="ghost" className="flex-col gap-1 h-auto text-cyan-400" data-testid="nav-command">
             <Radio className="h-5 w-5" />
             <span className="text-xs">Command</span>
           </Button>
-          <Button variant="ghost" className="flex-col gap-1 h-auto text-gray-400">
+          <Button variant="ghost" className="flex-col gap-1 h-auto text-gray-400" data-testid="nav-deliveries">
             <Truck className="h-5 w-5" />
             <span className="text-xs">Deliveries</span>
           </Button>
-          <Button variant="ghost" className="flex-col gap-1 h-auto text-gray-400">
+          <Button variant="ghost" className="flex-col gap-1 h-auto text-gray-400" data-testid="nav-alerts">
             <Bell className="h-5 w-5" />
             <span className="text-xs">Alerts</span>
           </Button>
-          <Button variant="ghost" className="flex-col gap-1 h-auto text-gray-400">
+          <Button variant="ghost" className="flex-col gap-1 h-auto text-gray-400" data-testid="nav-staff">
             <Users className="h-5 w-5" />
             <span className="text-xs">Staff</span>
           </Button>
         </div>
       </nav>
+    </div>
+  );
+}
+
+function StatCard({ value, label, icon, bgColor, testId }: { 
+  value: number; 
+  label: string; 
+  icon: React.ReactNode; 
+  bgColor: string;
+  testId: string;
+}) {
+  return (
+    <div className="p-3 rounded-lg bg-slate-800/60 border border-white/10 min-w-[140px]" data-testid={testId}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-xl font-bold text-white">{value}</p>
+          <p className="text-xs text-gray-400">{label}</p>
+        </div>
+        <div className={`h-9 w-9 rounded-full ${bgColor} flex items-center justify-center`}>
+          {icon}
+        </div>
+      </div>
     </div>
   );
 }
@@ -722,7 +798,7 @@ function DeliveryCard({ delivery, onSelect }: { delivery: DeliveryRequest; onSel
   return (
     <button
       onClick={onSelect}
-      className="w-full text-left p-3 rounded-lg bg-slate-900/50 border border-slate-700/50 hover:border-cyan-500/30 transition-colors"
+      className="w-full text-left p-3 rounded-lg bg-slate-900/50 border border-slate-700/50 hover:border-cyan-500/30 transition-colors min-w-[220px]"
       data-testid={`delivery-card-${delivery.id}`}
     >
       <div className="flex items-start justify-between gap-2">
