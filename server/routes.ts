@@ -5761,8 +5761,8 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   const { EcosystemClient } = await import("./ecosystemHub");
   
   const DEV_HUB_URL = process.env.ORBIT_ECOSYSTEM_URL || process.env.ORBIT_ECOSYSTEM_DEV_URL || "https://orbitstaffing.io/api/ecosystem";
-  const DEV_HUB_API_KEY = process.env.ORBIT_ECOSYSTEM_API_KEY || "";
-  const DEV_HUB_API_SECRET = process.env.ORBIT_ECOSYSTEM_API_SECRET || "";
+  const DEV_HUB_API_KEY = process.env.ORBIT_ECOSYSTEM_API_KEY || process.env.ORBIT_API_KEY || "";
+  const DEV_HUB_API_SECRET = process.env.ORBIT_ECOSYSTEM_API_SECRET || process.env.ORBIT_API_SECRET || "";
   
   const devHubClient = new EcosystemClient(
     DEV_HUB_URL,
