@@ -6,7 +6,7 @@ import {
   Shield, UserCog, Monitor, LogOut, ChefHat, Package, 
   Wine, Sparkles, Users, Radio, AlertTriangle, Truck,
   Activity, Zap, Eye, RefreshCw, Trash2, CheckCircle2,
-  XCircle, Wifi, WifiOff, Siren, FlaskConical, ClipboardList, Crown, Calendar,
+  XCircle, Wifi, WifiOff, Siren, FlaskConical, Crown, Calendar,
   Database, Server, Globe, FileText, BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -304,6 +304,41 @@ export default function DevDashboard() {
     />,
   ];
 
+  const orbitStatusItems = [
+    <div key="api-gateway" className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-api-gateway">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+        <span className="text-xs text-slate-400">API Gateway</span>
+      </div>
+      <div className="text-lg font-bold text-green-400">Active</div>
+    </div>,
+    <div key="database" className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-database">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+        <span className="text-xs text-slate-400">Database</span>
+      </div>
+      <div className="text-lg font-bold text-green-400">Online</div>
+    </div>,
+    <div key="websocket" className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-websocket">
+      <div className="flex items-center gap-2 mb-2">
+        <div className={cn("w-2 h-2 rounded-full", isConnected ? "bg-green-500 animate-pulse" : "bg-red-500")} />
+        <span className="text-xs text-slate-400">WebSocket</span>
+      </div>
+      <div className={cn("text-lg font-bold", isConnected ? "text-green-400" : "text-red-400")}>
+        {isConnected ? "Connected" : "Offline"}
+      </div>
+    </div>,
+    <div key="messages" className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-messages">
+      <div className="flex items-center gap-2 mb-2">
+        <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
+        <span className="text-xs text-slate-400">Messages</span>
+      </div>
+      <div className="text-lg font-bold text-cyan-400">
+        {wsStore.messages.length > 0 ? wsStore.messages.length : "—"}
+      </div>
+    </div>,
+  ];
+
   const supportItems = [
     {
       title: "Command Center Roles",
@@ -400,7 +435,7 @@ export default function DevDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" data-testid="dev-dashboard">
+    <LayoutShell className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 !block" data-testid="dev-dashboard">
       <GlobalModeBar />
       
       <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3" data-testid="dev-dashboard-header">
@@ -451,8 +486,7 @@ export default function DevDashboard() {
         />
 
         <LayoutShell className="mt-4">
-          {/* Hero Row - span-12: Dev metrics carousel */}
-          <BentoCard span={12} className="!p-4" data-testid="bento-hero-metrics">
+          <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-hero-metrics">
             <div className="flex items-center gap-2 mb-3">
               <Activity className="h-4 w-4 text-cyan-400" />
               <span className="text-sm font-medium text-slate-300">System Metrics</span>
@@ -460,39 +494,7 @@ export default function DevDashboard() {
             <CarouselRail items={heroMetrics} showDots autoplay />
           </BentoCard>
 
-          {/* Quick Actions Row - Mobile Only */}
-          <BentoCard span={12} className="!p-4 lg:hidden col-span-4 md:col-span-6" data-testid="bento-quick-actions-mobile">
-            <div className="flex items-center gap-2 mb-3">
-              <Siren className="h-4 w-4 text-red-400" />
-              <span className="text-sm font-medium text-slate-300">Quick Actions</span>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              <Button
-                onClick={() => setLocation('/command-center')}
-                className={cn(
-                  "flex-1 py-3 text-left justify-start gap-2 font-bold",
-                  systemStats.activeEmergencies > 0 
-                    ? "bg-red-600 hover:bg-red-700 animate-pulse" 
-                    : "bg-gradient-to-r from-red-900/50 to-red-800/50 border border-red-700/50"
-                )}
-                data-testid="button-command-center"
-              >
-                <Siren className="h-4 w-4" />
-                <span className="text-xs">Emergency</span>
-              </Button>
-              <Button
-                onClick={() => setLocation('/reports')}
-                className="flex-1 py-3 text-left justify-start gap-2 font-bold bg-gradient-to-r from-cyan-900/50 to-teal-900/50 border border-cyan-700/50"
-                data-testid="button-reports"
-              >
-                <Activity className="h-4 w-4 text-cyan-400" />
-                <span className="text-xs">Reports</span>
-              </Button>
-            </div>
-          </BentoCard>
-
-          {/* Tools Row - Quick tools carousel (span-6), Release Manager (span-6) */}
-          <BentoCard span={6} className="!p-4 col-span-4 md:col-span-6" data-testid="bento-quick-tools">
+          <BentoCard span={6} className="col-span-4 md:col-span-6 lg:col-span-6" data-testid="bento-quick-tools">
             <div className="flex items-center gap-2 mb-3">
               <Zap className="h-4 w-4 text-amber-400" />
               <span className="text-sm font-medium text-slate-300">Quick Tools</span>
@@ -500,7 +502,7 @@ export default function DevDashboard() {
             <CarouselRail items={quickTools} />
           </BentoCard>
 
-          <BentoCard span={6} className="!p-4 col-span-4 md:col-span-6" data-testid="bento-release-manager">
+          <BentoCard span={6} className="col-span-4 md:col-span-6 lg:col-span-6" data-testid="bento-release-manager">
             <div className="flex items-center gap-2 mb-3">
               <Package className="h-4 w-4 text-green-400" />
               <span className="text-sm font-medium text-slate-300">Release Manager</span>
@@ -509,48 +511,13 @@ export default function DevDashboard() {
             <ReleaseManager />
           </BentoCard>
 
-          {/* Integration Row: ORBIT Hub status (span-8), System Logs (span-4) */}
-          <BentoCard span={8} className="!p-4 col-span-4 md:col-span-4 lg:col-span-8" data-testid="bento-orbit-hub">
+          <BentoCard span={8} className="col-span-4 md:col-span-6 lg:col-span-8" data-testid="bento-orbit-hub">
             <div className="flex items-center gap-2 mb-3">
               <Globe className="h-4 w-4 text-violet-400" />
               <span className="text-sm font-medium text-slate-300">ORBIT Hub Status</span>
             </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-api-gateway">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs text-slate-400">API Gateway</span>
-                </div>
-                <div className="text-lg font-bold text-green-400">Active</div>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-database">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-xs text-slate-400">Database</span>
-                </div>
-                <div className="text-lg font-bold text-green-400">Online</div>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-websocket">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={cn("w-2 h-2 rounded-full", isConnected ? "bg-green-500 animate-pulse" : "bg-red-500")} />
-                  <span className="text-xs text-slate-400">WebSocket</span>
-                </div>
-                <div className={cn("text-lg font-bold", isConnected ? "text-green-400" : "text-red-400")}>
-                  {isConnected ? "Connected" : "Offline"}
-                </div>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-messages">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-                  <span className="text-xs text-slate-400">Messages</span>
-                </div>
-                <div className="text-lg font-bold text-cyan-400">
-                  {wsStore.messages.length > 0 ? wsStore.messages.length : "—"}
-                </div>
-              </div>
-            </div>
+            <CarouselRail items={orbitStatusItems} />
             
-            {/* Event Control Inline */}
             <div className="mt-4 pt-4 border-t border-slate-700/30">
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="h-4 w-4 text-emerald-400" />
@@ -565,7 +532,7 @@ export default function DevDashboard() {
             </div>
           </BentoCard>
 
-          <BentoCard span={4} className="!p-4 col-span-4 md:col-span-2 lg:col-span-4" data-testid="bento-system-logs">
+          <BentoCard span={4} className="col-span-4 md:col-span-6 lg:col-span-4" data-testid="bento-system-logs">
             <div className="flex items-center gap-2 mb-3">
               <FileText className="h-4 w-4 text-slate-400" />
               <span className="text-sm font-medium text-slate-300">System Logs</span>
@@ -595,9 +562,8 @@ export default function DevDashboard() {
               </div>
             </div>
             
-            {/* Desktop Quick Actions */}
-            <div className="hidden lg:block mt-4 pt-4 border-t border-slate-700/30">
-              <div className="flex gap-2">
+            <div className="mt-4 pt-4 border-t border-slate-700/30">
+              <div className="flex gap-2 flex-wrap">
                 <Button
                   onClick={() => setLocation('/command-center')}
                   size="sm"
@@ -607,7 +573,7 @@ export default function DevDashboard() {
                       ? "bg-red-600 hover:bg-red-700 animate-pulse" 
                       : "bg-red-900/50 border border-red-700/50 hover:bg-red-800/50"
                   )}
-                  data-testid="button-command-center-desktop"
+                  data-testid="button-command-center"
                 >
                   <Siren className="h-3 w-3 mr-1" />
                   Emergency
@@ -616,7 +582,7 @@ export default function DevDashboard() {
                   onClick={() => setLocation('/reports')}
                   size="sm"
                   className="flex-1 text-xs bg-cyan-900/50 border border-cyan-700/50 hover:bg-cyan-800/50"
-                  data-testid="button-reports-desktop"
+                  data-testid="button-reports"
                 >
                   <Activity className="h-3 w-3 mr-1" />
                   Reports
@@ -625,8 +591,7 @@ export default function DevDashboard() {
             </div>
           </BentoCard>
 
-          {/* Support Row: AccordionStack for documentation, debug tools, roles */}
-          <BentoCard span={12} className="!p-4" data-testid="bento-support-section">
+          <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-support-section">
             <div className="flex items-center gap-2 mb-3">
               <BookOpen className="h-4 w-4 text-violet-400" />
               <span className="text-sm font-medium text-slate-300">Documentation & Tools</span>
@@ -636,7 +601,6 @@ export default function DevDashboard() {
         </LayoutShell>
       </main>
 
-      {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6" data-testid="fab-container">
         <Button
           size="lg"
@@ -648,7 +612,6 @@ export default function DevDashboard() {
         </Button>
       </div>
 
-      {/* Twinkling Stars Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
         {[...Array(20)].map((_, i) => (
           <div
@@ -664,11 +627,10 @@ export default function DevDashboard() {
         ))}
       </div>
 
-      {/* Dashboard Controls Modal */}
       <DashboardControls
         isOpen={showDashboardControls}
         onClose={() => setShowDashboardControls(false)}
       />
-    </div>
+    </LayoutShell>
   );
 }

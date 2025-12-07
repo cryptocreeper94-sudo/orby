@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LayoutShell, BentoCard } from "@/components/ui/bento";
 import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
+import nashvilleSkylineImg from "@assets/generated_images/nashville_skyline_nissan_nobg.png";
 
 const loginSchema = z.object({
   pin: z.string().length(4, "PIN must be 4 digits"),
@@ -204,35 +205,35 @@ export default function LoginPage() {
             data-testid="bento-card-login"
           >
             <div className="flex flex-col items-center text-center mb-8">
-              <div className="w-64 h-64 mb-4 relative flex items-center justify-center" data-testid="login-mascot-container">
-                <div className="absolute inset-0 overflow-hidden rounded-full">
-                  <div className="star absolute w-1 h-1 bg-white rounded-full top-[15%] left-[20%] animate-twinkle" style={{animationDelay: '0s'}} />
-                  <div className="star absolute w-0.5 h-0.5 bg-cyan-200 rounded-full top-[25%] left-[75%] animate-twinkle" style={{animationDelay: '0.5s'}} />
-                  <div className="star absolute w-1.5 h-1.5 bg-white rounded-full top-[10%] left-[50%] animate-twinkle" style={{animationDelay: '1s'}} />
-                  <div className="star absolute w-0.5 h-0.5 bg-cyan-300 rounded-full top-[40%] left-[10%] animate-twinkle" style={{animationDelay: '1.5s'}} />
-                  <div className="star absolute w-1 h-1 bg-white rounded-full top-[70%] left-[85%] animate-twinkle" style={{animationDelay: '0.3s'}} />
-                  <div className="star absolute w-0.5 h-0.5 bg-white rounded-full top-[80%] left-[25%] animate-twinkle" style={{animationDelay: '0.8s'}} />
-                  <div className="star absolute w-1 h-1 bg-cyan-200 rounded-full top-[55%] left-[90%] animate-twinkle" style={{animationDelay: '1.2s'}} />
-                  <div className="star absolute w-0.5 h-0.5 bg-white rounded-full top-[85%] left-[60%] animate-twinkle" style={{animationDelay: '0.7s'}} />
-                  <div className="star absolute w-1.5 h-1.5 bg-cyan-100 rounded-full top-[20%] left-[5%] animate-twinkle" style={{animationDelay: '1.8s'}} />
-                  <div className="star absolute w-0.5 h-0.5 bg-white rounded-full top-[45%] left-[95%] animate-twinkle" style={{animationDelay: '0.2s'}} />
-                  <div className="star absolute w-1 h-1 bg-white rounded-full top-[5%] left-[35%] animate-twinkle" style={{animationDelay: '1.4s'}} />
-                  <div className="star absolute w-0.5 h-0.5 bg-cyan-200 rounded-full top-[90%] left-[45%] animate-twinkle" style={{animationDelay: '0.6s'}} />
-                  <div className="star absolute w-1 h-1 bg-white rounded-full top-[65%] left-[15%] animate-twinkle" style={{animationDelay: '1.1s'}} />
-                  <div className="star absolute w-1.5 h-1.5 bg-white rounded-full top-[35%] left-[80%] animate-twinkle" style={{animationDelay: '0.4s'}} />
-                  <div className="star absolute w-0.5 h-0.5 bg-cyan-300 rounded-full top-[75%] left-[5%] animate-twinkle" style={{animationDelay: '1.6s'}} />
+              {/* Nashville Skyline with Nissan Stadium behind Orby */}
+              <div className="w-full max-w-md h-72 mb-4 relative flex items-end justify-center" data-testid="login-mascot-container">
+                {/* Skyline background */}
+                <img 
+                  src={nashvilleSkylineImg} 
+                  alt="Nashville Skyline with Nissan Stadium" 
+                  className="absolute bottom-0 left-0 right-0 w-full h-auto object-contain opacity-60"
+                  data-testid="img-city-skyline"
+                />
+                {/* Glow effects */}
+                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-48 h-48 bg-cyan-400/25 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 w-40 h-40 bg-cyan-500/15 rounded-full blur-2xl animate-pulse" style={{animationDelay: '0.5s'}} />
+                {/* Twinkling stars */}
+                <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                  <div className="star absolute w-1 h-1 bg-white rounded-full top-[5%] left-[20%] animate-twinkle" style={{animationDelay: '0s'}} />
+                  <div className="star absolute w-0.5 h-0.5 bg-cyan-200 rounded-full top-[10%] left-[75%] animate-twinkle" style={{animationDelay: '0.5s'}} />
+                  <div className="star absolute w-1.5 h-1.5 bg-white rounded-full top-[3%] left-[50%] animate-twinkle" style={{animationDelay: '1s'}} />
+                  <div className="star absolute w-0.5 h-0.5 bg-cyan-300 rounded-full top-[15%] left-[10%] animate-twinkle" style={{animationDelay: '1.5s'}} />
+                  <div className="star absolute w-1 h-1 bg-white rounded-full top-[8%] left-[85%] animate-twinkle" style={{animationDelay: '0.3s'}} />
+                  <div className="star absolute w-0.5 h-0.5 bg-white rounded-full top-[12%] left-[35%] animate-twinkle" style={{animationDelay: '0.8s'}} />
+                  <div className="star absolute w-1 h-1 bg-cyan-200 rounded-full top-[6%] left-[90%] animate-twinkle" style={{animationDelay: '1.2s'}} />
                 </div>
-                <div className="absolute inset-0 bg-cyan-400/25 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute inset-4 bg-cyan-500/15 rounded-full blur-2xl animate-pulse" style={{animationDelay: '0.5s'}} />
+                {/* Orby Commander in front */}
                 <img 
                   src={orbyCommanderImg} 
                   alt="Orby Commander" 
-                  className="relative w-52 h-52 object-contain drop-shadow-[0_0_35px_rgba(6,182,212,0.8)] z-10"
+                  className="relative w-44 h-44 object-contain drop-shadow-[0_0_35px_rgba(6,182,212,0.8)] z-10 mb-8"
                   data-testid="img-orby-commander"
                 />
-                <div className="hidden fallback-icon absolute w-20 h-20 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-400/30 z-10">
-                  <span className="text-4xl">🪐</span>
-                </div>
               </div>
               <h1 className="text-4xl font-black tracking-tight text-white" data-testid="text-login-title">Orby Commander</h1>
               <p className="text-cyan-200/80 mt-2 text-sm" data-testid="text-login-subtitle">Venue Operations Platform</p>
