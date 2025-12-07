@@ -3690,6 +3690,9 @@ export class DatabaseStorage implements IStorage {
       updateData.solanaTransactionHash = blockchainTxHash;
       updateData.solanaNetwork = 'mainnet-beta';
     }
+    if (releaseHash) {
+      updateData.releaseHash = releaseHash;
+    }
     const [updated] = await db.update(releases)
       .set(updateData)
       .where(eq(releases.id, id))

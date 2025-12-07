@@ -5994,15 +5994,34 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   // Create draft release
   app.post("/api/releases", async (req: Request, res: Response) => {
     try {
-      const { version, title, description, changes, releasedById } = req.body;
+      const { version, title, description, changes, highlights, notes, versionType, versionNumber, releasedById } = req.body;
       if (!version || !title) {
         return res.status(400).json({ error: "Version and title are required" });
       }
+      
+      // Auto-detect version type from semver string if not provided
+      let detectedVersionType = versionType;
+      let detectedVersionNumber = versionNumber;
+      if (!detectedVersionType && version) {
+        const parts = version.split('.');
+        if (parts.length >= 3) {
+          const [major, minor, patch] = parts.map(Number);
+          if (patch > 0 && minor === 0 && major === 1) detectedVersionType = 'patch';
+          else if (minor > 0 && patch === 0) detectedVersionType = 'minor';
+          else if (major > 1) detectedVersionType = 'major';
+          else detectedVersionType = 'patch';
+        }
+      }
+      
       const release = await storage.createRelease({
         version,
+        versionType: detectedVersionType,
+        versionNumber: detectedVersionNumber,
         title,
         description,
         changes,
+        highlights,
+        notes,
         releasedById,
         isPublished: false
       });
