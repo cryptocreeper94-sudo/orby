@@ -75,7 +75,9 @@ import {
   type PosReplacement, type InsertPosReplacement,
   type PosIssue, type InsertPosIssue,
   type DocumentTemplate, type InsertDocumentTemplate,
-  type ScannedDocument, type InsertScannedDocument
+  type ScannedDocument, type InsertScannedDocument,
+  type Release, type InsertRelease,
+  releases
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, asc, or, inArray, ilike, sql } from "drizzle-orm";
@@ -588,6 +590,14 @@ export interface IStorage {
   updatePosIssue(id: string, updates: Partial<InsertPosIssue>): Promise<PosIssue>;
   assignPosIssue(id: string, assignedToId: string, assignedToName: string): Promise<PosIssue>;
   resolvePosIssue(id: string, resolvedById: string, resolvedByName: string, resolution: string): Promise<PosIssue>;
+
+  // ============ RELEASE MANAGEMENT SYSTEM ============
+  getReleases(filters?: { isPublished?: boolean }): Promise<Release[]>;
+  getRelease(id: string): Promise<Release | undefined>;
+  getLatestRelease(): Promise<Release | undefined>;
+  createRelease(release: InsertRelease): Promise<Release>;
+  publishRelease(id: string, blockchainTxHash?: string, releaseHash?: string): Promise<Release>;
+  deleteRelease(id: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3641,6 +3651,54 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(scannedDocuments)
       .where(and(...conditions))
       .orderBy(desc(scannedDocuments.createdAt));
+  }
+
+  // ============ RELEASE MANAGEMENT SYSTEM ============
+  async getReleases(filters?: { isPublished?: boolean }): Promise<Release[]> {
+    if (filters?.isPublished !== undefined) {
+      return await db.select().from(releases)
+        .where(eq(releases.isPublished, filters.isPublished))
+        .orderBy(desc(releases.createdAt));
+    }
+    return await db.select().from(releases).orderBy(desc(releases.createdAt));
+  }
+
+  async getRelease(id: string): Promise<Release | undefined> {
+    const [release] = await db.select().from(releases).where(eq(releases.id, id));
+    return release || undefined;
+  }
+
+  async getLatestRelease(): Promise<Release | undefined> {
+    const [release] = await db.select().from(releases)
+      .where(eq(releases.isPublished, true))
+      .orderBy(desc(releases.releasedAt))
+      .limit(1);
+    return release || undefined;
+  }
+
+  async createRelease(release: InsertRelease): Promise<Release> {
+    const [created] = await db.insert(releases).values(release).returning();
+    return created;
+  }
+
+  async publishRelease(id: string, blockchainTxHash?: string, releaseHash?: string): Promise<Release> {
+    const updateData: Partial<Release> = {
+      isPublished: true,
+      releasedAt: new Date(),
+    };
+    if (blockchainTxHash) {
+      updateData.solanaTransactionHash = blockchainTxHash;
+      updateData.solanaNetwork = 'mainnet-beta';
+    }
+    const [updated] = await db.update(releases)
+      .set(updateData)
+      .where(eq(releases.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteRelease(id: string): Promise<void> {
+    await db.delete(releases).where(eq(releases.id, id));
   }
 }
 
