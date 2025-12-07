@@ -5755,7 +5755,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   });
 
   // ═══════════════════════════════════════════════════════════════════════════════
-  // DARKWAVE DEVELOPER HUB INTEGRATION
+  // DARKWAVE DEVELOPER HUB / ORBIT ECOSYSTEM INTEGRATION
   // ═══════════════════════════════════════════════════════════════════════════════
   
   const { EcosystemClient } = await import("./ecosystemHub");
@@ -5764,35 +5764,51 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   const DEV_HUB_API_KEY = process.env.DEV_HUB_API_KEY || "";
   const DEV_HUB_API_SECRET = process.env.DEV_HUB_API_SECRET || "";
   
-  const devHubClient = new EcosystemClient({
-    hubUrl: DEV_HUB_URL,
-    apiKey: DEV_HUB_API_KEY,
-    apiSecret: DEV_HUB_API_SECRET,
-    appName: "Orby"
-  });
+  const devHubClient = new EcosystemClient(
+    DEV_HUB_URL,
+    DEV_HUB_API_KEY,
+    DEV_HUB_API_SECRET
+  );
 
-  // Test connection to DarkWave Developer Hub
-  app.get("/api/dev-hub/connect", async (_req: Request, res: Response) => {
+  // Get connection status from DarkWave Developer Hub
+  app.get("/api/dev-hub/status", async (_req: Request, res: Response) => {
     try {
-      const status = await devHubClient.checkConnection();
-      res.json(status);
+      if (!DEV_HUB_API_KEY || !DEV_HUB_API_SECRET) {
+        return res.json({ 
+          connected: false, 
+          configured: false,
+          message: "API credentials not configured" 
+        });
+      }
+      const status = await devHubClient.getStatus() as Record<string, unknown>;
+      res.json({ connected: true, configured: true, ...status });
     } catch (err) {
-      res.status(500).json({ error: String(err) });
+      res.json({ connected: false, configured: true, error: String(err) });
     }
   });
 
   // Push code snippet to Developer Hub
   app.post("/api/dev-hub/snippet", async (req: Request, res: Response) => {
     try {
-      const { name, code, language, category } = req.body;
-      const result = await devHubClient.pushSnippet({ name, code, language, category });
+      const { name, code, language, category, tags } = req.body;
+      const result = await devHubClient.pushSnippet(name, code, language, category, tags);
       res.json({ success: true, result });
     } catch (err) {
       res.status(500).json({ error: String(err) });
     }
   });
 
-  // Sync workers to Developer Hub
+  // Get snippet from Developer Hub
+  app.get("/api/dev-hub/snippet/:id", async (req: Request, res: Response) => {
+    try {
+      const result = await devHubClient.getSnippet(req.params.id);
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Sync workers to Developer Hub (Orbit Staffing integration)
   app.post("/api/dev-hub/sync-workers", async (req: Request, res: Response) => {
     try {
       const { workers } = req.body;
@@ -5814,11 +5830,22 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
-  // Sync 1099 data to Developer Hub
+  // Sync W-2 payroll data to Developer Hub
+  app.post("/api/dev-hub/sync-w2", async (req: Request, res: Response) => {
+    try {
+      const { year, employees } = req.body;
+      const result = await devHubClient.syncW2Payroll(year, employees);
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Sync 1099 payments to Developer Hub
   app.post("/api/dev-hub/sync-1099", async (req: Request, res: Response) => {
     try {
-      const { year, payments } = req.body;
-      const result = await devHubClient.sync1099Data(year, payments);
+      const { year, contractors } = req.body;
+      const result = await devHubClient.sync1099Payments(year, contractors);
       res.json({ success: true, result });
     } catch (err) {
       res.status(500).json({ error: String(err) });
@@ -5847,10 +5874,32 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
-  // Get activity logs from Developer Hub
-  app.get("/api/dev-hub/logs", async (_req: Request, res: Response) => {
+  // Get shop workers from Developer Hub
+  app.get("/api/dev-hub/shops/:shopId/workers", async (req: Request, res: Response) => {
     try {
-      const logs = await devHubClient.getActivityLogs();
+      const result = await devHubClient.getShopWorkers(req.params.shopId);
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Get shop payroll from Developer Hub
+  app.get("/api/dev-hub/shops/:shopId/payroll", async (req: Request, res: Response) => {
+    try {
+      const result = await devHubClient.getShopPayroll(req.params.shopId);
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Get activity logs from Developer Hub
+  app.get("/api/dev-hub/logs", async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+      const logs = await devHubClient.getLogs(limit, offset);
       res.json({ success: true, logs });
     } catch (err) {
       res.status(500).json({ error: String(err) });

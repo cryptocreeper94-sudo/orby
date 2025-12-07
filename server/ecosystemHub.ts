@@ -1,177 +1,117 @@
-interface EcosystemClientConfig {
-  hubUrl: string;
-  apiKey: string;
-  apiSecret: string;
-  appName: string;
-}
-
-interface Worker {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  status: string;
-  [key: string]: unknown;
-}
-
-interface Contractor {
-  id: string;
-  name: string;
-  email: string;
-  taxId?: string;
-  status: string;
-  [key: string]: unknown;
-}
-
-interface Payment {
-  contractorId: string;
-  amount: number;
-  date: string;
-  description?: string;
-  [key: string]: unknown;
-}
-
-interface Timesheet {
-  workerId: string;
-  date: string;
-  hoursWorked: number;
-  project?: string;
-  [key: string]: unknown;
-}
-
-interface Certification {
-  workerId: string;
-  certName: string;
-  issueDate: string;
-  expiryDate?: string;
-  [key: string]: unknown;
-}
-
-interface Snippet {
-  name: string;
-  code: string;
-  language: string;
-  category: string;
-}
+import crypto from 'crypto';
 
 export class EcosystemClient {
   private hubUrl: string;
   private apiKey: string;
   private apiSecret: string;
-  private appName: string;
 
-  constructor(config: EcosystemClientConfig) {
-    this.hubUrl = config.hubUrl;
-    this.apiKey = config.apiKey;
-    this.apiSecret = config.apiSecret;
-    this.appName = config.appName;
+  constructor(hubUrl: string, apiKey: string, apiSecret: string) {
+    this.hubUrl = hubUrl;
+    this.apiKey = apiKey;
+    this.apiSecret = apiSecret;
   }
 
-  private async makeRequest(endpoint: string, method: string = 'GET', body?: unknown) {
+  private generateSignature(body: string, timestamp: string): string {
+    const message = `${body}${timestamp}`;
+    return crypto
+      .createHmac('sha256', this.apiSecret)
+      .update(message)
+      .digest('hex');
+  }
+
+  private async request(
+    method: string,
+    endpoint: string,
+    body?: unknown
+  ): Promise<unknown> {
+    const timestamp = Date.now().toString();
+    const bodyStr = body ? JSON.stringify(body) : '';
+    const signature = this.generateSignature(bodyStr, timestamp);
+
     const headers: Record<string, string> = {
+      'X-Api-Key': this.apiKey,
+      'X-Api-Secret': this.apiSecret,
+      'X-Timestamp': timestamp,
+      'X-Signature': signature,
       'Content-Type': 'application/json',
-      'X-API-Key': this.apiKey,
-      'X-API-Secret': this.apiSecret,
-      'X-App-Name': this.appName
     };
 
-    const options: RequestInit = {
-      method,
-      headers
-    };
-
-    if (body && method !== 'GET') {
-      options.body = JSON.stringify(body);
-    }
+    const url = `${this.hubUrl}${endpoint}`;
 
     try {
-      const response = await fetch(`${this.hubUrl}${endpoint}`, options);
-      
+      const response = await fetch(url, {
+        method,
+        headers,
+        body: method !== 'GET' ? bodyStr : undefined,
+      });
+
       if (!response.ok) {
-        throw new Error(`Hub API error: ${response.status} ${response.statusText}`);
+        const error = await response.text();
+        throw new Error(`Hub error: ${response.status} - ${error}`);
       }
 
-      return await response.json();
+      return response.json();
     } catch (error) {
       console.error(`[EcosystemHub] Request failed:`, error);
       throw error;
     }
   }
 
-  async checkConnection(): Promise<{ connected: boolean; hubVersion?: string; appRegistered?: boolean }> {
-    try {
-      const result = await this.makeRequest('/api/v1/status');
-      return {
-        connected: true,
-        hubVersion: result.version,
-        appRegistered: result.appRegistered
-      };
-    } catch (error) {
-      return {
-        connected: false
-      };
-    }
+  async syncW2Payroll(year: number, employees: unknown[]) {
+    return this.request('POST', '/api/ecosystem/sync/w2', { year, employees });
   }
 
-  async pushSnippet(snippet: Snippet): Promise<{ id: string; created: boolean }> {
-    return await this.makeRequest('/api/v1/snippets', 'POST', {
-      ...snippet,
-      source: this.appName,
-      timestamp: new Date().toISOString()
+  async sync1099Payments(year: number, contractors: unknown[]) {
+    return this.request('POST', '/api/ecosystem/sync/1099', { year, contractors });
+  }
+
+  async syncWorkers(workers: unknown[]) {
+    return this.request('POST', '/api/ecosystem/sync/workers', { workers });
+  }
+
+  async syncContractors(contractors: unknown[]) {
+    return this.request('POST', '/api/ecosystem/sync/contractors', { contractors });
+  }
+
+  async syncTimesheets(timesheets: unknown[]) {
+    return this.request('POST', '/api/ecosystem/sync/timesheets', { timesheets });
+  }
+
+  async syncCertifications(certifications: unknown[]) {
+    return this.request('POST', '/api/ecosystem/sync/certifications', { certifications });
+  }
+
+  async getShopWorkers(shopId: string) {
+    return this.request('GET', `/api/ecosystem/shops/${shopId}/workers`);
+  }
+
+  async getShopPayroll(shopId: string) {
+    return this.request('GET', `/api/ecosystem/shops/${shopId}/payroll`);
+  }
+
+  async getStatus() {
+    return this.request('GET', '/api/ecosystem/status');
+  }
+
+  async getLogs(limit = 50, offset = 0) {
+    return this.request('GET', `/api/ecosystem/logs?limit=${limit}&offset=${offset}`);
+  }
+
+  async pushSnippet(name: string, code: string, language: string, category: string, tags?: string[]) {
+    return this.request('POST', '/api/ecosystem/snippets', {
+      name,
+      code,
+      language,
+      category,
+      tags,
     });
   }
 
-  async syncWorkers(workers: Worker[]): Promise<{ synced: number; errors: string[] }> {
-    return await this.makeRequest('/api/v1/workers/sync', 'POST', {
-      workers,
-      source: this.appName,
-      timestamp: new Date().toISOString()
-    });
+  async getSnippet(snippetId: string) {
+    return this.request('GET', `/api/ecosystem/snippets/${snippetId}`);
   }
 
-  async syncContractors(contractors: Contractor[]): Promise<{ synced: number; errors: string[] }> {
-    return await this.makeRequest('/api/v1/contractors/sync', 'POST', {
-      contractors,
-      source: this.appName,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  async sync1099Data(year: number, payments: Payment[]): Promise<{ synced: number; totalAmount: number }> {
-    return await this.makeRequest('/api/v1/1099/sync', 'POST', {
-      year,
-      payments,
-      source: this.appName,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  async syncTimesheets(timesheets: Timesheet[]): Promise<{ synced: number; totalHours: number }> {
-    return await this.makeRequest('/api/v1/timesheets/sync', 'POST', {
-      timesheets,
-      source: this.appName,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  async syncCertifications(certifications: Certification[]): Promise<{ synced: number; expiringSoon: number }> {
-    return await this.makeRequest('/api/v1/certifications/sync', 'POST', {
-      certifications,
-      source: this.appName,
-      timestamp: new Date().toISOString()
-    });
-  }
-
-  async getActivityLogs(limit: number = 100): Promise<{ logs: unknown[]; total: number }> {
-    return await this.makeRequest(`/api/v1/logs?limit=${limit}&app=${encodeURIComponent(this.appName)}`);
-  }
-
-  async logActivity(action: string, details: Record<string, unknown>): Promise<{ logged: boolean; id: string }> {
-    return await this.makeRequest('/api/v1/logs', 'POST', {
-      action,
-      details,
-      source: this.appName,
-      timestamp: new Date().toISOString()
-    });
+  async logActivity(action: string, details: unknown) {
+    return this.request('POST', '/api/ecosystem/logs', { action, details });
   }
 }
