@@ -5999,17 +5999,23 @@ Maintain professional composure. Answer inspector questions honestly. Report any
         return res.status(400).json({ error: "Version and title are required" });
       }
       
-      // Auto-detect version type from semver string if not provided
+      // Auto-detect version type and number from semver string if not provided
       let detectedVersionType = versionType;
       let detectedVersionNumber = versionNumber;
-      if (!detectedVersionType && version) {
+      if (version) {
         const parts = version.split('.');
         if (parts.length >= 3) {
           const [major, minor, patch] = parts.map(Number);
-          if (patch > 0 && minor === 0 && major === 1) detectedVersionType = 'patch';
-          else if (minor > 0 && patch === 0) detectedVersionType = 'minor';
-          else if (major > 1) detectedVersionType = 'major';
-          else detectedVersionType = 'patch';
+          // Calculate version number as single integer: major*10000 + minor*100 + patch
+          if (!detectedVersionNumber) {
+            detectedVersionNumber = major * 10000 + minor * 100 + patch;
+          }
+          // Auto-detect version type
+          if (!detectedVersionType) {
+            if (patch > 0) detectedVersionType = 'patch';
+            else if (minor > 0) detectedVersionType = 'minor';
+            else detectedVersionType = 'major';
+          }
         }
       }
       

@@ -5,16 +5,21 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { 
   Package, Plus, Rocket, Shield, ExternalLink, 
-  Trash2, Clock, CheckCircle2, Loader2 
+  Trash2, Clock, CheckCircle2, Loader2, Hash, Sparkles, FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Release {
   id: string;
   version: string;
+  versionType: string | null;
+  versionNumber: number | null;
   title: string;
   description: string | null;
   changes: unknown;
+  highlights: string | null;
+  notes: string | null;
+  releaseHash: string | null;
   releasedById: string | null;
   releasedAt: string | null;
   solanaTransactionHash: string | null;
@@ -23,11 +28,23 @@ interface Release {
   createdAt: string;
 }
 
+interface CreateReleaseData {
+  version: string;
+  versionType?: string;
+  title: string;
+  description?: string;
+  highlights?: string;
+  notes?: string;
+}
+
 export function ReleaseManager() {
   const [showForm, setShowForm] = useState(false);
   const [version, setVersion] = useState("");
+  const [versionType, setVersionType] = useState<string>("patch");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [highlights, setHighlights] = useState("");
+  const [notes, setNotes] = useState("");
   const queryClient = useQueryClient();
 
   const { data: releases = [], isLoading } = useQuery<Release[]>({
@@ -35,7 +52,7 @@ export function ReleaseManager() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (data: { version: string; title: string; description: string }) => {
+    mutationFn: async (data: CreateReleaseData) => {
       const res = await fetch("/api/releases", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -46,10 +63,7 @@ export function ReleaseManager() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/releases"] });
-      setShowForm(false);
-      setVersion("");
-      setTitle("");
-      setDescription("");
+      resetForm();
     },
   });
 
@@ -79,9 +93,26 @@ export function ReleaseManager() {
     },
   });
 
+  const resetForm = () => {
+    setShowForm(false);
+    setVersion("");
+    setVersionType("patch");
+    setTitle("");
+    setDescription("");
+    setHighlights("");
+    setNotes("");
+  };
+
   const handleCreate = () => {
     if (!version || !title) return;
-    createMutation.mutate({ version, title, description });
+    createMutation.mutate({ 
+      version, 
+      versionType,
+      title, 
+      description: description || undefined,
+      highlights: highlights || undefined,
+      notes: notes || undefined,
+    });
   };
 
   if (isLoading) {
@@ -106,13 +137,25 @@ export function ReleaseManager() {
         </Button>
       ) : (
         <div className="space-y-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700">
-          <Input
-            placeholder="Version (e.g., 1.0.13)"
-            value={version}
-            onChange={(e) => setVersion(e.target.value)}
-            className="bg-slate-900/50 border-slate-600"
-            data-testid="input-version"
-          />
+          <div className="flex gap-2">
+            <Input
+              placeholder="Version (e.g., 1.0.14)"
+              value={version}
+              onChange={(e) => setVersion(e.target.value)}
+              className="bg-slate-900/50 border-slate-600 flex-1"
+              data-testid="input-version"
+            />
+            <select
+              value={versionType}
+              onChange={(e) => setVersionType(e.target.value)}
+              className="bg-slate-900/50 border border-slate-600 rounded-md px-2 text-sm text-slate-300"
+              data-testid="select-version-type"
+            >
+              <option value="patch">Patch</option>
+              <option value="minor">Minor</option>
+              <option value="major">Major</option>
+            </select>
+          </div>
           <Input
             placeholder="Release Title"
             value={title}
@@ -124,8 +167,22 @@ export function ReleaseManager() {
             placeholder="Description / Changelog"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="bg-slate-900/50 border-slate-600 min-h-[80px]"
+            className="bg-slate-900/50 border-slate-600 min-h-[60px]"
             data-testid="input-description"
+          />
+          <Input
+            placeholder="Key Highlights (one-liner)"
+            value={highlights}
+            onChange={(e) => setHighlights(e.target.value)}
+            className="bg-slate-900/50 border-slate-600"
+            data-testid="input-highlights"
+          />
+          <Textarea
+            placeholder="Additional Notes (optional)"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="bg-slate-900/50 border-slate-600 min-h-[40px]"
+            data-testid="input-notes"
           />
           <div className="flex gap-2">
             <Button
@@ -145,7 +202,7 @@ export function ReleaseManager() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => setShowForm(false)}
+              onClick={resetForm}
               className="border-slate-600"
               data-testid="button-cancel"
             >
@@ -174,7 +231,7 @@ export function ReleaseManager() {
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Package className={cn(
                       "h-4 w-4",
                       release.isPublished ? "text-emerald-400" : "text-slate-400"
@@ -182,6 +239,11 @@ export function ReleaseManager() {
                     <span className="font-mono font-bold text-slate-200">
                       v{release.version}
                     </span>
+                    {release.versionType && (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-700/50 text-slate-400 uppercase">
+                        {release.versionType}
+                      </span>
+                    )}
                     {release.isPublished ? (
                       <span className="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-400 flex items-center gap-1">
                         <CheckCircle2 className="h-3 w-3" />
@@ -208,9 +270,27 @@ export function ReleaseManager() {
                     )}
                   </div>
                   <div className="text-sm text-slate-300 mt-1">{release.title}</div>
+                  {release.highlights && (
+                    <div className="text-xs text-cyan-400 mt-1 flex items-center gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      {release.highlights}
+                    </div>
+                  )}
                   {release.description && (
                     <div className="text-xs text-slate-500 mt-1 line-clamp-2">
                       {release.description}
+                    </div>
+                  )}
+                  {release.notes && (
+                    <div className="text-xs text-slate-600 mt-1 flex items-center gap-1">
+                      <FileText className="h-3 w-3" />
+                      {release.notes}
+                    </div>
+                  )}
+                  {release.releaseHash && (
+                    <div className="text-[10px] text-slate-600 mt-1 font-mono flex items-center gap-1">
+                      <Hash className="h-3 w-3" />
+                      {release.releaseHash.slice(0, 16)}...
                     </div>
                   )}
                 </div>
