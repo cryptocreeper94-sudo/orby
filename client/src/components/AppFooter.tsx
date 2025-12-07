@@ -27,13 +27,18 @@ interface AppFooterProps {
 export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterProps) {
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
 
+  const { data: packageVersion } = useQuery<{ version: string }>({
+    queryKey: ['/api/version'],
+    refetchInterval: false
+  });
+
   const { data: versionAssets } = useQuery<AssetStamp[]>({
     queryKey: ['/api/asset-stamps/category/version'],
     refetchInterval: 60000
   });
 
   const latestVersion = versionAssets?.[0];
-  const currentVersion = latestVersion?.version || 'v1.0';
+  const currentVersion = packageVersion?.version ? `v${packageVersion.version}` : 'v1.0';
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);

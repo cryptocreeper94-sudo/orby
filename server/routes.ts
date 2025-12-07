@@ -269,6 +269,19 @@ export async function registerRoutes(
     }
   });
 
+  // ============ VERSION ============
+  app.get("/api/version", async (_req: Request, res: Response) => {
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf-8'));
+      res.json({ 
+        version: packageJson.version,
+        name: packageJson.name || 'orby'
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get version" });
+    }
+  });
+
   // ============ USERS ============
   app.get("/api/users", async (_req: Request, res: Response) => {
     try {
