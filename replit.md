@@ -1,11 +1,11 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.10 (Beta) - STAMPED
-**Release Date:** December 5, 2024
-**Genesis Hallmark:** ORB-000000000015
-**Solana TX:** [61vgX3ZQTMDL2Bz3fr39449wKvLUNEyJymx6LQVEY41usj53DitjEygqJqWdjthgAyyhhuzd5v4EwWHXhCXVpzsQ](https://solscan.io/tx/61vgX3ZQTMDL2Bz3fr39449wKvLUNEyJymx6LQVEY41usj53DitjEygqJqWdjthgAyyhhuzd5v4EwWHXhCXVpzsQ)
+## Current Version: v1.0.11 (Beta) - STAMPED
+**Release Date:** December 7, 2024
+**Genesis Hallmark:** ORB-000000000016
+**Solana TX:** [58ndB3jqdB3Nf12FTN8BeDotypvMxCiuRucTQu42nNyf4xWbwVW7P4qXhGbc6WZYgiGUuACexXRtPNb5UTVYMzZq](https://solscan.io/tx/58ndB3jqdB3Nf12FTN8BeDotypvMxCiuRucTQu42nNyf4xWbwVW7P4qXhGbc6WZYgiGUuACexXRtPNb5UTVYMzZq)
 
-### v1.0.11 Release Notes (PENDING)
+### v1.0.11 Release Notes
 - **ORBIT Ecosystem Hub Integration:** Live connection to DarkWave Developer Hub
   - Simple header-based authentication (X-Api-Key, X-Api-Secret)
   - Worker sync for W-2 employees and 1099 contractors
