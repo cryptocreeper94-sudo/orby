@@ -2168,13 +2168,18 @@ export type InsertDocumentTemplate = z.infer<typeof insertDocumentTemplateSchema
 export type ScannedDocument = typeof scannedDocuments.$inferSelect;
 export type InsertScannedDocument = z.infer<typeof insertScannedDocumentSchema>;
 
-// Release Management System - matches existing table structure
+// Release Management System - aligned with ORBIT Dev Hub blueprint
 export const releases = pgTable("releases", {
   id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
   version: varchar("version", { length: 50 }).notNull().unique(),
+  versionType: varchar("version_type", { length: 20 }), // 'major' | 'minor' | 'patch'
+  versionNumber: integer("version_number"), // Numeric version counter
   title: varchar("title", { length: 255 }).notNull(),
   description: text("description"),
-  changes: jsonb("changes"),
+  changes: jsonb("changes"), // Changelog JSON
+  highlights: text("highlights"), // Key highlights summary
+  notes: text("notes"), // Additional release notes
+  releaseHash: varchar("release_hash", { length: 128 }), // SHA-256 hash stored
   releasedById: varchar("released_by_id", { length: 36 }).references(() => users.id),
   releasedAt: timestamp("released_at"),
   solanaTransactionHash: varchar("solana_transaction_hash", { length: 128 }),
