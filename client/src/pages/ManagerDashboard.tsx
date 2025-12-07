@@ -10,10 +10,13 @@ import { LiveSalesWidget } from '@/components/LiveSalesWidget';
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { SupervisorLiveWall } from '@/components/SupervisorLiveWall';
+import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from '@/components/ui/bento';
+import type { AccordionStackItem } from '@/components/ui/bento';
 import {
   LogOut, Menu, Bell, MessageSquare, Package, Utensils, Beer, Monitor, Activity,
   AlertTriangle, CheckCircle2, Clock, MapPin, Users, Radio, TrendingUp, 
-  ChevronRight, Truck, Zap, Crown, Calendar, Store, FileStack, ClipboardList, Siren
+  ChevronRight, Truck, Zap, Crown, Calendar, Store, FileStack, ClipboardList, Siren,
+  Shield, FileText, Settings
 } from 'lucide-react';
 import {
   Sheet,
@@ -154,6 +157,185 @@ export default function ManagerDashboard() {
   const openStands = standStatuses.filter(s => s.status === 'Open' || s.status === 'Hot Spot');
   const standsWithIssues = standStatuses.filter(s => s.activeIssues > 0);
 
+  const metricCards = [
+    <StatCard
+      key="stands"
+      icon={<MapPin className="h-5 w-5" />}
+      label="Stands Open"
+      value={`${openStands.length}/${standStatuses.length}`}
+      color="green"
+    />,
+    <StatCard
+      key="deliveries"
+      icon={<Truck className="h-5 w-5" />}
+      label="Active Deliveries"
+      value={activeDeliveries.length}
+      subValue={emergencyDeliveries.length > 0 ? `${emergencyDeliveries.length} urgent` : undefined}
+      color="blue"
+    />,
+    <StatCard
+      key="it"
+      icon={<Zap className="h-5 w-5" />}
+      label="IT Alerts"
+      value={activeITAlerts.length}
+      subValue={emergencyITAlerts.length > 0 ? `${emergencyITAlerts.length} urgent` : undefined}
+      color="cyan"
+    />,
+    <StatCard
+      key="issues"
+      icon={<AlertTriangle className="h-5 w-5" />}
+      label="Issues"
+      value={standsWithIssues.length}
+      color={standsWithIssues.length > 0 ? "amber" : "green"}
+    />,
+    <div key="weather" className="min-w-[200px]">
+      <WeatherWidget compact className="h-full" />
+    </div>,
+    <div key="sales" className="min-w-[200px]">
+      <LiveSalesWidget compact className="h-full" />
+    </div>,
+  ];
+
+  const quickActions = [
+    { icon: Radio, label: 'Broadcast', color: 'cyan', testId: 'action-broadcast' },
+    { icon: MessageSquare, label: 'Messages', color: 'blue', href: '/messages', testId: 'action-messages' },
+    { icon: Package, label: 'Warehouse', color: 'orange', href: '/warehouse', testId: 'action-warehouse' },
+    { icon: Store, label: 'Stand Setup', color: 'purple', href: '/stand-setup', testId: 'action-stand-setup' },
+    ...(currentUser && ['Developer', 'Management'].includes(currentUser.role) 
+      ? [{ icon: FileStack, label: 'Doc Hub', color: 'green', href: '/document-hub', testId: 'action-document-hub' }] 
+      : []),
+    { icon: Crown, label: 'Team Leads', color: 'amber', href: '/team-management', testId: 'action-team-leads' },
+    { icon: Beer, label: 'Bar Schedule', color: 'amber', href: '/bar-scheduler', testId: 'action-bar-schedule' },
+    { icon: ClipboardList, label: 'Items', color: 'emerald', href: '/item-management', testId: 'action-items' },
+  ];
+
+  const quickActionItems = quickActions.map((action) => {
+    const content = (
+      <motion.div 
+        whileHover={{ scale: 1.02 }} 
+        whileTap={{ scale: 0.98 }}
+        className="min-w-[80px]"
+      >
+        <Button 
+          variant="outline" 
+          className="h-auto py-2 px-3 flex flex-col items-center gap-1 bg-slate-800/60 border-white/10 hover:bg-white/10 hover:border-cyan-400/50"
+          data-testid={action.testId}
+        >
+          <action.icon className={`h-5 w-5 text-${action.color}-400`} />
+          <span className="text-xs text-slate-300 whitespace-nowrap">{action.label}</span>
+        </Button>
+      </motion.div>
+    );
+    return action.href ? (
+      <Link key={action.label} href={action.href}>{content}</Link>
+    ) : (
+      <div key={action.label}>{content}</div>
+    );
+  });
+
+  const staffRosterItems = standStatuses.slice(0, 8).map((stand) => (
+    <Link 
+      key={stand.id} 
+      href={`/count-session/${stand.id}/${encodeURIComponent(new Date().toLocaleDateString())}`}
+    >
+      <motion.div 
+        whileHover={{ scale: 1.02 }}
+        className="min-w-[140px] p-2 rounded-lg bg-slate-800/60 border border-white/10 hover:border-cyan-400/50 cursor-pointer"
+        data-testid={`staff-stand-${stand.id}`}
+      >
+        <div className="flex items-center gap-2 mb-1">
+          <div className={`w-2 h-2 rounded-full ${standStatusColors[stand.status]}`} />
+          <span className="text-sm font-medium text-slate-200 truncate">{stand.name}</span>
+        </div>
+        <div className="text-xs text-slate-500">{stand.section}</div>
+        <Badge variant="outline" className="text-xs border-white/20 text-slate-400 mt-1">
+          {stand.status}
+        </Badge>
+      </motion.div>
+    </Link>
+  ));
+
+  const inventoryItems = activeDeliveries.map((req) => (
+    <motion.div 
+      key={req.id}
+      whileHover={{ scale: 1.02 }}
+      className="min-w-[200px] p-2 rounded-lg bg-slate-800/60 border border-white/10 hover:border-cyan-400/50"
+      data-testid={`inventory-delivery-${req.id}`}
+    >
+      <div className="flex items-center gap-2 mb-1">
+        <div className={`p-1.5 rounded border ${departmentColors[req.department]}`}>
+          {departmentIcons[req.department]}
+        </div>
+        <span className="text-sm font-medium text-slate-200">{req.standName}</span>
+        {req.priority === 'Emergency' && (
+          <Badge className="text-xs bg-red-500/20 text-red-400 border border-red-500/30">!</Badge>
+        )}
+      </div>
+      <div className="text-xs text-slate-400 truncate">{req.description}</div>
+      <div className="flex items-center justify-between mt-1">
+        <Badge className={`text-xs border ${statusColors[req.status]}`}>
+          {req.status === 'OnTheWay' ? 'On Way' : req.status}
+        </Badge>
+        {req.eta && req.status === 'OnTheWay' && (
+          <span className="text-xs text-emerald-400 flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {req.eta}m
+          </span>
+        )}
+      </div>
+    </motion.div>
+  ));
+
+  const supportSections: AccordionStackItem[] = [
+    {
+      title: 'Compliance & Safety',
+      content: (
+        <div className="space-y-2" data-testid="accordion-compliance-content">
+          <ComplianceAlertPanel 
+            userId={currentUser?.id} 
+            userName={currentUser?.name} 
+            isManager={true}
+          />
+          <div className="flex items-center gap-2 p-2 rounded bg-slate-800/40">
+            <Shield className="h-4 w-4 text-emerald-400" />
+            <span className="text-sm text-slate-300">All safety protocols active</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Standard Operating Procedures',
+      content: (
+        <div className="space-y-2" data-testid="accordion-sop-content">
+          <Link href="/document-hub">
+            <div className="flex items-center gap-2 p-2 rounded bg-slate-800/40 hover:bg-slate-700/40 cursor-pointer">
+              <FileText className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm text-slate-300">View Document Hub</span>
+              <ChevronRight className="h-4 w-4 text-slate-500 ml-auto" />
+            </div>
+          </Link>
+          <div className="text-xs text-slate-500 pl-6">
+            Opening procedures, closing checklists, emergency protocols
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: 'Settings & Configuration',
+      content: (
+        <div className="space-y-2" data-testid="accordion-settings-content">
+          <div className="flex items-center gap-2 p-2 rounded bg-slate-800/40">
+            <Settings className="h-4 w-4 text-slate-400" />
+            <span className="text-sm text-slate-300">Dashboard Preferences</span>
+          </div>
+          <div className="text-xs text-slate-500 pl-6">
+            Notification settings, display options, role permissions
+          </div>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <AnimatedBackground>
       <GlobalModeBar />
@@ -177,7 +359,7 @@ export default function ManagerDashboard() {
             <div className="flex items-center gap-2">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button size="icon" variant="ghost" className="md:hidden text-slate-300 hover:bg-white/10">
+                  <Button size="icon" variant="ghost" className="md:hidden text-slate-300 hover:bg-white/10" data-testid="button-mobile-menu">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
@@ -220,358 +402,278 @@ export default function ManagerDashboard() {
           }
         />
 
-        <main className="p-4 space-y-4 max-w-7xl mx-auto">
+        <main className="p-2 md:p-3 max-w-7xl mx-auto">
           <WeatherAlertBanner />
           
-          <ComplianceAlertPanel 
-            userId={currentUser?.id} 
-            userName={currentUser?.name} 
-            isManager={true}
-          />
+          <LayoutShell className="mt-2">
+            {/* Hero Row: Event Overview with Metrics Carousel */}
+            <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="hero-metrics">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-cyan-500/20">
+                  <TrendingUp className="h-4 w-4 text-cyan-400" />
+                </div>
+                <span className="font-medium text-slate-200">Event Overview</span>
+                <SectionHelp
+                  title="Event Metrics"
+                  description="Live dashboard metrics showing current event status at a glance."
+                  tips={["Scroll horizontally to see all metrics", "Click any card for details"]}
+                  keywords={['metrics', 'overview', 'stats']}
+                />
+              </div>
+              <CarouselRail items={metricCards} showDots data-testid="metrics-carousel" />
+            </BentoCard>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <StatCard
-              icon={<MapPin className="h-5 w-5" />}
-              label="Stands Open"
-              value={`${openStands.length}/${standStatuses.length}`}
-              color="green"
-            />
-            <StatCard
-              icon={<Truck className="h-5 w-5" />}
-              label="Active Deliveries"
-              value={activeDeliveries.length}
-              subValue={emergencyDeliveries.length > 0 ? `${emergencyDeliveries.length} urgent` : undefined}
-              color="blue"
-            />
-            <StatCard
-              icon={<Zap className="h-5 w-5" />}
-              label="IT Alerts"
-              value={activeITAlerts.length}
-              subValue={emergencyITAlerts.length > 0 ? `${emergencyITAlerts.length} urgent` : undefined}
-              color="cyan"
-            />
-            <StatCard
-              icon={<AlertTriangle className="h-5 w-5" />}
-              label="Issues"
-              value={standsWithIssues.length}
-              color={standsWithIssues.length > 0 ? "amber" : "green"}
-            />
-          </div>
+            {/* Operations Row: Quick Actions (span-6), Staff Status (span-6) */}
+            <BentoCard span={6} className="col-span-4 md:col-span-3 lg:col-span-6" data-testid="quick-actions-card">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-medium text-slate-200">Quick Actions</span>
+                <SectionHelp
+                  title="Quick Actions"
+                  description="One-tap access to common operations tasks."
+                  tips={["Use Broadcast for venue-wide announcements"]}
+                  keywords={['broadcast', 'routing']}
+                />
+              </div>
+              <CarouselRail items={quickActionItems} data-testid="actions-carousel" />
+            </BentoCard>
 
-          <SupervisorLiveWall />
+            <BentoCard span={6} className="col-span-4 md:col-span-3 lg:col-span-6" data-testid="staff-status-card">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-emerald-500/20">
+                  <Users className="h-4 w-4 text-emerald-400" />
+                </div>
+                <span className="font-medium text-slate-200">Staff Roster</span>
+                <SectionHelp
+                  title="Staff Status"
+                  description="Live view of stand assignments and staff positions."
+                  tips={["Click a stand to view details"]}
+                  keywords={['staff', 'roster', 'stands']}
+                />
+              </div>
+              <CarouselRail items={staffRosterItems} data-testid="staff-carousel" />
+            </BentoCard>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2 space-y-4">
-              <AnimatePresence>
-                {emergencyDeliveries.length > 0 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                  >
-                    <GlassCard className="border-red-500/30" glow data-testid="emergency-deliveries">
-                      <GlassCardHeader>
-                        <div className="flex items-center gap-2">
-                          <div className="p-1.5 rounded-lg bg-red-500/20">
-                            <AlertTriangle className="h-4 w-4 text-red-400" />
-                          </div>
-                          <span className="font-bold text-red-400">Emergency Requests</span>
-                        </div>
-                      </GlassCardHeader>
-                      <GlassCardContent className="space-y-2 pt-0">
-                        {emergencyDeliveries.map((req, idx) => (
-                          <motion.div 
-                            key={req.id} 
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: idx * 0.1 }}
-                            className="flex items-center justify-between p-3 bg-red-500/10 rounded-xl border border-red-500/20"
-                            data-testid={`emergency-delivery-${req.id}`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg border ${departmentColors[req.department]}`}>
-                                {departmentIcons[req.department]}
-                              </div>
-                              <div>
-                                <div className="font-medium text-slate-200">{req.standName}</div>
-                                <div className="text-sm text-slate-400">{req.description}</div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <Badge className={`border ${statusColors[req.status]}`}>{req.status}</Badge>
-                              <div className="text-xs text-slate-500 mt-1">{formatTimeAgo(req.createdAt)}</div>
-                            </div>
-                          </motion.div>
-                        ))}
-                      </GlassCardContent>
-                    </GlassCard>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <GlassCard data-testid="active-deliveries">
-                <GlassCardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-blue-500/20">
-                        <Truck className="h-4 w-4 text-blue-400" />
-                      </div>
-                      <span className="font-bold text-slate-200">Active Deliveries</span>
-                      <SectionHelp
-                        title="Active Deliveries"
-                        description="Track all supply requests from stands to departments (Warehouse, Kitchen, Bar). Each delivery shows its current status and estimated arrival time."
-                        tips={[
-                          "Emergency requests appear at the top with red highlights",
-                          "Click any delivery to see full details and history",
-                          "ETA updates automatically as runners move"
-                        ]}
-                        keywords={['delivery', 'eta', 'priority', 'acknowledged', 'picking', 'on-the-way']}
-                      />
-                    </div>
-                    <Button variant="ghost" size="sm" className="text-cyan-400 hover:bg-cyan-500/10" data-testid="button-view-all-deliveries">
-                      View All <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
+            {/* Inventory Row: Deliveries Carousel (span-8), Alerts (span-4) */}
+            <BentoCard span={8} className="col-span-4 md:col-span-4 lg:col-span-8" data-testid="inventory-card">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-blue-500/20">
+                    <Truck className="h-4 w-4 text-blue-400" />
                   </div>
-                </GlassCardHeader>
-                <GlassCardContent className="pt-0">
-                  <Tabs defaultValue="all" className="w-full" data-testid="delivery-tabs">
-                    <TabsList className="grid grid-cols-5 bg-white/5 mb-4">
-                      <TabsTrigger value="all" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-all">All</TabsTrigger>
-                      <TabsTrigger value="Warehouse" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-warehouse">Warehouse</TabsTrigger>
-                      <TabsTrigger value="Kitchen" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-kitchen">Kitchen</TabsTrigger>
-                      <TabsTrigger value="Bar" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-bar">Bar</TabsTrigger>
-                      <TabsTrigger value="IT" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-it">IT</TabsTrigger>
-                    </TabsList>
-                    
-                    {['all', 'Warehouse', 'Kitchen', 'Bar', 'IT'].map(tab => (
-                      <TabsContent key={tab} value={tab} className="space-y-2">
+                  <span className="font-medium text-slate-200">Active Deliveries</span>
+                  <SectionHelp
+                    title="Active Deliveries"
+                    description="Track supply requests from stands to departments."
+                    tips={["Emergency requests appear with red badges", "ETA updates automatically"]}
+                    keywords={['delivery', 'eta', 'priority']}
+                  />
+                </div>
+                <Button variant="ghost" size="sm" className="text-cyan-400 hover:bg-cyan-500/10 text-xs" data-testid="button-view-all-deliveries">
+                  View All <ChevronRight className="h-3 w-3 ml-1" />
+                </Button>
+              </div>
+              {inventoryItems.length > 0 ? (
+                <CarouselRail items={inventoryItems} data-testid="inventory-carousel" />
+              ) : (
+                <div className="text-center py-4 text-slate-500">
+                  <CheckCircle2 className="h-6 w-6 mx-auto mb-1" />
+                  <p className="text-sm">No active deliveries</p>
+                </div>
+              )}
+            </BentoCard>
+
+            <BentoCard span={4} className="col-span-4 md:col-span-2 lg:col-span-4" data-testid="alerts-card">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-red-500/20">
+                  <AlertTriangle className="h-4 w-4 text-red-400" />
+                </div>
+                <span className="font-medium text-slate-200">Alerts</span>
+              </div>
+              <ScrollArea className="h-[140px]">
+                <div className="space-y-2">
+                  <AnimatePresence>
+                    {emergencyDeliveries.map((req) => (
+                      <motion.div 
+                        key={req.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0 }}
+                        className="p-2 bg-red-500/10 rounded-lg border border-red-500/20"
+                        data-testid={`alert-emergency-${req.id}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className={`p-1 rounded border ${departmentColors[req.department]}`}>
+                            {departmentIcons[req.department]}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium text-slate-200 truncate">{req.standName}</div>
+                            <div className="text-xs text-slate-400 truncate">{req.description}</div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                  {activeITAlerts.map((alert) => (
+                    <motion.div 
+                      key={alert.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className={`p-2 rounded-lg border ${alert.priority === 'Emergency' ? 'bg-red-500/10 border-red-500/20' : 'bg-cyan-500/10 border-cyan-500/20'}`}
+                      data-testid={`alert-it-${alert.id}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Monitor className="h-4 w-4 text-cyan-400" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-slate-200 truncate">{alert.standName}</div>
+                          <div className="text-xs text-slate-400 truncate">{alert.description}</div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                  {emergencyDeliveries.length === 0 && activeITAlerts.length === 0 && (
+                    <div className="text-center py-4 text-slate-500">
+                      <CheckCircle2 className="h-6 w-6 mx-auto mb-1" />
+                      <p className="text-sm">No alerts</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </BentoCard>
+
+            {/* Supervisor Live Wall */}
+            <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="supervisor-wall-card">
+              <SupervisorLiveWall />
+            </BentoCard>
+
+            {/* Active Deliveries Detail (with Tabs) */}
+            <BentoCard span={8} className="col-span-4 md:col-span-4 lg:col-span-8" data-testid="deliveries-detail-card">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-blue-500/20">
+                    <Truck className="h-4 w-4 text-blue-400" />
+                  </div>
+                  <span className="font-medium text-slate-200">Delivery Details</span>
+                </div>
+              </div>
+              <Tabs defaultValue="all" className="w-full" data-testid="delivery-tabs">
+                <TabsList className="grid grid-cols-5 bg-white/5 mb-2 h-8">
+                  <TabsTrigger value="all" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-all">All</TabsTrigger>
+                  <TabsTrigger value="Warehouse" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-warehouse">Warehouse</TabsTrigger>
+                  <TabsTrigger value="Kitchen" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-kitchen">Kitchen</TabsTrigger>
+                  <TabsTrigger value="Bar" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-bar">Bar</TabsTrigger>
+                  <TabsTrigger value="IT" className="text-xs data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400" data-testid="tab-it">IT</TabsTrigger>
+                </TabsList>
+                
+                {['all', 'Warehouse', 'Kitchen', 'Bar', 'IT'].map(tab => (
+                  <TabsContent key={tab} value={tab}>
+                    <ScrollArea className="h-[180px]">
+                      <div className="space-y-1">
                         {activeDeliveries
                           .filter(d => tab === 'all' || d.department === tab)
-                          .map((req, idx) => (
+                          .map((req) => (
                             <motion.div 
                               key={req.id} 
-                              initial={{ opacity: 0, y: 10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: idx * 0.05 }}
-                              className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
-                              data-testid={`delivery-${req.id}`}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="flex items-center justify-between p-2 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+                              data-testid={`delivery-detail-${req.id}`}
                             >
-                              <div className="flex items-center gap-3">
-                                <div className={`p-2 rounded-lg border ${departmentColors[req.department]}`}>
+                              <div className="flex items-center gap-2 min-w-0 flex-1">
+                                <div className={`p-1.5 rounded border ${departmentColors[req.department]}`}>
                                   {departmentIcons[req.department]}
                                 </div>
-                                <div>
+                                <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-2">
-                                    <span className="font-medium text-slate-200">{req.standName}</span>
-                                    <Badge variant="outline" className="text-xs border-white/20 text-slate-400">
-                                      {req.department}
-                                    </Badge>
+                                    <span className="text-sm font-medium text-slate-200">{req.standName}</span>
                                     {req.priority === 'Emergency' && (
                                       <Badge className="text-xs bg-red-500/20 text-red-400 border border-red-500/30">Urgent</Badge>
                                     )}
                                   </div>
-                                  <div className="text-sm text-slate-400">{req.description}</div>
-                                  <div className="text-xs text-slate-500 mt-1">
-                                    Requested by {req.requesterName} • {formatTimeAgo(req.createdAt)}
-                                  </div>
+                                  <div className="text-xs text-slate-400 truncate">{req.description}</div>
                                 </div>
                               </div>
-                              <div className="text-right">
-                                <Badge className={`border ${statusColors[req.status]}`}>
-                                  {req.status === 'OnTheWay' ? 'On the Way' : req.status}
+                              <div className="text-right shrink-0 ml-2">
+                                <Badge className={`text-xs border ${statusColors[req.status]}`}>
+                                  {req.status === 'OnTheWay' ? 'On Way' : req.status}
                                 </Badge>
                                 {req.eta && req.status === 'OnTheWay' && (
-                                  <div className="text-sm text-emerald-400 mt-1 flex items-center gap-1 justify-end">
+                                  <div className="text-xs text-emerald-400 mt-0.5 flex items-center gap-1 justify-end">
                                     <Clock className="h-3 w-3" />
-                                    {req.eta} min
+                                    {req.eta}m
                                   </div>
                                 )}
                               </div>
                             </motion.div>
                           ))}
                         {activeDeliveries.filter(d => tab === 'all' || d.department === tab).length === 0 && (
-                          <div className="text-center py-8 text-slate-500">
-                            <CheckCircle2 className="h-8 w-8 mx-auto mb-2" />
-                            <p>No active {tab === 'all' ? 'deliveries' : `${tab} requests`}</p>
+                          <div className="text-center py-6 text-slate-500">
+                            <CheckCircle2 className="h-6 w-6 mx-auto mb-1" />
+                            <p className="text-sm">No {tab === 'all' ? 'active' : tab} deliveries</p>
                           </div>
                         )}
-                      </TabsContent>
-                    ))}
-                  </Tabs>
-                </GlassCardContent>
-              </GlassCard>
-
-              {activeITAlerts.length > 0 && (
-                <GlassCard className="border-cyan-500/20" data-testid="it-alerts">
-                  <GlassCardHeader>
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-cyan-500/20">
-                        <Zap className="h-4 w-4 text-cyan-400" />
                       </div>
-                      <span className="font-bold text-cyan-400">IT Alerts</span>
-                    </div>
-                  </GlassCardHeader>
-                  <GlassCardContent className="space-y-2 pt-0">
-                    {activeITAlerts.map((alert, idx) => (
+                    </ScrollArea>
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </BentoCard>
+
+            {/* Stand Overview */}
+            <BentoCard span={4} className="col-span-4 md:col-span-2 lg:col-span-4" data-testid="stand-overview-card">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-emerald-500/20">
+                  <MapPin className="h-4 w-4 text-emerald-400" />
+                </div>
+                <span className="font-medium text-slate-200">Stand Overview</span>
+                <SectionHelp
+                  title="Stand Overview"
+                  description="Real-time status of all concession stands."
+                  tips={["Green = open", "Orange = hot spot", "Red = needs help"]}
+                  keywords={['stand', 'section', 'status']}
+                />
+              </div>
+              <ScrollArea className="h-[180px]">
+                <div className="space-y-1">
+                  {standStatuses.map((stand) => (
+                    <Link 
+                      key={stand.id} 
+                      href={`/count-session/${stand.id}/${encodeURIComponent(new Date().toLocaleDateString())}`}
+                    >
                       <motion.div 
-                        key={alert.id} 
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.1 }}
-                        className={`flex items-center justify-between p-3 rounded-xl border ${alert.priority === 'Emergency' ? 'bg-red-500/10 border-red-500/30' : 'bg-cyan-500/10 border-cyan-500/20'}`}
-                        data-testid={`it-alert-${alert.id}`}
+                        whileHover={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
+                        className="flex items-center justify-between p-1.5 rounded cursor-pointer"
+                        data-testid={`stand-overview-${stand.id}`}
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-cyan-500/20">
-                            <Monitor className="h-4 w-4 text-cyan-400" />
-                          </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-medium text-slate-200">{alert.standName}</span>
-                              <Badge variant="outline" className="text-xs border-white/20 text-slate-400">{alert.issueType}</Badge>
-                              {alert.priority === 'Emergency' && (
-                                <Badge className="text-xs bg-red-500/20 text-red-400 border border-red-500/30">Urgent</Badge>
-                              )}
-                            </div>
-                            <div className="text-sm text-slate-400">{alert.description}</div>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className={`w-2 h-2 rounded-full shrink-0 ${standStatusColors[stand.status]}`} />
+                          <div className="min-w-0">
+                            <div className="text-sm text-slate-200 truncate">{stand.name}</div>
+                            <div className="text-xs text-slate-500">{stand.section}</div>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <Badge className={`border ${statusColors[alert.status]}`}>{alert.status}</Badge>
-                          <div className="text-xs text-slate-500 mt-1">{formatTimeAgo(alert.createdAt)}</div>
-                        </div>
+                        <ChevronRight className="h-4 w-4 text-slate-500 shrink-0" />
                       </motion.div>
-                    ))}
-                  </GlassCardContent>
-                </GlassCard>
-              )}
-            </div>
+                    </Link>
+                  ))}
+                </div>
+              </ScrollArea>
+            </BentoCard>
 
-            <div className="space-y-4">
-              <LiveSalesWidget compact className="w-full" />
-              
-              <WeatherWidget compact className="w-full" />
-
-              <GlassCard data-testid="stand-overview">
-                <GlassCardHeader>
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-emerald-500/20">
-                      <MapPin className="h-4 w-4 text-emerald-400" />
-                    </div>
-                    <span className="font-bold text-slate-200">Stand Overview</span>
-                    <SectionHelp
-                      title="Stand Overview"
-                      description="Real-time status of all concession stands. Green means open and running smoothly. Orange indicates a Hot Spot needing attention. Red means the stand needs immediate help."
-                      tips={[
-                        "Hot Spots are high-volume or problem stands",
-                        "Tap a stand to see active issues and deliveries",
-                        "Filter by section to focus on your area"
-                      ]}
-                      keywords={['stand', 'section', 'hot-spot', 'supervisor']}
-                    />
-                  </div>
-                </GlassCardHeader>
-                <GlassCardContent className="pt-0">
-                  <ScrollArea className="h-[300px]">
-                    <div className="space-y-2">
-                      {standStatuses.map((stand, idx) => (
-                        <Link 
-                          key={stand.id} 
-                          href={`/count-session/${stand.id}/${encodeURIComponent(new Date().toLocaleDateString())}`}
-                        >
-                          <motion.div 
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: idx * 0.03 }}
-                            className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-                            data-testid={`stand-${stand.id}`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`w-2 h-2 rounded-full ${standStatusColors[stand.status]}`} />
-                              <div>
-                                <div className="font-medium text-sm text-slate-200">{stand.name}</div>
-                                <div className="text-xs text-slate-500">{stand.section}</div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {stand.activeIssues > 0 && (
-                                <Badge className="text-xs bg-red-500/20 text-red-400 border border-red-500/30">
-                                  {stand.activeIssues} issue{stand.activeIssues > 1 ? 's' : ''}
-                                </Badge>
-                              )}
-                              {stand.pendingDeliveries > 0 && (
-                                <Badge variant="outline" className="text-xs border-blue-500/30 text-blue-400">
-                                  {stand.pendingDeliveries} pending
-                                </Badge>
-                              )}
-                              <Badge variant="outline" className="text-xs border-white/20 text-slate-400">
-                                {stand.status}
-                              </Badge>
-                              <ChevronRight className="h-4 w-4 text-slate-500" />
-                            </div>
-                          </motion.div>
-                        </Link>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </GlassCardContent>
-              </GlassCard>
-
-              <GlassCard data-testid="quick-actions">
-                <GlassCardHeader>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-200">Quick Actions</span>
-                    <SectionHelp
-                      title="Quick Actions"
-                      description="One-tap access to common operations tasks. Broadcast messages to all staff, view reports, or manage system settings."
-                      tips={[
-                        "Use Broadcast for urgent venue-wide announcements",
-                        "Reports show trends and help with decision-making"
-                      ]}
-                      keywords={['broadcast', 'routing', 'audit-trail']}
-                    />
-                  </div>
-                </GlassCardHeader>
-                <GlassCardContent className="grid grid-cols-2 gap-2 pt-0">
-                  {[
-                    { icon: Radio, label: 'Broadcast', color: 'cyan', testId: 'button-broadcast' },
-                    { icon: MessageSquare, label: 'Messages', color: 'blue', href: '/messages', testId: 'button-view-messages' },
-                    { icon: Package, label: 'Warehouse', color: 'orange', href: '/warehouse', testId: 'button-warehouse' },
-                    { icon: Store, label: 'Stand Setup', color: 'purple', href: '/stand-setup', testId: 'button-stand-setup' },
-                    ...(currentUser && ['Developer', 'Management'].includes(currentUser.role) 
-                      ? [{ icon: FileStack, label: 'Doc Hub', color: 'green', href: '/document-hub', testId: 'button-document-hub' }] 
-                      : []),
-                    { icon: Crown, label: 'Team Leads', color: 'amber', href: '/team-management', testId: 'button-team-management' },
-                    { icon: Beer, label: 'Bar Schedule', color: 'amber', href: '/bar-scheduler', testId: 'button-bar-scheduler' },
-                    { icon: ClipboardList, label: 'Items', color: 'emerald', href: '/item-management', testId: 'button-item-management' },
-                  ].map((action) => {
-                    const content = (
-                      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                        <Button 
-                          variant="outline" 
-                          className={`h-auto py-3 flex flex-col items-center gap-1 bg-white/5 border-white/10 hover:bg-white/10 w-full`}
-                          data-testid={action.testId}
-                        >
-                          <action.icon className={`h-5 w-5 text-${action.color}-400`} />
-                          <span className="text-xs text-slate-300">{action.label}</span>
-                        </Button>
-                      </motion.div>
-                    );
-                    return action.href ? (
-                      <Link key={action.label} href={action.href}>{content}</Link>
-                    ) : (
-                      <div key={action.label}>{content}</div>
-                    );
-                  })}
-                </GlassCardContent>
-              </GlassCard>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <LiveSalesWidget className="w-full" />
-            <WeatherWidget className="w-full" />
-          </div>
+            {/* Support Row: AccordionStack for compliance, SOPs, documentation */}
+            <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="support-section-card">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-1.5 rounded-lg bg-purple-500/20">
+                  <FileStack className="h-4 w-4 text-purple-400" />
+                </div>
+                <span className="font-medium text-slate-200">Support & Documentation</span>
+              </div>
+              <AccordionStack 
+                items={supportSections} 
+                defaultOpen={[0]}
+                data-testid="support-accordion"
+              />
+            </BentoCard>
+          </LayoutShell>
         </main>
       </div>
     </AnimatedBackground>
