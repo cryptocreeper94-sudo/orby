@@ -1,9 +1,26 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.12 (Beta) - STAMPED
+## Current Version: v1.0.13 (Beta) - STAMPED
 **Release Date:** December 7, 2024
-**Genesis Hallmark:** ORB-000000000017
-**Solana TX:** [4EVgturPtFCypnoocLSPWoPxQCEhXVhAMGDMoKNGBsUbd1B7s93vzPqC8WmbqeXSFKTZVyFF2GKqE7tLfR5MLro1](https://solscan.io/tx/4EVgturPtFCypnoocLSPWoPxQCEhXVhAMGDMoKNGBsUbd1B7s93vzPqC8WmbqeXSFKTZVyFF2GKqE7tLfR5MLro1)
+**Solana TX:** [DVFpKvGGLcduQvBHHwLdcjCqZiPRPrNZJ7Grvdo9cHNqxDWRSU9vxo7W4bcpa1TTdz8Z8wRV23BQqswjxas9LtG](https://solscan.io/tx/DVFpKvGGLcduQvBHHwLdcjCqZiPRPrNZJ7Grvdo9cHNqxDWRSU9vxo7W4bcpa1TTdz8Z8wRV23BQqswjxas9LtG)
+
+### v1.0.13 Release Notes
+- **Release Manager:** Full release management UI in Dev Dashboard
+  - Create draft releases with version, title, and description
+  - Publish releases with automatic SHA-256 hash generation
+  - Solana mainnet blockchain verification on publish
+  - Visual indicators for Draft vs Published status
+  - Verified badge with Solscan link for blockchain-anchored releases
+- **Footer Version Display:** Shows latest published release from Release Manager
+  - Auto-fetches from /api/releases/latest endpoint
+  - Green verified checkmark for blockchain-anchored releases
+- **ORBIT Ecosystem Hub Sharing:** 4 reusable code snippets shared
+  - Automated versioning system for other DarkWave agents
+  - Bump-version script, schema patterns, storage interface, API routes
+
+### v1.0.12 Release Notes
+- **Genesis Hallmark:** ORB-000000000017
+- **Solana TX:** [4EVgturPtFCypnoocLSPWoPxQCEhXVhAMGDMoKNGBsUbd1B7s93vzPqC8WmbqeXSFKTZVyFF2GKqE7tLfR5MLro1](https://solscan.io/tx/4EVgturPtFCypnoocLSPWoPxQCEhXVhAMGDMoKNGBsUbd1B7s93vzPqC8WmbqeXSFKTZVyFF2GKqE7tLfR5MLro1)
 
 ### v1.0.11 Release Notes
 - **ORBIT Ecosystem Hub Integration:** Live connection to DarkWave Developer Hub
