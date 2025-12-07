@@ -3,6 +3,7 @@ import { useMode } from '@/lib/ModeContext';
 import { Shield, FlaskConical, Radio, Users, AlertTriangle, Sparkles, BadgeCheck, ExternalLink, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import orbyCommanderImg from '@assets/generated_images/orby_commander_nobg.png';
+import nashvilleSkylineImg from '@assets/generated_images/nashville_skyline_nissan_nobg.png';
 
 const GENESIS_HALLMARK_URL = 'https://solscan.io/tx/44QArRaRncUfTEP3ZHVQmiMo7zWfRxxD82KxpKHihzJc6KXD7PjQ1XofygiZjtCU6oNK6hCgiT848YqjntsMFMnU';
 const QR_CODE_URL = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(GENESIS_HALLMARK_URL)}&bgcolor=0f172a&color=10b981`;
@@ -26,36 +27,48 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
   };
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-800 z-50">
-      {/* Header with Verified Badge */}
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="text-cyan-400/70 text-xs font-medium">getorby.io</div>
-        <button
-          onClick={() => setShowQRModal(true)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-600/30 to-cyan-600/30 border border-emerald-400/50 hover:border-emerald-400 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] group"
-          data-testid="button-genesis-badge"
-        >
-          <BadgeCheck className="h-4 w-4 text-emerald-400" />
-          <span className="text-xs font-bold text-emerald-300">Verified</span>
-        </button>
-      </div>
+    <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-800 z-50 overflow-y-auto">
+      <div className="min-h-full flex flex-col">
+        {/* Header with Verified Badge */}
+        <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
+          <div className="text-cyan-400/70 text-xs font-medium">getorby.io</div>
+          <button
+            onClick={() => setShowQRModal(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-600/30 to-cyan-600/30 border border-emerald-400/50 hover:border-emerald-400 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] group"
+            data-testid="button-genesis-badge"
+          >
+            <BadgeCheck className="h-4 w-4 text-emerald-400" />
+            <span className="text-xs font-bold text-emerald-300">Verified</span>
+          </button>
+        </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-4">
-        <div className="w-full max-w-2xl">
-          <div className="text-center mb-8">
-            <div className="w-48 h-48 mx-auto mb-6 relative">
-              <div className="absolute inset-0 bg-cyan-400/30 rounded-full blur-3xl animate-pulse scale-125" />
-              <div className="absolute inset-0 bg-gradient-to-t from-cyan-500/20 to-transparent rounded-full blur-2xl" />
-              <img 
-                src={orbyCommanderImg} 
-                alt="Orby Commander" 
-                className="relative w-48 h-48 object-contain drop-shadow-[0_0_40px_rgba(6,182,212,0.9)] animate-float"
-              />
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col items-center px-4 pb-6 pt-2">
+          <div className="w-full max-w-2xl">
+            <div className="text-center mb-6">
+              {/* Nashville Skyline with Nissan Stadium behind Orby */}
+              <div className="w-full max-w-sm mx-auto h-48 sm:h-56 mb-4 relative flex items-end justify-center">
+                {/* Skyline background - positioned at bottom */}
+                <img 
+                  src={nashvilleSkylineImg} 
+                  alt="Nashville Skyline with Nissan Stadium" 
+                  className="absolute bottom-0 left-0 right-0 w-full h-32 sm:h-40 object-contain object-bottom opacity-60"
+                  data-testid="img-city-skyline"
+                />
+                {/* Glow effects */}
+                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-32 h-32 bg-cyan-400/30 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-24 h-24 bg-cyan-500/20 rounded-full blur-2xl animate-pulse" style={{animationDelay: '0.5s'}} />
+                {/* Orby Commander in front */}
+                <img 
+                  src={orbyCommanderImg} 
+                  alt="Orby Commander" 
+                  className="relative w-32 h-32 sm:w-36 sm:h-36 object-contain drop-shadow-[0_0_40px_rgba(6,182,212,0.9)] animate-float z-10 mb-2"
+                  data-testid="img-orby-commander"
+                />
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-black text-white mb-2 tracking-tight">Welcome to Orby</h1>
+              <p className="text-cyan-200/70 text-sm sm:text-base">Select your mode before continuing</p>
             </div>
-            <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Welcome to Orby</h1>
-            <p className="text-cyan-200/70 text-base">Select your mode before continuing</p>
-          </div>
 
           <div className="grid md:grid-cols-2 gap-4">
             <button
@@ -281,6 +294,7 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
           animation: bounce-horizontal 1s ease-in-out infinite;
         }
       `}</style>
+      </div>
     </div>
   );
 }
