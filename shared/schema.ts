@@ -2168,6 +2168,25 @@ export type InsertDocumentTemplate = z.infer<typeof insertDocumentTemplateSchema
 export type ScannedDocument = typeof scannedDocuments.$inferSelect;
 export type InsertScannedDocument = z.infer<typeof insertScannedDocumentSchema>;
 
+// Release Management System - matches existing table structure
+export const releases = pgTable("releases", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  version: varchar("version", { length: 50 }).notNull().unique(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  changes: jsonb("changes"),
+  releasedById: varchar("released_by_id", { length: 36 }).references(() => users.id),
+  releasedAt: timestamp("released_at"),
+  solanaTransactionHash: varchar("solana_transaction_hash", { length: 128 }),
+  solanaNetwork: varchar("solana_network", { length: 50 }),
+  isPublished: boolean("is_published").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertReleaseSchema = createInsertSchema(releases).omit({ id: true, createdAt: true });
+export type Release = typeof releases.$inferSelect;
+export type InsertRelease = z.infer<typeof insertReleaseSchema>;
+
 // Document type display names and routing
 export const DOCUMENT_TYPE_CONFIG = {
   bar_control: {
