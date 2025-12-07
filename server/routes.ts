@@ -5760,7 +5760,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   
   const { EcosystemClient } = await import("./ecosystemHub");
   
-  const DEV_HUB_URL = process.env.DEV_HUB_URL || "https://darkwavestudios.io";
+  const DEV_HUB_URL = process.env.ORBIT_ECOSYSTEM_DEV_URL || "https://darkwavestudios.io";
   const DEV_HUB_API_KEY = process.env.ORBIT_ECOSYSTEM_API_KEY || "";
   const DEV_HUB_API_SECRET = process.env.ORBIT_ECOSYSTEM_API_SECRET || "";
   
