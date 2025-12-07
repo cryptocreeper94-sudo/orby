@@ -11,8 +11,8 @@ export class EcosystemClient {
     this.apiSecret = apiSecret;
   }
 
-  private generateSignature(body: string, timestamp: string): string {
-    const message = `${body}${timestamp}`;
+  private generateSignature(timestamp: string, method: string, path: string, body: string): string {
+    const message = `${timestamp}${method}${path}${body}`;
     return crypto
       .createHmac('sha256', this.apiSecret)
       .update(message)
@@ -26,7 +26,7 @@ export class EcosystemClient {
   ): Promise<unknown> {
     const timestamp = Date.now().toString();
     const bodyStr = body ? JSON.stringify(body) : '';
-    const signature = this.generateSignature(bodyStr, timestamp);
+    const signature = this.generateSignature(timestamp, method, endpoint, bodyStr);
 
     const headers: Record<string, string> = {
       'X-Api-Key': this.apiKey,
@@ -58,60 +58,61 @@ export class EcosystemClient {
   }
 
   async syncW2Payroll(year: number, employees: unknown[]) {
-    return this.request('POST', '/api/ecosystem/sync/w2', { year, employees });
+    return this.request('POST', '/sync/w2', { year, employees });
   }
 
   async sync1099Payments(year: number, contractors: unknown[]) {
-    return this.request('POST', '/api/ecosystem/sync/1099', { year, contractors });
+    return this.request('POST', '/sync/1099', { year, contractors });
   }
 
   async syncWorkers(workers: unknown[]) {
-    return this.request('POST', '/api/ecosystem/sync/workers', { workers });
+    return this.request('POST', '/sync/workers', { workers });
   }
 
   async syncContractors(contractors: unknown[]) {
-    return this.request('POST', '/api/ecosystem/sync/contractors', { contractors });
+    return this.request('POST', '/sync/contractors', { contractors });
   }
 
   async syncTimesheets(timesheets: unknown[]) {
-    return this.request('POST', '/api/ecosystem/sync/timesheets', { timesheets });
+    return this.request('POST', '/sync/timesheets', { timesheets });
   }
 
   async syncCertifications(certifications: unknown[]) {
-    return this.request('POST', '/api/ecosystem/sync/certifications', { certifications });
+    return this.request('POST', '/sync/certifications', { certifications });
   }
 
-  async getShopWorkers(shopId: string) {
-    return this.request('GET', `/api/ecosystem/shops/${shopId}/workers`);
+  async getShopWorkers(filters?: Record<string, string>) {
+    const params = filters ? '?' + new URLSearchParams(filters).toString() : '';
+    return this.request('GET', `/shops/workers${params}`);
   }
 
-  async getShopPayroll(shopId: string) {
-    return this.request('GET', `/api/ecosystem/shops/${shopId}/payroll`);
+  async getShopPayroll(filters?: Record<string, string>) {
+    const params = filters ? '?' + new URLSearchParams(filters).toString() : '';
+    return this.request('GET', `/shops/payroll${params}`);
   }
 
   async getStatus() {
-    return this.request('GET', '/api/ecosystem/status');
+    return this.request('GET', '/status');
   }
 
   async getLogs(limit = 50, offset = 0) {
-    return this.request('GET', `/api/ecosystem/logs?limit=${limit}&offset=${offset}`);
+    return this.request('GET', `/logs?limit=${limit}&offset=${offset}`);
   }
 
-  async pushSnippet(name: string, code: string, language: string, category: string, tags?: string[]) {
-    return this.request('POST', '/api/ecosystem/snippets', {
-      name,
+  async pushSnippet(title: string, code: string, language: string, category: string) {
+    return this.request('POST', '/snippets', {
+      title,
       code,
       language,
       category,
-      tags,
     });
   }
 
-  async getSnippet(snippetId: string) {
-    return this.request('GET', `/api/ecosystem/snippets/${snippetId}`);
+  async getSnippets() {
+    return this.request('GET', '/snippets');
   }
 
   async logActivity(action: string, details: unknown) {
-    return this.request('POST', '/api/ecosystem/logs', { action, details });
+    return this.request('POST', '/logs', { action, details });
   }
 }

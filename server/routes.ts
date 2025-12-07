@@ -5760,7 +5760,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   
   const { EcosystemClient } = await import("./ecosystemHub");
   
-  const DEV_HUB_URL = process.env.ORBIT_ECOSYSTEM_DEV_URL || "https://darkwavestudios.io";
+  const DEV_HUB_URL = process.env.ORBIT_ECOSYSTEM_DEV_URL || "https://orbitstaffing.io/api/ecosystem";
   const DEV_HUB_API_KEY = process.env.ORBIT_ECOSYSTEM_API_KEY || "";
   const DEV_HUB_API_SECRET = process.env.ORBIT_ECOSYSTEM_API_SECRET || "";
   
@@ -5790,18 +5790,18 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   // Push code snippet to Developer Hub
   app.post("/api/dev-hub/snippet", async (req: Request, res: Response) => {
     try {
-      const { name, code, language, category, tags } = req.body;
-      const result = await devHubClient.pushSnippet(name, code, language, category, tags);
+      const { title, code, language, category } = req.body;
+      const result = await devHubClient.pushSnippet(title, code, language, category);
       res.json({ success: true, result });
     } catch (err) {
       res.status(500).json({ error: String(err) });
     }
   });
 
-  // Get snippet from Developer Hub
-  app.get("/api/dev-hub/snippet/:id", async (req: Request, res: Response) => {
+  // Get snippets from Developer Hub
+  app.get("/api/dev-hub/snippets", async (_req: Request, res: Response) => {
     try {
-      const result = await devHubClient.getSnippet(req.params.id);
+      const result = await devHubClient.getSnippets();
       res.json({ success: true, result });
     } catch (err) {
       res.status(500).json({ error: String(err) });
@@ -5874,20 +5874,22 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
-  // Get shop workers from Developer Hub
-  app.get("/api/dev-hub/shops/:shopId/workers", async (req: Request, res: Response) => {
+  // Get workers from Developer Hub
+  app.get("/api/dev-hub/workers", async (req: Request, res: Response) => {
     try {
-      const result = await devHubClient.getShopWorkers(req.params.shopId);
+      const filters = req.query as Record<string, string>;
+      const result = await devHubClient.getShopWorkers(filters);
       res.json({ success: true, result });
     } catch (err) {
       res.status(500).json({ error: String(err) });
     }
   });
 
-  // Get shop payroll from Developer Hub
-  app.get("/api/dev-hub/shops/:shopId/payroll", async (req: Request, res: Response) => {
+  // Get payroll from Developer Hub
+  app.get("/api/dev-hub/payroll", async (req: Request, res: Response) => {
     try {
-      const result = await devHubClient.getShopPayroll(req.params.shopId);
+      const filters = req.query as Record<string, string>;
+      const result = await devHubClient.getShopPayroll(filters);
       res.json({ success: true, result });
     } catch (err) {
       res.status(500).json({ error: String(err) });
