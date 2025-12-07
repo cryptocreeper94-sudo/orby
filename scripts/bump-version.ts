@@ -28,37 +28,82 @@ function bumpVersion(version: string, type: string): string {
   }
 }
 
-async function createHallmark(version: string, displayName: string) {
+async function createAndAnchorHallmark(version: string, displayName: string) {
   const baseUrl = process.env.REPLIT_DEV_DOMAIN 
     ? `https://${process.env.REPLIT_DEV_DOMAIN}`
     : 'http://localhost:5000';
   
   console.log(`Creating Genesis Hallmark for v${version}...`);
   
-  const response = await fetch(`${baseUrl}/api/asset-stamps`, {
+  const createResponse = await fetch(`${baseUrl}/api/asset-stamps`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       displayName,
       category: 'version',
       description: `Orby v${version} release`,
-      metadata: { version, releaseDate: new Date().toISOString() },
-      anchorToBlockchain: true,
-      network: 'mainnet-beta'
+      metadata: { version, releaseDate: new Date().toISOString() }
     })
   });
   
-  if (!response.ok) {
-    const error = await response.text();
+  if (!createResponse.ok) {
+    const error = await createResponse.text();
     throw new Error(`Failed to create hallmark: ${error}`);
   }
   
-  const result = await response.json();
-  console.log(`✓ Genesis Hallmark created: ${result.assetNumber}`);
-  if (result.solanaTxSignature && !result.solanaTxSignature.startsWith('HASH_')) {
-    console.log(`✓ Solana TX: https://solscan.io/tx/${result.solanaTxSignature}`);
+  const stamp = await createResponse.json();
+  console.log(`✓ Genesis Hallmark created: ${stamp.assetNumber}`);
+  
+  console.log(`Anchoring to Solana mainnet...`);
+  const anchorResponse = await fetch(`${baseUrl}/api/asset-stamps/${stamp.id}/anchor`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ network: 'mainnet-beta' })
+  });
+  
+  if (!anchorResponse.ok) {
+    const error = await anchorResponse.text();
+    throw new Error(`Failed to anchor to blockchain: ${error}`);
   }
-  return result;
+  
+  const anchorResult = await anchorResponse.json();
+  
+  if (anchorResult.txSignature && !anchorResult.txSignature.startsWith('HASH_')) {
+    console.log(`✓ Solana TX: ${anchorResult.solscanUrl}`);
+    return { ...stamp, txSignature: anchorResult.txSignature, solscanUrl: anchorResult.solscanUrl };
+  } else {
+    console.log(`⚠ Hash-only anchor (no SOL or Helius key configured)`);
+    return stamp;
+  }
+}
+
+function updateReplitMd(newVersion: string, assetNumber: string, txSignature?: string) {
+  const replitMdPath = path.join(process.cwd(), 'replit.md');
+  if (!fs.existsSync(replitMdPath)) return;
+  
+  let content = fs.readFileSync(replitMdPath, 'utf-8');
+  
+  const versionRegex = /## Current Version: v[\d.]+/;
+  const hallmarkRegex = /\*\*Genesis Hallmark:\*\* ORB-\d+/;
+  const txRegex = /\*\*Solana TX:\*\* \[.*?\]\(.*?\)/;
+  
+  if (versionRegex.test(content)) {
+    content = content.replace(versionRegex, `## Current Version: v${newVersion}`);
+  }
+  
+  if (hallmarkRegex.test(content)) {
+    content = content.replace(hallmarkRegex, `**Genesis Hallmark:** ${assetNumber}`);
+  }
+  
+  if (txSignature && txRegex.test(content)) {
+    const solscanUrl = `https://solscan.io/tx/${txSignature}`;
+    content = content.replace(txRegex, `**Solana TX:** [${txSignature}](${solscanUrl})`);
+  }
+  
+  content = content.replace(/### v[\d.]+ Release Notes \(PENDING\)/, `### v${newVersion} Release Notes`);
+  
+  fs.writeFileSync(replitMdPath, content);
+  console.log(`✓ Updated replit.md`);
 }
 
 async function main() {
@@ -74,30 +119,19 @@ async function main() {
   fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2) + '\n');
   console.log(`✓ Updated package.json`);
   
-  const replitMdPath = path.join(process.cwd(), 'replit.md');
-  if (fs.existsSync(replitMdPath)) {
-    let content = fs.readFileSync(replitMdPath, 'utf-8');
-    const versionRegex = /## Current Version: v[\d.]+/;
-    if (versionRegex.test(content)) {
-      content = content.replace(versionRegex, `## Current Version: v${newVersion}`);
-      content = content.replace(/### v[\d.]+ Release Notes \(PENDING\)/, `### v${newVersion} Release Notes`);
-      fs.writeFileSync(replitMdPath, content);
-      console.log(`✓ Updated replit.md`);
-    }
-  }
-  
   if (withHallmark) {
     try {
-      await createHallmark(newVersion, `Orby v${newVersion} - ORBIT Ecosystem Hub Integration`);
+      const result = await createAndAnchorHallmark(newVersion, `Orby v${newVersion} - ORBIT Ecosystem Hub Integration`);
+      updateReplitMd(newVersion, result.assetNumber, result.txSignature);
+      console.log(`\n✓ Version bump complete: v${newVersion}`);
+      console.log(`✓ Genesis Hallmark ${result.assetNumber} stamped to Solana mainnet`);
     } catch (error) {
       console.error(`✗ Hallmark creation failed: ${error}`);
       process.exit(1);
     }
-  }
-  
-  console.log(`\n✓ Version bump complete: v${newVersion}`);
-  if (withHallmark) {
-    console.log(`✓ Genesis Hallmark stamped to Solana mainnet`);
+  } else {
+    updateReplitMd(newVersion, '', '');
+    console.log(`\n✓ Version bump complete: v${newVersion}`);
   }
 }
 
