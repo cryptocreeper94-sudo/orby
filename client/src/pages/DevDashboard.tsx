@@ -20,6 +20,7 @@ import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { DashboardControls } from '@/components/DashboardControls';
 import { StaffPinsPanel } from '@/components/StaffPinsPanel';
 import { EventControlPanel } from '@/components/EventControlPanel';
+import { ReleaseManager } from '@/components/ReleaseManager';
 
 interface AccordionSectionProps {
   title: string;
@@ -577,6 +578,17 @@ export default function DevDashboard() {
           badge="Hallmark"
         >
           <AssetTracker />
+        </AccordionSection>
+
+        {/* Release Manager */}
+        <AccordionSection
+          title="Release Manager"
+          icon={<Package className="h-5 w-5" />}
+          defaultOpen={false}
+          accentColor="green"
+          badge="Solana"
+        >
+          <ReleaseManager />
         </AccordionSection>
 
         {/* Staff PINs Management */}
