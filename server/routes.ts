@@ -5800,8 +5800,8 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   // Push code snippet to Developer Hub
   app.post("/api/dev-hub/snippet", async (req: Request, res: Response) => {
     try {
-      const { title, code, language, category } = req.body;
-      const result = await devHubClient.pushSnippet(title, code, language, category);
+      const { name, code, language, category, description, tags, isPublic } = req.body;
+      const result = await devHubClient.pushSnippet(name, code, language, category, description, tags, isPublic);
       res.json({ success: true, result });
     } catch (err) {
       res.status(500).json({ error: String(err) });
@@ -5812,6 +5812,16 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   app.get("/api/dev-hub/snippets", async (_req: Request, res: Response) => {
     try {
       const result = await devHubClient.getSnippets();
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // Get public snippets from Developer Hub
+  app.get("/api/dev-hub/snippets/public", async (_req: Request, res: Response) => {
+    try {
+      const result = await devHubClient.getPublicSnippets();
       res.json({ success: true, result });
     } catch (err) {
       res.status(500).json({ error: String(err) });

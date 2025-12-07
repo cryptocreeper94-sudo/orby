@@ -1,0 +1,166 @@
+═══════════════════════════════════════════════════════════════════════════════
+ORBIT ECOSYSTEM HUB - CONNECTION GUIDE FOR ORBY
+═══════════════════════════════════════════════════════════════════════════════
+
+CREDENTIALS (Add to .env or Secrets):
+────────────────────────────────────────────────────────────────────────────────
+ORBIT_API_KEY=dw_app_5f9fa25a24248099625224cc3aa301b63318f5fff6ed1df3
+ORBIT_API_SECRET=dw_secret_23dda968012961b2f01cf42e0670433f8e43c50dec8954e2ad8096a640c9fe68
+ORBIT_HUB_URL=https://orbitstaffing.io/api/ecosystem
+
+AUTHENTICATION METHOD:
+────────────────────────────────────────────────────────────────────────────────
+Simple header-based auth. NO HMAC signature needed. Just send two headers:
+  - X-Api-Key: your API key
+  - X-Api-Secret: your API secret
+
+AVAILABLE ENDPOINTS:
+────────────────────────────────────────────────────────────────────────────────
+GET  /status                    → Connection status check
+POST /sync/workers              → Sync W-2 workers
+POST /sync/contractors          → Sync 1099 contractors  
+POST /sync/1099                 → Sync 1099 payment data
+POST /sync/timesheets           → Sync timesheet data
+POST /sync/certifications       → Sync certification data
+POST /snippets                  → Share code snippets
+GET  /snippets                  → Get shared snippets
+GET  /snippets/public           → Get public snippets
+POST /logs                      → Log activity
+GET  /logs                      → Get activity logs
+GET  /shops/workers             → Query workers
+GET  /shops/payroll             → Query payroll data
+
+TYPESCRIPT CLIENT CLASS:
+────────────────────────────────────────────────────────────────────────────────
+export class OrbyEcosystemClient {
+  private apiKey: string;
+  private apiSecret: string;
+  private hubUrl: string;
+
+  constructor() {
+    this.apiKey = process.env.ORBIT_API_KEY!;
+    this.apiSecret = process.env.ORBIT_API_SECRET!;
+    this.hubUrl = process.env.ORBIT_HUB_URL || 'https://orbitstaffing.io/api/ecosystem';
+  }
+
+  private async request(method: string, path: string, data?: any) {
+    const url = this.hubUrl + path;
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Api-Key': this.apiKey,
+        'X-Api-Secret': this.apiSecret,
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Request failed');
+    }
+    
+    return response.json();
+  }
+
+  async checkStatus() {
+    return this.request('GET', '/status');
+  }
+
+  async syncWorkers(workers: any[]) {
+    return this.request('POST', '/sync/workers', { workers });
+  }
+
+  async syncContractors(contractors: any[]) {
+    return this.request('POST', '/sync/contractors', { contractors });
+  }
+
+  async sync1099Payments(payments: any[]) {
+    return this.request('POST', '/sync/1099', { payments });
+  }
+
+  async syncTimesheets(timesheets: any[]) {
+    return this.request('POST', '/sync/timesheets', { timesheets });
+  }
+
+  async syncCertifications(certifications: any[]) {
+    return this.request('POST', '/sync/certifications', { certifications });
+  }
+
+  async shareSnippet(snippet: {
+    name: string;
+    code: string;
+    language: string;
+    category: 'component' | 'utility' | 'hook' | 'api' | 'config' | 'style' | 'other';
+    description?: string;
+    tags?: string[];
+    isPublic?: boolean;
+  }) {
+    return this.request('POST', '/snippets', snippet);
+  }
+
+  async getSnippets() {
+    return this.request('GET', '/snippets');
+  }
+
+  async getPublicSnippets() {
+    return this.request('GET', '/snippets/public');
+  }
+
+  async logActivity(action: string, details?: any) {
+    return this.request('POST', '/logs', { action, details });
+  }
+
+  async getLogs() {
+    return this.request('GET', '/logs');
+  }
+
+  async queryWorkers(filters?: { status?: string; workState?: string }) {
+    const params = new URLSearchParams(filters as any).toString();
+    return this.request('GET', '/shops/workers' + (params ? '?' + params : ''));
+  }
+
+  async queryPayroll(filters?: { startDate?: string; endDate?: string }) {
+    const params = new URLSearchParams(filters as any).toString();
+    return this.request('GET', '/shops/payroll' + (params ? '?' + params : ''));
+  }
+}
+
+QUICK TEST (curl):
+────────────────────────────────────────────────────────────────────────────────
+curl -X GET "https://orbitstaffing.io/api/ecosystem/status" \
+  -H "X-Api-Key: dw_app_5f9fa25a24248099625224cc3aa301b63318f5fff6ed1df3" \
+  -H "X-Api-Secret: dw_secret_23dda968012961b2f01cf42e0670433f8e43c50dec8954e2ad8096a640c9fe68"
+
+EXPECTED RESPONSE:
+────────────────────────────────────────────────────────────────────────────────
+{
+  "status": "connected",
+  "app": "Orby",
+  "hubVersion": "2.7.0",
+  "timestamp": "2025-12-07T12:00:00.000Z",
+  "permissions": ["read:workers","write:workers","read:contractors","write:contractors","read:1099","write:1099","read:timesheets","write:timesheets","read:certifications","write:certifications","read:code","write:code"]
+}
+
+USAGE EXAMPLE:
+────────────────────────────────────────────────────────────────────────────────
+const orbit = new OrbyEcosystemClient();
+
+// Check connection
+const status = await orbit.checkStatus();
+console.log('Connected to ORBIT:', status.status === 'connected');
+
+// Log an activity
+await orbit.logActivity('orby_initialized', { version: '1.0.0' });
+
+// Share a code snippet
+await orbit.shareSnippet({
+  name: 'useOrbyChat',
+  code: 'export function useOrbyChat() { ... }',
+  language: 'typescript',
+  category: 'hook',
+  description: 'React hook for Orby chat functionality',
+  isPublic: true
+});
+
+═══════════════════════════════════════════════════════════════════════════════
