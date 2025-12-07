@@ -1,9 +1,9 @@
 # Orby - Venue Operations Platform
 
-## Current Version: v1.0.11 (Beta) - STAMPED
+## Current Version: v1.0.12 (Beta) - STAMPED
 **Release Date:** December 7, 2024
-**Genesis Hallmark:** ORB-000000000016
-**Solana TX:** [58ndB3jqdB3Nf12FTN8BeDotypvMxCiuRucTQu42nNyf4xWbwVW7P4qXhGbc6WZYgiGUuACexXRtPNb5UTVYMzZq](https://solscan.io/tx/58ndB3jqdB3Nf12FTN8BeDotypvMxCiuRucTQu42nNyf4xWbwVW7P4qXhGbc6WZYgiGUuACexXRtPNb5UTVYMzZq)
+**Genesis Hallmark:** ORB-000000000017
+**Solana TX:** [4EVgturPtFCypnoocLSPWoPxQCEhXVhAMGDMoKNGBsUbd1B7s93vzPqC8WmbqeXSFKTZVyFF2GKqE7tLfR5MLro1](https://solscan.io/tx/4EVgturPtFCypnoocLSPWoPxQCEhXVhAMGDMoKNGBsUbd1B7s93vzPqC8WmbqeXSFKTZVyFF2GKqE7tLfR5MLro1)
 
 ### v1.0.11 Release Notes
 - **ORBIT Ecosystem Hub Integration:** Live connection to DarkWave Developer Hub
