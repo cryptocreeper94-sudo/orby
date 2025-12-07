@@ -5770,6 +5770,16 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     DEV_HUB_API_SECRET
   );
 
+  // Debug endpoint to check what URL is being used
+  app.get("/api/dev-hub/debug", async (_req: Request, res: Response) => {
+    res.json({
+      hubUrl: DEV_HUB_URL,
+      hasApiKey: !!DEV_HUB_API_KEY,
+      hasApiSecret: !!DEV_HUB_API_SECRET,
+      apiKeyPrefix: DEV_HUB_API_KEY ? DEV_HUB_API_KEY.substring(0, 10) + "..." : "not set"
+    });
+  });
+
   // Get connection status from DarkWave Developer Hub
   app.get("/api/dev-hub/status", async (_req: Request, res: Response) => {
     try {
