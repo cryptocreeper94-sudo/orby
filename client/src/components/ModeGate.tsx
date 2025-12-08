@@ -47,28 +47,27 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
           <div className="w-full max-w-2xl">
             <div className="text-center mb-6">
               {/* Cohesive Hero Scene - Skyline + Orby as one layered composition */}
-              <div className="relative w-screen left-1/2 -translate-x-1/2 h-[200px] sm:h-[260px] md:h-[320px] mb-4">
-                {/* Nashville Skyline - Full width background layer - MORE VISIBLE */}
+              <div className="relative w-screen left-1/2 -translate-x-1/2 h-[240px] sm:h-[300px] md:h-[380px] mb-4">
+                {/* Nashville Skyline - Full width, MAXIMUM VISIBILITY */}
                 <img 
                   src={nashvilleSkylineImg} 
                   alt="Nashville Skyline with Nissan Stadium" 
-                  className="absolute inset-x-0 bottom-0 w-full h-full object-cover object-bottom opacity-85 sm:opacity-90"
+                  className="absolute inset-x-0 bottom-0 w-full h-full object-cover object-bottom opacity-100 brightness-110 sm:brightness-125"
                   data-testid="img-city-skyline"
                 />
-                {/* Subtle color overlay to tie palette together */}
-                <div className="absolute inset-0 bg-cyan-900/10" />
-                {/* Softer gradient overlays for blending */}
-                <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
-                <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-slate-900/60 to-transparent" />
+                {/* Very subtle color tint */}
+                <div className="absolute inset-0 bg-cyan-200/5" />
+                {/* Minimal bottom gradient only for text readability */}
+                <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-slate-900/30 to-transparent" />
                 
-                {/* Orby Commander - Smaller, less dominant */}
-                <div className="absolute bottom-[-16px] sm:bottom-[-24px] left-1/2 -translate-x-1/2 z-20">
-                  {/* Subtle single glow effect */}
-                  <div className="absolute inset-0 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 sm:w-28 sm:h-28 bg-cyan-400/15 rounded-full blur-2xl -z-10" />
+                {/* Orby Commander - Smaller accent, positioned lower */}
+                <div className="absolute bottom-[-12px] sm:bottom-[-16px] left-1/2 -translate-x-1/2 z-20">
+                  {/* Very subtle glow */}
+                  <div className="absolute inset-0 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 sm:w-24 sm:h-24 bg-cyan-400/10 rounded-full blur-xl -z-10" />
                   <img 
                     src={orbyCommanderImg} 
                     alt="Orby Commander" 
-                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.45)] animate-float"
+                    className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.35)] animate-float"
                     data-testid="img-orby-commander"
                   />
                 </div>
