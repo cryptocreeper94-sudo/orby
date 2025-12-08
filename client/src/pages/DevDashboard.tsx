@@ -210,8 +210,8 @@ export default function DevDashboard() {
       { name: "Check-in Assistant", description: "Guest services, incident reporting", pin: "6666", route: "/checkin-assistant", icon: <Users className="h-5 w-5" />, color: "sky" },
     ],
     admin: [
-      { name: "Admin", description: "Full system access", pin: "0424", route: "/admin", icon: <Shield className="h-5 w-5" />, color: "red" },
-      { name: "Executive", description: "Brian/Megan - high-level view", pin: "0424", route: "/executive", icon: <Eye className="h-5 w-5" />, color: "purple" },
+      { name: "Developer", description: "Jason - full system access (hidden)", pin: "0424", route: "/admin", icon: <Shield className="h-5 w-5" />, color: "red" },
+      { name: "Executive", description: "Brian/Megan - high-level view", pin: "7777", route: "/executive", icon: <Eye className="h-5 w-5" />, color: "purple" },
     ]
   };
 
