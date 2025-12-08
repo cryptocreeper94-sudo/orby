@@ -74,12 +74,12 @@ const CarouselRail = React.forwardRef<HTMLDivElement, CarouselRailProps>(
 
         <div className="relative group">
           <div ref={emblaRef} className="overflow-hidden">
-            <div className="flex touch-pan-y">
+            <div className="flex touch-pan-y -mx-1.5">
               {items.map((item, index) => (
                 <div
                   key={index}
                   data-testid={`carousel-rail-item-${index}`}
-                  className="flex-none min-w-0 pl-3 first:pl-0"
+                  className="flex-none min-w-0 px-1.5"
                 >
                   {item}
                 </div>
