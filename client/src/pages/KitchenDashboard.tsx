@@ -48,7 +48,7 @@ export default function KitchenDashboard() {
     <div 
       key={idx}
       data-testid={`metric-card-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}
-      className={`p-4 rounded-xl bg-slate-800/60 border border-white/10 min-w-[140px] hover:border-${metric.color}-400/50 transition-colors`}
+      className={`p-4 rounded-xl bg-slate-800/60 border border-white/10 w-[140px] h-[80px] hover:border-${metric.color}-400/50 transition-colors`}
     >
       <div className={`p-2 rounded-lg bg-${metric.color}-500/20 w-fit mb-2`}>
         <div className={`text-${metric.color}-400`}>{metric.icon}</div>
@@ -64,7 +64,7 @@ export default function KitchenDashboard() {
         <div 
           key={msg.id} 
           data-testid={`message-item-${msg.id}`}
-          className="p-3 bg-white/5 rounded-xl border border-white/10 min-w-[200px] hover:bg-white/10 transition-colors cursor-pointer"
+          className="p-3 bg-white/5 rounded-xl border border-white/10 w-[180px] h-[90px] hover:bg-white/10 transition-colors cursor-pointer"
         >
           <div className="flex items-center gap-2 mb-1">
             <Badge 
@@ -84,7 +84,7 @@ export default function KitchenDashboard() {
         </div>
       ))
     : [
-        <div key="empty" className="p-6 text-center text-slate-500 min-w-[200px]">
+        <div key="empty" className="p-6 text-center text-slate-500 w-[180px] h-[90px]">
           <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No messages yet</p>
         </div>

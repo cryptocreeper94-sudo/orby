@@ -317,7 +317,7 @@ export default function SupervisorDashboard() {
   const closedStands = stands.filter(s => s.status !== 'Open').length;
 
   const keyMetricsItems = [
-    <div key="metric-stands" data-testid="metric-card-stands" className="w-32 md:w-40 p-3 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30">
+    <div key="metric-stands" data-testid="metric-card-stands" className="w-32 md:w-40 h-24 p-3 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30">
       <div className="flex items-center gap-2 mb-1">
         <Activity className="h-4 w-4 text-emerald-400" />
         <span className="text-xs text-slate-400">Stands</span>
@@ -325,7 +325,7 @@ export default function SupervisorDashboard() {
       <div className="text-2xl font-bold text-emerald-400">{stands.length}</div>
       <div className="text-xs text-slate-500">{openStands} open</div>
     </div>,
-    <div key="metric-open" data-testid="metric-card-open" className="w-32 md:w-40 p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30">
+    <div key="metric-open" data-testid="metric-card-open" className="w-32 md:w-40 h-24 p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30">
       <div className="flex items-center gap-2 mb-1">
         <CheckCircle2 className="h-4 w-4 text-blue-400" />
         <span className="text-xs text-slate-400">Open</span>
@@ -333,7 +333,7 @@ export default function SupervisorDashboard() {
       <div className="text-2xl font-bold text-blue-400">{openStands}</div>
       <div className="text-xs text-slate-500">operational</div>
     </div>,
-    <div key="metric-closed" data-testid="metric-card-closed" className="w-32 md:w-40 p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30">
+    <div key="metric-closed" data-testid="metric-card-closed" className="w-32 md:w-40 h-24 p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30">
       <div className="flex items-center gap-2 mb-1">
         <Clock className="h-4 w-4 text-amber-400" />
         <span className="text-xs text-slate-400">Closed</span>
@@ -341,7 +341,7 @@ export default function SupervisorDashboard() {
       <div className="text-2xl font-bold text-amber-400">{closedStands}</div>
       <div className="text-xs text-slate-500">pending</div>
     </div>,
-    <div key="metric-sections" data-testid="metric-card-sections" className="w-32 md:w-40 p-3 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-600/10 border border-violet-500/30">
+    <div key="metric-sections" data-testid="metric-card-sections" className="w-32 md:w-40 h-24 p-3 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-600/10 border border-violet-500/30">
       <div className="flex items-center gap-2 mb-1">
         <Users className="h-4 w-4 text-violet-400" />
         <span className="text-xs text-slate-400">Sections</span>
@@ -406,7 +406,7 @@ export default function SupervisorDashboard() {
         whileTap={{ scale: 0.98 }}
         onClick={() => { setActiveStandId(stand.id); updateStand(stand.id, stand.name, getStandSection(stand.name)); }}
         className={cn(
-          "w-36 md:w-44 p-3 rounded-xl flex flex-col",
+          "w-36 md:w-44 h-20 p-3 rounded-xl flex flex-col",
           "bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-200",
           "border-l-3",
           stand.status === 'Open' ? "border-l-emerald-500" : "border-l-red-500"

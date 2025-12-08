@@ -188,10 +188,10 @@ export default function ManagerDashboard() {
       value={standsWithIssues.length}
       color={standsWithIssues.length > 0 ? "amber" : "green"}
     />,
-    <div key="weather" className="min-w-[200px]">
+    <div key="weather" className="w-[200px] h-[100px]">
       <WeatherWidget compact className="h-full" />
     </div>,
-    <div key="sales" className="min-w-[200px]">
+    <div key="sales" className="w-[200px] h-[100px]">
       <LiveSalesWidget compact className="h-full" />
     </div>,
   ];
@@ -214,7 +214,7 @@ export default function ManagerDashboard() {
       <motion.div 
         whileHover={{ scale: 1.02 }} 
         whileTap={{ scale: 0.98 }}
-        className="min-w-[80px]"
+        className="w-[80px] h-[72px]"
       >
         <Button 
           variant="outline" 
@@ -240,7 +240,7 @@ export default function ManagerDashboard() {
     >
       <motion.div 
         whileHover={{ scale: 1.02 }}
-        className="min-w-[140px] p-2 rounded-lg bg-slate-800/60 border border-white/10 hover:border-cyan-400/50 cursor-pointer"
+        className="w-[140px] h-[88px] p-2 rounded-lg bg-slate-800/60 border border-white/10 hover:border-cyan-400/50 cursor-pointer"
         data-testid={`staff-stand-${stand.id}`}
       >
         <div className="flex items-center gap-2 mb-1">
@@ -259,7 +259,7 @@ export default function ManagerDashboard() {
     <motion.div 
       key={req.id}
       whileHover={{ scale: 1.02 }}
-      className="min-w-[200px] p-2 rounded-lg bg-slate-800/60 border border-white/10 hover:border-cyan-400/50"
+      className="w-[200px] h-[100px] p-2 rounded-lg bg-slate-800/60 border border-white/10 hover:border-cyan-400/50"
       data-testid={`inventory-delivery-${req.id}`}
     >
       <div className="flex items-center gap-2 mb-1">

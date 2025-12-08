@@ -200,7 +200,7 @@ export default function NPODashboard() {
     <div 
       key={idx}
       data-testid={`donation-metric-${metric.label.toLowerCase()}`}
-      className={`p-4 rounded-xl bg-slate-800/60 border border-white/10 min-w-[130px] hover:border-${metric.color}-400/50 transition-colors`}
+      className={`p-4 rounded-xl bg-slate-800/60 border border-white/10 w-[130px] h-[110px] hover:border-${metric.color}-400/50 transition-colors`}
     >
       <div className={`p-2 rounded-lg bg-${metric.color}-500/20 w-fit mb-2`}>
         <div className={`text-${metric.color}-400`}>{metric.icon}</div>
@@ -221,7 +221,7 @@ export default function NPODashboard() {
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       data-testid={action.testId}
-      className={`p-5 rounded-xl bg-gradient-to-br from-${action.color}-500 to-${action.color}-600 min-w-[160px] cursor-pointer shadow-lg`}
+      className={`p-5 rounded-xl bg-gradient-to-br from-${action.color}-500 to-${action.color}-600 w-[160px] h-[100px] cursor-pointer shadow-lg`}
       onClick={action.onClick}
     >
       <div className="p-2 bg-white/20 rounded-lg w-fit mb-2">

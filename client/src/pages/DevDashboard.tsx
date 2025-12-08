@@ -93,7 +93,7 @@ function MetricCard({ label, value, icon, status = 'good' }: MetricCardProps) {
   return (
     <div 
       className={cn(
-        "flex items-center gap-3 p-4 rounded-xl border min-w-[160px]",
+        "flex items-center gap-3 p-4 rounded-xl border w-[140px] h-[80px]",
         statusColors[status]
       )}
       data-testid={`metric-${label.toLowerCase().replace(/\s+/g, '-')}`}
@@ -126,7 +126,7 @@ function QuickToolButton({ label, icon, onClick, variant = 'default' }: QuickToo
     <button
       onClick={onClick}
       className={cn(
-        "flex flex-col items-center gap-2 p-4 rounded-xl border min-w-[100px]",
+        "flex flex-col items-center gap-2 p-4 rounded-xl border w-[100px] h-[90px]",
         "transition-all duration-200",
         variantClasses[variant]
       )}
@@ -304,21 +304,21 @@ export default function DevDashboard() {
   ];
 
   const orbitStatusItems = [
-    <div key="api-gateway" className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-api-gateway">
+    <div key="api-gateway" className="w-[120px] h-[80px] p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-api-gateway">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
         <span className="text-xs text-slate-400">API Gateway</span>
       </div>
       <div className="text-lg font-bold text-green-400">Active</div>
     </div>,
-    <div key="database" className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-database">
+    <div key="database" className="w-[120px] h-[80px] p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-database">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
         <span className="text-xs text-slate-400">Database</span>
       </div>
       <div className="text-lg font-bold text-green-400">Online</div>
     </div>,
-    <div key="websocket" className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-websocket">
+    <div key="websocket" className="w-[120px] h-[80px] p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-websocket">
       <div className="flex items-center gap-2 mb-2">
         <div className={cn("w-2 h-2 rounded-full", isConnected ? "bg-green-500 animate-pulse" : "bg-red-500")} />
         <span className="text-xs text-slate-400">WebSocket</span>
@@ -327,7 +327,7 @@ export default function DevDashboard() {
         {isConnected ? "Connected" : "Offline"}
       </div>
     </div>,
-    <div key="messages" className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-messages">
+    <div key="messages" className="w-[120px] h-[80px] p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-messages">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
         <span className="text-xs text-slate-400">Messages</span>

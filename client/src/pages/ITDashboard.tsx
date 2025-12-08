@@ -47,7 +47,7 @@ export default function ITDashboard() {
     <div 
       key={idx}
       data-testid={`status-card-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-      className={`p-4 rounded-xl bg-slate-800/60 border border-${item.color}-500/20 min-w-[140px] hover:border-${item.color}-400/50 transition-colors`}
+      className={`p-4 rounded-xl bg-slate-800/60 border border-${item.color}-500/20 w-[140px] h-[100px] hover:border-${item.color}-400/50 transition-colors`}
     >
       <div className={`p-2 rounded-xl bg-${item.color}-500/20 w-fit mb-2`}>
         <div className={`text-${item.color}-400`}>{item.icon}</div>

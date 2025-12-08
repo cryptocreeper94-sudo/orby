@@ -251,7 +251,7 @@ export default function StandLeadDashboard() {
     <div 
       key={idx}
       data-testid={`stand-metric-${metric.label.toLowerCase()}`}
-      className={`p-4 rounded-xl bg-slate-800/60 border border-white/10 min-w-[120px] hover:border-${metric.color}-400/50 transition-colors`}
+      className={`p-4 rounded-xl bg-slate-800/60 border border-white/10 w-[120px] h-[80px] hover:border-${metric.color}-400/50 transition-colors`}
     >
       <p className="text-[10px] text-slate-500 uppercase tracking-wider">{metric.label}</p>
       <p className="font-bold text-lg text-slate-200">{metric.value}</p>
@@ -269,7 +269,7 @@ export default function StandLeadDashboard() {
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       data-testid={action.testId}
-      className={`p-5 rounded-xl bg-gradient-to-br from-${action.color}-600 to-${action.color}-700 min-w-[160px] cursor-pointer shadow-lg shadow-${action.color}-500/25`}
+      className={`p-5 rounded-xl bg-gradient-to-br from-${action.color}-600 to-${action.color}-700 w-[160px] h-[100px] cursor-pointer shadow-lg shadow-${action.color}-500/25`}
       onClick={action.onClick}
     >
       <div className="p-2 bg-white/20 rounded-lg w-fit mb-2">

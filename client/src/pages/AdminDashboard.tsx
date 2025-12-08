@@ -56,7 +56,7 @@ export default function AdminDashboard() {
   };
 
   const systemMetricItems = [
-    <div key="open-stands" className="min-w-[140px]" data-testid="metric-open-stands">
+    <div key="open-stands" className="w-[140px] h-[80px]" data-testid="metric-open-stands">
       <StatCard
         icon={<Package className="h-5 w-5" />}
         label="Open Stands"
@@ -64,7 +64,7 @@ export default function AdminDashboard() {
         color="green"
       />
     </div>,
-    <div key="staff-active" className="min-w-[140px]" data-testid="metric-staff-active">
+    <div key="staff-active" className="w-[140px] h-[80px]" data-testid="metric-staff-active">
       <StatCard
         icon={<Users className="h-5 w-5" />}
         label="Staff Active"
@@ -72,7 +72,7 @@ export default function AdminDashboard() {
         color="blue"
       />
     </div>,
-    <div key="pending-audits" className="min-w-[140px]" data-testid="metric-pending-audits">
+    <div key="pending-audits" className="w-[140px] h-[80px]" data-testid="metric-pending-audits">
       <StatCard
         icon={<ClipboardCheck className="h-5 w-5" />}
         label="Pending Audits"
@@ -80,7 +80,7 @@ export default function AdminDashboard() {
         color="amber"
       />
     </div>,
-    <div key="total-revenue" className="min-w-[140px]" data-testid="metric-total-revenue">
+    <div key="total-revenue" className="w-[140px] h-[80px]" data-testid="metric-total-revenue">
       <StatCard
         icon={<FileBarChart className="h-5 w-5" />}
         label="Total Revenue"
@@ -88,7 +88,7 @@ export default function AdminDashboard() {
         color="purple"
       />
     </div>,
-    <div key="server-status" className="min-w-[140px]" data-testid="metric-server-status">
+    <div key="server-status" className="w-[140px] h-[80px]" data-testid="metric-server-status">
       <StatCard
         icon={<Server className="h-5 w-5" />}
         label="Server Status"
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
         color="green"
       />
     </div>,
-    <div key="db-connections" className="min-w-[140px]" data-testid="metric-db-connections">
+    <div key="db-connections" className="w-[140px] h-[80px]" data-testid="metric-db-connections">
       <StatCard
         icon={<Database className="h-5 w-5" />}
         label="DB Connections"
@@ -107,21 +107,21 @@ export default function AdminDashboard() {
   ];
 
   const settingsItems = [
-    <div key="system-config" className="p-3 bg-white/5 rounded-lg border border-white/10 min-w-[180px]" data-testid="setting-system-config">
+    <div key="system-config" className="p-3 bg-white/5 rounded-lg border border-white/10 w-[180px] h-[100px]" data-testid="setting-system-config">
       <div className="flex items-center gap-2 mb-2">
         <Settings className="h-4 w-4 text-cyan-400" />
         <span className="text-sm font-medium text-slate-200">System Config</span>
       </div>
       <p className="text-xs text-slate-400">Configure system preferences</p>
     </div>,
-    <div key="notifications" className="p-3 bg-white/5 rounded-lg border border-white/10 min-w-[180px]" data-testid="setting-notifications">
+    <div key="notifications" className="p-3 bg-white/5 rounded-lg border border-white/10 w-[180px] h-[100px]" data-testid="setting-notifications">
       <div className="flex items-center gap-2 mb-2">
         <Bell className="h-4 w-4 text-amber-400" />
         <span className="text-sm font-medium text-slate-200">Notifications</span>
       </div>
       <p className="text-xs text-slate-400">Manage alert settings</p>
     </div>,
-    <div key="security" className="p-3 bg-white/5 rounded-lg border border-white/10 min-w-[180px]" data-testid="setting-security">
+    <div key="security" className="p-3 bg-white/5 rounded-lg border border-white/10 w-[180px] h-[100px]" data-testid="setting-security">
       <div className="flex items-center gap-2 mb-2">
         <Shield className="h-4 w-4 text-emerald-400" />
         <span className="text-sm font-medium text-slate-200">Security</span>

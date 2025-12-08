@@ -235,28 +235,28 @@ export default function WarehouseDashboard() {
   const lowStockProducts = products.filter(p => getProductStock(p.id) < 10);
 
   const inventoryMetricItems = [
-    <div key="products" className="min-w-[140px] p-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20" data-testid="metric-products">
+    <div key="products" className="w-[140px] h-[90px] p-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20" data-testid="metric-products">
       <div className="flex items-center gap-2 mb-2">
         <Package className="h-5 w-5 text-amber-400" />
         <span className="text-xs text-slate-400">Products</span>
       </div>
       <div className="text-2xl font-bold text-amber-300">{stats?.totalProducts ?? 0}</div>
     </div>,
-    <div key="categories" className="min-w-[140px] p-4 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20" data-testid="metric-categories">
+    <div key="categories" className="w-[140px] h-[90px] p-4 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20" data-testid="metric-categories">
       <div className="flex items-center gap-2 mb-2">
         <Layers className="h-5 w-5 text-blue-400" />
         <span className="text-xs text-slate-400">Categories</span>
       </div>
       <div className="text-2xl font-bold text-blue-300">{stats?.totalCategories ?? 0}</div>
     </div>,
-    <div key="pending" className="min-w-[140px] p-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/20" data-testid="metric-pending">
+    <div key="pending" className="w-[140px] h-[90px] p-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/20" data-testid="metric-pending">
       <div className="flex items-center gap-2 mb-2">
         <Clock className="h-5 w-5 text-purple-400" />
         <span className="text-xs text-slate-400">Pending</span>
       </div>
       <div className="text-2xl font-bold text-purple-300">{stats?.pendingRequestCount ?? 0}</div>
     </div>,
-    <div key="lowstock" className="min-w-[140px] p-4 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/20" data-testid="metric-low-stock">
+    <div key="lowstock" className="w-[140px] h-[90px] p-4 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/20" data-testid="metric-low-stock">
       <div className="flex items-center gap-2 mb-2">
         <AlertTriangle className="h-5 w-5 text-red-400" />
         <span className="text-xs text-slate-400">Low Stock</span>
@@ -331,7 +331,7 @@ export default function WarehouseDashboard() {
         const totalStock = categoryProducts.reduce((sum, p) => sum + getProductStock(p.id), 0);
         const lowCount = categoryProducts.filter(p => getProductStock(p.id) < 10).length;
         return (
-          <div key={category.id} className="min-w-[200px] p-4 rounded-xl bg-white/5 border border-white/10" data-testid={`stock-category-${category.id}`}>
+          <div key={category.id} className="w-[180px] h-[130px] p-4 rounded-xl bg-white/5 border border-white/10" data-testid={`stock-category-${category.id}`}>
             <div className="flex items-center gap-2 mb-3">
               <div 
                 className="w-3 h-3 rounded-full" 
@@ -359,7 +359,7 @@ export default function WarehouseDashboard() {
         );
       })
     : [
-        <div key="no-stock" className="min-w-[200px] p-6 rounded-xl bg-white/5 border border-white/10 text-center" data-testid="no-stock-data">
+        <div key="no-stock" className="w-[180px] h-[130px] p-6 rounded-xl bg-white/5 border border-white/10 text-center" data-testid="no-stock-data">
           <Package className="h-10 w-10 text-slate-500 mx-auto mb-2" />
           <p className="text-sm text-slate-400">No inventory data</p>
           <GlowButton 

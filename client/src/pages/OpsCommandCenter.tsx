@@ -241,7 +241,7 @@ export default function OpsCommandCenter() {
   const normalDeliveries = activeDeliveries.filter(d => d.priority !== 'Emergency');
 
   const heroCarouselItems = [
-    <div key="stats" className="flex gap-3 min-w-[320px]" data-testid="hero-stats">
+    <div key="stats" className="flex gap-3 w-[320px] h-[88px]" data-testid="hero-stats">
       <StatCard 
         value={summary.activeDeliveries} 
         label="Active Deliveries" 
@@ -257,7 +257,7 @@ export default function OpsCommandCenter() {
         testId="stat-emergencies"
       />
     </div>,
-    <div key="stats2" className="flex gap-3 min-w-[320px]" data-testid="hero-stats-2">
+    <div key="stats2" className="flex gap-3 w-[320px] h-[88px]" data-testid="hero-stats-2">
       <StatCard 
         value={summary.emergencyDeliveries} 
         label="Emergency Requests" 
@@ -276,7 +276,7 @@ export default function OpsCommandCenter() {
     ...emergencies.map((alert) => (
       <div 
         key={alert.id} 
-        className="p-3 rounded-lg bg-red-900/40 border border-red-500/40 min-w-[280px]"
+        className="p-3 rounded-lg bg-red-900/40 border border-red-500/40 w-[320px] h-[88px]"
         data-testid={`alert-${alert.id}`}
       >
         <div className="flex items-start gap-2">
@@ -336,7 +336,7 @@ export default function OpsCommandCenter() {
   const teamItems = culinaryStats.assignments.slice(0, 6).map((assignment, idx) => (
     <div
       key={idx}
-      className="flex items-center justify-between p-2 rounded bg-slate-900/50 min-w-[180px]"
+      className="flex items-center justify-between p-2 rounded bg-slate-900/50 w-[180px] h-[48px]"
       data-testid={`culinary-assignment-${idx}`}
     >
       <div className="flex items-center gap-2">
@@ -778,7 +778,7 @@ function StatCard({ value, label, icon, bgColor, testId }: {
   testId: string;
 }) {
   return (
-    <div className="p-3 rounded-lg bg-slate-800/60 border border-white/10 min-w-[140px]" data-testid={testId}>
+    <div className="p-3 rounded-lg bg-slate-800/60 border border-white/10 w-[140px] h-[72px]" data-testid={testId}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xl font-bold text-white">{value}</p>
@@ -798,7 +798,7 @@ function DeliveryCard({ delivery, onSelect }: { delivery: DeliveryRequest; onSel
   return (
     <button
       onClick={onSelect}
-      className="w-full text-left p-3 rounded-lg bg-slate-900/50 border border-slate-700/50 hover:border-cyan-500/30 transition-colors min-w-[220px]"
+      className="text-left p-3 rounded-lg bg-slate-900/50 border border-slate-700/50 hover:border-cyan-500/30 transition-colors w-[220px] h-[120px]"
       data-testid={`delivery-card-${delivery.id}`}
     >
       <div className="flex items-start justify-between gap-2">
