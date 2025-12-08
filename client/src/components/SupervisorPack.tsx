@@ -170,20 +170,20 @@ export function SupervisorPack({
       </div>
 
       <Tabs defaultValue="checklist" className="flex-1 flex flex-col">
-        <TabsList className="w-full rounded-none border-b bg-slate-50 p-0 h-auto">
-          <TabsTrigger value="checklist" className="flex-1 rounded-none py-3 data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-amber-600">
+        <TabsList className="w-full rounded-none border-b border-slate-700 bg-slate-800 p-0 h-auto">
+          <TabsTrigger value="checklist" className="flex-1 rounded-none py-3 data-[state=active]:bg-slate-900 data-[state=active]:border-b-2 data-[state=active]:border-amber-500">
             <ClipboardCheck className="h-4 w-4 mr-1" />
             Checklist
           </TabsTrigger>
-          <TabsTrigger value="alcohol" className="flex-1 rounded-none py-3 data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-amber-600">
+          <TabsTrigger value="alcohol" className="flex-1 rounded-none py-3 data-[state=active]:bg-slate-900 data-[state=active]:border-b-2 data-[state=active]:border-amber-500">
             <Wine className="h-4 w-4 mr-1" />
             Alcohol
           </TabsTrigger>
-          <TabsTrigger value="vouchers" className="flex-1 rounded-none py-3 data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-amber-600">
+          <TabsTrigger value="vouchers" className="flex-1 rounded-none py-3 data-[state=active]:bg-slate-900 data-[state=active]:border-b-2 data-[state=active]:border-amber-500">
             <Receipt className="h-4 w-4 mr-1" />
             Vouchers
           </TabsTrigger>
-          <TabsTrigger value="orders" className="flex-1 rounded-none py-3 data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-amber-600">
+          <TabsTrigger value="orders" className="flex-1 rounded-none py-3 data-[state=active]:bg-slate-900 data-[state=active]:border-b-2 data-[state=active]:border-amber-500">
             <ShoppingCart className="h-4 w-4 mr-1" />
             Orders
           </TabsTrigger>
@@ -191,10 +191,10 @@ export function SupervisorPack({
 
         <ScrollArea className="flex-1">
           <TabsContent value="checklist" className="p-4 m-0 space-y-4">
-            <div className="flex items-center justify-between p-3 bg-amber-50 rounded-lg border border-amber-200">
+            <div className="flex items-center justify-between p-3 bg-amber-500/10 rounded-lg border border-amber-500/30">
               <div>
-                <p className="font-medium text-amber-900">Progress: {completedItems}/{totalItems}</p>
-                <p className="text-sm text-amber-700">Required: {requiredComplete}/{totalRequired}</p>
+                <p className="font-medium text-amber-300">Progress: {completedItems}/{totalItems}</p>
+                <p className="text-sm text-amber-400">Required: {requiredComplete}/{totalRequired}</p>
               </div>
               <Badge className={requiredComplete === totalRequired ? 'bg-green-600' : 'bg-amber-600'}>
                 {Math.round((completedItems / totalItems) * 100)}%
@@ -213,7 +213,7 @@ export function SupervisorPack({
                         <div 
                           key={item.id}
                           className={`flex items-center gap-3 p-3 rounded-lg border ${
-                            item.checked ? 'bg-green-50 border-green-200' : 'bg-white border-slate-200'
+                            item.checked ? 'bg-green-500/10 border-green-500/30' : 'bg-slate-800/50 border-slate-700'
                           }`}
                         >
                           <Checkbox
@@ -225,7 +225,7 @@ export function SupervisorPack({
                             {item.label}
                           </span>
                           {item.required && !item.checked && (
-                            <Badge variant="outline" className="text-xs bg-red-50 text-red-700 border-red-200">
+                            <Badge variant="outline" className="text-xs bg-red-500/10 text-red-400 border-red-500/30">
                               Required
                             </Badge>
                           )}
@@ -250,7 +250,7 @@ export function SupervisorPack({
               <CardContent>
                 {!signature ? (
                   <div className="space-y-3">
-                    <div className="border rounded-lg bg-white">
+                    <div className="border border-slate-600 rounded-lg bg-slate-800/50">
                       <SignatureCanvas
                         ref={sigCanvasRef}
                         canvasProps={{
@@ -272,7 +272,7 @@ export function SupervisorPack({
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <img src={signature} alt="Signature" className="border rounded-lg bg-white p-2" />
+                    <img src={signature} alt="Signature" className="border border-slate-600 rounded-lg bg-slate-800/50 p-2" />
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">
                         Signed by {supervisorName} at {new Date().toLocaleTimeString()}
@@ -288,13 +288,13 @@ export function SupervisorPack({
           </TabsContent>
 
           <TabsContent value="alcohol" className="p-4 m-0 space-y-4">
-            <Card className="border-red-200 bg-red-50">
+            <Card className="border-red-500/30 bg-red-500/10">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2 text-red-800">
+                <CardTitle className="text-base flex items-center gap-2 text-red-300">
                   <AlertTriangle className="h-5 w-5" />
                   Alcohol Compliance
                 </CardTitle>
-                <CardDescription className="text-red-700">
+                <CardDescription className="text-red-400">
                   Complete all fields for alcohol service documentation
                 </CardDescription>
               </CardHeader>
@@ -381,7 +381,7 @@ export function SupervisorPack({
               <CardContent>
                 <div className="space-y-2">
                   {['John Bartender', 'Sarah Server', 'Mike Runner'].map((name, idx) => (
-                    <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg">
+                    <div key={idx} className="flex items-center justify-between p-2 bg-slate-800/50 rounded-lg">
                       <span className="text-sm font-medium">{name}</span>
                       <Badge className="bg-green-600">TIPS Certified</Badge>
                     </div>
@@ -446,7 +446,7 @@ export function SupervisorPack({
                 ) : (
                   <div className="space-y-2">
                     {vouchers.map(v => (
-                      <div key={v.id} className="p-3 bg-slate-50 rounded-lg border">
+                      <div key={v.id} className="p-3 bg-slate-800/50 rounded-lg border border-slate-700">
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-medium">{v.recipientName}</span>
                           <Badge className="bg-green-600">${v.amount}</Badge>
@@ -476,7 +476,7 @@ export function SupervisorPack({
               <CardContent>
                 <div className="space-y-2">
                   {orderSheet.map(item => (
-                    <div key={item.id} className="flex items-center gap-3 p-2 bg-slate-50 rounded-lg">
+                    <div key={item.id} className="flex items-center gap-3 p-2 bg-slate-800/50 rounded-lg">
                       <div className="flex-1">
                         <p className="text-sm font-medium">{item.itemName}</p>
                         <p className="text-xs text-muted-foreground">Current: {item.currentCount} {item.unit}</p>

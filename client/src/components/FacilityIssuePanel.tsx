@@ -64,15 +64,15 @@ const QUICK_ISSUES: QuickIssue[] = [
 ];
 
 const CATEGORY_COLORS: Record<IssueCategory, string> = {
-  Cooling: 'bg-blue-100 text-blue-700 border-blue-200',
-  Beverage: 'bg-cyan-100 text-cyan-700 border-cyan-200',
-  Power: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  AV: 'bg-purple-100 text-purple-700 border-purple-200',
-  Menu: 'bg-orange-100 text-orange-700 border-orange-200',
-  FoodSafety: 'bg-red-100 text-red-700 border-red-200',
-  Equipment: 'bg-slate-100 text-slate-700 border-slate-200',
-  Staffing: 'bg-green-100 text-green-700 border-green-200',
-  Other: 'bg-gray-100 text-gray-700 border-gray-200',
+  Cooling: 'bg-blue-500/10 text-blue-300 border border-blue-500/30',
+  Beverage: 'bg-cyan-500/10 text-cyan-300 border border-cyan-500/30',
+  Power: 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/30',
+  AV: 'bg-purple-500/10 text-purple-300 border border-purple-500/30',
+  Menu: 'bg-orange-500/10 text-orange-300 border border-orange-500/30',
+  FoodSafety: 'bg-red-500/10 text-red-300 border border-red-500/30',
+  Equipment: 'bg-slate-700/50 text-slate-300 border border-slate-500/30',
+  Staffing: 'bg-green-500/10 text-green-300 border border-green-500/30',
+  Other: 'bg-slate-700/50 text-slate-400 border border-slate-500/30',
 };
 
 const SEVERITY_COLORS: Record<IssueSeverity, string> = {
@@ -195,7 +195,7 @@ export function FacilityIssuePanel({
             <CardTitle className="text-base">Report Facility Issue</CardTitle>
           </div>
           {openIssues.length > 0 && (
-            <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+            <Badge variant="outline" className="bg-orange-500/10 text-orange-300 border border-orange-500/30">
               {openIssues.length} Open
             </Badge>
           )}
@@ -207,7 +207,7 @@ export function FacilityIssuePanel({
 
       <CardContent className="space-y-4">
         {successMessage && (
-          <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg">
+          <div className="flex items-center gap-2 p-3 bg-green-500/10 text-green-300 border border-green-500/30 rounded-lg">
             <CheckCircle className="w-5 h-5" />
             <span className="font-medium">{successMessage}</span>
           </div>
@@ -268,7 +268,7 @@ export function FacilityIssuePanel({
         </div>
 
         {showCustomForm && (
-          <div className="space-y-3 p-3 bg-slate-50 rounded-lg">
+          <div className="space-y-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
             <div>
               <label className="text-sm font-medium">Issue Description</label>
               <Textarea
@@ -302,7 +302,7 @@ export function FacilityIssuePanel({
         )}
 
         {(selectedIssue || showCustomForm) && (
-          <div className="space-y-3 p-3 border rounded-lg bg-white">
+          <div className="space-y-3 p-3 border border-slate-700/50 rounded-lg bg-slate-800/50">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
                 {selectedIssue ? selectedIssue.title : 'Custom Issue'}
@@ -399,7 +399,7 @@ export function FacilityIssuePanel({
               {openIssues.map((issue: any) => (
                 <div 
                   key={issue.id} 
-                  className="p-2 bg-slate-50 rounded-lg text-sm"
+                  className="p-2 bg-slate-800/50 rounded-lg text-sm border border-slate-700/50"
                   data-testid={`open-issue-${issue.id}`}
                 >
                   <div className="flex items-center justify-between">

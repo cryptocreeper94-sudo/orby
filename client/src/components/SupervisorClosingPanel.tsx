@@ -574,7 +574,7 @@ export function SupervisorClosingPanel({
 
   return (
     <Card className="w-full" data-testid="supervisor-closing-panel">
-      <CardHeader className="pb-2 bg-gradient-to-r from-slate-50 to-blue-50">
+      <CardHeader className="pb-2 bg-gradient-to-r from-slate-800/50 to-blue-500/10 border-b border-slate-700/50">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -591,14 +591,14 @@ export function SupervisorClosingPanel({
         </div>
         
         {error && (
-          <div className="flex items-center gap-2 text-red-600 bg-red-50 p-2 rounded mt-2">
+          <div className="flex items-center gap-2 text-red-300 bg-red-500/10 border border-red-500/30 p-2 rounded mt-2">
             <AlertCircle className="h-4 w-4" />
             <span className="text-sm">{error}</span>
           </div>
         )}
         
         {successMessage && (
-          <div className="flex items-center gap-2 text-green-600 bg-green-50 p-2 rounded mt-2">
+          <div className="flex items-center gap-2 text-green-300 bg-green-500/10 border border-green-500/30 p-2 rounded mt-2">
             <CheckCircle className="h-4 w-4" />
             <span className="text-sm">{successMessage}</span>
           </div>
@@ -649,12 +649,12 @@ export function SupervisorClosingPanel({
               </div>
             ) : (
               <>
-                <div className="bg-slate-50 rounded-lg p-3">
+                <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span>Progress: {completedTasks}/{totalTasks} tasks</span>
                     <span className="font-medium">{checklistProgress}%</span>
                   </div>
-                  <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="h-2 bg-slate-600/50 rounded-full overflow-hidden">
                     <div 
                       className={`h-full rounded-full transition-all duration-300 ${
                         checklistProgress === 100 ? 'bg-green-500' : 'bg-blue-500'
@@ -669,7 +669,7 @@ export function SupervisorClosingPanel({
                     <div 
                       key={task.id}
                       className={`flex items-center gap-3 p-3 rounded-lg border ${
-                        task.isCompleted ? 'bg-green-50 border-green-200' : 'bg-white'
+                        task.isCompleted ? 'bg-green-500/10 border-green-500/30' : 'bg-slate-800/50 border-slate-700/50'
                       }`}
                       data-testid={`checklist-task-${task.taskKey}`}
                     >
@@ -703,7 +703,7 @@ export function SupervisorClosingPanel({
 
                 {checklistComplete && (
                   <div className="space-y-3">
-                    <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg">
+                    <div className="flex items-center justify-center gap-2 text-green-300 bg-green-500/10 border border-green-500/30 p-3 rounded-lg">
                       <CheckCircle className="h-5 w-5" />
                       <span className="font-medium">Checklist Completed</span>
                     </div>
@@ -719,7 +719,7 @@ export function SupervisorClosingPanel({
                         Submit PDF to Operations Manager
                       </Button>
                     ) : (
-                      <div className="flex items-center justify-center gap-2 text-blue-700 bg-blue-50 p-3 rounded-lg">
+                      <div className="flex items-center justify-center gap-2 text-blue-300 bg-blue-500/10 border border-blue-500/30 p-3 rounded-lg">
                         <FileText className="h-5 w-5" />
                         <span className="font-medium">Submitted to Operations Manager</span>
                       </div>
@@ -743,7 +743,7 @@ export function SupervisorClosingPanel({
             ) : (
               <>
                 {!spoilageSubmitted && (
-                  <div className="bg-slate-50 rounded-lg p-3 space-y-3">
+                  <div className="bg-slate-800/50 rounded-lg p-3 space-y-3 border border-slate-700/50">
                     <Input
                       placeholder="Item name (e.g., Hot Dogs, Bud Light)"
                       value={newSpoilage.itemName}
@@ -814,7 +814,7 @@ export function SupervisorClosingPanel({
                     spoilageItems.map((item) => (
                       <div 
                         key={item.id}
-                        className="flex items-center justify-between p-3 bg-white border rounded-lg"
+                        className="flex items-center justify-between p-3 bg-slate-800/50 border border-slate-700/50 rounded-lg"
                         data-testid={`spoilage-item-${item.id}`}
                       >
                         <div>
@@ -857,7 +857,7 @@ export function SupervisorClosingPanel({
                       Send to Ops Manager
                     </Button>
                   ) : (
-                    <div className="flex-1 flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg">
+                    <div className="flex-1 flex items-center justify-center gap-2 text-green-300 bg-green-500/10 border border-green-500/30 p-3 rounded-lg">
                       <CheckCircle className="h-5 w-5" />
                       <span className="font-medium">Submitted</span>
                     </div>
@@ -879,7 +879,7 @@ export function SupervisorClosingPanel({
               </div>
             ) : (
               <>
-                <div className="bg-blue-50 rounded-lg p-4 space-y-4">
+                <div className="bg-blue-500/10 rounded-lg p-4 space-y-4 border border-blue-500/30">
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Number of Vouchers</span>
                     <div className="flex items-center gap-2">
@@ -978,7 +978,7 @@ export function SupervisorClosingPanel({
                       </Button>
                     </>
                   ) : (
-                    <div className="flex items-center justify-center gap-2 text-green-700 bg-green-50 p-3 rounded-lg">
+                    <div className="flex items-center justify-center gap-2 text-green-300 bg-green-500/10 border border-green-500/30 p-3 rounded-lg">
                       <CheckCircle className="h-5 w-5" />
                       <span className="font-medium">Submitted to Ops Manager</span>
                     </div>

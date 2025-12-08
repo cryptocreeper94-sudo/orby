@@ -84,20 +84,20 @@ interface EndOfEventReportProps {
 const STAGE_ORDER = { PreEvent: 1, PostEvent: 2, DayAfter: 3 };
 
 const SEVERITY_COLORS: Record<string, string> = {
-  Emergency: 'bg-red-100 text-red-700 border-red-300',
-  High: 'bg-orange-100 text-orange-700 border-orange-300',
-  Normal: 'bg-blue-100 text-blue-700 border-blue-300',
-  Low: 'bg-gray-100 text-gray-700 border-gray-300'
+  Emergency: 'bg-red-500/10 text-red-300 border border-red-500/30',
+  High: 'bg-orange-500/10 text-orange-300 border border-orange-500/30',
+  Normal: 'bg-blue-500/10 text-blue-300 border border-blue-500/30',
+  Low: 'bg-slate-700/50 text-slate-300 border border-slate-500/30'
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  Open: 'bg-yellow-100 text-yellow-700',
-  Acknowledged: 'bg-blue-100 text-blue-700',
-  InProgress: 'bg-purple-100 text-purple-700',
-  Resolved: 'bg-green-100 text-green-700',
-  Closed: 'bg-gray-100 text-gray-700',
-  Completed: 'bg-green-100 text-green-700',
-  Verified: 'bg-emerald-100 text-emerald-700'
+  Open: 'bg-yellow-500/10 text-yellow-300',
+  Acknowledged: 'bg-blue-500/10 text-blue-300',
+  InProgress: 'bg-purple-500/10 text-purple-300',
+  Resolved: 'bg-green-500/10 text-green-300',
+  Closed: 'bg-slate-700/50 text-slate-300',
+  Completed: 'bg-green-500/10 text-green-300',
+  Verified: 'bg-emerald-500/10 text-emerald-300'
 };
 
 export function EndOfEventReport({
@@ -312,12 +312,12 @@ export function EndOfEventReport({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-auto bg-white">
-        <CardHeader className="sticky top-0 bg-white z-10 border-b">
+      <Card className="w-full max-w-4xl max-h-[90vh] overflow-auto bg-slate-900 border-slate-700">
+        <CardHeader className="sticky top-0 bg-slate-900 z-10 border-b border-slate-700">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <FileText className="w-5 h-5 text-blue-600" />
+              <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center border border-blue-500/30">
+                <FileText className="w-5 h-5 text-blue-400" />
               </div>
               <div>
                 <CardTitle className="text-xl">End-of-Event Report</CardTitle>
@@ -342,27 +342,27 @@ export function EndOfEventReport({
 
         <CardContent className="p-4 space-y-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-blue-50 rounded-lg p-3 text-center">
-              <div className="text-2xl font-bold text-blue-600">{countSessions.length}</div>
-              <div className="text-xs text-blue-600">Count Sessions</div>
+            <div className="bg-blue-500/10 rounded-lg p-3 text-center border border-blue-500/30">
+              <div className="text-2xl font-bold text-blue-400">{countSessions.length}</div>
+              <div className="text-xs text-blue-400">Count Sessions</div>
             </div>
-            <div className="bg-green-50 rounded-lg p-3 text-center">
-              <div className="text-2xl font-bold text-green-600">{inventoryCounts.length}</div>
-              <div className="text-xs text-green-600">Items Counted</div>
+            <div className="bg-green-500/10 rounded-lg p-3 text-center border border-green-500/30">
+              <div className="text-2xl font-bold text-green-400">{inventoryCounts.length}</div>
+              <div className="text-xs text-green-400">Items Counted</div>
             </div>
-            <div className={`rounded-lg p-3 text-center ${hasVarianceIssues ? 'bg-red-50' : 'bg-gray-50'}`}>
-              <div className={`text-2xl font-bold ${hasVarianceIssues ? 'text-red-600' : 'text-gray-600'}`}>
+            <div className={`rounded-lg p-3 text-center ${hasVarianceIssues ? 'bg-red-500/10 border border-red-500/30' : 'bg-slate-800/50 border border-slate-700/50'}`}>
+              <div className={`text-2xl font-bold ${hasVarianceIssues ? 'text-red-400' : 'text-slate-400'}`}>
                 {totalVariance}
               </div>
-              <div className={`text-xs ${hasVarianceIssues ? 'text-red-600' : 'text-gray-600'}`}>
+              <div className={`text-xs ${hasVarianceIssues ? 'text-red-400' : 'text-slate-400'}`}>
                 Total Variance
               </div>
             </div>
-            <div className={`rounded-lg p-3 text-center ${issues.length > 0 ? 'bg-orange-50' : 'bg-gray-50'}`}>
-              <div className={`text-2xl font-bold ${issues.length > 0 ? 'text-orange-600' : 'text-gray-600'}`}>
+            <div className={`rounded-lg p-3 text-center ${issues.length > 0 ? 'bg-orange-500/10 border border-orange-500/30' : 'bg-slate-800/50 border border-slate-700/50'}`}>
+              <div className={`text-2xl font-bold ${issues.length > 0 ? 'text-orange-400' : 'text-slate-400'}`}>
                 {issues.length}
               </div>
-              <div className={`text-xs ${issues.length > 0 ? 'text-orange-600' : 'text-gray-600'}`}>
+              <div className={`text-xs ${issues.length > 0 ? 'text-orange-400' : 'text-slate-400'}`}>
                 Issues Reported
               </div>
             </div>
@@ -379,12 +379,12 @@ export function EndOfEventReport({
               <AccordionContent className="px-4 pb-4">
                 <div className="space-y-3">
                   {sortedSessions.map((session) => (
-                    <div key={session.id} className="border rounded-lg p-3 bg-gray-50">
+                    <div key={session.id} className="border border-slate-700/50 rounded-lg p-3 bg-slate-800/50">
                       <div className="flex items-center justify-between mb-2">
-                        <Badge variant="outline" className="bg-blue-50">
+                        <Badge variant="outline" className="bg-blue-500/10 border-blue-500/30 text-blue-300">
                           {session.stage}
                         </Badge>
-                        <Badge className={STATUS_COLORS[session.status] || 'bg-gray-100'}>
+                        <Badge className={STATUS_COLORS[session.status] || 'bg-slate-700/50'}>
                           {session.status}
                         </Badge>
                       </div>
@@ -433,7 +433,7 @@ export function EndOfEventReport({
                 <div className="space-y-3">
                   {Object.entries(groupedCounts).map(([category, items]) => (
                     <div key={category} className="border rounded-lg overflow-hidden">
-                      <div className="bg-gray-100 px-3 py-2 font-medium text-sm">{category}</div>
+                      <div className="bg-slate-700/50 px-3 py-2 font-medium text-sm">{category}</div>
                       <div className="divide-y">
                         {items.map((item) => (
                           <div key={item.itemId} className="px-3 py-2 flex items-center justify-between">
@@ -443,7 +443,7 @@ export function EndOfEventReport({
                               <span className="text-gray-500">End: {item.endCount}</span>
                               <span className="text-gray-500">Sold: {item.sold}</span>
                               {item.variance !== 0 && (
-                                <Badge variant="outline" className="bg-red-50 text-red-600">
+                                <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30">
                                   Var: {item.variance}
                                 </Badge>
                               )}
@@ -470,7 +470,7 @@ export function EndOfEventReport({
               <AccordionContent className="px-4 pb-4">
                 <div className="space-y-3">
                   {issues.map((issue) => (
-                    <div key={issue.id} className={`border rounded-lg p-3 ${SEVERITY_COLORS[issue.severity] || 'bg-gray-50'}`}>
+                    <div key={issue.id} className={`border rounded-lg p-3 ${SEVERITY_COLORS[issue.severity] || 'bg-slate-800/50'}`}>
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">{issue.category}</Badge>
@@ -478,7 +478,7 @@ export function EndOfEventReport({
                             {issue.severity}
                           </Badge>
                         </div>
-                        <Badge className={STATUS_COLORS[issue.status] || 'bg-gray-100'}>
+                        <Badge className={STATUS_COLORS[issue.status] || 'bg-slate-700/50'}>
                           {issue.status}
                         </Badge>
                       </div>
@@ -489,7 +489,7 @@ export function EndOfEventReport({
                         {issue.resolvedAt && <span>Resolved: {formatTime(issue.resolvedAt)}</span>}
                       </div>
                       {issue.resolutionNotes && (
-                        <div className="mt-2 text-xs bg-white/50 rounded p-2">
+                        <div className="mt-2 text-xs bg-slate-800/50 rounded p-2">
                           <span className="font-medium">Resolution: </span>
                           {issue.resolutionNotes}
                         </div>
@@ -513,7 +513,7 @@ export function EndOfEventReport({
               <AccordionContent className="px-4 pb-4">
                 <div className="space-y-2">
                   {signatures.map((sig, idx) => (
-                    <div key={idx} className="flex items-center justify-between border rounded-lg p-3 bg-gray-50">
+                    <div key={idx} className="flex items-center justify-between border border-slate-700/50 rounded-lg p-3 bg-slate-800/50">
                       <div>
                         <div className="font-medium text-sm">{sig.docTitle}</div>
                         <div className="text-xs text-gray-500">Signed by: {sig.signedBy}</div>

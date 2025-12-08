@@ -34,9 +34,9 @@ interface AIScannerProps {
 }
 
 const CONFIDENCE_COLORS = {
-  high: 'bg-green-100 text-green-700',
-  medium: 'bg-amber-100 text-amber-700',
-  low: 'bg-red-100 text-red-700'
+  high: 'bg-green-500/10 text-green-400 border border-green-500/30',
+  medium: 'bg-amber-500/10 text-amber-400 border border-amber-500/30',
+  low: 'bg-red-500/10 text-red-400 border border-red-500/30'
 };
 
 export function AIScanner({ onScanComplete, onClose, standName }: AIScannerProps) {
@@ -128,10 +128,10 @@ export function AIScanner({ onScanComplete, onClose, standName }: AIScannerProps
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white">
+      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-900">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <div className="flex items-center gap-2">
-            <ScanLine className="w-5 h-5 text-blue-600" />
+            <ScanLine className="w-5 h-5 text-blue-400" />
             <CardTitle className="text-lg">AI Inventory Scanner</CardTitle>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-scanner">
@@ -207,17 +207,17 @@ export function AIScanner({ onScanComplete, onClose, standName }: AIScannerProps
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
-                  <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
-                  <div className="text-sm text-red-700">{error}</div>
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
+                  <div className="text-sm text-red-300">{error}</div>
                 </div>
               )}
 
               {scanResult && (
                 <div className="space-y-3">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-lg font-bold text-blue-900">
+                      <span className="text-lg font-bold text-blue-300">
                         Total Count: {scanResult.totalCount}
                       </span>
                       <Badge className={CONFIDENCE_COLORS[scanResult.confidence]}>
@@ -238,7 +238,7 @@ export function AIScanner({ onScanComplete, onClose, standName }: AIScannerProps
                             {scanResult.products.map((product, index) => (
                               <div 
                                 key={index}
-                                className="flex items-center justify-between bg-white rounded-lg p-2 shadow-sm"
+                                className="flex items-center justify-between bg-slate-800/50 rounded-lg p-2 shadow-sm"
                                 data-testid={`product-count-${index}`}
                               >
                                 <div>

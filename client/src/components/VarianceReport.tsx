@@ -155,7 +155,7 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-white">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-slate-900 border-slate-700">
         <CardHeader className="flex flex-row items-center justify-between pb-2 flex-shrink-0">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-600" />
@@ -185,11 +185,11 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
               <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
             </div>
           ) : error ? (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
               <div>
-                <p className="font-medium text-red-800">Error Loading Report</p>
-                <p className="text-sm text-red-700">{error}</p>
+                <p className="font-medium text-red-300">Error Loading Report</p>
+                <p className="text-sm text-red-400">{error}</p>
                 <Button size="sm" variant="outline" onClick={fetchReport} className="mt-2">
                   Retry
                 </Button>
@@ -204,25 +204,25 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
           ) : (
             <>
               <div className="grid grid-cols-5 gap-2">
-                <div className="bg-green-50 rounded-lg p-3 text-center">
-                  <div className="text-xs text-green-600 font-medium">Started</div>
-                  <div className="text-xl font-bold text-green-700">{totals.started}</div>
+                <div className="bg-green-500/10 rounded-lg p-3 text-center border border-green-500/30">
+                  <div className="text-xs text-green-400 font-medium">Started</div>
+                  <div className="text-xl font-bold text-green-300">{totals.started}</div>
                 </div>
-                <div className="bg-blue-50 rounded-lg p-3 text-center">
-                  <div className="text-xs text-blue-600 font-medium">Added</div>
-                  <div className="text-xl font-bold text-blue-700">+{totals.added}</div>
+                <div className="bg-blue-500/10 rounded-lg p-3 text-center border border-blue-500/30">
+                  <div className="text-xs text-blue-400 font-medium">Added</div>
+                  <div className="text-xl font-bold text-blue-300">+{totals.added}</div>
                 </div>
-                <div className="bg-amber-50 rounded-lg p-3 text-center">
-                  <div className="text-xs text-amber-600 font-medium">Ended</div>
-                  <div className="text-xl font-bold text-amber-700">{totals.ended}</div>
+                <div className="bg-amber-500/10 rounded-lg p-3 text-center border border-amber-500/30">
+                  <div className="text-xs text-amber-400 font-medium">Ended</div>
+                  <div className="text-xl font-bold text-amber-300">{totals.ended}</div>
                 </div>
-                <div className="bg-purple-50 rounded-lg p-3 text-center">
-                  <div className="text-xs text-purple-600 font-medium">Used/Sold</div>
-                  <div className="text-xl font-bold text-purple-700">{totals.used}</div>
+                <div className="bg-purple-500/10 rounded-lg p-3 text-center border border-purple-500/30">
+                  <div className="text-xs text-purple-400 font-medium">Used/Sold</div>
+                  <div className="text-xl font-bold text-purple-300">{totals.used}</div>
                 </div>
-                <div className="bg-red-50 rounded-lg p-3 text-center">
-                  <div className="text-xs text-red-600 font-medium">Spoilage</div>
-                  <div className="text-xl font-bold text-red-700">{totals.spoilage}</div>
+                <div className="bg-red-500/10 rounded-lg p-3 text-center border border-red-500/30">
+                  <div className="text-xs text-red-400 font-medium">Spoilage</div>
+                  <div className="text-xl font-bold text-red-300">{totals.spoilage}</div>
                 </div>
               </div>
 
@@ -235,7 +235,7 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
                   
                   return (
                     <AccordionItem key={category} value={category}>
-                      <AccordionTrigger className="hover:bg-blue-50 px-3 rounded-lg">
+                      <AccordionTrigger className="hover:bg-blue-500/10 px-3 rounded-lg">
                         <div className="flex items-center justify-between w-full pr-4">
                           <span className="font-medium">{category}</span>
                           <Badge variant="secondary">
@@ -245,7 +245,7 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
                       </AccordionTrigger>
                       <AccordionContent className="px-1">
                         <div className="space-y-1">
-                          <div className="grid grid-cols-6 text-xs text-muted-foreground font-medium py-1 px-2 bg-gray-100 rounded">
+                          <div className="grid grid-cols-6 text-xs text-muted-foreground font-medium py-1 px-2 bg-slate-700/50 rounded">
                             <span className="col-span-2">Item</span>
                             <span className="text-center">Start</span>
                             <span className="text-center">End</span>
@@ -255,7 +255,7 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
                           {items.map((item) => (
                             <div 
                               key={item.itemId}
-                              className="grid grid-cols-6 text-sm py-2 px-2 hover:bg-gray-50 rounded items-center"
+                              className="grid grid-cols-6 text-sm py-2 px-2 hover:bg-slate-800/50 rounded items-center"
                               data-testid={`variance-item-${item.itemId}`}
                             >
                               <span className="col-span-2 font-medium truncate">{item.itemName}</span>

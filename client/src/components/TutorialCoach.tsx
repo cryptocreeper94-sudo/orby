@@ -242,7 +242,7 @@ export function TutorialCoach({ page, onNavigate }: TutorialCoachProps) {
             </CardHeader>
             
             <CardContent className="space-y-4">
-              <p className="text-sm text-slate-600">{step.body}</p>
+              <p className="text-sm text-slate-400">{step.body}</p>
               
               {step.linkRoute && step.linkText && (
                 <Button
@@ -274,7 +274,7 @@ export function TutorialCoach({ page, onNavigate }: TutorialCoachProps) {
                     <div
                       key={idx}
                       className={`h-2 w-2 rounded-full transition-colors ${
-                        idx === currentStep ? 'bg-blue-500' : 'bg-slate-200'
+                        idx === currentStep ? 'bg-blue-500' : 'bg-slate-600'
                       }`}
                     />
                   ))}

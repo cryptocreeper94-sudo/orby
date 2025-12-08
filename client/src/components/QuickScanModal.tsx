@@ -45,9 +45,9 @@ interface QuickScanModalProps {
 }
 
 const CONFIDENCE_COLORS = {
-  high: 'bg-green-100 text-green-700 border-green-200',
-  medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  low: 'bg-red-100 text-red-700 border-red-200',
+  high: 'bg-green-500/10 text-green-300 border border-green-500/30',
+  medium: 'bg-yellow-500/10 text-yellow-300 border border-yellow-500/30',
+  low: 'bg-red-500/10 text-red-300 border border-red-500/30',
 };
 
 export function QuickScanModal({ 
@@ -198,11 +198,11 @@ export function QuickScanModal({
   const getConfidenceBadge = (confidence: string) => {
     switch (confidence) {
       case 'high':
-        return <Badge className="bg-green-100 text-green-700 text-xs">High</Badge>;
+        return <Badge className="bg-green-500/10 text-green-300 border border-green-500/30 text-xs">High</Badge>;
       case 'medium':
-        return <Badge className="bg-yellow-100 text-yellow-700 text-xs">Medium</Badge>;
+        return <Badge className="bg-yellow-500/10 text-yellow-300 border border-yellow-500/30 text-xs">Medium</Badge>;
       case 'low':
-        return <Badge className="bg-red-100 text-red-700 text-xs">Low</Badge>;
+        return <Badge className="bg-red-500/10 text-red-300 border border-red-500/30 text-xs">Low</Badge>;
       default:
         return null;
     }
@@ -210,8 +210,8 @@ export function QuickScanModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" data-testid="quick-scan-modal">
-      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white">
-        <CardHeader className="pb-2 border-b sticky top-0 bg-white z-10">
+      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-700">
+        <CardHeader className="pb-2 border-b border-slate-700 sticky top-0 bg-slate-900 z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600">
@@ -263,8 +263,8 @@ export function QuickScanModal({
                 </div>
               </div>
               
-              <div className="bg-cyan-50 border border-cyan-200 rounded-lg p-3">
-                <p className="text-sm text-cyan-800">
+              <div className="bg-cyan-500/10 border border-cyan-500/30 rounded-lg p-3">
+                <p className="text-sm text-cyan-300">
                   {scanType === 'cooler' 
                     ? "📸 Point your camera at the cooler. The AI will count all visible cans and bottles."
                     : "📝 Point your camera at a handwritten count sheet. The AI will read the items and quantities."
@@ -306,11 +306,11 @@ export function QuickScanModal({
               </div>
 
               {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0" />
+                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3 flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
                   <div>
-                    <p className="text-sm text-red-700 font-medium">Scan Failed</p>
-                    <p className="text-xs text-red-600">{error}</p>
+                    <p className="text-sm text-red-300 font-medium">Scan Failed</p>
+                    <p className="text-xs text-red-400">{error}</p>
                   </div>
                 </div>
               )}
@@ -339,16 +339,16 @@ export function QuickScanModal({
 
               {scanResult && (
                 <div className="space-y-3">
-                  <div className="bg-gradient-to-r from-cyan-50 to-blue-50 border border-cyan-200 rounded-lg p-4">
+                  <div className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-500/30 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <span className="text-lg font-bold text-cyan-900">
+                      <span className="text-lg font-bold text-cyan-300">
                         Total: {scanResult.totalCount} items
                       </span>
                       {getConfidenceBadge(scanResult.confidence)}
                     </div>
                     
                     {scanResult.notes && (
-                      <p className="text-xs text-cyan-700 bg-white/50 p-2 rounded mb-3">
+                      <p className="text-xs text-cyan-400 bg-slate-800/50 p-2 rounded mb-3">
                         {scanResult.notes}
                       </p>
                     )}
@@ -358,7 +358,7 @@ export function QuickScanModal({
                         <div 
                           key={index}
                           className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
-                            selectedItems.has(index) ? 'bg-white shadow-sm' : 'bg-gray-50'
+                            selectedItems.has(index) ? 'bg-slate-700/50 shadow-sm' : 'bg-slate-800/50'
                           }`}
                           data-testid={`scanned-product-${index}`}
                         >

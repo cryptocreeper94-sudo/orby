@@ -65,9 +65,9 @@ const STAGE_LABELS: Record<CountStage, string> = {
 };
 
 const STAGE_COLORS: Record<CountStage, string> = {
-  PreEvent: 'bg-green-100 text-green-700',
-  PostEvent: 'bg-blue-100 text-blue-700',
-  DayAfter: 'bg-purple-100 text-purple-700'
+  PreEvent: 'bg-green-500/10 text-green-400 border border-green-500/30',
+  PostEvent: 'bg-blue-500/10 text-blue-400 border border-blue-500/30',
+  DayAfter: 'bg-purple-500/10 text-purple-400 border border-purple-500/30'
 };
 
 const ROLE_LABELS: Record<CounterRole, string> = {
@@ -223,14 +223,14 @@ export function CountSheet({
 
   return (
     <Card className="h-full flex flex-col" data-testid="count-sheet">
-      <CardHeader className="pb-2 flex-shrink-0 bg-gradient-to-r from-slate-50 to-blue-50">
+      <CardHeader className="pb-2 flex-shrink-0 bg-gradient-to-r from-slate-800/50 to-blue-900/30">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
-              <ClipboardList className="h-5 w-5 text-blue-600" />
+              <ClipboardList className="h-5 w-5 text-blue-400" />
               {standName}
             </CardTitle>
-            <p className="text-sm text-slate-600">{session.eventDate}</p>
+            <p className="text-sm text-slate-400">{session.eventDate}</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} data-testid="close-count-sheet">
             <X className="h-4 w-4" />
@@ -258,16 +258,16 @@ export function CountSheet({
           <Clock className="h-3 w-3" />
           Started: {formatTime(session.startedAt)}
           {session.status === 'InProgress' && (
-            <span className="animate-pulse text-green-600 font-medium">• Active</span>
+            <span className="animate-pulse text-green-400 font-medium">• Active</span>
           )}
         </div>
 
-        <div className="mt-3 bg-white rounded-lg p-2 border">
-          <div className="flex items-center justify-between text-sm">
+        <div className="mt-3 bg-slate-800/50 rounded-lg p-2 border border-slate-700">
+          <div className="flex items-center justify-between text-sm text-slate-300">
             <span>Progress: {totalItemsCounted}/{totalItems} items</span>
             <span className="font-medium">{countProgress}%</span>
           </div>
-          <div className="h-2 bg-slate-100 rounded-full mt-1 overflow-hidden">
+          <div className="h-2 bg-slate-700/50 rounded-full mt-1 overflow-hidden">
             <div 
               className="h-full bg-blue-500 rounded-full transition-all duration-300"
               style={{ width: `${countProgress}%` }}
@@ -280,17 +280,17 @@ export function CountSheet({
             <Button
               onClick={() => setShowAIScanner(true)}
               variant="outline"
-              className="w-full bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200 hover:from-purple-100 hover:to-blue-100"
+              className="w-full bg-gradient-to-r from-purple-500/10 to-blue-500/10 border-purple-500/30 hover:from-purple-500/20 hover:to-blue-500/20"
               data-testid="button-open-ai-scanner"
             >
-              <ScanLine className="w-4 h-4 mr-2 text-purple-600" />
-              <span className="text-purple-700">AI Can Counter</span>
-              <Badge variant="secondary" className="ml-2 bg-purple-100 text-purple-700 text-xs">
+              <ScanLine className="w-4 h-4 mr-2 text-purple-400" />
+              <span className="text-purple-300">AI Can Counter</span>
+              <Badge variant="secondary" className="ml-2 bg-purple-500/20 text-purple-300 text-xs">
                 Beta
               </Badge>
             </Button>
             {lastScanResult && (
-              <div className="text-xs text-center text-purple-600 mt-1">
+              <div className="text-xs text-center text-purple-400 mt-1">
                 Last scan: {lastScanResult.totalCount} items found, {lastScanResult.productsMatched} matched
               </div>
             )}
@@ -298,14 +298,14 @@ export function CountSheet({
             <Button
               onClick={() => setShowPaperScanner(true)}
               variant="outline"
-              className="w-full bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:from-green-100 hover:to-emerald-100"
+              className="w-full bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-green-500/30 hover:from-green-500/20 hover:to-emerald-500/20"
               data-testid="button-open-paper-scanner"
             >
-              <FileText className="w-4 h-4 mr-2 text-green-600" />
-              <span className="text-green-700">Scan Paper Count Sheet</span>
+              <FileText className="w-4 h-4 mr-2 text-green-400" />
+              <span className="text-green-300">Scan Paper Count Sheet</span>
             </Button>
             {lastPaperScanResult && (
-              <div className="text-xs text-center text-green-600 mt-1">
+              <div className="text-xs text-center text-green-400 mt-1">
                 Last scan: {lastPaperScanResult.totalItems} items read, {lastPaperScanResult.matched} matched
               </div>
             )}
@@ -335,9 +335,9 @@ export function CountSheet({
               value={category}
               className="border rounded-lg overflow-hidden"
             >
-              <AccordionTrigger className="px-3 py-2 bg-slate-50 hover:bg-slate-100">
+              <AccordionTrigger className="px-3 py-2 bg-slate-800/50 hover:bg-slate-700/50">
                 <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-slate-600" />
+                  <Package className="h-4 w-4 text-slate-400" />
                   <span className="font-medium">{category}</span>
                   <Badge variant="secondary" className="ml-2">
                     {itemsByCategory[category].length} items
@@ -348,7 +348,7 @@ export function CountSheet({
                 {itemsByCategory[category].map((item) => (
                   <div 
                     key={item.id}
-                    className="flex items-center gap-2 p-2 bg-white border rounded-lg"
+                    className="flex items-center gap-2 p-2 bg-slate-800/50 border border-slate-700 rounded-lg"
                     data-testid={`count-item-${item.id}`}
                   >
                     <div className="flex-1 min-w-0">
@@ -418,7 +418,7 @@ export function CountSheet({
       </CardContent>
 
       {!isReadOnly && session.status === 'InProgress' && (
-        <div className="p-3 border-t bg-slate-50">
+        <div className="p-3 border-t border-slate-700 bg-slate-800/50">
           <Button
             onClick={onCompleteSession}
             className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg shadow-lg flex items-center justify-center gap-2"
@@ -434,13 +434,13 @@ export function CountSheet({
       )}
 
       {session.status === 'Completed' && (
-        <div className="p-3 border-t bg-green-50">
-          <div className="flex items-center justify-center gap-2 text-green-700">
+        <div className="p-3 border-t border-green-500/30 bg-green-500/10">
+          <div className="flex items-center justify-center gap-2 text-green-400">
             <Check className="h-5 w-5" />
             <span className="font-medium">Count Completed</span>
           </div>
           {session.completedAt && (
-            <p className="text-xs text-center text-green-600 mt-1">
+            <p className="text-xs text-center text-green-300 mt-1">
               Finished at {formatTime(session.completedAt)}
             </p>
           )}

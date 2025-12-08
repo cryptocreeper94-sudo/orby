@@ -125,32 +125,32 @@ export function CounterLogin({
 
   return (
     <Card className="h-full flex flex-col" data-testid="counter-login">
-      <CardHeader className="pb-2 flex-shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <CardHeader className="pb-2 flex-shrink-0 bg-gradient-to-r from-blue-900/30 to-indigo-900/30">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
-            <ClipboardList className="h-5 w-5 text-blue-600" />
+            <ClipboardList className="h-5 w-5 text-blue-400" />
             Start Inventory Count
           </CardTitle>
           <Button variant="ghost" size="icon" onClick={onClose} data-testid="close-counter-login">
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <p className="text-sm text-slate-600 mt-1">
+        <p className="text-sm text-slate-400 mt-1">
           {standName} • {eventDate}
         </p>
       </CardHeader>
 
       <CardContent className="flex-1 overflow-auto p-4 space-y-4">
         {existingSessions.length > 0 && (
-          <div className="bg-slate-50 rounded-lg p-3 space-y-2">
-            <p className="text-sm font-medium text-slate-700">Previous Counts:</p>
+          <div className="bg-slate-800/50 rounded-lg p-3 space-y-2 border border-slate-700">
+            <p className="text-sm font-medium text-slate-300">Previous Counts:</p>
             {existingSessions.map((session) => (
               <div 
                 key={session.stage} 
                 className={`text-xs px-2 py-1 rounded ${
-                  session.status === 'Completed' ? 'bg-green-100 text-green-700' :
-                  session.status === 'Verified' ? 'bg-blue-100 text-blue-700' :
-                  'bg-amber-100 text-amber-700'
+                  session.status === 'Completed' ? 'bg-green-500/10 text-green-400 border border-green-500/30' :
+                  session.status === 'Verified' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/30' :
+                  'bg-amber-500/10 text-amber-400 border border-amber-500/30'
                 }`}
               >
                 {STAGE_LABELS[session.stage]}: {session.status} by {session.counterName} (***{session.counterPhoneLast4})
@@ -244,7 +244,7 @@ export function CounterLogin({
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 p-3 rounded-lg">
+          <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/30 p-3 rounded-lg">
             <AlertCircle className="h-4 w-4" />
             {error}
           </div>

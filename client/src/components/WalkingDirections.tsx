@@ -252,7 +252,7 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
 
   const getStepIcon = (icon: string) => {
     switch (icon) {
-      case 'walk': return <Footprints className="h-5 w-5 text-blue-600" />;
+      case 'walk': return <Footprints className="h-5 w-5 text-blue-400" />;
       case 'elevator': return <ArrowUp className="h-5 w-5 text-purple-600" />;
       case 'stairs': return <ArrowUp className="h-5 w-5 text-orange-600" />;
       case 'door': return <DoorOpen className="h-5 w-5 text-green-600" />;
@@ -310,7 +310,7 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
                     {Object.entries(groupedSections).map(([groupName, sections]) => (
                       sections.length > 0 && (
                         <div key={groupName}>
-                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-slate-100">
+                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-slate-800">
                             {groupName}
                           </div>
                           {sections.map(section => (
@@ -327,12 +327,12 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
             </div>
 
             {selectedSection && needsElevator && (
-              <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg">
+              <div className="p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
                 <div className="flex items-start gap-2">
-                  <ArrowUp className="h-5 w-5 text-purple-600 mt-0.5" />
+                  <ArrowUp className="h-5 w-5 text-purple-400 mt-0.5" />
                   <div>
-                    <p className="font-medium text-purple-900">Elevator Required</p>
-                    <p className="text-sm text-purple-700">
+                    <p className="font-medium text-purple-300">Elevator Required</p>
+                    <p className="text-sm text-purple-400">
                       Section {selectedSectionData?.name} is on Level {selectedSectionData?.floorLevel}
                       {selectedSectionData?.floorLevel === '7' && ' (300s Upper Deck)'}
                       {selectedSectionData?.floorLevel === 'Club' && ' (Club Level)'}
@@ -345,14 +345,14 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
 
             {directions.length > 0 && (
               <>
-                <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center justify-between p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium text-blue-900">
+                    <Clock className="h-4 w-4 text-blue-400" />
+                    <span className="text-sm font-medium text-blue-300">
                       Est. Time: {getEstimatedTime(directions)}
                     </span>
                   </div>
-                  <Badge variant="outline" className="bg-white">
+                  <Badge variant="outline" className="bg-slate-800/50">
                     {directions.length} steps
                   </Badge>
                 </div>
@@ -363,11 +363,11 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
                       <div 
                         key={index}
                         className={`flex items-start gap-3 p-3 rounded-lg border ${
-                          step.floorChange ? 'bg-purple-50 border-purple-200' : 'bg-white border-slate-200'
+                          step.floorChange ? 'bg-purple-500/10 border-purple-500/30' : 'bg-slate-800/50 border-slate-700'
                         }`}
                       >
                         <div className={`p-2 rounded-full ${
-                          step.floorChange ? 'bg-purple-100' : 'bg-slate-100'
+                          step.floorChange ? 'bg-purple-500/20' : 'bg-slate-700'
                         }`}>
                           {getStepIcon(step.icon)}
                         </div>
@@ -415,11 +415,11 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
 
             <div className={`flex-1 flex flex-col items-center justify-center p-6 rounded-xl ${
               directions[currentStep]?.floorChange 
-                ? 'bg-purple-100 border-2 border-purple-300' 
-                : 'bg-blue-50 border-2 border-blue-200'
+                ? 'bg-purple-500/10 border-2 border-purple-500/30' 
+                : 'bg-blue-500/10 border-2 border-blue-500/30'
             }`}>
               <div className={`p-4 rounded-full mb-4 ${
-                directions[currentStep]?.floorChange ? 'bg-purple-200' : 'bg-blue-100'
+                directions[currentStep]?.floorChange ? 'bg-purple-500/20' : 'bg-blue-500/20'
               }`}>
                 {getStepIcon(directions[currentStep]?.icon || 'walk')}
               </div>
@@ -435,7 +435,7 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
               )}
 
               {directions[currentStep]?.distance && (
-                <Badge className="bg-white text-slate-700">
+                <Badge className="bg-slate-800/50 text-slate-300">
                   {directions[currentStep].distance}
                 </Badge>
               )}

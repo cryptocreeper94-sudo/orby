@@ -306,14 +306,14 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-100">
+    <div className="h-full flex flex-col bg-slate-900">
       {/* Toolbar */}
-      <div className="bg-white border-b p-3 flex items-center gap-3 flex-wrap">
+      <div className="bg-slate-800 border-b border-slate-700 p-3 flex items-center gap-3 flex-wrap">
         <Button variant="ghost" size="sm" onClick={onBack} data-testid="menu-editor-back">
           <ChevronLeft className="h-4 w-4 mr-1" /> Back
         </Button>
-        <div className="h-6 w-px bg-gray-300" />
-        <span className="font-semibold text-gray-700">{boardName}</span>
+        <div className="h-6 w-px bg-slate-600" />
+        <span className="font-semibold text-slate-300">{boardName}</span>
         <div className="flex-1" />
         
         <Button 
@@ -490,7 +490,7 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
         </div>
 
         {/* Right Panel - Properties */}
-        <div className="w-72 bg-white border-l p-4 overflow-auto">
+        <div className="w-72 bg-slate-800 border-l border-slate-700 p-4 overflow-auto">
           <Tabs defaultValue="slide" className="w-full">
             <TabsList className="w-full">
               <TabsTrigger value="slide" className="flex-1">Slide</TabsTrigger>
@@ -518,8 +518,8 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
                       key={color}
                       className={`w-8 h-8 rounded border-2 ${
                         currentSlide?.backgroundColor === color 
-                          ? 'border-blue-500 ring-2 ring-blue-200' 
-                          : 'border-gray-200'
+                          ? 'border-blue-500 ring-2 ring-blue-500/30' 
+                          : 'border-slate-600'
                       }`}
                       style={{ backgroundColor: color }}
                       onClick={() => updateSlide({ backgroundColor: color })}
@@ -535,7 +535,7 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
                   {TEMPLATES.map((template) => (
                     <button
                       key={template.name}
-                      className="w-full p-2 rounded border text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                      className="w-full p-2 rounded border border-slate-600 text-left text-sm hover:bg-slate-700 flex items-center gap-2"
                       onClick={() => applyTemplate(template)}
                       data-testid={`template-${template.name}`}
                     >
@@ -632,8 +632,8 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
                           key={color}
                           className={`w-8 h-8 rounded border-2 ${
                             selectedElement.color === color 
-                              ? 'border-blue-500 ring-2 ring-blue-200' 
-                              : 'border-gray-200'
+                              ? 'border-blue-500 ring-2 ring-blue-500/30' 
+                              : 'border-slate-600'
                           }`}
                           style={{ backgroundColor: color }}
                           onClick={() => updateElement(selectedElement.id, { color })}
