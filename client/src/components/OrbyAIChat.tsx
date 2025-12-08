@@ -301,7 +301,7 @@ export function OrbyAIChat() {
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1, type: 'spring' }}
-        className="fixed bottom-14 left-4 z-50"
+        className="fixed bottom-4 right-4 z-50"
       >
         <motion.button
           onClick={() => setIsOpen(true)}

@@ -156,7 +156,7 @@ export default function FloatingWeatherButton() {
     <>
       <motion.button
         onClick={() => setIsExpanded(true)}
-        className="fixed bottom-14 right-4 z-50 cursor-pointer"
+        className="fixed bottom-4 left-4 z-50 cursor-pointer"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.5 }}
