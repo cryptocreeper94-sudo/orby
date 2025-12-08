@@ -51,8 +51,12 @@ export class EcosystemClient {
     return this.request('POST', '/sync/contractors', { contractors });
   }
 
-  async sync1099Payments(payments: unknown[]) {
-    return this.request('POST', '/sync/1099', { payments });
+  async sync1099Payments(year: number, payments: unknown[]) {
+    return this.request('POST', '/sync/1099', { year, payments });
+  }
+
+  async syncW2Payroll(year: number, employees: unknown[]) {
+    return this.request('POST', '/sync/w2', { year, employees });
   }
 
   async syncTimesheets(timesheets: unknown[]) {
@@ -95,8 +99,12 @@ export class EcosystemClient {
     return this.request('POST', '/logs', { action, details });
   }
 
-  async getLogs() {
-    return this.request('GET', '/logs');
+  async getLogs(limit?: number, offset?: number) {
+    const params = new URLSearchParams();
+    if (limit) params.set('limit', limit.toString());
+    if (offset) params.set('offset', offset.toString());
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return this.request('GET', `/logs${query}`);
   }
 
   async getShopWorkers(filters?: Record<string, string>) {

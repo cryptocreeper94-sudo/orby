@@ -70,7 +70,7 @@ export const GLOSSARY: Record<string, { term: string; definition: string; exampl
   'ops-controller': {
     term: 'Ops Controller',
     definition: 'Command-level staff who see all operations and can direct resources anywhere.',
-    example: 'Sid and David are Ops Controllers with full visibility.',
+    example: 'David is the Ops Controller with full visibility.',
     category: 'Roles'
   },
 

@@ -591,7 +591,7 @@ export function PersonalizedWelcomeTour() {
                     <div className="flex items-start gap-2">
                       <MessageCircle className="h-4 w-4 text-slate-300 mt-0.5 flex-shrink-0" />
                       <p className="text-xs text-slate-300">
-                        <span className="font-semibold">A note from Jason:</span> I built this based on what I understood about your role. If anything needs adjusting or you want to add features, just let me know!
+                        <span className="font-semibold">A note from the team:</span> This was built based on what we understood about your role. If anything needs adjusting or you want to add features, just let us know!
                       </p>
                     </div>
                   </motion.div>

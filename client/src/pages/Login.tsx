@@ -425,7 +425,7 @@ export default function LoginPage() {
               data-testid="dev-role-picker-modal"
             >
               <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-white mb-2">Welcome, Jason</h3>
+                <h3 className="text-xl font-bold text-white mb-2">Welcome, Admin</h3>
                 <p className="text-sm text-slate-400">How would you like to log in?</p>
               </div>
 
@@ -456,8 +456,8 @@ export default function LoginPage() {
                       <Briefcase className="w-6 h-6 text-cyan-400" />
                     </div>
                     <div className="text-left">
-                      <div className="font-bold text-white">Jason - Ops Manager</div>
-                      <div className="text-xs text-slate-400">Command Center (same as David)</div>
+                      <div className="font-bold text-white">Ops Manager</div>
+                      <div className="text-xs text-slate-400">Command Center (David's view)</div>
                     </div>
                   </div>
                 </button>

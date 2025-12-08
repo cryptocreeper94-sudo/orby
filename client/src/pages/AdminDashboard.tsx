@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   };
 
   const supervisors = [
-    { id: '1', name: 'Jason (You)' },
+    { id: '1', name: currentUser?.name ? `${currentUser.name} (You)` : 'You' },
     { id: '2', name: 'Mike Smith' },
     { id: '3', name: 'Sarah Johnson' },
     { id: '4', name: 'Chris Williams' },

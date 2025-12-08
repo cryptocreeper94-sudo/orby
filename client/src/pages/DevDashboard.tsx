@@ -191,9 +191,8 @@ export default function DevDashboard() {
 
   const roles = {
     command: [
-      { name: "Developer", description: "Jason - Dev + Field Ops (unified view)", pin: "0424", route: "/ops-command", icon: <Monitor className="h-5 w-5" />, color: "cyan" },
-      { name: "Ops Manager", description: "David - full ops control", pin: "0424", route: "/ops-command", icon: <Radio className="h-5 w-5" />, color: "cyan" },
-      { name: "Special Ops", description: "Sid's controller view", pin: "0424", route: "/ops-command", icon: <Zap className="h-5 w-5" />, color: "purple" },
+      { name: "Developer", description: "Dev + Field Ops (unified view)", pin: "2424", route: "/ops-command", icon: <Monitor className="h-5 w-5" />, color: "cyan" },
+      { name: "Ops Manager", description: "David - full ops control", pin: "2424", route: "/ops-command", icon: <Radio className="h-5 w-5" />, color: "cyan" },
     ],
     management: [
       { name: "Management", description: "All managers - full access", pin: "4444", route: "/manager-dashboard", icon: <UserCog className="h-5 w-5" />, color: "teal" },

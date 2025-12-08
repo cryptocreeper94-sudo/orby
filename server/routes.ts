@@ -1632,7 +1632,7 @@ Key facts:
 - Bar handles beverage supplies
 - Stand Leads manage individual stands
 - Supervisors oversee 4-6 stands in a section
-- Ops Controllers (like David and Sid) have full visibility
+- David is the Ops Controller with full visibility
 - Pre-event counts happen before doors open
 - Post-event counts happen after the event ends
 - Three-phase inventory: PreEvent → PostEvent → DayAfter
@@ -4163,7 +4163,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
-  // Update dashboard config for a role (David/Developer only)
+  // Update dashboard config for a role (David only)
   app.put("/api/dashboard-configs/:role", async (req: Request, res: Response) => {
     try {
       const config = await storage.upsertDashboardConfig({
@@ -4191,7 +4191,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   // ========== ACTIVE EVENT SYSTEM (Live vs Sandbox Mode) ==========
   // Only Event Admins can activate/deactivate events
   // When no event is active, system defaults to SANDBOX mode
-  const EVENT_ADMIN_PINS = ['2424', '0424', '1234']; // David, Jason, Sid
+  const EVENT_ADMIN_PINS = ['2424']; // David only
 
   // Check if system is in live mode (has active event)
   app.get("/api/system-status", async (_req: Request, res: Response) => {
@@ -4539,8 +4539,8 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   });
 
   // ========== DEPARTMENT INVENTORY CONTROL ==========
-  // Authorized PINs for inventory management: Bar Manager (Darby), Chef Deb, Shelia, David, Jason
-  const INVENTORY_ADMIN_PINS = ['2424', '0424', '3737', '4545', '4646'];
+  // Authorized PINs for inventory management: Bar Manager (Darby), Chef Deb, Shelia, David
+  const INVENTORY_ADMIN_PINS = ['2424', '3737', '4545', '4646'];
   
   // Get inventory locations (optionally filter by department)
   app.get("/api/inventory/locations", async (req: Request, res: Response) => {
@@ -4716,8 +4716,8 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   // Note: GET operations are always allowed, only POST/PUT/DELETE for core data are blocked
   
   // ========== VENUE GEOFENCE CONFIGURATION ==========
-  // Authorized PINs: David (2424) and Jason (0424) only
-  const GEOFENCE_ADMIN_PINS = ['2424', '0424'];
+  // Authorized PINs: David (2424) only
+  const GEOFENCE_ADMIN_PINS = ['2424'];
 
   // Get current geofence configuration
   app.get("/api/geofence-config", async (_req: Request, res: Response) => {
@@ -4735,12 +4735,12 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
-  // Update geofence configuration (David/Jason only)
+  // Update geofence configuration (David only)
   app.put("/api/geofence-config", async (req: Request, res: Response) => {
     try {
       const { userPin, userId, userName, preset, radiusFeet, customRadiusFeet, maxConcurrentUsers, eventName } = req.body;
       
-      // Authorization check - only David (2424) and Jason (0424) can modify
+      // Authorization check - only David (2424) can modify
       if (!userPin || !GEOFENCE_ADMIN_PINS.includes(userPin)) {
         return res.status(403).json({ error: "Unauthorized. Only Operations Manager and Developer can modify geofence settings." });
       }
@@ -4947,25 +4947,25 @@ Maintain professional composure. Answer inspector questions honestly. Report any
         version: 'v1.0'
       });
       
-      // Genesis Asset #2: Jason (Developer/Founder)
-      const jasonData = prepareAssetData('user', 'genesis-jason', 'ORB-000000000002', undefined, {
-        name: 'Jason',
-        role: 'Developer',
-        title: 'Founder & Lead Developer',
-        description: 'Jason - Lead Developer of Orby Platform',
+      // Genesis Asset #2: David (Developer/Ops Manager)
+      const davidData = prepareAssetData('user', 'genesis-david', 'ORB-000000000002', undefined, {
+        name: 'David',
+        role: 'Ops Controller',
+        title: 'Operations Manager',
+        description: 'David - Operations Manager of Orby Platform',
         genesisDate: new Date().toISOString()
       });
       
-      const jasonHash = generateDataHash(jasonData);
+      const davidHash = generateDataHash(davidData);
       await storage.createAssetStamp({
         assetNumber: 'ORB-000000000002',
-        displayName: 'Jason (Developer)',
+        displayName: 'David (Ops Manager)',
         category: 'user',
-        description: 'Genesis asset - Jason, Lead Developer and Founder',
+        description: 'Genesis asset - David, Operations Manager',
         sourceType: 'genesis',
-        sourceId: 'jason',
-        sha256Hash: jasonHash,
-        metadata: jasonData.data,
+        sourceId: 'david',
+        sha256Hash: davidHash,
+        metadata: davidData.data,
         isBlockchainAnchored: false
       });
       
@@ -5016,7 +5016,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
         seeded: true,
         assets: [
           { number: 'ORB-000000000001', name: 'Orby Platform' },
-          { number: 'ORB-000000000002', name: 'Jason (Developer)' },
+          { number: 'ORB-000000000002', name: 'David (Ops Manager)' },
           { number: 'ORB-000000000003', name: 'Orby v1.0 Release' }
         ]
       });

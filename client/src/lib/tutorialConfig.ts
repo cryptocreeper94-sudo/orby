@@ -484,8 +484,8 @@ export const tutorialConfigs: Record<string, PageTutorial> = {
       },
       {
         id: "feedback",
-        title: "Report Issues to Jason",
-        body: "See something that's not working right? Tell Jason immediately and he'll fix it on the spot. This is a beta - your feedback shapes the product.",
+        title: "Report Issues",
+        body: "See something that's not working right? Report it immediately and the team will fix it on the spot. This is a beta - your feedback shapes the product.",
         position: "center"
       },
       {

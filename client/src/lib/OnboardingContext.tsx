@@ -286,7 +286,7 @@ export const opsManagerPages: OnboardingPage[] = [
         id: 'controls-geofence',
         page: 'ops-controls',
         title: 'Venue Geofencing',
-        description: 'Configure geofence radius: Standard (1,640ft), Large Event (2,461ft), CMA Festival (4,921ft). Only you and Jason can change this.',
+        description: 'Configure geofence radius: Standard (1,640ft), Large Event (2,461ft), CMA Festival (4,921ft). Only you can change this.',
         position: 'center'
       }
     ]
@@ -497,8 +497,8 @@ export const opsManagerPages: OnboardingPage[] = [
       {
         id: 'report-issues',
         page: 'ops-feedback',
-        title: 'Report Issues to Jason',
-        description: 'See something wrong? Tell Jason immediately. He\'ll fix it on the spot. This is beta - your feedback shapes the product.',
+        title: 'Report Issues',
+        description: 'See something wrong? Report it immediately. The team will fix it on the spot. This is beta - your feedback shapes the product.',
         position: 'center'
       },
       {

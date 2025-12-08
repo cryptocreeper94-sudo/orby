@@ -124,10 +124,8 @@ export const demoMessages = [
 ];
 
 export const demoUsers = [
-  { id: 1, name: 'Jason', role: 'Developer', status: 'online', location: 'Command Center' },
-  { id: 2, name: 'David', role: 'IT Manager', status: 'online', location: 'Field' },
-  { id: 3, name: 'Sid', role: 'Ops Controller', status: 'online', location: 'Command Center' },
-  { id: 4, name: 'Jay', role: 'Purchasing Manager', status: 'online', location: 'Warehouse' },
+  { id: 1, name: 'David', role: 'Ops Controller', status: 'online', location: 'Command Center' },
+  { id: 2, name: 'Jay', role: 'Purchasing Manager', status: 'online', location: 'Warehouse' },
   { id: 5, name: 'Chef Deb', role: 'Culinary Manager', status: 'online', location: 'Kitchen' },
   { id: 6, name: 'Darby', role: 'Bar Manager', status: 'online', location: 'Field' },
   { id: 7, name: 'Shelia', role: 'Operations Manager', status: 'online', location: 'Field' },
