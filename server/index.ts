@@ -79,6 +79,17 @@ app.use((req, res, next) => {
   // doesn't interfere with the other routes
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
+    
+    // Auto-release: Bump version, hash, and stamp to Solana on production deploy
+    try {
+      const { autoReleaseOnDeploy } = await import("./services/autoRelease");
+      const result = await autoReleaseOnDeploy();
+      if (result.success) {
+        log(`Deploy stamped: ${result.version} - ${result.message}`, 'deploy');
+      }
+    } catch (autoReleaseErr) {
+      log(`Auto-release skipped: ${autoReleaseErr}`, 'deploy');
+    }
   } else {
     const { setupVite } = await import("./vite");
     await setupVite(httpServer, app);
