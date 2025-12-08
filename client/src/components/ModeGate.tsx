@@ -48,26 +48,27 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
             <div className="text-center mb-6">
               {/* Cohesive Hero Scene - Skyline + Orby as one layered composition */}
               <div className="relative w-screen left-1/2 -translate-x-1/2 h-[200px] sm:h-[260px] md:h-[320px] mb-4">
-                {/* Nashville Skyline - Full width background layer */}
+                {/* Nashville Skyline - Full width background layer - MORE VISIBLE */}
                 <img 
                   src={nashvilleSkylineImg} 
                   alt="Nashville Skyline with Nissan Stadium" 
-                  className="absolute inset-x-0 bottom-0 w-full h-full object-cover object-bottom opacity-60"
+                  className="absolute inset-x-0 bottom-0 w-full h-full object-cover object-bottom opacity-85 sm:opacity-90"
                   data-testid="img-city-skyline"
                 />
-                {/* Gradient overlay for blending */}
-                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-slate-900 via-slate-900/70 to-transparent" />
-                <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-slate-900/80 to-transparent" />
+                {/* Subtle color overlay to tie palette together */}
+                <div className="absolute inset-0 bg-cyan-900/10" />
+                {/* Softer gradient overlays for blending */}
+                <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+                <div className="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-slate-900/60 to-transparent" />
                 
-                {/* Orby Commander - Floating in front of skyline */}
-                <div className="absolute bottom-[-20px] sm:bottom-[-30px] left-1/2 -translate-x-1/2 z-20">
-                  {/* Glow effects behind Orby */}
-                  <div className="absolute inset-0 w-36 h-36 sm:w-44 sm:h-44 bg-cyan-400/30 rounded-full blur-3xl animate-pulse -z-10" />
-                  <div className="absolute inset-0 w-32 h-32 sm:w-40 sm:h-40 bg-cyan-500/20 rounded-full blur-2xl animate-pulse -z-10" style={{animationDelay: '0.5s'}} />
+                {/* Orby Commander - Smaller, less dominant */}
+                <div className="absolute bottom-[-16px] sm:bottom-[-24px] left-1/2 -translate-x-1/2 z-20">
+                  {/* Subtle single glow effect */}
+                  <div className="absolute inset-0 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 sm:w-28 sm:h-28 bg-cyan-400/15 rounded-full blur-2xl -z-10" />
                   <img 
                     src={orbyCommanderImg} 
                     alt="Orby Commander" 
-                    className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 object-contain drop-shadow-[0_0_50px_rgba(6,182,212,0.9)] animate-float"
+                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.45)] animate-float"
                     data-testid="img-orby-commander"
                   />
                 </div>
