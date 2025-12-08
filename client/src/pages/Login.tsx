@@ -340,42 +340,18 @@ export default function LoginPage() {
                   >
                     <div className="mt-2 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 space-y-3" data-testid="pin-help-content">
                       <p className="text-xs text-slate-400 mb-3">
-                        First time logging in? Use your role's initial PIN:
+                        First time logging in?
                       </p>
                       
                       <div className="space-y-2 text-xs">
                         <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
-                          <span className="text-slate-300">New Legends Staff</span>
+                          <span className="text-slate-300">New Staff Registration</span>
                           <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded" data-testid="pin-hint-9999">9999</span>
-                        </div>
-                        <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
-                          <span className="text-slate-300">NPO / Concessions</span>
-                          <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded" data-testid="pin-hint-1111">1111</span>
-                        </div>
-                        <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
-                          <span className="text-slate-300">Stand Lead</span>
-                          <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded" data-testid="pin-hint-2222">2222</span>
-                        </div>
-                        <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
-                          <span className="text-slate-300">Stand Supervisor</span>
-                          <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded" data-testid="pin-hint-3333">3333</span>
-                        </div>
-                        <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
-                          <span className="text-slate-300">Bartender</span>
-                          <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded" data-testid="pin-hint-7777">7777</span>
-                        </div>
-                        <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
-                          <span className="text-slate-300">Alcohol Compliance</span>
-                          <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded" data-testid="pin-hint-5555">5555</span>
-                        </div>
-                        <div className="flex justify-between items-center py-1.5">
-                          <span className="text-slate-300">Check-in Assistant</span>
-                          <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded" data-testid="pin-hint-6666">6666</span>
                         </div>
                       </div>
 
                       <p className="text-[10px] text-slate-500 mt-3 pt-2 border-t border-slate-700/50">
-                        Managers: Contact David for your PIN.
+                        All staff: Contact David for your PIN.
                       </p>
                     </div>
                   </motion.div>

@@ -35,18 +35,15 @@ Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designe
 ## PIN Access Structure
 | PIN | User | Role | Dashboard |
 |-----|------|------|-----------|
-| 0424 | Jason | Developer (hidden) | Dev Portal with role picker |
-| 444 | Jason | Operations Supervisor | Supervisor Dashboard |
-| 4444 | Sid | Operations Supervisor | Supervisor Dashboard + welcome modal |
 | 2424 | David | Ops Controller | Ops Command Center |
-| 7777 | Brian/Megan | Executives | Executive Dashboard |
+| 8080 | Brian | Regional VP | Executive Dashboard |
+| 9090 | Megan | General Manager | Executive Dashboard |
 | 5555 | Compliance | Alcohol Compliance | Compliance Dashboard |
 | 9999 | New User | Registration | First-time registration flow |
 
-**Access Hierarchy:**
-- Jason (0424) has hidden full access that supersedes all roles
-- David (2424) is the public-facing operations authority
-- Sid (4444) is an Operations Supervisor with welcome modal on login
+**Hidden Developer Access:**
+- Jason (0424) has hidden full developer access with role picker
+- Jason (444) and Sid (4444) are Operations Supervisors - contact David for access
 
 ## System Architecture
 Orby is a full-stack PWA built with a React frontend and an Express backend, utilizing PostgreSQL with Drizzle ORM. The platform emphasizes a mobile-first, touch-optimized UI/UX with Framer Motion animations, dynamic glow effects, glassmorphism with backdrop blur, and a dark theme featuring aqua/cyan accent gradients.
