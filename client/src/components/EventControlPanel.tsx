@@ -456,7 +456,7 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
         </div>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-cyan-500"></span>
-          <span>Only Event Admins (David, Jason, Sid) can activate events</span>
+          <span>Only Event Admin (David) can activate events</span>
         </div>
       </div>
     </div>
