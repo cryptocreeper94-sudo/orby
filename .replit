@@ -4,7 +4,23 @@ hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["ffmpeg-full", "freetype", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "oneDNN", "openjpeg", "re2", "tcl", "tk", "zlib", "nodejs_20"]
+packages = [
+  "ffmpeg-full",
+  "freetype",
+  "lcms2",
+  "libimagequant",
+  "libjpeg",
+  "libtiff",
+  "libwebp",
+  "libxcrypt",
+  "oneDNN",
+  "openjpeg",
+  "re2",
+  "tcl",
+  "tk",
+  "zlib",
+  "nodejs_20",
+]
 
 [deployment]
 deploymentTarget = "autoscale"
@@ -15,65 +31,6 @@ run = ["npm", "run", "start"]
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 34095
-externalPort = 6000
-
-[[ports]]
-localPort = 35195
-externalPort = 6800
-
-[[ports]]
-localPort = 37109
-externalPort = 5000
-
-[[ports]]
-localPort = 38857
-externalPort = 3000
-
-[[ports]]
-localPort = 39583
-externalPort = 8008
-
-[[ports]]
-localPort = 39615
-externalPort = 3003
-
-[[ports]]
-localPort = 41539
-externalPort = 8080
-
-[[ports]]
-localPort = 41815
-externalPort = 9000
-
-[[ports]]
-localPort = 42441
-externalPort = 3002
-
-[[ports]]
-localPort = 43469
-externalPort = 5173
-
-[[ports]]
-localPort = 44849
-externalPort = 8000
-
-[[ports]]
-localPort = 45301
-externalPort = 8099
-
-[[ports]]
-localPort = 46039
-externalPort = 4200
-
-[[ports]]
-localPort = 46389
-externalPort = 3001
-
-[[ports]]
-localPort = 46859
-externalPort = 8081
 
 [env]
 PORT = "5000"
