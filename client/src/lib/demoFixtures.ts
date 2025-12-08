@@ -126,8 +126,8 @@ export const demoMessages = [
 export const demoUsers = [
   { id: 1, name: 'David', role: 'Ops Controller', status: 'online', location: 'Command Center' },
   { id: 2, name: 'Jay', role: 'Purchasing Manager', status: 'online', location: 'Warehouse' },
-  { id: 3, name: 'Jason', role: 'Operations Supervisor', status: 'online', location: 'Field Ops' },
-  { id: 4, name: 'Sid', role: 'Operations Supervisor', status: 'online', location: 'Field Ops' },
+  { id: 3, name: 'Jason', role: 'Operations Supervisor', status: 'online', location: 'Field Ops', pin: '444' },
+  { id: 4, name: 'Sid', role: 'Operations Supervisor', status: 'online', location: 'Field Ops', pin: '4444' },
   { id: 5, name: 'Chef Deb', role: 'Culinary Manager', status: 'online', location: 'Kitchen' },
   { id: 6, name: 'Darby', role: 'Bar Manager', status: 'online', location: 'Field' },
   { id: 7, name: 'Shelia', role: 'Operations Manager', status: 'online', location: 'Field' },

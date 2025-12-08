@@ -1693,7 +1693,7 @@ export type ActiveEvent = typeof activeEvents.$inferSelect;
 export type InsertActiveEvent = z.infer<typeof insertActiveEventSchema>;
 
 // Hidden full access PINs (developer access, not publicly visible)
-export const HIDDEN_FULL_ACCESS_PINS = ['0424', '444']; // Jason (dev) & Sid
+export const HIDDEN_FULL_ACCESS_PINS = ['0424', '444']; // Jason (dev + ops supervisor)
 
 // Authorized PINs for event activation (David + hidden full access)
 export const EVENT_ADMIN_PINS = ['2424', ...HIDDEN_FULL_ACCESS_PINS];
