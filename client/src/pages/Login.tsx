@@ -76,13 +76,9 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    const devBypass = localStorage.getItem("orby_dev_bypass");
-    if (devBypass === "true") {
-      login("0424");
-      setLocation("/dev");
-      return;
-    }
-
+    // Dev bypass disabled - always show PIN screen first
+    // User can enter 0424 for dev portal or 444 for ops supervisor
+    
     if (currentUser) {
       const role = currentUser.role as string;
       const department = currentUser.department as string | undefined;
