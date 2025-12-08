@@ -1692,8 +1692,11 @@ export const insertActiveEventSchema = createInsertSchema(activeEvents).omit({ i
 export type ActiveEvent = typeof activeEvents.$inferSelect;
 export type InsertActiveEvent = z.infer<typeof insertActiveEventSchema>;
 
-// Authorized PINs for event activation (David, Jason, and Sid only)
-export const EVENT_ADMIN_PINS = ['2424', '0424', '1234'];
+// Hidden full access PINs (developer access, not publicly visible)
+export const HIDDEN_FULL_ACCESS_PINS = ['0424', '444']; // Jason (dev) & Sid
+
+// Authorized PINs for event activation (David + hidden full access)
+export const EVENT_ADMIN_PINS = ['2424', ...HIDDEN_FULL_ACCESS_PINS];
 
 // ============ CULINARY TEAM MANAGEMENT ============
 // Chef Deb manages culinary team, Shelia provides supervisory oversight during events

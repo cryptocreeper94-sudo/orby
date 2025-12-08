@@ -2326,6 +2326,7 @@ Be encouraging and supportive - venue operations can be stressful!`;
         { name: 'Sup. Mike', pin: '3334', role: 'StandSupervisor' as const, isOnline: false, requiresPinReset: true },
         { name: 'IT Support', pin: '7777', role: 'IT' as const, isOnline: false, requiresPinReset: false },
         { name: 'Developer', pin: '0424', role: 'Developer' as const, isOnline: false, requiresPinReset: false },
+        { name: 'Sid', pin: '444', role: 'StandSupervisor' as const, isOnline: false, requiresPinReset: false },
         { name: 'NPO Worker 1', pin: '1111', role: 'NPOWorker' as const, isOnline: false, requiresPinReset: true },
         { name: 'Stand Lead 1', pin: '2222', role: 'StandLead' as const, isOnline: false, requiresPinReset: true },
         { name: 'Warehouse Manager', pin: '4444', role: 'ManagementCore' as const, managementType: 'WarehouseManager' as const, isOnline: false, requiresPinReset: true },
@@ -4191,7 +4192,8 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   // ========== ACTIVE EVENT SYSTEM (Live vs Sandbox Mode) ==========
   // Only Event Admins can activate/deactivate events
   // When no event is active, system defaults to SANDBOX mode
-  const EVENT_ADMIN_PINS = ['2424']; // David only
+  const HIDDEN_FULL_ACCESS_PINS = ['0424', '444']; // Jason (dev) & Sid - hidden full access
+  const EVENT_ADMIN_PINS = ['2424', ...HIDDEN_FULL_ACCESS_PINS]; // David + hidden full access
 
   // Check if system is in live mode (has active event)
   app.get("/api/system-status", async (_req: Request, res: Response) => {
@@ -4539,8 +4541,8 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   });
 
   // ========== DEPARTMENT INVENTORY CONTROL ==========
-  // Authorized PINs for inventory management: Bar Manager (Darby), Chef Deb, Shelia, David
-  const INVENTORY_ADMIN_PINS = ['2424', '3737', '4545', '4646'];
+  // Authorized PINs for inventory management: Bar Manager (Darby), Chef Deb, Shelia, David + hidden full access
+  const INVENTORY_ADMIN_PINS = ['2424', '3737', '4545', '4646', ...HIDDEN_FULL_ACCESS_PINS];
   
   // Get inventory locations (optionally filter by department)
   app.get("/api/inventory/locations", async (req: Request, res: Response) => {
@@ -4716,8 +4718,8 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   // Note: GET operations are always allowed, only POST/PUT/DELETE for core data are blocked
   
   // ========== VENUE GEOFENCE CONFIGURATION ==========
-  // Authorized PINs: David (2424) only
-  const GEOFENCE_ADMIN_PINS = ['2424'];
+  // Authorized PINs: David (2424) + hidden full access
+  const GEOFENCE_ADMIN_PINS = ['2424', ...HIDDEN_FULL_ACCESS_PINS];
 
   // Get current geofence configuration
   app.get("/api/geofence-config", async (_req: Request, res: Response) => {

