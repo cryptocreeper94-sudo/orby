@@ -42,53 +42,53 @@ export function LocationAcknowledgement({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-lg" data-testid="location-acknowledgement">
+      <DialogContent className="sm:max-w-lg bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-cyan-500/30" data-testid="location-acknowledgement">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <MapPin className="h-6 w-6 text-blue-600" />
+          <DialogTitle className="flex items-center gap-2 text-xl text-white">
+            <MapPin className="h-6 w-6 text-cyan-400" />
             Location Services Required
           </DialogTitle>
-          <DialogDescription className="text-base pt-2">
+          <DialogDescription className="text-base pt-2 text-slate-400">
             This app uses your device's GPS location to provide the following features:
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
-          <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg">
-            <Navigation className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="flex items-start gap-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+            <Navigation className="h-5 w-5 text-blue-400 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-blue-900">Indoor Navigation</p>
-              <p className="text-sm text-blue-700">
+              <p className="font-medium text-blue-300">Indoor Navigation</p>
+              <p className="text-sm text-blue-400">
                 Walking directions to help you find stands, gates, and key locations within the stadium.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg">
-            <Shield className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+          <div className="flex items-start gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+            <Shield className="h-5 w-5 text-green-400 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-green-900">Geofence Verification</p>
-              <p className="text-sm text-green-700">
+              <p className="font-medium text-green-300">Geofence Verification</p>
+              <p className="text-sm text-green-400">
                 Confirms you're on-site for attendance tracking and secure login when within 100 feet of the stadium.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3 p-3 bg-purple-50 rounded-lg">
-            <MapPin className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+          <div className="flex items-start gap-3 p-3 bg-purple-500/10 border border-purple-500/30 rounded-lg">
+            <MapPin className="h-5 w-5 text-purple-400 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-purple-900">Real-time Communication</p>
-              <p className="text-sm text-purple-700">
+              <p className="font-medium text-purple-300">Real-time Communication</p>
+              <p className="text-sm text-purple-400">
                 Helps supervisors and managers know your location for faster response to requests.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start gap-3 p-3 bg-amber-50 rounded-lg border border-amber-200">
-            <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div className="flex items-start gap-3 p-3 bg-amber-500/10 rounded-lg border border-amber-500/30">
+            <AlertTriangle className="h-5 w-5 text-amber-400 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="font-medium text-amber-900">Privacy Notice</p>
-              <p className="text-sm text-amber-700">
+              <p className="font-medium text-amber-300">Privacy Notice</p>
+              <p className="text-sm text-amber-400">
                 Your location is only used while the app is open and for stadium operations. 
                 Location data is not stored or shared outside the Orby system.
               </p>
@@ -104,7 +104,7 @@ export function LocationAcknowledgement({
             />
             <label 
               htmlFor="understand" 
-              className="text-sm font-medium leading-none cursor-pointer"
+              className="text-sm font-medium leading-none cursor-pointer text-slate-300"
             >
               I understand and agree to allow location access for these features
             </label>
@@ -124,7 +124,7 @@ export function LocationAcknowledgement({
           <Button 
             onClick={handleAccept}
             disabled={!understood}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-gradient-to-r from-cyan-600 to-cyan-500 hover:from-cyan-500 hover:to-cyan-400"
             data-testid="accept-location"
           >
             <MapPin className="h-4 w-4 mr-2" />
