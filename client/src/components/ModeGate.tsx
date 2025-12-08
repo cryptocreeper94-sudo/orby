@@ -46,23 +46,29 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
         <div className="flex-1 flex flex-col items-center px-4 pb-6 pt-2">
           <div className="w-full max-w-2xl">
             <div className="text-center mb-6">
-              {/* Nashville Skyline with Nissan Stadium behind Orby */}
-              <div className="w-full max-w-sm mx-auto h-48 sm:h-56 mb-4 relative flex items-end justify-center">
-                {/* Skyline background - positioned at bottom */}
+              {/* Nashville Skyline with Nissan Stadium - Full Width */}
+              <div className="w-screen relative -mx-4 mb-4">
+                {/* Skyline background - full width at top */}
                 <img 
                   src={nashvilleSkylineImg} 
                   alt="Nashville Skyline with Nissan Stadium" 
-                  className="absolute bottom-0 left-0 right-0 w-full h-32 sm:h-40 object-contain object-bottom opacity-60"
+                  className="w-full h-24 sm:h-32 object-cover object-bottom opacity-70"
                   data-testid="img-city-skyline"
                 />
+                {/* Gradient fade at bottom of skyline */}
+                <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent" />
+              </div>
+              
+              {/* Orby Commander below skyline */}
+              <div className="relative flex justify-center -mt-8 mb-2">
                 {/* Glow effects */}
-                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 w-32 h-32 bg-cyan-400/30 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute bottom-16 left-1/2 -translate-x-1/2 w-24 h-24 bg-cyan-500/20 rounded-full blur-2xl animate-pulse" style={{animationDelay: '0.5s'}} />
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-32 h-32 bg-cyan-400/30 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute top-6 left-1/2 -translate-x-1/2 w-24 h-24 bg-cyan-500/20 rounded-full blur-2xl animate-pulse" style={{animationDelay: '0.5s'}} />
                 {/* Orby Commander in front */}
                 <img 
                   src={orbyCommanderImg} 
                   alt="Orby Commander" 
-                  className="relative w-32 h-32 sm:w-36 sm:h-36 object-contain drop-shadow-[0_0_40px_rgba(6,182,212,0.9)] animate-float z-10 mb-2"
+                  className="relative w-28 h-28 sm:w-32 sm:h-32 object-contain drop-shadow-[0_0_40px_rgba(6,182,212,0.9)] animate-float z-10"
                   data-testid="img-orby-commander"
                 />
               </div>
