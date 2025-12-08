@@ -48,9 +48,9 @@ const ALERT_LEVELS = [
 ];
 
 const LAYOUT_PRESETS = [
-  { value: "ops-lite", label: "Ops Lite", description: "Simplified view for training" },
-  { value: "standard", label: "Standard", description: "Default balanced layout" },
-  { value: "full-command", label: "Full Command", description: "All panels visible" },
+  { value: "ops-lite", label: "Ops Lite", icon: LayoutGrid, description: "Simplified view for training" },
+  { value: "standard", label: "Standard", icon: Sparkles, description: "Default balanced layout" },
+  { value: "full-command", label: "Full Command", icon: Maximize2, description: "All panels visible" },
 ];
 
 const GEOFENCE_PRESETS = [
@@ -64,6 +64,37 @@ const formatRadius = (feet: number): string => {
   if (feet >= 1000) return `${(feet / 5280).toFixed(2)} mi (${feet.toLocaleString()} ft)`;
   return `${feet} feet`;
 };
+
+const SectionHeader = ({ icon: Icon, title, color, expanded, onToggle, badge }: {
+  icon: React.ElementType;
+  title: string;
+  color: string;
+  expanded: boolean;
+  onToggle: () => void;
+  badge?: string;
+}) => (
+  <button
+    onClick={onToggle}
+    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
+  >
+    <div className="flex items-center gap-3">
+      <div className={`p-1.5 rounded-lg ${color.replace('text-', 'bg-').replace('400', '500/20')}`}>
+        <Icon className={`w-4 h-4 ${color}`} />
+      </div>
+      <span className="text-sm font-medium text-white">{title}</span>
+      {badge && (
+        <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+          {badge}
+        </span>
+      )}
+    </div>
+    {expanded ? (
+      <ChevronUp className="w-4 h-4 text-slate-400" />
+    ) : (
+      <ChevronDown className="w-4 h-4 text-slate-400" />
+    )}
+  </button>
+);
 
 export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
   const [selectedRole, setSelectedRole] = useState<string>("NPOWorker");
@@ -111,7 +142,6 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
     },
   });
 
-  // Geofence Configuration (David/Jason only)
   const { data: geofenceConfig } = useQuery<VenueGeofenceConfig>({
     queryKey: ["/api/geofence-config"],
   });
@@ -153,7 +183,6 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
       });
     },
     onError: (error: Error) => {
-      // Revert to previous selection
       if (geofenceConfig?.preset) {
         setSelectedGeofencePreset(geofenceConfig.preset);
       }
@@ -264,10 +293,13 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
             </div>
           </div>
 
-          {/* Role Selector */}
-          <div className="px-4 py-3 border-b border-slate-700/50 bg-slate-800/30">
-            <label className="text-xs text-slate-400 mb-2 block">Configure Dashboard For:</label>
-            <div className="flex flex-wrap gap-1.5">
+          {/* Role Selector - Bento Grid Layout */}
+          <div className="px-4 py-4 border-b border-slate-700/50 bg-slate-800/30">
+            <div className="flex items-center gap-2 mb-3">
+              <Users className="w-4 h-4 text-cyan-400" />
+              <label className="text-xs font-medium text-slate-300">Configure Dashboard For:</label>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
               {CONFIGURABLE_ROLES.map((role) => (
                 <button
                   key={role}
@@ -275,10 +307,10 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                     setSelectedRole(role);
                     setPendingChanges({});
                   }}
-                  className={`px-2.5 py-1 text-xs rounded-lg transition-all ${
+                  className={`h-10 px-2 text-xs rounded-lg transition-all flex items-center justify-center text-center ${
                     selectedRole === role
-                      ? "bg-cyan-500/30 text-cyan-300 border border-cyan-400/50"
-                      : "bg-slate-700/50 text-slate-400 border border-transparent hover:border-slate-600"
+                      ? "bg-cyan-500/30 text-cyan-300 border border-cyan-400/50 font-medium"
+                      : "bg-slate-700/50 text-slate-400 border border-slate-700/50 hover:border-slate-600 hover:bg-slate-700/70"
                   }`}
                   data-testid={`role-select-${role}`}
                 >
@@ -289,7 +321,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
           </div>
 
           {/* Scrollable Content */}
-          <div className="overflow-y-auto max-h-[50vh] px-4 py-3 space-y-3">
+          <div className="overflow-y-auto max-h-[50vh] px-4 py-4 space-y-3">
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <motion.div
@@ -303,20 +335,13 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
               <>
                 {/* Widget Visibility Section */}
                 <div className="rounded-xl border border-slate-700/50 overflow-hidden">
-                  <button
-                    onClick={() => toggleSection("widgets")}
-                    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <LayoutGrid className="w-4 h-4 text-cyan-400" />
-                      <span className="text-sm font-medium text-white">Widget Visibility</span>
-                    </div>
-                    {expandedSection === "widgets" ? (
-                      <ChevronUp className="w-4 h-4 text-slate-400" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-slate-400" />
-                    )}
-                  </button>
+                  <SectionHeader
+                    icon={LayoutGrid}
+                    title="Widget Visibility"
+                    color="text-cyan-400"
+                    expanded={expandedSection === "widgets"}
+                    onToggle={() => toggleSection("widgets")}
+                  />
                   
                   <AnimatePresence>
                     {expandedSection === "widgets" && (
@@ -335,21 +360,23 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                               <button
                                 key={widget.key}
                                 onClick={() => handleChange(widget.key as keyof DashboardConfig, !isVisible)}
-                                className={`flex items-center gap-2 p-2.5 rounded-lg transition-all ${
+                                className={`h-14 flex items-center gap-3 px-3 rounded-lg transition-all ${
                                   isVisible
                                     ? "bg-slate-700/50 border border-cyan-500/30"
                                     : "bg-slate-800/30 border border-slate-700/30 opacity-60"
                                 }`}
                                 data-testid={`toggle-${widget.key}`}
                               >
-                                <Icon className={`w-4 h-4 ${isVisible ? widget.color : "text-slate-500"}`} />
-                                <span className={`text-xs ${isVisible ? "text-white" : "text-slate-500"}`}>
+                                <div className={`p-1.5 rounded-md ${isVisible ? widget.color.replace('text-', 'bg-').replace('400', '500/20') : 'bg-slate-700/50'}`}>
+                                  <Icon className={`w-4 h-4 ${isVisible ? widget.color : "text-slate-500"}`} />
+                                </div>
+                                <span className={`text-xs flex-1 text-left ${isVisible ? "text-white" : "text-slate-500"}`}>
                                   {widget.label}
                                 </span>
                                 {isVisible ? (
-                                  <Eye className="w-3 h-3 text-green-400 ml-auto" />
+                                  <Eye className="w-3.5 h-3.5 text-green-400 shrink-0" />
                                 ) : (
-                                  <EyeOff className="w-3 h-3 text-slate-500 ml-auto" />
+                                  <EyeOff className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                                 )}
                               </button>
                             );
@@ -362,20 +389,13 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
 
                 {/* Alert Settings Section */}
                 <div className="rounded-xl border border-slate-700/50 overflow-hidden">
-                  <button
-                    onClick={() => toggleSection("alerts")}
-                    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Bell className="w-4 h-4 text-amber-400" />
-                      <span className="text-sm font-medium text-white">Alert Settings</span>
-                    </div>
-                    {expandedSection === "alerts" ? (
-                      <ChevronUp className="w-4 h-4 text-slate-400" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-slate-400" />
-                    )}
-                  </button>
+                  <SectionHeader
+                    icon={Bell}
+                    title="Alert Settings"
+                    color="text-amber-400"
+                    expanded={expandedSection === "alerts"}
+                    onToggle={() => toggleSection("alerts")}
+                  />
                   
                   <AnimatePresence>
                     {expandedSection === "alerts" && (
@@ -386,7 +406,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                         transition={{ duration: 0.2 }}
                         className="border-t border-slate-700/50"
                       >
-                        <div className="p-3 space-y-2">
+                        <div className="p-3 grid grid-cols-3 gap-2">
                           {ALERT_LEVELS.map((level) => {
                             const isSelected = getConfigValue("alertLevel") === level.value;
                             const Icon = level.icon;
@@ -394,21 +414,26 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                               <button
                                 key={level.value}
                                 onClick={() => handleChange("alertLevel", level.value)}
-                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
+                                className={`h-20 flex flex-col items-center justify-center gap-2 p-2 rounded-lg transition-all ${
                                   isSelected
                                     ? "bg-amber-500/20 border border-amber-500/40"
                                     : "bg-slate-800/30 border border-slate-700/30 hover:border-slate-600"
                                 }`}
                                 data-testid={`alert-level-${level.value}`}
                               >
-                                <Icon className={`w-4 h-4 ${isSelected ? "text-amber-400" : "text-slate-400"}`} />
-                                <div className="text-left flex-1">
-                                  <div className={`text-sm ${isSelected ? "text-amber-300" : "text-slate-300"}`}>
+                                <div className={`p-2 rounded-lg ${isSelected ? 'bg-amber-500/20' : 'bg-slate-700/50'}`}>
+                                  <Icon className={`w-4 h-4 ${isSelected ? "text-amber-400" : "text-slate-400"}`} />
+                                </div>
+                                <div className="text-center">
+                                  <div className={`text-xs font-medium ${isSelected ? "text-amber-300" : "text-slate-300"}`}>
                                     {level.label}
                                   </div>
-                                  <div className="text-xs text-slate-500">{level.description}</div>
                                 </div>
-                                {isSelected && <Check className="w-4 h-4 text-amber-400" />}
+                                {isSelected && (
+                                  <div className="absolute top-1 right-1">
+                                    <Check className="w-3 h-3 text-amber-400" />
+                                  </div>
+                                )}
                               </button>
                             );
                           })}
@@ -420,20 +445,13 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
 
                 {/* Data Scope Section */}
                 <div className="rounded-xl border border-slate-700/50 overflow-hidden">
-                  <button
-                    onClick={() => toggleSection("scope")}
-                    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-green-400" />
-                      <span className="text-sm font-medium text-white">Data Scope</span>
-                    </div>
-                    {expandedSection === "scope" ? (
-                      <ChevronUp className="w-4 h-4 text-slate-400" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-slate-400" />
-                    )}
-                  </button>
+                  <SectionHeader
+                    icon={Users}
+                    title="Data Scope"
+                    color="text-green-400"
+                    expanded={expandedSection === "scope"}
+                    onToggle={() => toggleSection("scope")}
+                  />
                   
                   <AnimatePresence>
                     {expandedSection === "scope" && (
@@ -445,44 +463,50 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                         className="border-t border-slate-700/50"
                       >
                         <div className="p-3 space-y-3">
-                          <div className="flex gap-2">
+                          <div className="grid grid-cols-2 gap-2">
                             <button
                               onClick={() => handleChange("dataScope", "assigned")}
-                              className={`flex-1 p-3 rounded-lg text-center transition-all ${
+                              className={`h-16 flex flex-col items-center justify-center gap-1.5 rounded-lg transition-all ${
                                 getConfigValue("dataScope") === "assigned"
                                   ? "bg-green-500/20 border border-green-500/40 text-green-300"
                                   : "bg-slate-800/30 border border-slate-700/30 text-slate-400 hover:border-slate-600"
                               }`}
                               data-testid="scope-assigned"
                             >
-                              <Lock className="w-4 h-4 mx-auto mb-1" />
-                              <span className="text-xs">Assigned Only</span>
+                              <div className={`p-1.5 rounded-lg ${getConfigValue("dataScope") === "assigned" ? 'bg-green-500/20' : 'bg-slate-700/50'}`}>
+                                <Lock className="w-4 h-4" />
+                              </div>
+                              <span className="text-xs font-medium">Assigned Only</span>
                             </button>
                             <button
                               onClick={() => handleChange("dataScope", "all")}
-                              className={`flex-1 p-3 rounded-lg text-center transition-all ${
+                              className={`h-16 flex flex-col items-center justify-center gap-1.5 rounded-lg transition-all ${
                                 getConfigValue("dataScope") === "all"
                                   ? "bg-green-500/20 border border-green-500/40 text-green-300"
                                   : "bg-slate-800/30 border border-slate-700/30 text-slate-400 hover:border-slate-600"
                               }`}
                               data-testid="scope-all"
                             >
-                              <Radio className="w-4 h-4 mx-auto mb-1" />
-                              <span className="text-xs">All Stands</span>
+                              <div className={`p-1.5 rounded-lg ${getConfigValue("dataScope") === "all" ? 'bg-green-500/20' : 'bg-slate-700/50'}`}>
+                                <Radio className="w-4 h-4" />
+                              </div>
+                              <span className="text-xs font-medium">All Stands</span>
                             </button>
                           </div>
                           
                           <button
                             onClick={() => handleChange("showSensitiveMetrics", !getConfigValue("showSensitiveMetrics"))}
-                            className={`w-full flex items-center justify-between p-3 rounded-lg transition-all ${
+                            className={`w-full h-14 flex items-center justify-between px-4 rounded-lg transition-all ${
                               getConfigValue("showSensitiveMetrics")
                                 ? "bg-purple-500/20 border border-purple-500/40"
                                 : "bg-slate-800/30 border border-slate-700/30"
                             }`}
                             data-testid="toggle-sensitive-metrics"
                           >
-                            <div className="flex items-center gap-2">
-                              <Shield className="w-4 h-4 text-purple-400" />
+                            <div className="flex items-center gap-3">
+                              <div className={`p-1.5 rounded-lg ${getConfigValue("showSensitiveMetrics") ? 'bg-purple-500/20' : 'bg-slate-700/50'}`}>
+                                <Shield className="w-4 h-4 text-purple-400" />
+                              </div>
                               <span className="text-sm text-slate-300">Show Sensitive Metrics</span>
                             </div>
                             <div className={`w-10 h-5 rounded-full transition-all ${
@@ -502,20 +526,13 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
 
                 {/* Layout Presets Section */}
                 <div className="rounded-xl border border-slate-700/50 overflow-hidden">
-                  <button
-                    onClick={() => toggleSection("layout")}
-                    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-purple-400" />
-                      <span className="text-sm font-medium text-white">Layout Presets</span>
-                    </div>
-                    {expandedSection === "layout" ? (
-                      <ChevronUp className="w-4 h-4 text-slate-400" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-slate-400" />
-                    )}
-                  </button>
+                  <SectionHeader
+                    icon={Sparkles}
+                    title="Layout Presets"
+                    color="text-purple-400"
+                    expanded={expandedSection === "layout"}
+                    onToggle={() => toggleSection("layout")}
+                  />
                   
                   <AnimatePresence>
                     {expandedSection === "layout" && (
@@ -526,27 +543,32 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                         transition={{ duration: 0.2 }}
                         className="border-t border-slate-700/50"
                       >
-                        <div className="p-3 space-y-2">
+                        <div className="p-3 grid grid-cols-3 gap-2">
                           {LAYOUT_PRESETS.map((preset) => {
                             const isSelected = getConfigValue("layoutPreset") === preset.value;
+                            const Icon = preset.icon;
                             return (
                               <button
                                 key={preset.value}
                                 onClick={() => handleChange("layoutPreset", preset.value)}
-                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
+                                className={`h-20 flex flex-col items-center justify-center gap-2 p-2 rounded-lg transition-all relative ${
                                   isSelected
                                     ? "bg-purple-500/20 border border-purple-500/40"
                                     : "bg-slate-800/30 border border-slate-700/30 hover:border-slate-600"
                                 }`}
                                 data-testid={`layout-${preset.value}`}
                               >
-                                <div className="text-left flex-1">
-                                  <div className={`text-sm ${isSelected ? "text-purple-300" : "text-slate-300"}`}>
-                                    {preset.label}
-                                  </div>
-                                  <div className="text-xs text-slate-500">{preset.description}</div>
+                                <div className={`p-2 rounded-lg ${isSelected ? 'bg-purple-500/20' : 'bg-slate-700/50'}`}>
+                                  <Icon className={`w-4 h-4 ${isSelected ? "text-purple-400" : "text-slate-400"}`} />
                                 </div>
-                                {isSelected && <Check className="w-4 h-4 text-purple-400" />}
+                                <div className={`text-xs font-medium text-center ${isSelected ? "text-purple-300" : "text-slate-300"}`}>
+                                  {preset.label}
+                                </div>
+                                {isSelected && (
+                                  <div className="absolute top-1 right-1">
+                                    <Check className="w-3 h-3 text-purple-400" />
+                                  </div>
+                                )}
                               </button>
                             );
                           })}
@@ -558,23 +580,14 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
 
                 {/* Venue Geofence Section */}
                 <div className="rounded-xl border border-cyan-500/30 overflow-hidden bg-gradient-to-br from-cyan-500/5 to-transparent">
-                  <button
-                    onClick={() => toggleSection("geofence")}
-                    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Globe className="w-4 h-4 text-cyan-400" />
-                      <span className="text-sm font-medium text-white">Venue Geofence</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                        Scalable
-                      </span>
-                    </div>
-                    {expandedSection === "geofence" ? (
-                      <ChevronUp className="w-4 h-4 text-slate-400" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-slate-400" />
-                    )}
-                  </button>
+                  <SectionHeader
+                    icon={Globe}
+                    title="Venue Geofence"
+                    color="text-cyan-400"
+                    expanded={expandedSection === "geofence"}
+                    onToggle={() => toggleSection("geofence")}
+                    badge="Scalable"
+                  />
                   
                   <AnimatePresence>
                     {expandedSection === "geofence" && (
@@ -590,44 +603,46 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                             Configure geofence radius for different event types. Larger events like CMA Fest need extended coverage.
                           </p>
                           
-                          {GEOFENCE_PRESETS.map((preset) => {
-                            const isSelected = selectedGeofencePreset === preset.value;
-                            return (
-                              <button
-                                key={preset.value}
-                                onClick={() => handleGeofenceChange(preset.value)}
-                                disabled={geofenceMutation.isPending}
-                                className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all ${
-                                  isSelected
-                                    ? "bg-cyan-500/20 border border-cyan-500/40"
-                                    : "bg-slate-800/30 border border-slate-700/30 hover:border-cyan-500/30"
-                                }`}
-                                data-testid={`geofence-${preset.value}`}
-                              >
-                                <div className="p-2 rounded-lg bg-slate-700/50">
-                                  <Maximize2 className={`w-4 h-4 ${isSelected ? "text-cyan-400" : "text-slate-400"}`} />
-                                </div>
-                                <div className="text-left flex-1">
-                                  <div className={`text-sm font-medium ${isSelected ? "text-cyan-300" : "text-slate-300"}`}>
-                                    {preset.label}
+                          <div className="grid grid-cols-1 gap-2">
+                            {GEOFENCE_PRESETS.map((preset) => {
+                              const isSelected = selectedGeofencePreset === preset.value;
+                              return (
+                                <button
+                                  key={preset.value}
+                                  onClick={() => handleGeofenceChange(preset.value)}
+                                  disabled={geofenceMutation.isPending}
+                                  className={`h-20 flex items-center gap-3 p-3 rounded-lg transition-all ${
+                                    isSelected
+                                      ? "bg-cyan-500/20 border border-cyan-500/40"
+                                      : "bg-slate-800/30 border border-slate-700/30 hover:border-cyan-500/30"
+                                  }`}
+                                  data-testid={`geofence-${preset.value}`}
+                                >
+                                  <div className={`p-2 rounded-lg ${isSelected ? 'bg-cyan-500/20' : 'bg-slate-700/50'}`}>
+                                    <Maximize2 className={`w-4 h-4 ${isSelected ? "text-cyan-400" : "text-slate-400"}`} />
                                   </div>
-                                  <div className="text-xs text-slate-500">{preset.description}</div>
-                                  <div className="flex gap-3 mt-1">
-                                    <span className="text-xs text-cyan-400/70">
-                                      {formatRadius(preset.radiusFeet)} radius
-                                    </span>
-                                    <span className="text-xs text-green-400/70">
-                                      {preset.maxUsers.toLocaleString()} users
-                                    </span>
+                                  <div className="text-left flex-1">
+                                    <div className={`text-sm font-medium ${isSelected ? "text-cyan-300" : "text-slate-300"}`}>
+                                      {preset.label}
+                                    </div>
+                                    <div className="text-xs text-slate-500">{preset.description}</div>
+                                    <div className="flex gap-3 mt-1">
+                                      <span className="text-xs text-cyan-400/70">
+                                        {formatRadius(preset.radiusFeet)} radius
+                                      </span>
+                                      <span className="text-xs text-green-400/70">
+                                        {preset.maxUsers.toLocaleString()} users
+                                      </span>
+                                    </div>
                                   </div>
-                                </div>
-                                {isSelected && <Check className="w-4 h-4 text-cyan-400" />}
-                              </button>
-                            );
-                          })}
+                                  {isSelected && <Check className="w-4 h-4 text-cyan-400 shrink-0" />}
+                                </button>
+                              );
+                            })}
+                          </div>
                           
                           {geofenceConfig && (
-                            <div className="mt-2 p-2 rounded-lg bg-slate-800/50 border border-slate-700/30">
+                            <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30">
                               <div className="flex items-center justify-between text-xs">
                                 <span className="text-slate-400">Current Setting:</span>
                                 <span className="text-cyan-300 font-medium">
@@ -651,47 +666,48 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
           </div>
 
           {/* Footer Actions */}
-          <div className="px-4 py-3 border-t border-slate-700/50 bg-slate-800/30 flex items-center gap-2">
-            <button
-              onClick={handleReset}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-700/50 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all text-sm"
-              data-testid="reset-config"
-            >
-              <RotateCcw className="w-4 h-4" />
-              Reset
-            </button>
-            <div className="flex-1" />
-            <button
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition-all text-sm"
-              data-testid="cancel-config"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={Object.keys(pendingChanges).length === 0 || updateMutation.isPending}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                Object.keys(pendingChanges).length > 0
-                  ? "bg-gradient-to-r from-cyan-500 to-cyan-600 text-white hover:from-cyan-400 hover:to-cyan-500 shadow-lg shadow-cyan-500/30"
-                  : "bg-slate-700/50 text-slate-500 cursor-not-allowed"
-              }`}
-              data-testid="save-config"
-            >
-              {updateMutation.isPending ? (
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                >
-                  <Settings2 className="w-4 h-4" />
-                </motion.div>
-              ) : (
-                <>
-                  <Check className="w-4 h-4" />
-                  Apply Changes
-                </>
-              )}
-            </button>
+          <div className="px-4 py-3 border-t border-slate-700/50 bg-slate-800/30">
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                onClick={handleReset}
+                className="h-10 flex items-center justify-center gap-2 rounded-lg bg-slate-700/50 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all text-sm"
+                data-testid="reset-config"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Reset
+              </button>
+              <button
+                onClick={onClose}
+                className="h-10 rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition-all text-sm"
+                data-testid="cancel-config"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={Object.keys(pendingChanges).length === 0 || updateMutation.isPending}
+                className={`h-10 flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all ${
+                  Object.keys(pendingChanges).length > 0
+                    ? "bg-gradient-to-r from-cyan-500 to-cyan-600 text-white hover:from-cyan-400 hover:to-cyan-500 shadow-lg shadow-cyan-500/30"
+                    : "bg-slate-700/50 text-slate-500 cursor-not-allowed"
+                }`}
+                data-testid="save-config"
+              >
+                {updateMutation.isPending ? (
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  >
+                    <Settings2 className="w-4 h-4" />
+                  </motion.div>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    Apply
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </motion.div>
 
