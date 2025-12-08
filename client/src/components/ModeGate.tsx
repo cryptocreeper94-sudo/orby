@@ -60,14 +60,14 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
                 {/* Minimal bottom gradient only for text readability */}
                 <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-slate-900/30 to-transparent" />
                 
-                {/* Orby Commander - Smaller accent, positioned lower */}
-                <div className="absolute bottom-[-12px] sm:bottom-[-16px] left-1/2 -translate-x-1/2 z-20">
-                  {/* Very subtle glow */}
-                  <div className="absolute inset-0 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 sm:w-24 sm:h-24 bg-cyan-400/10 rounded-full blur-xl -z-10" />
+                {/* Orby Commander - Balanced size in front of stadium */}
+                <div className="absolute bottom-[-16px] sm:bottom-[-20px] left-1/2 -translate-x-1/2 z-20">
+                  {/* Subtle glow */}
+                  <div className="absolute inset-0 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-28 h-28 sm:w-32 sm:h-32 bg-cyan-400/15 rounded-full blur-xl -z-10" />
                   <img 
                     src={orbyCommanderImg} 
                     alt="Orby Commander" 
-                    className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-contain drop-shadow-[0_0_20px_rgba(6,182,212,0.35)] animate-float"
+                    className="w-24 h-24 sm:w-28 sm:h-28 md:w-36 md:h-36 object-contain drop-shadow-[0_0_25px_rgba(6,182,212,0.4)] animate-float"
                     data-testid="img-orby-commander"
                   />
                 </div>
