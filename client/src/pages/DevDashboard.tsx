@@ -531,6 +531,56 @@ export default function DevDashboard() {
             </div>
           </BentoCard>
 
+          <BentoCard span={4} className="col-span-4 md:col-span-6 lg:col-span-4" data-testid="bento-dashboard-picker">
+            <div className="flex items-center gap-2 mb-3">
+              <UserCog className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm font-medium text-slate-300">Quick Dashboard Picker</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button 
+                onClick={() => handleRoleSwitch('2424', '/command-center')}
+                className="p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/30 hover:bg-cyan-500/30 text-left transition-all"
+                data-testid="quick-dashboard-ops"
+              >
+                <div className="text-sm font-medium text-cyan-400">Ops Command</div>
+                <div className="text-[10px] text-slate-500">David (2424)</div>
+              </button>
+              <button 
+                onClick={() => handleRoleSwitch('9090', '/command-center')}
+                className="p-2 rounded-lg bg-teal-500/20 border border-teal-500/30 hover:bg-teal-500/30 text-left transition-all"
+                data-testid="quick-dashboard-gm"
+              >
+                <div className="text-sm font-medium text-teal-400">GM</div>
+                <div className="text-[10px] text-slate-500">Megan (9090)</div>
+              </button>
+              <button 
+                onClick={() => handleRoleSwitch('5555', '/alcohol-compliance')}
+                className="p-2 rounded-lg bg-rose-500/20 border border-rose-500/30 hover:bg-rose-500/30 text-left transition-all"
+                data-testid="quick-dashboard-compliance"
+              >
+                <div className="text-sm font-medium text-rose-400">Compliance</div>
+                <div className="text-[10px] text-slate-500">Alcohol (5555)</div>
+              </button>
+              <button 
+                onClick={() => handleRoleSwitch('1111', '/warehouse')}
+                className="p-2 rounded-lg bg-amber-500/20 border border-amber-500/30 hover:bg-amber-500/30 text-left transition-all"
+                data-testid="quick-dashboard-warehouse"
+              >
+                <div className="text-sm font-medium text-amber-400">Warehouse</div>
+                <div className="text-[10px] text-slate-500">Staff (1111)</div>
+              </button>
+            </div>
+            <div className="mt-3 pt-3 border-t border-slate-700/30">
+              <button 
+                onClick={() => setLocation('/command-center')}
+                className="w-full p-2 rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white text-sm font-medium transition-all"
+                data-testid="quick-dashboard-command"
+              >
+                View as Ops Manager (My Dashboard)
+              </button>
+            </div>
+          </BentoCard>
+
           <BentoCard span={4} className="col-span-4 md:col-span-6 lg:col-span-4" data-testid="bento-system-logs">
             <div className="flex items-center gap-2 mb-3">
               <FileText className="h-4 w-4 text-slate-400" />

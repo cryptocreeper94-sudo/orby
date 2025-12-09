@@ -95,16 +95,16 @@ export function ModeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const exitSandbox = useCallback(() => {
-    if (systemStatus.isLive) {
-      setMode('live');
-      sessionStorage.setItem(STORAGE_KEY, 'live');
-    } else {
-      console.warn('Cannot exit sandbox mode - no active event');
-    }
+    // Always exit sandbox - navigate back to mode selection
+    setMode('live');
+    sessionStorage.setItem(STORAGE_KEY, 'live');
     sessionStorage.removeItem(RETURN_PATH_KEY);
     sessionStorage.removeItem(WELCOME_SEEN_KEY);
+    sessionStorage.removeItem('orby_mode_selected'); // Return to mode selection
     setReturnPath(null);
-  }, [systemStatus.isLive]);
+    // Navigate to login for mode selection
+    window.location.href = '/';
+  }, []);
 
   const toggleMode = useCallback(() => {
     if (mode === 'live') {

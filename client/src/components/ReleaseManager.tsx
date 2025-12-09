@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { 
   Package, Plus, Rocket, Shield, ExternalLink, 
-  Trash2, Clock, CheckCircle2, Loader2, Hash, Sparkles, FileText
+  Trash2, Clock, CheckCircle2, Loader2, Hash, Sparkles, FileText, ChevronRight
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,128 @@ interface CreateReleaseData {
   description?: string;
   highlights?: string;
   notes?: string;
+}
+
+interface ReleaseCardProps {
+  release: Release;
+  publishMutation: ReturnType<typeof useMutation<unknown, Error, string>>;
+  deleteMutation: ReturnType<typeof useMutation<unknown, Error, string>>;
+  isCompact?: boolean;
+}
+
+function ReleaseCard({ release, publishMutation, deleteMutation, isCompact }: ReleaseCardProps) {
+  return (
+    <div
+      className={cn(
+        "p-3 rounded-lg border transition-all",
+        release.isPublished
+          ? "bg-emerald-500/10 border-emerald-500/30"
+          : "bg-slate-800/50 border-slate-700/50"
+      )}
+      data-testid={`release-${release.version}`}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <Package className={cn(
+              "h-4 w-4",
+              release.isPublished ? "text-emerald-400" : "text-slate-400"
+            )} />
+            <span className="font-mono font-bold text-slate-200">
+              v{release.version}
+            </span>
+            {release.versionType && (
+              <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-700/50 text-slate-400 uppercase">
+                {release.versionType}
+              </span>
+            )}
+            {release.isPublished ? (
+              <span className="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-400 flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                Published
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-400 flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                Draft
+              </span>
+            )}
+            {release.solanaTransactionHash && !release.solanaTransactionHash.startsWith("HASH_") && (
+              <a
+                href={`https://solscan.io/tx/${release.solanaTransactionHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2 py-0.5 rounded text-xs bg-cyan-500/20 text-cyan-400 flex items-center gap-1 hover:bg-cyan-500/30"
+                data-testid={`link-solscan-${release.version}`}
+              >
+                <Shield className="h-3 w-3" />
+                Verified
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            )}
+          </div>
+          <div className="text-sm text-slate-300 mt-1">{release.title}</div>
+          {!isCompact && release.highlights && (
+            <div className="text-xs text-cyan-400 mt-1 flex items-center gap-1">
+              <Sparkles className="h-3 w-3" />
+              {release.highlights}
+            </div>
+          )}
+          {!isCompact && release.description && (
+            <div className="text-xs text-slate-500 mt-1 line-clamp-2">
+              {release.description}
+            </div>
+          )}
+          {!isCompact && release.notes && (
+            <div className="text-xs text-slate-600 mt-1 flex items-center gap-1">
+              <FileText className="h-3 w-3" />
+              {release.notes}
+            </div>
+          )}
+          {!isCompact && release.releaseHash && (
+            <div className="text-[10px] text-slate-600 mt-1 font-mono flex items-center gap-1">
+              <Hash className="h-3 w-3" />
+              {release.releaseHash.slice(0, 16)}...
+            </div>
+          )}
+        </div>
+        <div className="flex gap-1">
+          {!release.isPublished && (
+            <>
+              <Button
+                size="sm"
+                onClick={() => publishMutation.mutate(release.id)}
+                disabled={publishMutation.isPending}
+                className="bg-emerald-600 hover:bg-emerald-500 h-8 px-2"
+                data-testid={`button-publish-${release.version}`}
+              >
+                {publishMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Rocket className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => deleteMutation.mutate(release.id)}
+                disabled={deleteMutation.isPending}
+                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2"
+                data-testid={`button-delete-${release.version}`}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+        </div>
+      </div>
+      <div className="text-xs text-slate-600 mt-2">
+        {release.isPublished && release.releasedAt
+          ? `Published ${new Date(release.releasedAt).toLocaleDateString()}`
+          : `Created ${new Date(release.createdAt).toLocaleDateString()}`}
+      </div>
+    </div>
+  );
 }
 
 export function ReleaseManager() {
@@ -218,119 +340,25 @@ export function ReleaseManager() {
         </div>
       ) : (
         <div className="space-y-2">
-          {releases.map((release) => (
-            <div
-              key={release.id}
-              className={cn(
-                "p-3 rounded-lg border transition-all",
-                release.isPublished
-                  ? "bg-emerald-500/10 border-emerald-500/30"
-                  : "bg-slate-800/50 border-slate-700/50"
-              )}
-              data-testid={`release-${release.version}`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Package className={cn(
-                      "h-4 w-4",
-                      release.isPublished ? "text-emerald-400" : "text-slate-400"
-                    )} />
-                    <span className="font-mono font-bold text-slate-200">
-                      v{release.version}
-                    </span>
-                    {release.versionType && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-700/50 text-slate-400 uppercase">
-                        {release.versionType}
-                      </span>
-                    )}
-                    {release.isPublished ? (
-                      <span className="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-400 flex items-center gap-1">
-                        <CheckCircle2 className="h-3 w-3" />
-                        Published
-                      </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded text-xs bg-amber-500/20 text-amber-400 flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        Draft
-                      </span>
-                    )}
-                    {release.solanaTransactionHash && !release.solanaTransactionHash.startsWith("HASH_") && (
-                      <a
-                        href={`https://solscan.io/tx/${release.solanaTransactionHash}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-2 py-0.5 rounded text-xs bg-cyan-500/20 text-cyan-400 flex items-center gap-1 hover:bg-cyan-500/30"
-                        data-testid={`link-solscan-${release.version}`}
-                      >
-                        <Shield className="h-3 w-3" />
-                        Verified
-                        <ExternalLink className="h-3 w-3" />
-                      </a>
-                    )}
-                  </div>
-                  <div className="text-sm text-slate-300 mt-1">{release.title}</div>
-                  {release.highlights && (
-                    <div className="text-xs text-cyan-400 mt-1 flex items-center gap-1">
-                      <Sparkles className="h-3 w-3" />
-                      {release.highlights}
-                    </div>
-                  )}
-                  {release.description && (
-                    <div className="text-xs text-slate-500 mt-1 line-clamp-2">
-                      {release.description}
-                    </div>
-                  )}
-                  {release.notes && (
-                    <div className="text-xs text-slate-600 mt-1 flex items-center gap-1">
-                      <FileText className="h-3 w-3" />
-                      {release.notes}
-                    </div>
-                  )}
-                  {release.releaseHash && (
-                    <div className="text-[10px] text-slate-600 mt-1 font-mono flex items-center gap-1">
-                      <Hash className="h-3 w-3" />
-                      {release.releaseHash.slice(0, 16)}...
-                    </div>
-                  )}
-                </div>
-                <div className="flex gap-1">
-                  {!release.isPublished && (
-                    <>
-                      <Button
-                        size="sm"
-                        onClick={() => publishMutation.mutate(release.id)}
-                        disabled={publishMutation.isPending}
-                        className="bg-emerald-600 hover:bg-emerald-500 h-8 px-2"
-                        data-testid={`button-publish-${release.version}`}
-                      >
-                        {publishMutation.isPending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Rocket className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => deleteMutation.mutate(release.id)}
-                        disabled={deleteMutation.isPending}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 px-2"
-                        data-testid={`button-delete-${release.version}`}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </div>
-              <div className="text-xs text-slate-600 mt-2">
-                {release.isPublished && release.releasedAt
-                  ? `Published ${new Date(release.releasedAt).toLocaleDateString()}`
-                  : `Created ${new Date(release.createdAt).toLocaleDateString()}`}
-              </div>
-            </div>
+          {/* Show latest release prominently */}
+          {releases.slice(0, 1).map((release) => (
+            <ReleaseCard key={release.id} release={release} publishMutation={publishMutation} deleteMutation={deleteMutation} />
           ))}
+          
+          {/* Put older releases in accordion */}
+          {releases.length > 1 && (
+            <details className="group" data-testid="accordion-release-history">
+              <summary className="cursor-pointer list-none flex items-center gap-2 p-2 rounded-lg bg-slate-800/30 border border-slate-700/30 hover:bg-slate-800/50 text-sm text-slate-400">
+                <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
+                <span>Release History ({releases.length - 1} older)</span>
+              </summary>
+              <div className="mt-2 space-y-2 pl-2 border-l border-slate-700/30">
+                {releases.slice(1).map((release) => (
+                  <ReleaseCard key={release.id} release={release} publishMutation={publishMutation} deleteMutation={deleteMutation} isCompact />
+                ))}
+              </div>
+            </details>
+          )}
         </div>
       )}
     </div>
