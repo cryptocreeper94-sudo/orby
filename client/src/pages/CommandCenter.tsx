@@ -827,7 +827,7 @@ export default function CommandCenter() {
           </BentoCard>
 
           {/* Incidents Row - Active Incidents Carousel (span-8), Priority Queue (span-4) */}
-          <BentoCard span={8} className="overflow-hidden" data-testid="bento-active-incidents">
+          <BentoCard span={8} className="col-span-12 lg:col-span-8 overflow-hidden" data-testid="bento-active-incidents">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <SectionHeader 
@@ -876,7 +876,7 @@ export default function CommandCenter() {
             )}
           </BentoCard>
 
-          <BentoCard span={4} data-testid="bento-quick-dispatch">
+          <BentoCard span={4} className="col-span-12 lg:col-span-4" data-testid="bento-quick-dispatch">
             <div className="flex items-center gap-2 mb-3">
               <SectionHeader 
                 title="Quick Dispatch" 
@@ -893,7 +893,7 @@ export default function CommandCenter() {
           </BentoCard>
 
           {/* Response Row - Teams/Resources (span-6), Communications (span-6) */}
-          <BentoCard span={6} data-testid="bento-teams">
+          <BentoCard span={6} className="col-span-12 md:col-span-6" data-testid="bento-teams">
             <div className="flex items-center gap-2 mb-3">
               <SectionHeader 
                 title="Response Teams" 
@@ -903,7 +903,7 @@ export default function CommandCenter() {
             {teamsContent}
           </BentoCard>
 
-          <BentoCard span={6} data-testid="bento-communications">
+          <BentoCard span={6} className="col-span-12 md:col-span-6" data-testid="bento-communications">
             <div className="flex items-center gap-2 mb-3">
               <SectionHeader 
                 title="Communications" 
@@ -914,7 +914,7 @@ export default function CommandCenter() {
           </BentoCard>
 
           {/* Support Row - Protocols Accordion, Activity Log Accordion */}
-          <BentoCard span={8} data-testid="bento-protocols">
+          <BentoCard span={8} className="col-span-12 lg:col-span-8" data-testid="bento-protocols">
             <div className="flex items-center gap-2 mb-3">
               <SectionHeader 
                 title="Emergency Protocols" 
@@ -930,7 +930,7 @@ export default function CommandCenter() {
             <AccordionStack items={protocolItems} defaultOpen={[0]} data-testid="accordion-protocols" />
           </BentoCard>
 
-          <BentoCard span={4} data-testid="bento-activity-log">
+          <BentoCard span={4} className="col-span-12 lg:col-span-4" data-testid="bento-activity-log">
             <div className="flex items-center gap-2 mb-3">
               <SectionHeader 
                 title="Recent Activity" 
