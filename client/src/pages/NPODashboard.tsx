@@ -144,7 +144,7 @@ export default function NPODashboard() {
     if (!activeSession) return;
     
     try {
-      await fetch('/api/inventory/counts', {
+      await fetch('/api/inventory-counts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

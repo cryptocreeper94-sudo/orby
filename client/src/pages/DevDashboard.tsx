@@ -162,7 +162,7 @@ export default function DevDashboard() {
   async function loadSystemStats() {
     try {
       const [deliveriesRes, emergenciesRes] = await Promise.all([
-        fetch('/api/delivery-requests'),
+        fetch('/api/deliveries'),
         fetch('/api/emergency-alerts/active')
       ]);
       
