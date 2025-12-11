@@ -477,7 +477,7 @@ export default function OpsCommandCenter() {
         </div>
       </header>
 
-      <main className="p-4 pb-24">
+      <main className="p-3 sm:px-4 pb-24 max-w-7xl mx-auto">
         <LayoutShell className="gap-3">
           <BentoCard span={12} className="bg-red-950/20 border-red-500/20" data-testid="hero-row">
             <div className="flex items-center gap-2 mb-2">

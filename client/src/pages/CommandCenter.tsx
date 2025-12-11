@@ -806,7 +806,7 @@ export default function CommandCenter() {
         }
       />
 
-      <main className="p-4 md:p-6 lg:p-8 pb-24 max-w-7xl mx-auto" data-testid="command-center-main">
+      <main className="p-3 sm:px-4 pb-24 max-w-7xl mx-auto" data-testid="command-center-main">
         <LayoutShell className="gap-3">
           {/* Hero Row - Emergency Status Metrics (span-12) */}
           <BentoCard span={12} className="overflow-hidden" data-testid="bento-hero-metrics">

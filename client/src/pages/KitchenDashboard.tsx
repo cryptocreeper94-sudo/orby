@@ -161,7 +161,7 @@ export default function KitchenDashboard() {
           }
         />
 
-        <main className="p-4 sm:px-6 max-w-6xl mx-auto">
+        <main className="p-3 sm:px-4 max-w-7xl mx-auto">
           <div className="mb-4">
             <ComplianceAlertPanel 
               userId={currentUser?.id} 

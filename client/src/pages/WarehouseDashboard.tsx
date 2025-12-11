@@ -461,7 +461,7 @@ export default function WarehouseDashboard() {
           }
         />
 
-        <main className="p-4 sm:px-6 max-w-6xl mx-auto" data-testid="warehouse-main">
+        <main className="p-3 sm:px-4 max-w-7xl mx-auto" data-testid="warehouse-main">
           <ComplianceAlertPanel 
             userId={currentUser?.id} 
             userName={currentUser?.name} 

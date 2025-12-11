@@ -42,7 +42,7 @@ export default function StadiumMapPage() {
           backAction={handleBack}
         />
 
-        <main className="p-4 sm:px-6 max-w-6xl mx-auto">
+        <main className="p-3 sm:px-4 max-w-7xl mx-auto">
           <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 overflow-hidden min-h-[70vh]">
             <InteractiveMap 
               showNavigation={true}

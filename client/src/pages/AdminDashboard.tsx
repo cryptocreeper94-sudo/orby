@@ -233,7 +233,7 @@ export default function AdminDashboard() {
           }
         />
 
-        <main className="p-4 sm:px-6 space-y-4 max-w-6xl mx-auto">
+        <main className="p-3 sm:px-4 space-y-3 max-w-7xl mx-auto">
           <ComplianceAlertPanel 
             userId={currentUser?.id} 
             userName={currentUser?.name} 

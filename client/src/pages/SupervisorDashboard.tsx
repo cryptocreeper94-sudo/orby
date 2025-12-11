@@ -810,7 +810,7 @@ export default function SupervisorDashboard() {
         backAction={() => setActiveStandId(null)}
       />
 
-      <main className="p-4 md:p-6 max-w-7xl mx-auto pb-24" data-testid="stand-detail-main">
+      <main className="p-3 sm:px-4 max-w-7xl mx-auto pb-24" data-testid="stand-detail-main">
         {showScanner && (
            <div className="fixed inset-0 z-50 bg-black flex flex-col">
              <div className="relative flex-1 bg-black">
