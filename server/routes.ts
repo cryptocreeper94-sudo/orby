@@ -6118,5 +6118,10 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // Catch-all 404 handler for non-existent API routes
+  app.all("/api/*", (_req: Request, res: Response) => {
+    res.status(404).json({ error: "API endpoint not found" });
+  });
+
   return httpServer;
 }

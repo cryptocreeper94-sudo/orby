@@ -428,7 +428,7 @@ export default function StandSetup() {
 
   const existingItemIds = new Set(standItems.map(si => si.itemId));
 
-  if (!currentUser || !['Developer', 'Admin', 'Management', 'Warehouse', 'Kitchen'].includes(currentUser.role)) {
+  if (!currentUser || !['Developer', 'Admin', 'Management', 'OperationsManager', 'GeneralManager', 'RegionalVP', 'WarehouseManager', 'Warehouse', 'Kitchen'].includes(currentUser.role)) {
     return (
       <AnimatedBackground>
         <div className="min-h-screen flex items-center justify-center p-4" data-testid="access-restricted">

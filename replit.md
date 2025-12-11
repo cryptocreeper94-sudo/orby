@@ -4,10 +4,9 @@
 Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designed to unify venue operations, replacing fragmented communication with a digital platform. It offers an Emergency Command Center, delivery lifecycle tracking, three-phase inventory counting, alcohol compliance monitoring, GPS-guided navigation, and real-time team communications. Orby aims to provide a complete operational solution for venues, from emergency response to inventory and team management, improving efficiency and compliance for event venues.
 
 ## Current Version
-**v1.0.14** - Published to Solana Mainnet (December 2025)
+**v1.0.12** - Published to Solana Mainnet (December 2025)
 
 ### Recent Changelog
-- **v1.0.14**: Test New Fields with enhanced release management
 - **v1.0.12**: ORBIT Ecosystem Hub Integration with DarkWave Developer Hub
 - **v1.0.10**: Genesis Hallmark Badge & Footer Fix with clickable verified badge
 - **v1.0.9**: Genesis Hallmark Badge on welcome page

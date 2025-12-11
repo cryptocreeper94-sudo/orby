@@ -363,7 +363,7 @@ export default function ItemManagement() {
     return items.some(item => item.name.toLowerCase() === name.toLowerCase());
   };
 
-  if (!currentUser || !['Developer', 'Admin', 'Management', 'Warehouse', 'Kitchen'].includes(currentUser.role)) {
+  if (!currentUser || !['Developer', 'Admin', 'Management', 'OperationsManager', 'GeneralManager', 'RegionalVP', 'WarehouseManager', 'Warehouse', 'Kitchen'].includes(currentUser.role)) {
     return (
       <AnimatedBackground>
         <div className="min-h-screen flex items-center justify-center p-4" data-testid="access-restricted">

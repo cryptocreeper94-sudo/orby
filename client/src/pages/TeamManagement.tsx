@@ -161,7 +161,7 @@ export default function TeamManagement() {
     }
   };
 
-  if (!currentUser || !['Developer', 'Admin', 'Management'].includes(currentUser.role)) {
+  if (!currentUser || !['Developer', 'Admin', 'Management', 'OperationsManager', 'GeneralManager', 'RegionalVP', 'WarehouseManager'].includes(currentUser.role)) {
     return (
       <AnimatedBackground>
         <div className="min-h-screen flex items-center justify-center p-4" data-testid="access-restricted">

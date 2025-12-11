@@ -201,7 +201,7 @@ export default function DocumentHub() {
 
   const hasActiveFilters = searchQuery || selectedCategory !== 'all' || selectedStand !== 'all' || dateFilter;
 
-  const MANAGER_ACCESS_ROLES = ['Developer', 'Management'];
+  const MANAGER_ACCESS_ROLES = ['Developer', 'Management', 'Admin', 'OperationsManager', 'GeneralManager', 'RegionalVP', 'WarehouseManager'];
   const hasManagerAccess = currentUser && MANAGER_ACCESS_ROLES.includes(currentUser.role);
   
   if (!hasManagerAccess) {
