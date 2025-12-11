@@ -121,37 +121,72 @@ export default function EventSetup() {
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
   const [showTemplateMenu, setShowTemplateMenu] = useState(false);
   const [staffingGrid, setStaffingGrid] = useState({
-    supervisors: 12,
-    leads: 48,
-    it: 6,
-    pos: 85,
-    kitchen: 24,
-    portables: 16,
+    // Section totals
+    sections: {
+      '2 East': { stands: 16, e700: 12, a930: 48 },
+      '2 West': { stands: 8, e700: 6, a930: 24 },
+      '7 East': { stands: 18, e700: 6, a930: 46 },
+      '7 West': { stands: 12, e700: 4, a930: 46 },
+    },
+    // Totals
+    totalStands: 54,
+    totalE700: 26,
+    totalA930: 295,
+    closed: 4,
+    needsPower: 2,
     templateName: 'Titans Game Day'
   });
 
-  // Staffing templates based on Nissan Stadium concession map
-  // Sections: East Side (105-118), West Side (128-142), North End (121 & 125), South End (121 & 125)
+  // POS templates based on actual Nissan Stadium data
   const STAFFING_TEMPLATES = [
-    { id: 'titans-game', name: 'Titans Game Day', supervisors: 12, leads: 48, it: 6, pos: 85, kitchen: 24, portables: 16 },
-    { id: 'concert-large', name: 'Large Concert', supervisors: 15, leads: 60, it: 8, pos: 95, kitchen: 30, portables: 24 },
-    { id: 'concert-small', name: 'Small Concert', supervisors: 8, leads: 32, it: 4, pos: 50, kitchen: 16, portables: 12 },
-    { id: 'private-event', name: 'Private Event', supervisors: 4, leads: 16, it: 2, pos: 20, kitchen: 8, portables: 4 },
+    { 
+      id: 'titans-game', 
+      name: 'Titans Game Day', 
+      sections: {
+        '2 East': { stands: 16, e700: 12, a930: 48 },
+        '2 West': { stands: 8, e700: 6, a930: 24 },
+        '7 East': { stands: 18, e700: 6, a930: 46 },
+        '7 West': { stands: 12, e700: 4, a930: 46 },
+      },
+      totalStands: 54, totalE700: 26, totalA930: 295, closed: 4, needsPower: 2
+    },
+    { 
+      id: 'concert-large', 
+      name: 'Large Concert', 
+      sections: {
+        '2 East': { stands: 20, e700: 15, a930: 60 },
+        '2 West': { stands: 12, e700: 10, a930: 40 },
+        '7 East': { stands: 22, e700: 10, a930: 55 },
+        '7 West': { stands: 16, e700: 8, a930: 50 },
+      },
+      totalStands: 70, totalE700: 43, totalA930: 380, closed: 2, needsPower: 3
+    },
+    { 
+      id: 'concert-small', 
+      name: 'Small Concert', 
+      sections: {
+        '2 East': { stands: 10, e700: 6, a930: 30 },
+        '2 West': { stands: 6, e700: 4, a930: 18 },
+        '7 East': { stands: 12, e700: 4, a930: 28 },
+        '7 West': { stands: 8, e700: 3, a930: 24 },
+      },
+      totalStands: 36, totalE700: 17, totalA930: 180, closed: 8, needsPower: 1
+    },
   ];
 
   const handleUseTemplate = (template: typeof STAFFING_TEMPLATES[0]) => {
     setStaffingGrid({
-      supervisors: template.supervisors,
-      leads: template.leads,
-      it: template.it,
-      pos: template.pos,
-      kitchen: template.kitchen,
-      portables: template.portables,
+      sections: template.sections,
+      totalStands: template.totalStands,
+      totalE700: template.totalE700,
+      totalA930: template.totalA930,
+      closed: template.closed,
+      needsPower: template.needsPower,
       templateName: template.name
     });
     toast({
       title: `Template Applied: ${template.name}`,
-      description: `${template.leads} stands, ${template.pos} POS devices, ${template.it} IT staff assigned.`,
+      description: `${template.totalStands} stands, ${template.totalE700} E700, ${template.totalA930} A930 devices.`,
     });
     setShowTemplateMenu(false);
   };
@@ -767,80 +802,56 @@ export default function EventSetup() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mt-3">
-              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-supervisors">
-                <Users className="h-4 w-4 mx-auto mb-1 text-cyan-400" />
-                <input
-                  type="number"
-                  value={staffingGrid.supervisors}
-                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, supervisors: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
-                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-cyan-500 rounded"
-                  data-testid="input-supervisors"
-                />
-                <div className="text-[10px] text-slate-400">Supervisors</div>
+            {/* Section breakdown table */}
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-slate-700">
+                    <th className="text-left py-1 px-2 text-slate-400 font-medium">Section</th>
+                    <th className="text-center py-1 px-2 text-slate-400 font-medium">Stands</th>
+                    <th className="text-center py-1 px-2 text-cyan-400 font-medium">E700</th>
+                    <th className="text-center py-1 px-2 text-violet-400 font-medium">A930</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(staffingGrid.sections).map(([section, data]) => (
+                    <tr key={section} className="border-b border-slate-800">
+                      <td className="py-1.5 px-2 text-white font-medium">{section}</td>
+                      <td className="text-center py-1.5 px-2 text-slate-300">{data.stands}</td>
+                      <td className="text-center py-1.5 px-2 text-cyan-400">{data.e700}</td>
+                      <td className="text-center py-1.5 px-2 text-violet-400">{data.a930}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Totals row */}
+            <div className="grid grid-cols-5 gap-2 mt-3">
+              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center">
+                <div className="text-lg font-bold text-white">{staffingGrid.totalStands}</div>
+                <div className="text-[10px] text-slate-400">Total Stands</div>
               </div>
-              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-leads">
-                <Users className="h-4 w-4 mx-auto mb-1 text-emerald-400" />
-                <input
-                  type="number"
-                  value={staffingGrid.leads}
-                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, leads: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
-                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-emerald-500 rounded"
-                  data-testid="input-leads"
-                />
-                <div className="text-[10px] text-slate-400">Stands</div>
+              <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-center">
+                <div className="text-lg font-bold text-cyan-400">{staffingGrid.totalE700}</div>
+                <div className="text-[10px] text-cyan-400">E700</div>
               </div>
-              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-pos">
-                <Grid3X3 className="h-4 w-4 mx-auto mb-1 text-violet-400" />
-                <input
-                  type="number"
-                  value={staffingGrid.pos}
-                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, pos: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
-                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-violet-500 rounded"
-                  data-testid="input-pos"
-                />
-                <div className="text-[10px] text-slate-400">POS Devices</div>
+              <div className="p-2 rounded-lg bg-violet-500/10 border border-violet-500/30 text-center">
+                <div className="text-lg font-bold text-violet-400">{staffingGrid.totalA930}</div>
+                <div className="text-[10px] text-violet-400">A930</div>
               </div>
-              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-it">
-                <Monitor className="h-4 w-4 mx-auto mb-1 text-blue-400" />
-                <input
-                  type="number"
-                  value={staffingGrid.it}
-                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, it: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
-                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-blue-500 rounded"
-                  data-testid="input-it"
-                />
-                <div className="text-[10px] text-slate-400">IT Support</div>
+              <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/30 text-center">
+                <div className="text-lg font-bold text-rose-400">{staffingGrid.closed}</div>
+                <div className="text-[10px] text-rose-400">Closed</div>
               </div>
-              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-kitchen">
-                <ChefHat className="h-4 w-4 mx-auto mb-1 text-orange-400" />
-                <input
-                  type="number"
-                  value={staffingGrid.kitchen}
-                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, kitchen: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
-                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-orange-500 rounded"
-                  data-testid="input-kitchen"
-                />
-                <div className="text-[10px] text-slate-400">Kitchen</div>
-              </div>
-              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-portables">
-                <Navigation className="h-4 w-4 mx-auto mb-1 text-teal-400" />
-                <input
-                  type="number"
-                  value={staffingGrid.portables}
-                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, portables: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
-                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-teal-500 rounded"
-                  data-testid="input-portables"
-                />
-                <div className="text-[10px] text-slate-400">Portables</div>
+              <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-center">
+                <div className="text-lg font-bold text-emerald-400">{staffingGrid.needsPower}</div>
+                <div className="text-[10px] text-emerald-400">Needs Power</div>
               </div>
             </div>
+            
             <div className="mt-2 text-xs text-slate-500 text-center">
               {staffingGrid.templateName !== 'Custom' ? `Template: ${staffingGrid.templateName}` : 'Custom values'}
-            </div>
-            <div className="mt-3 p-3 rounded-lg bg-slate-900/30 border border-dashed border-slate-600 text-center">
-              <Info className="h-5 w-5 mx-auto mb-1 text-slate-500" />
-              <p className="text-xs text-slate-500">Scan or upload staffing grid to populate assignments</p>
             </div>
           </BentoCard>
 
