@@ -770,37 +770,73 @@ export default function EventSetup() {
             <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mt-3">
               <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-supervisors">
                 <Users className="h-4 w-4 mx-auto mb-1 text-cyan-400" />
-                <div className="text-lg font-bold text-white">{staffingGrid.supervisors}</div>
+                <input
+                  type="number"
+                  value={staffingGrid.supervisors}
+                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, supervisors: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
+                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-cyan-500 rounded"
+                  data-testid="input-supervisors"
+                />
                 <div className="text-[10px] text-slate-400">Supervisors</div>
               </div>
               <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-leads">
                 <Users className="h-4 w-4 mx-auto mb-1 text-emerald-400" />
-                <div className="text-lg font-bold text-white">{staffingGrid.leads}</div>
+                <input
+                  type="number"
+                  value={staffingGrid.leads}
+                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, leads: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
+                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-emerald-500 rounded"
+                  data-testid="input-leads"
+                />
                 <div className="text-[10px] text-slate-400">Stands</div>
               </div>
               <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-pos">
                 <Grid3X3 className="h-4 w-4 mx-auto mb-1 text-violet-400" />
-                <div className="text-lg font-bold text-white">{staffingGrid.pos}</div>
+                <input
+                  type="number"
+                  value={staffingGrid.pos}
+                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, pos: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
+                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-violet-500 rounded"
+                  data-testid="input-pos"
+                />
                 <div className="text-[10px] text-slate-400">POS Devices</div>
               </div>
               <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-it">
                 <Monitor className="h-4 w-4 mx-auto mb-1 text-blue-400" />
-                <div className="text-lg font-bold text-white">{staffingGrid.it}</div>
+                <input
+                  type="number"
+                  value={staffingGrid.it}
+                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, it: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
+                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-blue-500 rounded"
+                  data-testid="input-it"
+                />
                 <div className="text-[10px] text-slate-400">IT Support</div>
               </div>
               <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-kitchen">
                 <ChefHat className="h-4 w-4 mx-auto mb-1 text-orange-400" />
-                <div className="text-lg font-bold text-white">{staffingGrid.kitchen}</div>
+                <input
+                  type="number"
+                  value={staffingGrid.kitchen}
+                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, kitchen: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
+                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-orange-500 rounded"
+                  data-testid="input-kitchen"
+                />
                 <div className="text-[10px] text-slate-400">Kitchen</div>
               </div>
               <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-portables">
                 <Navigation className="h-4 w-4 mx-auto mb-1 text-teal-400" />
-                <div className="text-lg font-bold text-white">{staffingGrid.portables}</div>
+                <input
+                  type="number"
+                  value={staffingGrid.portables}
+                  onChange={(e) => setStaffingGrid(prev => ({ ...prev, portables: parseInt(e.target.value) || 0, templateName: 'Custom' }))}
+                  className="w-full text-lg font-bold text-white text-center bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-teal-500 rounded"
+                  data-testid="input-portables"
+                />
                 <div className="text-[10px] text-slate-400">Portables</div>
               </div>
             </div>
             <div className="mt-2 text-xs text-slate-500 text-center">
-              Template: {staffingGrid.templateName}
+              {staffingGrid.templateName !== 'Custom' ? `Template: ${staffingGrid.templateName}` : 'Custom values'}
             </div>
             <div className="mt-3 p-3 rounded-lg bg-slate-900/30 border border-dashed border-slate-600 text-center">
               <Info className="h-5 w-5 mx-auto mb-1 text-slate-500" />
