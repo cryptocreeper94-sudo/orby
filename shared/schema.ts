@@ -1681,6 +1681,10 @@ export const activeEvents = pgTable("active_events", {
   deactivatedByName: text("deactivated_by_name"),
   deactivatedAt: timestamp("deactivated_at"),
   notes: text("notes"),
+  geofenceMode: text("geofence_mode").default('stadium'), // stadium, custom
+  geofenceRadiusFeet: integer("geofence_radius_feet").default(100),
+  staffingGridEnabled: boolean("staffing_grid_enabled").default(false),
+  departmentNotes: jsonb("department_notes").$type<Array<{department: string; note: string}>>(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [

@@ -72,6 +72,7 @@ interface EventFormData {
   departmentNotes: DepartmentNote[];
   geofenceMode: 'stadium' | 'custom';
   customGeofenceRadius: number;
+  staffingGridEnabled: boolean;
 }
 
 const DEPARTMENT_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -110,6 +111,7 @@ export default function EventSetup() {
     departmentNotes: [],
     geofenceMode: 'stadium',
     customGeofenceRadius: 500,
+    staffingGridEnabled: false,
   });
   
   const [newDeptNote, setNewDeptNote] = useState({ department: 'All' as DepartmentNote['department'], note: '' });
@@ -145,6 +147,10 @@ export default function EventSetup() {
         eventEndTime: activeEvent.eventEndTime || '17:00',
         expectedAttendance: activeEvent.expectedAttendance || 60000,
         notes: activeEvent.notes || '',
+        geofenceMode: (activeEvent.geofenceMode as 'stadium' | 'custom') || 'stadium',
+        customGeofenceRadius: activeEvent.geofenceRadiusFeet || 500,
+        staffingGridEnabled: activeEvent.staffingGridEnabled || false,
+        departmentNotes: (activeEvent.departmentNotes as DepartmentNote[]) || [],
       }));
       setActiveEventId(activeEvent.id);
       if (activeEvent.status === 'active') {
@@ -186,6 +192,10 @@ export default function EventSetup() {
         eventEndTime: data.eventEndTime,
         expectedAttendance: data.expectedAttendance,
         notes: data.notes,
+        geofenceMode: data.geofenceMode,
+        geofenceRadiusFeet: data.customGeofenceRadius,
+        staffingGridEnabled: data.staffingGridEnabled,
+        departmentNotes: data.departmentNotes,
         status: 'active',
         activatedById: currentUser?.id,
         activatedByName: currentUser?.name,

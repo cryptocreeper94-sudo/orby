@@ -27,7 +27,9 @@ import {
   Zap,
   Crown,
   FileText,
-  BookOpen
+  BookOpen,
+  UtensilsCrossed,
+  Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -72,6 +74,10 @@ const EMERGENCY_TYPES = [
   { id: 'Security', icon: Shield, color: 'from-cyan-500 to-cyan-600', bgColor: 'bg-cyan-500', label: 'Security Threat', sla: 5 },
   { id: 'Fire', icon: Flame, color: 'from-orange-500 to-orange-600', bgColor: 'bg-orange-500', label: 'Fire/Smoke', sla: 2 },
   { id: 'Equipment', icon: Wrench, color: 'from-teal-500 to-teal-600', bgColor: 'bg-teal-500', label: 'Equipment Failure', sla: 10 },
+  { id: 'IT', icon: Monitor, color: 'from-indigo-500 to-indigo-600', bgColor: 'bg-indigo-500', label: 'IT/Network Issue', sla: 15 },
+  { id: 'Operations', icon: Activity, color: 'from-emerald-500 to-emerald-600', bgColor: 'bg-emerald-500', label: 'Operations Support', sla: 10 },
+  { id: 'Kitchen', icon: UtensilsCrossed, color: 'from-amber-500 to-amber-600', bgColor: 'bg-amber-500', label: 'Kitchen/Food Issue', sla: 10 },
+  { id: 'Warehouse', icon: Package, color: 'from-purple-500 to-purple-600', bgColor: 'bg-purple-500', label: 'Warehouse Request', sla: 15 },
   { id: 'Weather', icon: Cloud, color: 'from-sky-500 to-sky-600', bgColor: 'bg-sky-500', label: 'Weather Alert', sla: 5 },
   { id: 'Crowd', icon: Users, color: 'from-violet-500 to-violet-600', bgColor: 'bg-violet-500', label: 'Crowd Control', sla: 5 },
   { id: 'Other', icon: HelpCircle, color: 'from-slate-500 to-slate-600', bgColor: 'bg-slate-500', label: 'Other Emergency', sla: 10 }
@@ -686,6 +692,10 @@ export default function CommandCenter() {
     'bg-sky-500': 'shadow-sky-500/25',
     'bg-violet-500': 'shadow-violet-500/25',
     'bg-slate-500': 'shadow-slate-500/25',
+    'bg-indigo-500': 'shadow-indigo-500/25',
+    'bg-emerald-500': 'shadow-emerald-500/25',
+    'bg-amber-500': 'shadow-amber-500/25',
+    'bg-purple-500': 'shadow-purple-500/25',
   };
 
   const quickAlertCarouselItems = EMERGENCY_TYPES.map((type) => {
@@ -850,11 +860,11 @@ export default function CommandCenter() {
 
       <main className="p-3 sm:px-4 pb-24 max-w-7xl mx-auto" data-testid="command-center-main">
         <LayoutShell className="gap-3">
-          {/* Hero Row - Emergency Status Metrics (span-12) */}
+          {/* Hero Row - Event Status Metrics (span-12) */}
           <BentoCard span={12} className="overflow-hidden" data-testid="bento-hero-metrics">
             <div className="flex items-center gap-2 mb-3">
               <SectionHeader 
-                title="Emergency Status" 
+                title="Event Status" 
                 subtitle="Real-time metrics"
                 icon={<Activity className="w-4 h-4" />}
               />
