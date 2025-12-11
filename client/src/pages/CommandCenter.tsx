@@ -678,73 +678,115 @@ export default function CommandCenter() {
     </div>
   );
 
+  const shadowColors: Record<string, string> = {
+    'bg-rose-500': 'shadow-rose-500/25',
+    'bg-cyan-500': 'shadow-cyan-500/25',
+    'bg-orange-500': 'shadow-orange-500/25',
+    'bg-teal-500': 'shadow-teal-500/25',
+    'bg-sky-500': 'shadow-sky-500/25',
+    'bg-violet-500': 'shadow-violet-500/25',
+    'bg-slate-500': 'shadow-slate-500/25',
+  };
+
+  const quickAlertCarouselItems = EMERGENCY_TYPES.map((type) => {
+    const Icon = type.icon;
+    const shadowClass = shadowColors[type.bgColor] || 'shadow-slate-500/25';
+    return (
+      <motion.button
+        key={type.id}
+        whileHover={{ scale: 1.05, y: -2 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => {
+          setSelectedType(type.id);
+          setShowNewIncident(true);
+        }}
+        className={`w-[100px] h-[80px] rounded-xl bg-gradient-to-br ${type.color} p-3 shadow-lg ${shadowClass} group relative overflow-hidden`}
+        data-testid={`button-quick-${type.id.toLowerCase()}`}
+      >
+        <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="relative flex flex-col items-center justify-center h-full gap-1.5">
+          <Icon className="w-6 h-6 text-white drop-shadow-lg" />
+          <span className="text-xs font-semibold text-white whitespace-nowrap">{type.id}</span>
+        </div>
+      </motion.button>
+    );
+  });
+
   const quickAlertButtons = (
-    <div className="flex gap-2 overflow-x-auto pb-2">
-      {EMERGENCY_TYPES.map((type) => {
-        const Icon = type.icon;
-        return (
-          <motion.button
-            key={type.id}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              setSelectedType(type.id);
-              setShowNewIncident(true);
-            }}
-            className={`flex-shrink-0 rounded-xl bg-gradient-to-br ${type.color} p-3 shadow-lg`}
-            data-testid={`button-quick-${type.id.toLowerCase()}`}
-          >
-            <div className="flex flex-col items-center gap-1">
-              <Icon className="w-5 h-5 text-white" />
-              <span className="text-xs font-medium text-white whitespace-nowrap">{type.id}</span>
-            </div>
-          </motion.button>
-        );
-      })}
-    </div>
+    <CarouselRail items={quickAlertCarouselItems} showDots data-testid="quick-dispatch-carousel" />
   );
+
+  const teamColorStyles: Record<string, { border: string; hoverBorder: string; bg: string; text: string; dot: string; badge: string }> = {
+    emerald: { border: 'border-emerald-500/30', hoverBorder: 'hover:border-emerald-400/50', bg: 'bg-emerald-500/20', text: 'text-emerald-400', dot: 'bg-emerald-400', badge: 'bg-emerald-500/20 text-emerald-400' },
+    amber: { border: 'border-amber-500/30', hoverBorder: 'hover:border-amber-400/50', bg: 'bg-amber-500/20', text: 'text-amber-400', dot: 'bg-amber-400', badge: 'bg-amber-500/20 text-amber-400' },
+    cyan: { border: 'border-cyan-500/30', hoverBorder: 'hover:border-cyan-400/50', bg: 'bg-cyan-500/20', text: 'text-cyan-400', dot: 'bg-cyan-400', badge: 'bg-cyan-500/20 text-cyan-400' },
+    orange: { border: 'border-orange-500/30', hoverBorder: 'hover:border-orange-400/50', bg: 'bg-orange-500/20', text: 'text-orange-400', dot: 'bg-orange-400', badge: 'bg-orange-500/20 text-orange-400' },
+    violet: { border: 'border-violet-500/30', hoverBorder: 'hover:border-violet-400/50', bg: 'bg-violet-500/20', text: 'text-violet-400', dot: 'bg-violet-400', badge: 'bg-violet-500/20 text-violet-400' },
+  };
+
+  const teamsCarouselItems = [
+    { name: 'Security Alpha', status: 'Available', color: 'emerald' as const, icon: Shield },
+    { name: 'Medical Response', status: 'On Call', color: 'amber' as const, icon: Heart },
+    { name: 'Maintenance', status: 'Ready', color: 'cyan' as const, icon: Wrench },
+    { name: 'Fire Safety', status: 'Standby', color: 'orange' as const, icon: Flame },
+    { name: 'Crowd Control', status: 'Active', color: 'violet' as const, icon: Users },
+  ].map((team) => {
+    const Icon = team.icon;
+    const styles = teamColorStyles[team.color];
+    return (
+      <div 
+        key={team.name}
+        className={`w-[140px] h-[90px] p-3 rounded-xl bg-slate-800/60 border ${styles.border} ${styles.hoverBorder} transition-colors`}
+        data-testid={`team-${team.name.toLowerCase().replace(' ', '-')}`}
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <div className={`p-1.5 rounded-lg ${styles.bg}`}>
+            <Icon className={`w-4 h-4 ${styles.text}`} />
+          </div>
+          <div className={`w-2 h-2 rounded-full ${styles.dot} animate-pulse`} />
+        </div>
+        <p className="text-sm font-medium text-slate-200 truncate">{team.name}</p>
+        <Badge className={`mt-1 text-[10px] ${styles.badge} border-0`}>{team.status}</Badge>
+      </div>
+    );
+  });
 
   const teamsContent = (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-400" />
-          <span className="text-sm">Security Team Alpha</span>
-        </div>
-        <Badge className="bg-emerald-500/20 text-emerald-400 border-0 text-xs">Available</Badge>
-      </div>
-      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-amber-400" />
-          <span className="text-sm">Medical Response</span>
-        </div>
-        <Badge className="bg-amber-500/20 text-amber-400 border-0 text-xs">On Call</Badge>
-      </div>
-      <div className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-cyan-400" />
-          <span className="text-sm">Maintenance Crew</span>
-        </div>
-        <Badge className="bg-cyan-500/20 text-cyan-400 border-0 text-xs">Ready</Badge>
-      </div>
-    </div>
+    <CarouselRail items={teamsCarouselItems} data-testid="teams-carousel" />
   );
 
+  const commColorStyles: Record<string, { border: string; text: string }> = {
+    cyan: { border: 'border-cyan-400', text: 'text-cyan-400' },
+    emerald: { border: 'border-emerald-400', text: 'text-emerald-400' },
+    violet: { border: 'border-violet-400', text: 'text-violet-400' },
+    red: { border: 'border-red-400', text: 'text-red-400' },
+  };
+
+  const commsCarouselItems = [
+    { channel: 'Radio Ch. 1', status: 'Security dispatch active', color: 'cyan' as const, icon: Radio },
+    { channel: 'Radio Ch. 2', status: 'Medical standby', color: 'emerald' as const, icon: Radio },
+    { channel: 'PA System', status: 'Ready for announcements', color: 'violet' as const, icon: Activity },
+    { channel: 'Emergency', status: 'Priority override ready', color: 'red' as const, icon: Siren },
+  ].map((comm) => {
+    const Icon = comm.icon;
+    const styles = commColorStyles[comm.color];
+    return (
+      <div 
+        key={comm.channel}
+        className={`w-[160px] h-[80px] p-3 rounded-xl bg-slate-800/60 border-l-4 ${styles.border} hover:bg-slate-800/80 transition-colors`}
+        data-testid={`comm-${comm.channel.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
+      >
+        <div className="flex items-center gap-2 mb-1">
+          <Icon className={`w-4 h-4 ${styles.text}`} />
+          <p className="text-xs text-slate-400 font-medium">{comm.channel}</p>
+        </div>
+        <p className="text-sm text-slate-200 line-clamp-2">{comm.status}</p>
+      </div>
+    );
+  });
+
   const communicationsContent = (
-    <div className="space-y-2">
-      <div className="p-2 rounded-lg bg-slate-800/50 border-l-2 border-cyan-400">
-        <p className="text-xs text-slate-500">Radio Ch. 1</p>
-        <p className="text-sm">Security dispatch active</p>
-      </div>
-      <div className="p-2 rounded-lg bg-slate-800/50 border-l-2 border-emerald-400">
-        <p className="text-xs text-slate-500">Radio Ch. 2</p>
-        <p className="text-sm">Medical standby</p>
-      </div>
-      <div className="p-2 rounded-lg bg-slate-800/50 border-l-2 border-violet-400">
-        <p className="text-xs text-slate-500">PA System</p>
-        <p className="text-sm">Ready for announcements</p>
-      </div>
-    </div>
+    <CarouselRail items={commsCarouselItems} data-testid="comms-carousel" />
   );
 
   return (
