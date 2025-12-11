@@ -7,7 +7,7 @@ Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designe
 **v1.0.12** - Published to Solana Mainnet (December 2025)
 
 ### Recent Changelog
-- **v1.0.12**: ORBIT Ecosystem Hub Integration with DarkWave Developer Hub
+- **v1.0.12**: ORBIT Ecosystem Hub Integration with DarkWave Developer Hub + Session Persistence Fix + Role Access Fix
 - **v1.0.10**: Genesis Hallmark Badge & Footer Fix with clickable verified badge
 - **v1.0.9**: Genesis Hallmark Badge on welcome page
 - **v1.0.8**: Multi-Tenant SaaS Architecture with tenant types and feature flags

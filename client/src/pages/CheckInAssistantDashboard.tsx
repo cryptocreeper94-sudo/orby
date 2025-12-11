@@ -724,7 +724,7 @@ export default function CheckInAssistantDashboard() {
           <DialogHeader>
             <DialogTitle className="text-white">Walking Directions</DialogTitle>
           </DialogHeader>
-          <WalkingDirections destination={selectedDestination} />
+          <WalkingDirections defaultDestination={selectedDestination} />
         </DialogContent>
       </Dialog>
     </AnimatedBackground>

@@ -36,7 +36,7 @@ export default function RosterBuilder() {
     }
   }, [users.length, fetchAll]);
 
-  const supervisors = users.filter(u => u.role === 'Supervisor');
+  const supervisors = users.filter(u => u.role === 'StandSupervisor');
 
   const handleCreateGroup = () => {
     if (!groupName || !selectedSupervisor || selectedStands.length === 0) {
@@ -131,7 +131,7 @@ export default function RosterBuilder() {
     <div key={group.id} className="p-3 rounded-lg bg-slate-800/80 border border-slate-700 min-w-[180px]" data-testid={`group-card-${group.id}`}>
       <div className="flex items-center justify-between mb-1">
         <span className="font-bold text-sm text-slate-200 truncate">{group.name}</span>
-        <Badge variant="secondary" className="text-[10px]">{group.standIds.length}</Badge>
+        <Badge variant="secondary" className="text-[10px]">{group.standIds?.length ?? 0}</Badge>
       </div>
       <div className="text-xs text-slate-400">
         Sup: {users.find(u => u.id === group.supervisorId)?.name}
