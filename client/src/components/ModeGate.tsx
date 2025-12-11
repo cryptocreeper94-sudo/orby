@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useMode } from '@/lib/ModeContext';
-import { Shield, FlaskConical, Radio, Users, AlertTriangle, Sparkles, BadgeCheck, ExternalLink, X } from 'lucide-react';
+import { Shield, FlaskConical, Radio, Users, AlertTriangle, Sparkles, BadgeCheck, ExternalLink, X, Palette } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ThemeGallery } from '@/components/ThemeGallery';
 import orbyCommanderImg from '@assets/generated_images/orby_commander_nobg.png';
 import nashvilleSkylineImg from '@assets/generated_images/nashville_skyline_nissan_nobg.png';
 
@@ -15,6 +17,7 @@ interface ModeGateProps {
 export function ModeGate({ onModeSelected }: ModeGateProps) {
   const { enterSandbox, exitSandbox, mode } = useMode();
   const [showQRModal, setShowQRModal] = useState(false);
+  const [showThemePanel, setShowThemePanel] = useState(false);
 
   const handleLiveMode = () => {
     exitSandbox();
@@ -29,17 +32,34 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-800 z-50 overflow-y-auto">
       <div className="min-h-full flex flex-col">
-        {/* Header with Verified Badge */}
+        {/* Header with Theme Palette and Verified Badge */}
         <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
           <div className="text-cyan-400/70 text-xs font-medium">getorby.io</div>
-          <button
-            onClick={() => setShowQRModal(true)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-600/30 to-cyan-600/30 border border-emerald-400/50 hover:border-emerald-400 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] group"
-            data-testid="button-genesis-badge"
-          >
-            <BadgeCheck className="h-4 w-4 text-emerald-400" />
-            <span className="text-xs font-bold text-emerald-300">Verified</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <Sheet open={showThemePanel} onOpenChange={setShowThemePanel}>
+              <SheetTrigger asChild>
+                <button
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-gradient-to-r from-violet-600/30 to-cyan-600/30 border border-violet-400/50 hover:border-violet-400 transition-all duration-300 hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] group relative"
+                  data-testid="button-theme-panel"
+                >
+                  <Palette className="h-4 w-4 text-violet-400" />
+                  <span className="text-xs font-bold text-violet-300 hidden sm:inline">Themes</span>
+                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 sm:w-96 bg-slate-950 border-gray-700 p-0">
+                <ThemeGallery />
+              </SheetContent>
+            </Sheet>
+            <button
+              onClick={() => setShowQRModal(true)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-emerald-600/30 to-cyan-600/30 border border-emerald-400/50 hover:border-emerald-400 transition-all duration-300 hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] group"
+              data-testid="button-genesis-badge"
+            >
+              <BadgeCheck className="h-4 w-4 text-emerald-400" />
+              <span className="text-xs font-bold text-emerald-300">Verified</span>
+            </button>
+          </div>
         </div>
 
         {/* Main Content */}
