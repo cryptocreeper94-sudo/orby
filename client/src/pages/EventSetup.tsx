@@ -124,16 +124,19 @@ export default function EventSetup() {
     supervisors: 12,
     leads: 48,
     it: 6,
+    pos: 85,
     kitchen: 24,
+    portables: 16,
     templateName: 'Titans Game Day'
   });
 
-  // Staffing templates for common event types
+  // Staffing templates based on Nissan Stadium concession map
+  // Sections: East Side (105-118), West Side (128-142), North End (121 & 125), South End (121 & 125)
   const STAFFING_TEMPLATES = [
-    { id: 'titans-game', name: 'Titans Game Day', supervisors: 12, leads: 48, it: 6, kitchen: 24 },
-    { id: 'concert-large', name: 'Large Concert', supervisors: 15, leads: 60, it: 8, kitchen: 30 },
-    { id: 'concert-small', name: 'Small Concert', supervisors: 8, leads: 32, it: 4, kitchen: 16 },
-    { id: 'private-event', name: 'Private Event', supervisors: 4, leads: 16, it: 2, kitchen: 8 },
+    { id: 'titans-game', name: 'Titans Game Day', supervisors: 12, leads: 48, it: 6, pos: 85, kitchen: 24, portables: 16 },
+    { id: 'concert-large', name: 'Large Concert', supervisors: 15, leads: 60, it: 8, pos: 95, kitchen: 30, portables: 24 },
+    { id: 'concert-small', name: 'Small Concert', supervisors: 8, leads: 32, it: 4, pos: 50, kitchen: 16, portables: 12 },
+    { id: 'private-event', name: 'Private Event', supervisors: 4, leads: 16, it: 2, pos: 20, kitchen: 8, portables: 4 },
   ];
 
   const handleUseTemplate = (template: typeof STAFFING_TEMPLATES[0]) => {
@@ -141,12 +144,14 @@ export default function EventSetup() {
       supervisors: template.supervisors,
       leads: template.leads,
       it: template.it,
+      pos: template.pos,
       kitchen: template.kitchen,
+      portables: template.portables,
       templateName: template.name
     });
     toast({
       title: `Template Applied: ${template.name}`,
-      description: `Staffing grid updated with ${template.supervisors} supervisors, ${template.leads} leads, ${template.it} IT, ${template.kitchen} kitchen staff.`,
+      description: `${template.leads} stands, ${template.pos} POS devices, ${template.it} IT staff assigned.`,
     });
     setShowTemplateMenu(false);
   };
@@ -762,26 +767,36 @@ export default function EventSetup() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
-              <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-supervisors">
-                <Users className="h-5 w-5 mx-auto mb-1 text-cyan-400" />
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-2 mt-3">
+              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-supervisors">
+                <Users className="h-4 w-4 mx-auto mb-1 text-cyan-400" />
                 <div className="text-lg font-bold text-white">{staffingGrid.supervisors}</div>
-                <div className="text-xs text-slate-400">Supervisors</div>
+                <div className="text-[10px] text-slate-400">Supervisors</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-leads">
-                <Users className="h-5 w-5 mx-auto mb-1 text-emerald-400" />
+              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-leads">
+                <Users className="h-4 w-4 mx-auto mb-1 text-emerald-400" />
                 <div className="text-lg font-bold text-white">{staffingGrid.leads}</div>
-                <div className="text-xs text-slate-400">Stand Leads</div>
+                <div className="text-[10px] text-slate-400">Stands</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-it">
-                <Monitor className="h-5 w-5 mx-auto mb-1 text-blue-400" />
+              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-pos">
+                <Grid3X3 className="h-4 w-4 mx-auto mb-1 text-violet-400" />
+                <div className="text-lg font-bold text-white">{staffingGrid.pos}</div>
+                <div className="text-[10px] text-slate-400">POS Devices</div>
+              </div>
+              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-it">
+                <Monitor className="h-4 w-4 mx-auto mb-1 text-blue-400" />
                 <div className="text-lg font-bold text-white">{staffingGrid.it}</div>
-                <div className="text-xs text-slate-400">IT Support</div>
+                <div className="text-[10px] text-slate-400">IT Support</div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-kitchen">
-                <ChefHat className="h-5 w-5 mx-auto mb-1 text-orange-400" />
+              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-kitchen">
+                <ChefHat className="h-4 w-4 mx-auto mb-1 text-orange-400" />
                 <div className="text-lg font-bold text-white">{staffingGrid.kitchen}</div>
-                <div className="text-xs text-slate-400">Kitchen Staff</div>
+                <div className="text-[10px] text-slate-400">Kitchen</div>
+              </div>
+              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-portables">
+                <Navigation className="h-4 w-4 mx-auto mb-1 text-teal-400" />
+                <div className="text-lg font-bold text-white">{staffingGrid.portables}</div>
+                <div className="text-[10px] text-slate-400">Portables</div>
               </div>
             </div>
             <div className="mt-2 text-xs text-slate-500 text-center">
