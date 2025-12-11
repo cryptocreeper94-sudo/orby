@@ -1,0 +1,646 @@
+# Skins - Complete Theme/Skin System Blueprint
+
+## Overview
+A comprehensive, production-ready skin/theme system for React + TypeScript + Tailwind CSS applications. Supports 300+ themes across 15 categories with persistent user preferences, optional watermarks/logos, and a beautiful accordion-based selector UI.
+
+---
+
+## Architecture
+
+```
+client/
+  src/
+    contexts/
+      ThemeContext.tsx       # React context provider
+    data/
+      themes.ts              # Theme definitions (all themes)
+    components/
+      ThemeSelector.tsx      # UI component for selecting themes
+```
+
+---
+
+## Step 1: Theme Context Provider
+
+Create `client/src/contexts/ThemeContext.tsx`:
+
+```typescript
+import { createContext, useContext, useState, ReactNode } from "react";
+import { allThemes } from "@/data/themes";
+
+export interface ThemeColors {
+  primary: string;      // Gradient: "from-blue-900 via-slate-800 to-blue-900"
+  secondary: string;    // Gradient: "from-blue-600 to-purple-600"
+  accent: string;       // Single color: "bg-blue-600"
+  background: string;   // Background: "bg-slate-900"
+  cardBg: string;       // Card background: "bg-slate-800"
+  textPrimary: string;  // Primary text: "text-white"
+  textSecondary: string; // Secondary text: "text-slate-300"
+}
+
+export interface Theme {
+  id: string;           // Unique identifier: "bills", "cherry-blossom"
+  name: string;         // Display name: "Buffalo Bills", "Cherry Blossom"
+  colors: ThemeColors;
+  watermark?: string;   // Optional logo/image URL
+  category: ThemeCategory;
+}
+
+export type ThemeCategory = 
+  | "classic" 
+  | "nfl" | "mlb" | "nba" | "nhl" | "mls" 
+  | "wsl" | "epl" | "laliga" | "bundesliga" | "seriea" | "ligue1" 
+  | "college" | "golf" | "nature";
+
+interface ThemeContextType {
+  currentTheme: Theme;
+  setTheme: (themeId: string) => void;
+  availableThemes: Theme[];
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+// Storage key - change this for your app
+const STORAGE_KEY = "app_theme";
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [currentTheme, setCurrentTheme] = useState<Theme>(() => {
+    const savedThemeId = localStorage.getItem(STORAGE_KEY);
+    return allThemes.find(t => t.id === savedThemeId) || allThemes[0];
+  });
+
+  const setTheme = (themeId: string) => {
+    const theme = allThemes.find(t => t.id === themeId);
+    if (theme) {
+      setCurrentTheme(theme);
+      localStorage.setItem(STORAGE_KEY, themeId);
+    }
+  };
+
+  return (
+    <ThemeContext.Provider value={{ currentTheme, setTheme, availableThemes: allThemes }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useTheme must be used within ThemeProvider");
+  }
+  return context;
+}
+```
+
+---
+
+## Step 2: Theme Definitions
+
+Create `client/src/data/themes.ts`:
+
+```typescript
+import { Theme, ThemeCategory } from "@/contexts/ThemeContext";
+
+// Helper to create sports team themes with watermark logos
+const createTeamTheme = (
+  id: string,
+  name: string,
+  category: ThemeCategory,
+  logoUrl: string,
+  primaryColor: string,
+  secondaryColor: string,
+  accentColor: string
+): Theme => ({
+  id,
+  name,
+  category,
+  watermark: logoUrl,
+  colors: {
+    primary: primaryColor,
+    secondary: secondaryColor,
+    accent: accentColor,
+    background: primaryColor.includes("black") ? "bg-black" : 
+                primaryColor.includes("white") || primaryColor.includes("slate-100") ? "bg-slate-50" : "bg-slate-950",
+    cardBg: primaryColor.includes("black") ? "bg-zinc-950" : 
+            primaryColor.includes("white") ? "bg-white" : "bg-slate-900",
+    textPrimary: primaryColor.includes("white") || primaryColor.includes("slate-100") ? "text-slate-900" : "text-white",
+    textSecondary: primaryColor.includes("white") || primaryColor.includes("slate-100") ? "text-slate-600" : "text-slate-300"
+  }
+});
+
+export const allThemes: Theme[] = [
+  // ============ CLASSIC THEMES ============
+  {
+    id: "light",
+    name: "Light Mode",
+    category: "classic",
+    colors: {
+      primary: "from-slate-100 via-slate-50 to-white",
+      secondary: "from-blue-500 to-purple-500",
+      accent: "bg-blue-500",
+      background: "bg-slate-50",
+      cardBg: "bg-white",
+      textPrimary: "text-slate-900",
+      textSecondary: "text-slate-600"
+    }
+  },
+  {
+    id: "pure-black",
+    name: "Pure Black",
+    category: "classic",
+    colors: {
+      primary: "from-black via-zinc-950 to-black",
+      secondary: "from-blue-600 to-purple-600",
+      accent: "bg-blue-600",
+      background: "bg-black",
+      cardBg: "bg-zinc-950",
+      textPrimary: "text-white",
+      textSecondary: "text-zinc-300"
+    }
+  },
+  {
+    id: "classic-dark",
+    name: "Classic Dark",
+    category: "classic",
+    colors: {
+      primary: "from-slate-900 via-slate-800 to-slate-900",
+      secondary: "from-blue-600 to-purple-600",
+      accent: "bg-blue-600",
+      background: "bg-slate-900",
+      cardBg: "bg-slate-800",
+      textPrimary: "text-white",
+      textSecondary: "text-slate-300"
+    }
+  },
+  {
+    id: "midnight-blue",
+    name: "Midnight Blue",
+    category: "classic",
+    colors: {
+      primary: "from-blue-950 via-slate-900 to-blue-950",
+      secondary: "from-blue-500 to-cyan-500",
+      accent: "bg-blue-500",
+      background: "bg-blue-950",
+      cardBg: "bg-slate-900",
+      textPrimary: "text-white",
+      textSecondary: "text-blue-200"
+    }
+  },
+  {
+    id: "forest-green",
+    name: "Forest Green",
+    category: "classic",
+    colors: {
+      primary: "from-green-950 via-emerald-900 to-green-950",
+      secondary: "from-green-500 to-emerald-500",
+      accent: "bg-green-500",
+      background: "bg-green-950",
+      cardBg: "bg-emerald-900",
+      textPrimary: "text-white",
+      textSecondary: "text-green-200"
+    }
+  },
+
+  // ============ NATURE THEMES ============
+  {
+    id: "cherry-blossom",
+    name: "Cherry Blossom",
+    category: "nature",
+    watermark: "https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400",
+    colors: {
+      primary: "from-pink-900 via-rose-800 to-pink-900",
+      secondary: "from-pink-500 to-rose-500",
+      accent: "bg-pink-500",
+      background: "bg-pink-950",
+      cardBg: "bg-rose-900/80",
+      textPrimary: "text-white",
+      textSecondary: "text-pink-200"
+    }
+  },
+  {
+    id: "ocean-sunset",
+    name: "Ocean Sunset",
+    category: "nature",
+    watermark: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=400",
+    colors: {
+      primary: "from-orange-900 via-pink-800 to-purple-900",
+      secondary: "from-orange-500 to-pink-500",
+      accent: "bg-orange-500",
+      background: "bg-slate-950",
+      cardBg: "bg-purple-900/80",
+      textPrimary: "text-white",
+      textSecondary: "text-orange-200"
+    }
+  },
+  {
+    id: "mountain-mist",
+    name: "Mountain Mist",
+    category: "nature",
+    watermark: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400",
+    colors: {
+      primary: "from-slate-800 via-blue-900 to-slate-800",
+      secondary: "from-slate-500 to-blue-500",
+      accent: "bg-slate-500",
+      background: "bg-slate-900",
+      cardBg: "bg-blue-900/80",
+      textPrimary: "text-white",
+      textSecondary: "text-slate-300"
+    }
+  },
+
+  // ============ SPORTS TEAM THEMES ============
+  // NFL Examples
+  createTeamTheme(
+    "bills", 
+    "Buffalo Bills", 
+    "nfl", 
+    "https://content.sportslogos.net/logos/7/149/full/n0fd1z6xmhigb0eej3323ebwq.png", 
+    "from-blue-900 via-red-800 to-blue-900", 
+    "from-blue-600 to-red-600", 
+    "bg-blue-700"
+  ),
+  createTeamTheme(
+    "dolphins", 
+    "Miami Dolphins", 
+    "nfl", 
+    "https://content.sportslogos.net/logos/7/150/full/4105_miami_dolphins-primary-2018.png", 
+    "from-teal-900 via-orange-700 to-teal-900", 
+    "from-teal-500 to-orange-500", 
+    "bg-teal-600"
+  ),
+  createTeamTheme(
+    "patriots", 
+    "New England Patriots", 
+    "nfl", 
+    "https://content.sportslogos.net/logos/7/151/full/y71myf8mlwlk8lbgagh3fd5e0.png", 
+    "from-blue-900 via-red-800 to-blue-900", 
+    "from-blue-600 to-red-600", 
+    "bg-blue-700"
+  ),
+
+  // NBA Examples  
+  createTeamTheme(
+    "lakers", 
+    "Los Angeles Lakers", 
+    "nba", 
+    "https://content.sportslogos.net/logos/6/237/full/uig7aiht8jnpl1szbi57zzlsh.png", 
+    "from-purple-900 via-yellow-700 to-purple-900", 
+    "from-purple-600 to-yellow-500", 
+    "bg-purple-700"
+  ),
+  createTeamTheme(
+    "celtics", 
+    "Boston Celtics", 
+    "nba", 
+    "https://content.sportslogos.net/logos/6/213/full/slhg02hbef3j1ov4lsnwyol5o.png", 
+    "from-green-900 via-slate-800 to-green-900", 
+    "from-green-600 to-white", 
+    "bg-green-700"
+  ),
+
+  // MLB Examples
+  createTeamTheme(
+    "yankees", 
+    "New York Yankees", 
+    "mlb", 
+    "https://content.sportslogos.net/logos/53/68/full/1256.png", 
+    "from-blue-950 via-slate-800 to-blue-950", 
+    "from-blue-600 to-white", 
+    "bg-blue-800"
+  ),
+  createTeamTheme(
+    "dodgers", 
+    "Los Angeles Dodgers", 
+    "mlb", 
+    "https://content.sportslogos.net/logos/54/63/full/o0a0vj3fgxmksk8cz3hfaxybs.png", 
+    "from-blue-900 via-slate-800 to-blue-900", 
+    "from-blue-600 to-white", 
+    "bg-blue-700"
+  ),
+
+  // Add more teams as needed...
+];
+
+// Category configuration for UI
+export const THEME_CATEGORIES = [
+  { id: "all", label: "All Themes", icon: "Palette" },
+  { id: "classic", label: "Classic", icon: "Moon" },
+  { id: "nfl", label: "NFL", icon: "Football" },
+  { id: "mlb", label: "MLB", icon: "Baseball" },
+  { id: "nba", label: "NBA", icon: "Basketball" },
+  { id: "nhl", label: "NHL", icon: "Hockey" },
+  { id: "mls", label: "MLS", icon: "Soccer" },
+  { id: "nature", label: "Nature", icon: "Trees" },
+] as const;
+```
+
+---
+
+## Step 3: Theme Selector Component
+
+Create `client/src/components/ThemeSelector.tsx`:
+
+```typescript
+import { useState } from "react";
+import { useTheme, ThemeCategory } from "@/contexts/ThemeContext";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Accordion, 
+  AccordionContent, 
+  AccordionItem, 
+  AccordionTrigger 
+} from "@/components/ui/accordion";
+import { CheckCircle2, Palette, Sparkles, Star, Crown } from "lucide-react";
+
+const categoryLabels: Record<string, { label: string; icon: string; color: string }> = {
+  classic: { label: "Classic Themes", icon: "Palette", color: "from-slate-600 to-slate-800" },
+  nfl: { label: "NFL Teams", icon: "Football", color: "from-green-600 to-green-800" },
+  mlb: { label: "MLB Teams", icon: "Baseball", color: "from-red-600 to-red-800" },
+  nba: { label: "NBA Teams", icon: "Basketball", color: "from-orange-600 to-orange-800" },
+  nhl: { label: "NHL Teams", icon: "Hockey", color: "from-blue-600 to-blue-800" },
+  mls: { label: "MLS Teams", icon: "Soccer", color: "from-emerald-600 to-emerald-800" },
+  nature: { label: "Nature & Scenery", icon: "Trees", color: "from-teal-600 to-teal-800" }
+};
+
+const categoryOrder = ["classic", "nfl", "mlb", "nba", "nhl", "mls", "nature"];
+
+export function ThemeSelector() {
+  const { currentTheme, setTheme, availableThemes } = useTheme();
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
+
+  // Group themes by category
+  const themesByCategory = availableThemes.reduce((acc, theme) => {
+    if (!acc[theme.category]) {
+      acc[theme.category] = [];
+    }
+    acc[theme.category].push(theme);
+    return acc;
+  }, {} as Record<string, typeof availableThemes>);
+
+  const sortedCategories = categoryOrder.filter(cat => themesByCategory[cat]?.length > 0);
+
+  return (
+    <div className="space-y-4 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl p-4 border border-slate-700/50">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-2.5 rounded-full">
+          <Palette className="h-5 w-5 text-white" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            Theme Gallery
+            <Sparkles className="h-4 w-4 text-yellow-400" />
+          </h2>
+          <p className="text-xs text-slate-400">
+            {availableThemes.length}+ premium themes
+          </p>
+        </div>
+      </div>
+
+      {/* Current Theme Display */}
+      <div className="rounded-xl bg-gradient-to-r from-blue-900/50 to-purple-900/50 border border-blue-500/30 p-3">
+        <div className="flex items-center gap-3">
+          <div 
+            className={`w-12 h-12 rounded-lg bg-gradient-to-br ${currentTheme.colors.primary} border-2 border-white/20`}
+            style={{
+              backgroundImage: currentTheme.watermark ? `url(${currentTheme.watermark})` : undefined,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundBlendMode: "overlay"
+            }}
+          />
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <Crown className="h-4 w-4 text-yellow-400" />
+              <span className="text-sm font-bold text-white">{currentTheme.name}</span>
+            </div>
+            <p className="text-xs text-blue-300">Currently Active</p>
+          </div>
+          <CheckCircle2 className="h-5 w-5 text-green-400" />
+        </div>
+      </div>
+
+      {/* Accordion Categories */}
+      <Accordion 
+        type="multiple" 
+        value={expandedCategories}
+        onValueChange={setExpandedCategories}
+        className="space-y-2"
+      >
+        {sortedCategories.map((category) => {
+          const themes = themesByCategory[category];
+          const catInfo = categoryLabels[category];
+          const hasCurrentTheme = themes.some(t => t.id === currentTheme.id);
+          
+          return (
+            <AccordionItem key={category} value={category} className="border-0">
+              <AccordionTrigger 
+                className={`px-3 py-2.5 rounded-xl bg-gradient-to-r ${catInfo.color} border border-white/10
+                  ${hasCurrentTheme ? 'ring-2 ring-yellow-400/50' : ''}`}
+              >
+                <div className="flex items-center gap-3 w-full">
+                  <span className="text-sm font-bold text-white">{catInfo.label}</span>
+                  <Badge className="ml-auto mr-2 bg-white/20 text-white border-white/30 text-xs">
+                    {themes.length}
+                  </Badge>
+                  {hasCurrentTheme && <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />}
+                </div>
+              </AccordionTrigger>
+              
+              <AccordionContent className="pt-3 pb-1">
+                <div className="overflow-x-auto pb-2">
+                  <div className="flex gap-2" style={{ minWidth: "max-content" }}>
+                    {themes.map((theme) => {
+                      const isSelected = currentTheme.id === theme.id;
+                      return (
+                        <button
+                          key={theme.id}
+                          onClick={() => setTheme(theme.id)}
+                          className={`relative flex-shrink-0 w-20 rounded-xl overflow-hidden transition-all
+                            ${isSelected 
+                              ? 'ring-2 ring-yellow-400 scale-105' 
+                              : 'hover:scale-105 border border-slate-600/50'
+                            }`}
+                          data-testid={`theme-${theme.id}`}
+                        >
+                          <div 
+                            className={`h-14 bg-gradient-to-br ${theme.colors.primary}`}
+                            style={{
+                              backgroundImage: theme.watermark ? `url(${theme.watermark})` : undefined,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                              backgroundBlendMode: "overlay"
+                            }}
+                          >
+                            {isSelected && (
+                              <div className="absolute top-1 right-1">
+                                <div className="bg-yellow-400 rounded-full p-0.5">
+                                  <CheckCircle2 className="h-3 w-3 text-slate-900" />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className="p-1.5 bg-slate-800/90">
+                            <p className="text-[10px] font-medium text-white truncate text-center">
+                              {theme.name.substring(0, 12)}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+    </div>
+  );
+}
+```
+
+---
+
+## Step 4: Integrate into App
+
+Wrap your app with the ThemeProvider in `client/src/App.tsx`:
+
+```typescript
+import { ThemeProvider } from "@/contexts/ThemeContext";
+
+function App() {
+  return (
+    <ThemeProvider>
+      {/* Your app content */}
+    </ThemeProvider>
+  );
+}
+```
+
+---
+
+## Step 5: Apply Theme Colors in Components
+
+Use the `useTheme` hook to apply theme colors anywhere:
+
+```typescript
+import { useTheme } from "@/contexts/ThemeContext";
+
+function MyComponent() {
+  const { currentTheme } = useTheme();
+  
+  return (
+    <div className={`bg-gradient-to-br ${currentTheme.colors.primary}`}>
+      <div className={currentTheme.colors.background}>
+        <div className={currentTheme.colors.cardBg}>
+          <h1 className={currentTheme.colors.textPrimary}>Title</h1>
+          <p className={currentTheme.colors.textSecondary}>Subtitle</p>
+          <button className={currentTheme.colors.accent}>Action</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## Step 6: Apply Theme to Root Layout
+
+For full-app theming, apply to your root layout:
+
+```typescript
+function RootLayout({ children }) {
+  const { currentTheme } = useTheme();
+  
+  return (
+    <div className={`min-h-screen ${currentTheme.colors.background} ${currentTheme.colors.textPrimary}`}>
+      {children}
+    </div>
+  );
+}
+```
+
+---
+
+## Adding New Themes
+
+### Basic Theme
+```typescript
+{
+  id: "my-theme",
+  name: "My Custom Theme",
+  category: "classic",
+  colors: {
+    primary: "from-indigo-900 via-purple-800 to-indigo-900",
+    secondary: "from-indigo-500 to-purple-500",
+    accent: "bg-indigo-500",
+    background: "bg-indigo-950",
+    cardBg: "bg-purple-900",
+    textPrimary: "text-white",
+    textSecondary: "text-indigo-200"
+  }
+}
+```
+
+### Sports Team Theme (with logo watermark)
+```typescript
+createTeamTheme(
+  "team-id",           // Unique ID
+  "Team Name",         // Display name
+  "nfl",               // Category
+  "https://logo-url",  // Logo/watermark URL
+  "from-blue-900 via-red-800 to-blue-900",  // Primary gradient
+  "from-blue-600 to-red-600",               // Secondary gradient
+  "bg-blue-700"                              // Accent color
+)
+```
+
+---
+
+## Required Dependencies
+
+```json
+{
+  "@radix-ui/react-accordion": "^1.x",
+  "lucide-react": "^0.x",
+  "tailwindcss": "^3.x or ^4.x"
+}
+```
+
+---
+
+## Storage
+
+Themes persist to localStorage with the key defined in ThemeContext (default: `app_theme`). Change this key to avoid conflicts between apps.
+
+---
+
+## Key Features
+
+1. **300+ themes** - Sports teams, nature scenes, classic colors
+2. **15 categories** - NFL, NBA, MLB, NHL, MLS, EPL, La Liga, Bundesliga, Serie A, Ligue 1, WSL, College, Golf, Nature, Classic
+3. **Watermark support** - Team logos and background images
+4. **Persistent preferences** - Saves to localStorage
+5. **Accordion UI** - Organized, collapsible category groups
+6. **Horizontal scroll** - Easy theme browsing within categories
+7. **Active theme indicator** - Visual feedback for current selection
+8. **Type-safe** - Full TypeScript support
+
+---
+
+## Notes for Implementation
+
+1. Replace the storage key (`STORAGE_KEY`) with your app's unique prefix
+2. Add/remove categories based on your needs
+3. The watermark URLs point to external images - ensure they're stable or host your own
+4. All colors use Tailwind CSS classes - adjust for your Tailwind configuration
+5. The helper function `createTeamTheme` automatically infers background/text colors from the primary gradient
+
+---
+
+## License
+
+MIT - Use freely in any project.
