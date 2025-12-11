@@ -81,6 +81,22 @@ export function EventHeader({ compact = false, showDepartmentNotes }: EventHeade
             )}
           </div>
         </div>
+        {relevantNotes.length > 0 && (
+          <div className="mt-2 pt-2 border-t border-white/10">
+            <div className="flex flex-wrap gap-2">
+              {relevantNotes.map((note, idx) => (
+                <div
+                  key={idx}
+                  data-testid={`note-${note.department.toLowerCase()}`}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20"
+                >
+                  <AlertCircle className="w-3 h-3 text-amber-400 flex-shrink-0" />
+                  <span className="text-xs text-amber-300">{note.note}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </motion.div>
     );
   }
