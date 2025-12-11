@@ -7,6 +7,16 @@ Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designe
 **v1.0.12** - Published to Solana Mainnet (December 2025)
 
 ### Recent Changelog
+- **v1.0.14**: Event Setup System + Full Enhancement Suite
+  - Event Setup page with bento grid layout (David's landing page)
+  - Pre-Event Checklist validation before activation
+  - Department Notes routing to matching dashboards via EventHeader
+  - Geofencing toggle (Stadium/Custom mode with configurable radius)
+  - Staffing Grid linked to active event (dynamic event name/date)
+  - Event History page with past events and metrics
+  - Real-time WebSocket notifications for event activation
+  - "Event Status" renamed from "Emergency Status"
+  - Quick Dispatch expanded with IT, Operations, Kitchen, Warehouse
 - **v1.0.12**: ORBIT Ecosystem Hub Integration with DarkWave Developer Hub + Session Persistence Fix + Role Access Fix
 - **v1.0.10**: Genesis Hallmark Badge & Footer Fix with clickable verified badge
 - **v1.0.9**: Genesis Hallmark Badge on welcome page
