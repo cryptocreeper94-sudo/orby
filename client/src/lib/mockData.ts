@@ -101,7 +101,7 @@ export const useStore = create<AppState>()(
           // Set session persistence for page navigation
           const PERSISTENCE_KEY = 'orby_session_persistence';
           const PERSISTENCE_EXPIRY_KEY = 'orby_session_expiry';
-          const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours
+          const SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
           localStorage.setItem(PERSISTENCE_KEY, 'true');
           localStorage.setItem(PERSISTENCE_EXPIRY_KEY, String(Date.now() + SESSION_DURATION));
           // Fetch all data after login
