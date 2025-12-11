@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ModeProvider, useMode } from "@/lib/ModeContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 import { OnboardingProvider } from "@/lib/OnboardingContext";
 import { SandboxBanner } from "@/components/SandboxBanner";
 import { SandboxWelcome } from "@/components/SandboxWelcome";
@@ -135,9 +136,10 @@ function TwinklingStars() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ModeProvider>
-        <OnboardingProvider>
-          <TooltipProvider>
+      <ThemeProvider>
+        <ModeProvider>
+          <OnboardingProvider>
+            <TooltipProvider>
             <SandboxBanner />
             <SandboxWelcome />
             <OnboardingOverlay />
@@ -162,8 +164,9 @@ function App() {
               <AppFooter companyLogo={legendsLogo} companyName="Legends" />
             </SandboxContentWrapper>
           </TooltipProvider>
-        </OnboardingProvider>
-      </ModeProvider>
+          </OnboardingProvider>
+        </ModeProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

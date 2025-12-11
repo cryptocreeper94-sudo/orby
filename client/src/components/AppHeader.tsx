@@ -5,7 +5,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Menu, Settings, Shield, QrCode, LogOut, User, Building2, ChevronRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { Menu, Settings, Shield, QrCode, LogOut, User, Building2, ChevronRight, CheckCircle2, Loader2, Palette } from 'lucide-react';
+import { ThemeGallery } from '@/components/ThemeGallery';
 import orbyCommanderImg from '@assets/generated_images/orby_commander_nobg.png';
 
 interface AssetStamp {
@@ -30,6 +31,7 @@ export function AppHeader({ showVerifiedBadge = true }: AppHeaderProps) {
   const logout = useStore((state) => state.logout);
   const [isOpen, setIsOpen] = useState(false);
   const [showHallmarkViewer, setShowHallmarkViewer] = useState(false);
+  const [showThemePanel, setShowThemePanel] = useState(false);
 
   const isLoginPage = location === '/';
   const isSetPinPage = location === '/set-pin';
@@ -46,6 +48,16 @@ export function AppHeader({ showVerifiedBadge = true }: AppHeaderProps) {
   };
 
   const menuItems = [
+    {
+      id: 'themes',
+      label: 'Themes & Skins',
+      icon: <Palette className="w-5 h-5" />,
+      description: 'Customize app appearance',
+      action: () => {
+        setIsOpen(false);
+        setTimeout(() => setShowThemePanel(true), 150);
+      }
+    },
     {
       id: 'hallmarks',
       label: 'Genesis Hallmarks',
@@ -177,17 +189,36 @@ export function AppHeader({ showVerifiedBadge = true }: AppHeaderProps) {
               </div>
             </div>
 
-            {showVerifiedBadge && (
-              <button
-                onClick={() => setShowHallmarkViewer(true)}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-green-500/10 border border-green-500/30 hover:bg-green-500/20 transition-colors"
-                data-testid="button-verified-badge"
-              >
-                <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
-                <span className="text-xs font-medium text-green-400 hidden sm:inline">Verified</span>
-                <Shield className="w-3 h-3 text-green-400" />
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              <Sheet open={showThemePanel} onOpenChange={setShowThemePanel}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 text-gray-400 hover:text-cyan-400 hover:bg-gray-800/50 relative"
+                    data-testid="button-theme-panel"
+                  >
+                    <Palette className="h-5 w-5" />
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-80 sm:w-96 bg-slate-950 border-gray-700 p-0">
+                  <ThemeGallery />
+                </SheetContent>
+              </Sheet>
+              
+              {showVerifiedBadge && (
+                <button
+                  onClick={() => setShowHallmarkViewer(true)}
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-green-500/10 border border-green-500/30 hover:bg-green-500/20 transition-colors"
+                  data-testid="button-verified-badge"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
+                  <span className="text-xs font-medium text-green-400 hidden sm:inline">Verified</span>
+                  <Shield className="w-3 h-3 text-green-400" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </header>
