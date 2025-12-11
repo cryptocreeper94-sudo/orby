@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { MapPin, Navigation, Shield, AlertTriangle } from 'lucide-react';
+import type { ActiveEvent } from '@shared/schema';
 
 interface LocationAcknowledgementProps {
   onAccept: () => void;
@@ -17,6 +19,13 @@ export function LocationAcknowledgement({
 }: LocationAcknowledgementProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [understood, setUnderstood] = useState(false);
+
+  const { data: activeEvent } = useQuery<ActiveEvent | null>({
+    queryKey: ['/api/active-events/current'],
+    staleTime: 60000,
+  });
+
+  const geofenceRadius = getActiveEventGeofenceRadius(activeEvent);
 
   useEffect(() => {
     const acknowledged = localStorage.getItem(storageKey);
@@ -69,8 +78,13 @@ export function LocationAcknowledgement({
             <div>
               <p className="font-medium text-green-300">Geofence Verification</p>
               <p className="text-sm text-green-400">
-                Confirms you're on-site for attendance tracking and secure login when within 100 feet of the stadium.
+                Confirms you're on-site for attendance tracking and secure login when within {formatRadius(geofenceRadius)} of the stadium.
               </p>
+              {activeEvent && (
+                <p className="text-xs text-green-500 mt-1" data-testid="text-geofence-mode">
+                  Current mode: {activeEvent.geofenceMode === 'custom' ? 'Custom radius' : 'Stadium default'}
+                </p>
+              )}
             </div>
           </div>
 
@@ -271,4 +285,41 @@ export function formatRadius(feet: number): string {
     return `${(feet / 5280).toFixed(2)} miles (${feet.toLocaleString()} ft)`;
   }
   return `${feet} feet`;
+}
+
+// Default stadium radius for registration (matches server default)
+export const DEFAULT_STADIUM_RADIUS_FEET = 2000;
+
+// Get geofence radius from active event settings
+export function getActiveEventGeofenceRadius(activeEvent: ActiveEvent | null | undefined): number {
+  if (!activeEvent) {
+    return GEOFENCE_RADIUS_FEET;
+  }
+  
+  if (activeEvent.geofenceMode === 'custom' && activeEvent.geofenceRadiusFeet) {
+    return activeEvent.geofenceRadiusFeet;
+  }
+  
+  return DEFAULT_STADIUM_RADIUS_FEET;
+}
+
+// Hook to get active event geofence settings
+export function useActiveEventGeofence() {
+  const { data: activeEvent, isLoading, error } = useQuery<ActiveEvent | null>({
+    queryKey: ['/api/active-events/current'],
+    staleTime: 60000,
+  });
+
+  const radiusFeet = getActiveEventGeofenceRadius(activeEvent);
+  const mode = activeEvent?.geofenceMode || 'stadium';
+
+  return {
+    activeEvent,
+    radiusFeet,
+    mode,
+    isLoading,
+    error,
+    isWithinEventGeofence: (userLat: number, userLng: number) => 
+      isWithinGeofence(userLat, userLng, STADIUM_LOCATION.lat, STADIUM_LOCATION.lng, radiusFeet)
+  };
 }

@@ -12,6 +12,8 @@ import { OnboardingOverlay } from "@/components/OnboardingOverlay";
 import { FeatureSlideshow } from "@/components/FeatureSlideshow";
 import { OrbyAIChat } from "@/components/OrbyAIChat";
 import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
+import { NotificationToast } from "@/components/NotificationToast";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import FloatingWeatherButton from "@/components/FloatingWeatherButton";
 import { AppFooter } from "@/components/AppFooter";
 import { AppHeader } from "@/components/AppHeader";
@@ -147,6 +149,8 @@ function App() {
         <ModeProvider>
           <OnboardingProvider>
             <TooltipProvider>
+              <SonnerToaster position="top-right" richColors />
+              <NotificationToast />
               <ThemedBackground>
                 <SandboxBanner />
                 <SandboxWelcome />

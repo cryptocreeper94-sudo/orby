@@ -155,7 +155,24 @@ export async function registerRoutes(
       // Nissan Stadium geofence constants
       const STADIUM_LAT = 36.1665;
       const STADIUM_LNG = -86.7713;
-      const GEOFENCE_RADIUS_FEET = 2000;
+      const DEFAULT_STADIUM_RADIUS_FEET = 2000;
+      
+      // Fetch active event to get geofence settings
+      const activeEvent = await storage.getActiveEvent();
+      let geofenceRadiusFeet = DEFAULT_STADIUM_RADIUS_FEET;
+      let geofenceMode = 'stadium';
+      
+      if (activeEvent) {
+        geofenceMode = activeEvent.geofenceMode || 'stadium';
+        if (geofenceMode === 'custom' && activeEvent.geofenceRadiusFeet) {
+          geofenceRadiusFeet = activeEvent.geofenceRadiusFeet;
+        } else {
+          geofenceRadiusFeet = DEFAULT_STADIUM_RADIUS_FEET;
+        }
+        console.log(`[Geofence] Using ${geofenceMode} mode with radius ${geofenceRadiusFeet} feet for event: ${activeEvent.eventName}`);
+      } else {
+        console.log(`[Geofence] No active event, using default stadium radius: ${geofenceRadiusFeet} feet`);
+      }
       
       // Validate required fields
       if (!name || !department || !pin) {
@@ -178,8 +195,8 @@ export async function registerRoutes(
       const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
       const distanceFeet = R * c;
       
-      if (distanceFeet > GEOFENCE_RADIUS_FEET) {
-        return res.status(403).json({ error: "Registration is only available at Nissan Stadium" });
+      if (distanceFeet > geofenceRadiusFeet) {
+        return res.status(403).json({ error: `Registration is only available within ${geofenceRadiusFeet} feet of Nissan Stadium` });
       }
       
       // Validate name
@@ -1800,7 +1817,7 @@ Be encouraging and supportive - venue operations can be stressful!`;
   // Add note to a count session
   app.patch("/api/count-sessions/:id/note", async (req: Request, res: Response) => {
     try {
-      const { note } = req.body;
+      const { note, department } = req.body;
       if (!note) {
         return res.status(400).json({ error: "Note is required" });
       }
@@ -1809,6 +1826,17 @@ Be encouraging and supportive - venue operations can be stressful!`;
         return res.status(404).json({ error: "Count session not found" });
       }
       await storage.addCountSessionNote(req.params.id, note);
+      
+      // Broadcast department note to all connected clients
+      const stand = await storage.getStand(session.standId);
+      wsServer.broadcast({
+        type: 'DEPARTMENT_NOTE_ADDED',
+        payload: {
+          department: department || stand?.section || 'Unknown',
+          note: note
+        }
+      });
+      
       const updatedSession = await storage.getCountSession(req.params.id);
       res.json(updatedSession);
     } catch (error) {
@@ -4798,6 +4826,16 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     try {
       const { activatedById, activatedByName } = req.body;
       const event = await storage.activateEvent(req.params.id, activatedById, activatedByName);
+      
+      // Broadcast event activation to all connected clients
+      wsServer.broadcast({
+        type: 'EVENT_ACTIVATED',
+        payload: {
+          eventName: event.eventName,
+          activatedBy: activatedByName || 'Unknown'
+        }
+      });
+      
       res.json(event);
     } catch (error) {
       console.error("Error activating event:", error);
