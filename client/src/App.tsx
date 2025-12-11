@@ -49,6 +49,7 @@ import CulinaryDirectorDashboard from "@/pages/CulinaryDirectorDashboard";
 import CulinaryCookDashboard from "@/pages/CulinaryCookDashboard";
 import WeatherMapPage from "@/pages/WeatherMapPage";
 import StadiumMapPage from "@/pages/StadiumMapPage";
+import EventSetup from "@/pages/EventSetup";
 import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
@@ -99,6 +100,7 @@ function Router() {
       <Route path="/culinary-cook" component={CulinaryCookDashboard} />
       <Route path="/weather-map" component={WeatherMapPage} />
       <Route path="/stadium-map" component={StadiumMapPage} />
+      <Route path="/event-setup" component={EventSetup} />
       <Route component={NotFound} />
     </Switch>
   );

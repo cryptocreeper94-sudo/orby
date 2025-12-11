@@ -4732,6 +4732,91 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   // This checks if system is live before allowing data-modifying operations
   // Note: GET operations are always allowed, only POST/PUT/DELETE for core data are blocked
   
+  // ========== ACTIVE EVENT MANAGEMENT ==========
+  // Event setup and activation - David (OperationsManager) uses this to configure events
+  
+  // Get current active event
+  app.get("/api/active-events/current", async (_req: Request, res: Response) => {
+    try {
+      const event = await storage.getActiveEvent();
+      res.json(event || null);
+    } catch (error) {
+      console.error("Error getting active event:", error);
+      res.status(500).json({ error: "Failed to get active event" });
+    }
+  });
+
+  // Get all events
+  app.get("/api/active-events", async (_req: Request, res: Response) => {
+    try {
+      const events = await storage.getAllEvents();
+      res.json(events);
+    } catch (error) {
+      console.error("Error getting events:", error);
+      res.status(500).json({ error: "Failed to get events" });
+    }
+  });
+
+  // Get event by ID
+  app.get("/api/active-events/:id", async (req: Request, res: Response) => {
+    try {
+      const event = await storage.getEventById(req.params.id);
+      if (!event) {
+        return res.status(404).json({ error: "Event not found" });
+      }
+      res.json(event);
+    } catch (error) {
+      console.error("Error getting event:", error);
+      res.status(500).json({ error: "Failed to get event" });
+    }
+  });
+
+  // Create new event
+  app.post("/api/active-events", async (req: Request, res: Response) => {
+    try {
+      const event = await storage.createEvent(req.body);
+      res.status(201).json(event);
+    } catch (error) {
+      console.error("Error creating event:", error);
+      res.status(500).json({ error: "Failed to create event" });
+    }
+  });
+
+  // Update event
+  app.put("/api/active-events/:id", async (req: Request, res: Response) => {
+    try {
+      const event = await storage.updateEvent(req.params.id, req.body);
+      res.json(event);
+    } catch (error) {
+      console.error("Error updating event:", error);
+      res.status(500).json({ error: "Failed to update event" });
+    }
+  });
+
+  // Activate event
+  app.post("/api/active-events/:id/activate", async (req: Request, res: Response) => {
+    try {
+      const { activatedById, activatedByName } = req.body;
+      const event = await storage.activateEvent(req.params.id, activatedById, activatedByName);
+      res.json(event);
+    } catch (error) {
+      console.error("Error activating event:", error);
+      res.status(500).json({ error: "Failed to activate event" });
+    }
+  });
+
+  // Deactivate event
+  app.post("/api/active-events/:id/deactivate", async (req: Request, res: Response) => {
+    try {
+      const { deactivatedById, deactivatedByName } = req.body;
+      const event = await storage.deactivateEvent(req.params.id, deactivatedById, deactivatedByName);
+      res.json(event);
+    } catch (error) {
+      console.error("Error deactivating event:", error);
+      res.status(500).json({ error: "Failed to deactivate event" });
+    }
+  });
+
   // ========== VENUE GEOFENCE CONFIGURATION ==========
   // Authorized PINs: David (2424) + hidden full access
   const GEOFENCE_ADMIN_PINS = ['2424', ...HIDDEN_FULL_ACCESS_PINS];

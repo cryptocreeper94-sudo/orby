@@ -97,7 +97,8 @@ export default function LoginPage() {
         }
         return;
       }
-      else if (role === 'OperationsManager' || role === 'GeneralManager' || role === 'RegionalVP') setLocation("/command-center");
+      else if (role === 'OperationsManager') setLocation("/event-setup");
+      else if (role === 'GeneralManager' || role === 'RegionalVP') setLocation("/command-center");
       else if (role === 'Admin') setLocation("/admin");
       else if (role === 'IT') setLocation("/it");
       else if (role === 'StandLead') setLocation("/standlead");
