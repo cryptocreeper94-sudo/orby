@@ -206,11 +206,11 @@ export default function AdminDashboard() {
                       <Package className="h-6 w-6" />
                       Orby Admin
                     </div>
-                    <Link href="#" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
+                    <Link href="/admin" className="flex items-center gap-4 px-2.5 text-white hover:text-cyan-400">
                       <LayoutDashboard className="h-5 w-5" />
                       Dashboard
                     </Link>
-                    <Link href="#" className="flex items-center gap-4 px-2.5 text-slate-400 hover:text-white">
+                    <Link href="/roster-builder" className="flex items-center gap-4 px-2.5 text-slate-400 hover:text-white">
                       <Users className="h-5 w-5" />
                       Roster
                     </Link>

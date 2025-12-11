@@ -1816,6 +1816,20 @@ Be encouraging and supportive - venue operations can be stressful!`;
     }
   });
 
+  // Get counts for a specific count session
+  app.get("/api/count-sessions/:id/counts", async (req: Request, res: Response) => {
+    try {
+      const session = await storage.getCountSession(req.params.id);
+      if (!session) {
+        return res.status(404).json({ error: "Count session not found" });
+      }
+      const counts = await storage.getInventoryCountsBySession(req.params.id);
+      res.json(counts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to get count session counts" });
+    }
+  });
+
   // Get active count session for a stand
   app.get("/api/count-sessions/active", async (req: Request, res: Response) => {
     try {
