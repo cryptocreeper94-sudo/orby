@@ -5,7 +5,7 @@ import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 export function AnimatedBackground({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("relative min-h-screen overflow-hidden", className)}>
+    <div className={cn("relative min-h-[100dvh] overflow-x-hidden", className)}>
       <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950/30 -z-20" />
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/20 via-transparent to-transparent -z-10" />
       <Stars />
