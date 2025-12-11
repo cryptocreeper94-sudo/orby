@@ -10,6 +10,7 @@ import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { useState } from "react";
 import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
+import { EventHeader } from '@/components/EventHeader';
 
 export default function ITDashboard() {
   const logout = useStore((state) => state.logout);
@@ -163,6 +164,7 @@ export default function ITDashboard() {
 
   return (
     <AnimatedBackground>
+      <EventHeader compact showDepartmentNotes="IT" />
       <GlobalModeBar />
       <div className="min-h-screen pb-20" data-testid="it-dashboard">
         <PageHeader

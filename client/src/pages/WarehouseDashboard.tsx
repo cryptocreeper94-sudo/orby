@@ -16,6 +16,7 @@ import { AnimatedBackground, GlassCard, GlassCardContent, GlassCardHeader, PageH
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
+import { EventHeader } from '@/components/EventHeader';
 
 type WarehouseCategory = {
   id: string;
@@ -435,6 +436,7 @@ export default function WarehouseDashboard() {
 
   return (
     <AnimatedBackground>
+      <EventHeader compact showDepartmentNotes="Warehouse" />
       <GlobalModeBar />
       <div className="min-h-screen pb-20" data-testid="warehouse-dashboard">
         <PageHeader

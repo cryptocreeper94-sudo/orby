@@ -13,6 +13,7 @@ import { AnimatedBackground, PageHeader } from "@/components/ui/premium";
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
+import { EventHeader } from '@/components/EventHeader';
 
 export default function KitchenDashboard() {
   const logout = useStore((state) => state.logout);
@@ -135,6 +136,7 @@ export default function KitchenDashboard() {
 
   return (
     <AnimatedBackground>
+      <EventHeader compact showDepartmentNotes="Kitchen" />
       <GlobalModeBar />
       <div className="min-h-screen pb-20" data-testid="kitchen-dashboard">
         <PageHeader

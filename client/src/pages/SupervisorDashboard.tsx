@@ -47,6 +47,7 @@ import { HeaderTutorialButton } from '@/components/HeaderTutorialButton';
 import { useSupervisorSession } from '@/hooks/useSupervisorSession';
 import { PersonalizedWelcomeTour } from '@/components/PersonalizedWelcomeTour';
 import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
+import { EventHeader } from '@/components/EventHeader';
 
 type WarehouseProduct = {
   id: string;
@@ -497,6 +498,7 @@ export default function SupervisorDashboard() {
   if (!activeStandId) {
     return (
       <AnimatedBackground>
+        <EventHeader compact showDepartmentNotes="Operations" />
         <PersonalizedWelcomeTour />
         <GlobalModeBar />
         <PageHeader 
