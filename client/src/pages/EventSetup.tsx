@@ -358,27 +358,27 @@ export default function EventSetup() {
 
   // Metrics for the carousel
   const eventMetrics = [
-    <div key="attendance" className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 min-w-[120px]" data-testid="metric-attendance">
+    <div key="attendance" className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 w-[130px] flex-shrink-0" data-testid="metric-attendance">
       <div className="text-xs text-cyan-400 mb-1">Expected</div>
       <div className="text-lg font-bold text-cyan-400">{formData.expectedAttendance.toLocaleString()}</div>
       <div className="text-xs text-slate-500">Attendees</div>
     </div>,
-    <div key="doors" className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 min-w-[120px]" data-testid="metric-doors">
+    <div key="doors" className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 w-[130px] flex-shrink-0" data-testid="metric-doors">
       <div className="text-xs text-emerald-400 mb-1">Gates</div>
       <div className="text-lg font-bold text-emerald-400">{formData.doorsOpenTime}</div>
       <div className="text-xs text-slate-500">Open Time</div>
     </div>,
-    <div key="start" className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 min-w-[120px]" data-testid="metric-start">
+    <div key="start" className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 w-[130px] flex-shrink-0" data-testid="metric-start">
       <div className="text-xs text-amber-400 mb-1">Kick Off</div>
       <div className="text-lg font-bold text-amber-400">{formData.eventStartTime}</div>
       <div className="text-xs text-slate-500">Event Start</div>
     </div>,
-    <div key="alcohol" className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 min-w-[140px]" data-testid="metric-alcohol">
+    <div key="alcohol" className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 w-[130px] flex-shrink-0" data-testid="metric-alcohol">
       <div className="text-xs text-rose-400 mb-1">Alcohol Cut Off</div>
-      <div className="text-sm font-bold text-rose-400">{formData.alcoholCutoffTime || 'End of 3rd Qtr'}</div>
+      <div className="text-sm font-bold text-rose-400 truncate">{formData.alcoholCutoffTime || 'End of 3rd Qtr'}</div>
       <div className="text-xs text-slate-500">Last Call</div>
     </div>,
-    <div key="geofence" className="p-3 rounded-lg bg-violet-500/10 border border-violet-500/30 min-w-[120px]" data-testid="metric-geofence">
+    <div key="geofence" className="p-3 rounded-lg bg-violet-500/10 border border-violet-500/30 w-[130px] flex-shrink-0" data-testid="metric-geofence">
       <div className="text-xs text-violet-400 mb-1">Geofence</div>
       <div className="text-lg font-bold text-violet-400 capitalize">{formData.geofenceMode}</div>
       <div className="text-xs text-slate-500">{formData.geofenceMode === 'custom' ? `${formData.customGeofenceRadius}ft` : 'Default'}</div>
