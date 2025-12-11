@@ -43,9 +43,21 @@ const roleTourConfigs: Record<string, RoleTourConfig> = {
     },
     steps: [
       {
+        id: 'ops-event-setup',
+        title: 'Event Setup - Your First Stop',
+        description: 'Event Setup is now your landing page. Configure event name, date, geofencing, and department notes before activating any event.',
+        position: 'center'
+      },
+      {
         id: 'ops-welcome',
-        title: 'Your Operations Hub',
+        title: 'Your Event Command Hub',
         description: 'This dashboard gives you complete visibility into every stand, every team member, and every active situation across the venue.',
+        position: 'center'
+      },
+      {
+        id: 'ops-event-header',
+        title: 'Live Event Header',
+        description: 'Once an event is active, every dashboard shows the EventHeader with event name, date, and department-specific notes.',
         position: 'center'
       },
       {
@@ -58,7 +70,7 @@ const roleTourConfigs: Record<string, RoleTourConfig> = {
       {
         id: 'ops-staffing-grid',
         title: 'Staffing Grid',
-        description: 'See all stands at a glance - who\'s assigned, what\'s their status, and any issues that need attention.',
+        description: 'See all stands at a glance linked to the active event - who\'s assigned, what\'s their status, and any issues that need attention.',
         targetSelector: '[data-testid="tab-grid"]',
         position: 'bottom'
       },

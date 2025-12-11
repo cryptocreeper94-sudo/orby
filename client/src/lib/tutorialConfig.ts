@@ -382,6 +382,56 @@ export const tutorialConfigs: Record<string, PageTutorial> = {
     ]
   },
 
+  "event-setup": {
+    page: "event-setup",
+    title: "Event Setup (Ops Manager)",
+    steps: [
+      { id: "welcome", title: "Event Setup Hub", body: "This is your first stop before any event. Configure event details, geofencing, staffing, and department notes all in one place.", position: "center" },
+      { id: "event-info", title: "Event Information", body: "Set the event name, date, type, and expected attendance. These details flow to all dashboards and the Staffing Grid.", targetSelector: "[data-testid='input-event-name']", position: "bottom" },
+      { id: "geofence", title: "Geofence Configuration", body: "Toggle between Stadium mode (default 2000ft) or Custom mode with your own radius. This controls where staff can check in.", targetSelector: "[data-testid='toggle-geofence-mode']", position: "bottom" },
+      { id: "department-notes", title: "Department Notes", body: "Add notes for specific departments - Operations, Kitchen, Warehouse, IT. Notes appear on each department's dashboard header.", position: "center" },
+      { id: "checklist", title: "Pre-Event Checklist", body: "Complete all required fields (event name, date, time) before activating. The checklist shows your progress.", targetSelector: "[data-testid='pre-event-checklist']", position: "bottom" },
+      { id: "activate", title: "Save & Activate", body: "When ready, activate the event. All dashboards switch to LIVE mode and show the active event header.", targetSelector: "[data-testid='btn-save-activate']", position: "bottom" }
+    ]
+  },
+
+  "command-center": {
+    page: "command-center",
+    title: "Command Center",
+    steps: [
+      {
+        id: "welcome",
+        title: "Command Center Overview",
+        body: "Your central hub for monitoring all venue operations in real-time. View event status, dispatch teams, and track emergencies.",
+        position: "center"
+      },
+      {
+        id: "event-status",
+        title: "Event Status",
+        body: "Live overview of the current event including attendance, staffing levels, and operational status across all departments.",
+        position: "center"
+      },
+      {
+        id: "quick-dispatch",
+        title: "Quick Dispatch",
+        body: "One-tap dispatch to IT, Operations, Kitchen, or Warehouse teams. Send urgent requests directly to the right department.",
+        position: "center"
+      },
+      {
+        id: "emergency-feed",
+        title: "Emergency Feed",
+        body: "Real-time alerts and incidents requiring immediate attention. Medical, Security, Fire, and Equipment emergencies appear here.",
+        position: "center"
+      },
+      {
+        id: "live-metrics",
+        title: "Live Metrics",
+        body: "Track key performance indicators: check-in rates, issue resolution times, and department response metrics.",
+        position: "center"
+      }
+    ]
+  },
+
   "ops-manager": {
     page: "ops-manager",
     title: "Ops Manager Command (David)",
@@ -390,6 +440,14 @@ export const tutorialConfigs: Record<string, PageTutorial> = {
         id: "welcome",
         title: "Your Command Center",
         body: "As Ops Manager, you have full visibility and control over all venue operations. This tour covers your superpowers.",
+        position: "center"
+      },
+      {
+        id: "event-setup-first",
+        title: "Start with Event Setup",
+        body: "Before each event, visit Event Setup to configure event details, geofencing mode (Stadium or Custom), staffing, and department notes. It's your pre-event checklist.",
+        linkRoute: "/event-setup",
+        linkText: "Go to Event Setup",
         position: "center"
       },
       {
@@ -414,7 +472,7 @@ export const tutorialConfigs: Record<string, PageTutorial> = {
       {
         id: "geofence",
         title: "Venue Geofencing",
-        body: "Configure the geofence radius for staff check-ins. Presets: Standard (1,640ft), Large Event (2,461ft), CMA Festival (4,921ft).",
+        body: "Configure geofencing in Event Setup: Stadium mode (default 2000ft) or Custom mode with your own radius. Controls where staff can check in.",
         position: "center"
       },
       {

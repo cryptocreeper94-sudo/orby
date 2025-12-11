@@ -4,7 +4,7 @@
 Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designed to unify venue operations, replacing fragmented communication with a digital platform. It offers an Emergency Command Center, delivery lifecycle tracking, three-phase inventory counting, alcohol compliance monitoring, GPS-guided navigation, and real-time team communications. Orby aims to provide a complete operational solution for venues, from emergency response to inventory and team management, improving efficiency and compliance for event venues.
 
 ## Current Version
-**v1.0.12** - Published to Solana Mainnet (December 2025)
+**v1.0.14** - Event Setup System + Full Enhancement Suite (December 2025)
 
 ### Recent Changelog
 - **v1.0.14**: Event Setup System + Full Enhancement Suite
@@ -58,7 +58,10 @@ Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designe
 Orby is a full-stack PWA built with a React frontend and an Express backend, utilizing PostgreSQL with Drizzle ORM. The platform emphasizes a mobile-first, touch-optimized UI/UX with Framer Motion animations, dynamic glow effects, glassmorphism with backdrop blur, and a dark theme featuring aqua/cyan accent gradients.
 
 **Core Features:**
-- **Emergency & Command:** Real-time incident management, smart message routing, priority escalation, and full audit trails.
+- **Event Setup System:** Ops Manager (David) landing page for pre-event configuration including event details, geofencing (Stadium/Custom modes), department notes, and pre-event checklist validation.
+- **EventHeader:** Universal component displaying active event information with department-filtered notes across all manager dashboards.
+- **Event History:** View past events with metrics (total, completed, average attendance) and expandable details.
+- **Event Status & Command:** Real-time incident management, smart message routing, priority escalation, and full audit trails.
 - **Delivery Operations:** Full lifecycle tracking (Requested → Approved → Picking → On the Way → Delivered) with status dashboards and quick messages.
 - **Inventory Management:** Three-phase counting, digital template creation via OCR, Manager Document Hub, and AI scanning for auto-counting.
 - **Staff Management:** Universal PIN login, role-based access, dynamic team lead assignments, and bar scheduler.

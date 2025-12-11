@@ -248,9 +248,21 @@ export const opsManagerPages: OnboardingPage[] = [
         id: 'ops-intro',
         page: 'ops-welcome',
         title: 'Welcome, David!',
-        description: 'As Ops Manager, you have full visibility and control over all venue operations. This tour covers your superpowers. It\'s thorough but quick.',
+        description: 'As Ops Manager, you have full visibility and control over all venue operations. Event Setup is now your landing page - configure events before going live. This tour covers your superpowers.',
         position: 'center'
       }
+    ]
+  },
+  {
+    id: 'ops-event-setup',
+    title: 'Event Setup',
+    icon: '🎯',
+    description: 'Your first stop before any event',
+    route: '/event-setup',
+    steps: [
+      { id: 'event-setup-intro', page: 'ops-event-setup', title: 'Event Setup Hub', description: 'This is now your landing page. Configure event details, geofencing, staffing, and department notes before going live.', position: 'center' },
+      { id: 'event-setup-geofence', page: 'ops-event-setup', title: 'Geofence Configuration', description: 'Toggle between Stadium (2000ft default) or Custom mode with your specified radius. Controls where staff can check in.', position: 'center' },
+      { id: 'event-setup-notes', page: 'ops-event-setup', title: 'Department Notes', description: 'Add notes for Operations, Kitchen, Warehouse, IT. Each department sees only their relevant notes in the EventHeader.', position: 'center' }
     ]
   },
   {
@@ -286,7 +298,7 @@ export const opsManagerPages: OnboardingPage[] = [
         id: 'controls-geofence',
         page: 'ops-controls',
         title: 'Venue Geofencing',
-        description: 'Configure geofence radius: Standard (1,640ft), Large Event (2,461ft), CMA Festival (4,921ft). Only you can change this.',
+        description: 'Geofencing is now configured in Event Setup. Choose Stadium mode (2000ft default) or Custom mode with your specified radius. Controls where staff can check in.',
         position: 'center'
       }
     ]
@@ -373,7 +385,7 @@ export const opsManagerPages: OnboardingPage[] = [
       {
         id: 'emergency-center',
         page: 'ops-emergency',
-        title: 'Emergency Command Center',
+        title: 'Event Status Command',
         description: 'Real-time alerts with SLA tracking. One-tap for Medical, Security, Fire, Equipment, Weather, or Crowd alerts. Right teams notified instantly.',
         position: 'center'
       },
@@ -485,6 +497,17 @@ export const opsManagerPages: OnboardingPage[] = [
         description: 'Switch between Radar, Temperature, and Precipitation views. Nissan Stadium marker shows your exact location. Make weather-based operational decisions fast.',
         position: 'center'
       }
+    ]
+  },
+  {
+    id: 'ops-event-history',
+    title: 'Event History',
+    icon: '📅',
+    description: 'View past events and performance metrics',
+    route: '/event-history',
+    steps: [
+      { id: 'history-overview', page: 'ops-event-history', title: 'Event History', description: 'View all past events with attendance, activation times, and status. Click any event to see department notes and details.', position: 'center' },
+      { id: 'history-metrics', page: 'ops-event-history', title: 'Summary Metrics', description: 'See total events, completed count, average attendance, and other key metrics at a glance.', position: 'center' }
     ]
   },
   {
