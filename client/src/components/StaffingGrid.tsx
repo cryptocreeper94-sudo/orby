@@ -5,12 +5,36 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScanLine, CalendarDays, Upload, Printer, Search } from "lucide-react";
+import { ScanLine, CalendarDays, Upload, Printer, Search, AlertCircle } from "lucide-react";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { EventHeader } from "@/components/EventHeader";
+import type { ActiveEvent } from "@shared/schema";
 
 export function StaffingGrid() {
   const stands = useStore((state) => state.stands);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const { data: activeEvent } = useQuery<ActiveEvent | null>({
+    queryKey: ['/api/active-events/current'],
+    queryFn: async () => {
+      try {
+        const response = await fetch('/api/active-events/current');
+        if (response.ok) {
+          return response.json();
+        }
+        return null;
+      } catch {
+        return null;
+      }
+    },
+    refetchInterval: 30000,
+  });
+
+  const formatEventDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
 
   const getStatusColor = (status: Stand['status']) => {
     switch (status) {
@@ -37,14 +61,27 @@ export function StaffingGrid() {
 
   return (
     <div className="space-y-6">
+      {/* Event Header */}
+      <EventHeader compact />
+
+      {/* No Active Event Message */}
+      {!activeEvent && (
+        <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg" data-testid="staffing-grid-no-event">
+          <AlertCircle className="w-4 h-4 text-amber-400" />
+          <span className="text-sm text-amber-600 dark:text-amber-300 font-medium">No active event - Staffing grid shows sample data</span>
+        </div>
+      )}
+
       {/* Grid Header / Actions */}
       <div className="flex flex-col gap-4 bg-white dark:bg-slate-900 p-4 rounded-lg border shadow-sm">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
-            <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2 font-mono">
-              25-11-30 POS TITANS V JAGUARS
+            <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2 font-mono" data-testid="staffing-grid-event-name">
+              {activeEvent ? activeEvent.eventName : "25-11-30 POS TITANS V JAGUARS"}
             </h2>
-            <p className="text-sm text-muted-foreground font-medium">Staffing Grid • Event ID: #E-251130</p>
+            <p className="text-sm text-muted-foreground font-medium">
+              Staffing Grid • {activeEvent ? `Event Date: ${formatEventDate(activeEvent.eventDate)}` : "Event ID: #E-251130"}
+            </p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">

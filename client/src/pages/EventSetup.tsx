@@ -14,6 +14,7 @@ import {
   Phone,
   AlertCircle,
   CheckCircle2,
+  Circle,
   Scan,
   Grid3X3,
   Navigation,
@@ -30,7 +31,8 @@ import {
   Expand,
   CloudSun,
   Wine,
-  Info
+  Info,
+  ClipboardCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -226,14 +228,26 @@ export default function EventSetup() {
   });
 
   const handleSave = () => {
-    if (!formData.eventName) {
+    if (!requiredFieldsComplete) {
       toast({
-        title: 'Missing Information',
-        description: 'Please enter an event name.',
+        title: 'Missing Required Fields',
+        description: 'Please complete all required fields before activating.',
         variant: 'destructive',
       });
       return;
     }
+
+    if (!optionalFieldsComplete) {
+      const missingOptional = checklistItems
+        .filter((item) => !item.isRequired && !item.isComplete)
+        .map((item) => item.label);
+      toast({
+        title: 'Optional Fields Missing',
+        description: `Consider adding: ${missingOptional.join(', ')}`,
+        variant: 'default',
+      });
+    }
+
     saveEventMutation.mutate(formData);
   };
 
@@ -252,6 +266,47 @@ export default function EventSetup() {
       departmentNotes: prev.departmentNotes.filter((_, i) => i !== index)
     }));
   };
+
+  const checklistItems = [
+    {
+      id: 'event-name',
+      label: 'Event name configured',
+      isComplete: !!formData.eventName.trim(),
+      isRequired: true,
+    },
+    {
+      id: 'event-date',
+      label: 'Event date set',
+      isComplete: !!formData.eventDate,
+      isRequired: true,
+    },
+    {
+      id: 'event-time',
+      label: 'Doors/start time set',
+      isComplete: !!formData.doorsOpenTime || !!formData.eventStartTime,
+      isRequired: true,
+    },
+    {
+      id: 'attendance',
+      label: 'Expected attendance',
+      isComplete: formData.expectedAttendance > 0,
+      isRequired: false,
+    },
+    {
+      id: 'dept-notes',
+      label: 'Department notes added',
+      isComplete: formData.departmentNotes.length > 0,
+      isRequired: false,
+    },
+  ];
+
+  const requiredFieldsComplete = checklistItems
+    .filter((item) => item.isRequired)
+    .every((item) => item.isComplete);
+
+  const optionalFieldsComplete = checklistItems
+    .filter((item) => !item.isRequired)
+    .every((item) => item.isComplete);
 
   // Access control
   const allowedRoles = ['Developer', 'Admin', 'OperationsManager', 'GeneralManager', 'RegionalVP'];
@@ -578,6 +633,59 @@ export default function EventSetup() {
             </div>
           </BentoCard>
 
+          {/* Pre-Event Checklist */}
+          <BentoCard span={4} className="col-span-12 md:col-span-4" data-testid="bento-checklist">
+            <div data-testid="pre-event-checklist">
+              <SectionHeader
+                title="Pre-Event Checklist"
+                icon={<ClipboardCheck className="w-4 h-4" />}
+              />
+              <div className="mt-3 space-y-2">
+                {checklistItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`flex items-center gap-2 p-2 rounded-lg ${
+                      item.isComplete
+                        ? 'bg-emerald-500/10 border border-emerald-500/30'
+                        : item.isRequired
+                        ? 'bg-rose-500/10 border border-rose-500/30'
+                        : 'bg-slate-800/50 border border-slate-700/50'
+                    }`}
+                    data-testid={`checklist-item-${item.id}`}
+                  >
+                    {item.isComplete ? (
+                      <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                    ) : (
+                      <Circle className="h-4 w-4 text-slate-500 flex-shrink-0" />
+                    )}
+                    <span
+                      className={`text-sm ${
+                        item.isComplete
+                          ? 'text-emerald-400'
+                          : item.isRequired
+                          ? 'text-rose-400'
+                          : 'text-slate-400'
+                      }`}
+                    >
+                      {item.label}
+                      {item.isRequired && !item.isComplete && (
+                        <span className="text-xs ml-1 text-rose-500">*</span>
+                      )}
+                      {!item.isRequired && (
+                        <span className="text-xs ml-1 text-slate-500">(optional)</span>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 text-xs text-slate-500">
+                {requiredFieldsComplete
+                  ? '✓ All required fields complete'
+                  : '* Required fields must be completed'}
+              </div>
+            </div>
+          </BentoCard>
+
           {/* Staffing Row - Staffing Grid (span-8), Quick Actions (span-4) */}
           <BentoCard span={8} className="col-span-12 lg:col-span-8" data-testid="bento-staffing">
             <div className="flex items-center justify-between mb-3">
@@ -632,7 +740,7 @@ export default function EventSetup() {
                 onClick={handleSave}
                 className="w-full"
                 variant="cyan"
-                disabled={saveEventMutation.isPending}
+                disabled={saveEventMutation.isPending || !requiredFieldsComplete}
                 data-testid="btn-save-activate"
               >
                 <Save className="h-4 w-4 mr-2" />
