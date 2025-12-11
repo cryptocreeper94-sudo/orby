@@ -119,6 +119,37 @@ export default function EventSetup() {
   const [newDeptNote, setNewDeptNote] = useState({ department: 'All' as DepartmentNote['department'], note: '' });
   const [isSaved, setIsSaved] = useState(false);
   const [activeEventId, setActiveEventId] = useState<string | null>(null);
+  const [showTemplateMenu, setShowTemplateMenu] = useState(false);
+  const [staffingGrid, setStaffingGrid] = useState({
+    supervisors: 12,
+    leads: 48,
+    it: 6,
+    kitchen: 24,
+    templateName: 'Titans Game Day'
+  });
+
+  // Staffing templates for common event types
+  const STAFFING_TEMPLATES = [
+    { id: 'titans-game', name: 'Titans Game Day', supervisors: 12, leads: 48, it: 6, kitchen: 24 },
+    { id: 'concert-large', name: 'Large Concert', supervisors: 15, leads: 60, it: 8, kitchen: 30 },
+    { id: 'concert-small', name: 'Small Concert', supervisors: 8, leads: 32, it: 4, kitchen: 16 },
+    { id: 'private-event', name: 'Private Event', supervisors: 4, leads: 16, it: 2, kitchen: 8 },
+  ];
+
+  const handleUseTemplate = (template: typeof STAFFING_TEMPLATES[0]) => {
+    setStaffingGrid({
+      supervisors: template.supervisors,
+      leads: template.leads,
+      it: template.it,
+      kitchen: template.kitchen,
+      templateName: template.name
+    });
+    toast({
+      title: `Template Applied: ${template.name}`,
+      description: `Staffing grid updated with ${template.supervisors} supervisors, ${template.leads} leads, ${template.it} IT, ${template.kitchen} kitchen staff.`,
+    });
+    setShowTemplateMenu(false);
+  };
 
   // Fetch active event if one exists
   const { data: activeEvent } = useQuery<ActiveEvent | null>({
@@ -697,32 +728,64 @@ export default function EventSetup() {
                 <Button variant="outline" size="sm" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10" data-testid="btn-scan-grid">
                   <Scan className="h-3 w-3 mr-1" /> Scan Document
                 </Button>
-                <Button variant="outline" size="sm" className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10" data-testid="btn-use-template">
-                  <FileText className="h-3 w-3 mr-1" /> Use Template
-                </Button>
+                <div className="relative">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10" 
+                    data-testid="btn-use-template"
+                    onClick={() => setShowTemplateMenu(!showTemplateMenu)}
+                  >
+                    <FileText className="h-3 w-3 mr-1" /> Use Template
+                  </Button>
+                  <AnimatePresence>
+                    {showTemplateMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute right-0 top-full mt-1 z-50 w-48 rounded-lg bg-slate-800 border border-slate-700 shadow-xl overflow-hidden"
+                      >
+                        {STAFFING_TEMPLATES.map((template) => (
+                          <button
+                            key={template.id}
+                            onClick={() => handleUseTemplate(template)}
+                            className="w-full px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white transition-colors"
+                            data-testid={`template-${template.id}`}
+                          >
+                            {template.name}
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
               <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-supervisors">
                 <Users className="h-5 w-5 mx-auto mb-1 text-cyan-400" />
-                <div className="text-lg font-bold text-white">12</div>
+                <div className="text-lg font-bold text-white">{staffingGrid.supervisors}</div>
                 <div className="text-xs text-slate-400">Supervisors</div>
               </div>
               <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-leads">
                 <Users className="h-5 w-5 mx-auto mb-1 text-emerald-400" />
-                <div className="text-lg font-bold text-white">48</div>
+                <div className="text-lg font-bold text-white">{staffingGrid.leads}</div>
                 <div className="text-xs text-slate-400">Stand Leads</div>
               </div>
               <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-it">
                 <Monitor className="h-5 w-5 mx-auto mb-1 text-blue-400" />
-                <div className="text-lg font-bold text-white">6</div>
+                <div className="text-lg font-bold text-white">{staffingGrid.it}</div>
                 <div className="text-xs text-slate-400">IT Support</div>
               </div>
               <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-700 text-center" data-testid="grid-kitchen">
                 <ChefHat className="h-5 w-5 mx-auto mb-1 text-orange-400" />
-                <div className="text-lg font-bold text-white">24</div>
+                <div className="text-lg font-bold text-white">{staffingGrid.kitchen}</div>
                 <div className="text-xs text-slate-400">Kitchen Staff</div>
               </div>
+            </div>
+            <div className="mt-2 text-xs text-slate-500 text-center">
+              Template: {staffingGrid.templateName}
             </div>
             <div className="mt-3 p-3 rounded-lg bg-slate-900/30 border border-dashed border-slate-600 text-center">
               <Info className="h-5 w-5 mx-auto mb-1 text-slate-500" />
