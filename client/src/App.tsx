@@ -15,6 +15,7 @@ import { PWAInstallPrompt } from "@/components/PWAInstallPrompt";
 import FloatingWeatherButton from "@/components/FloatingWeatherButton";
 import { AppFooter } from "@/components/AppFooter";
 import { AppHeader } from "@/components/AppHeader";
+import { ThemedBackground } from "@/components/ThemedBackground";
 import legendsLogo from "@assets/stock_images/legends_hospitality_nobg.png";
 import NotFound from "@/pages/not-found";
 import LoginPage from "@/pages/Login";
@@ -140,30 +141,32 @@ function App() {
         <ModeProvider>
           <OnboardingProvider>
             <TooltipProvider>
-            <SandboxBanner />
-            <SandboxWelcome />
-            <OnboardingOverlay />
-            <FeatureSlideshow />
-            <OrbyAIChat />
-            <PWAInstallPrompt />
-            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-              <TwinklingStars />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <img 
-                  src={orbyCommanderImg} 
-                  alt="" 
-                  className="w-[65vmin] h-[65vmin] object-contain opacity-[0.06] select-none drop-shadow-[0_0_30px_rgba(6,182,212,0.15)]"
-                  aria-hidden="true"
-                />
-              </div>
-            </div>
-            <SandboxContentWrapper>
-              <Toaster />
-              <Router />
-              <FloatingWeatherButton />
-              <AppFooter companyLogo={legendsLogo} companyName="Legends" />
-            </SandboxContentWrapper>
-          </TooltipProvider>
+              <ThemedBackground>
+                <SandboxBanner />
+                <SandboxWelcome />
+                <OnboardingOverlay />
+                <FeatureSlideshow />
+                <OrbyAIChat />
+                <PWAInstallPrompt />
+                <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+                  <TwinklingStars />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <img 
+                      src={orbyCommanderImg} 
+                      alt="" 
+                      className="w-[65vmin] h-[65vmin] object-contain opacity-[0.06] select-none drop-shadow-[0_0_30px_rgba(6,182,212,0.15)]"
+                      aria-hidden="true"
+                    />
+                  </div>
+                </div>
+                <SandboxContentWrapper>
+                  <Toaster />
+                  <Router />
+                  <FloatingWeatherButton />
+                  <AppFooter companyLogo={legendsLogo} companyName="Legends" />
+                </SandboxContentWrapper>
+              </ThemedBackground>
+            </TooltipProvider>
           </OnboardingProvider>
         </ModeProvider>
       </ThemeProvider>
