@@ -43,6 +43,20 @@ const FEATURE_CATEGORIES: FeatureCategory[] = [
     ]
   },
   {
+    name: "Event Setup & Management",
+    icon: "🎯",
+    color: "cyan",
+    features: [
+      { id: "evt-1", name: "Event Setup Hub", description: "Pre-event configuration page for ops managers", status: "complete", route: "/event-setup" },
+      { id: "evt-2", name: "POS Staffing Grid", description: "Section breakdown with E700/A930 device assignments", status: "complete" },
+      { id: "evt-3", name: "Geofence Configuration", description: "Stadium or Custom mode with configurable radius", status: "complete" },
+      { id: "evt-4", name: "Department Notes", description: "Targeted notes for IT, Kitchen, Warehouse, Operations", status: "complete" },
+      { id: "evt-5", name: "Pre-Event Checklist", description: "Validation before event activation", status: "complete" },
+      { id: "evt-6", name: "Event History", description: "Past events with metrics and details", status: "complete", route: "/event-history" },
+      { id: "evt-7", name: "EventHeader", description: "Universal active event display across dashboards", status: "complete" },
+    ]
+  },
+  {
     name: "Role Dashboards",
     icon: "📊",
     color: "blue",
