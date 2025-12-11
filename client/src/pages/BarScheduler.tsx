@@ -386,7 +386,10 @@ export default function BarScheduler() {
     },
   ];
 
-  if (!currentUser || !['Developer', 'Admin', 'Management', 'OperationsManager', 'GeneralManager', 'RegionalVP', 'WarehouseManager', 'Bar'].includes(currentUser.role)) {
+  // Access check for bar scheduler - management roles and Bar role have access
+  const allowedRoles = ['Developer', 'Admin', 'Management', 'OperationsManager', 'GeneralManager', 'RegionalVP', 'WarehouseManager', 'Bar'];
+  
+  if (!currentUser || !allowedRoles.includes(currentUser.role)) {
     return (
       <AnimatedBackground>
         <div className="min-h-screen flex items-center justify-center p-4" data-testid="access-restricted">

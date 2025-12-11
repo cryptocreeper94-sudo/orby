@@ -98,6 +98,12 @@ export const useStore = create<AppState>()(
           set({ isLoading: true, error: null });
           const { user } = await api.loginWithPin(pin);
           set({ currentUser: user, isLoading: false });
+          // Set session persistence for page navigation
+          const PERSISTENCE_KEY = 'orby_session_persistence';
+          const PERSISTENCE_EXPIRY_KEY = 'orby_session_expiry';
+          const SESSION_DURATION = 8 * 60 * 60 * 1000; // 8 hours
+          localStorage.setItem(PERSISTENCE_KEY, 'true');
+          localStorage.setItem(PERSISTENCE_EXPIRY_KEY, String(Date.now() + SESSION_DURATION));
           // Fetch all data after login
           await get().fetchAll();
           return true;
