@@ -4,9 +4,19 @@
 Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designed to unify venue operations, replacing fragmented communication with a digital platform. It offers an Emergency Command Center, delivery lifecycle tracking, three-phase inventory counting, alcohol compliance monitoring, GPS-guided navigation, and real-time team communications. Orby aims to provide a complete operational solution for venues, from emergency response to inventory and team management, improving efficiency and compliance for event venues.
 
 ## Current Version
-**v1.0.14** - Event Setup System + Full Enhancement Suite (December 2025)
+**v1.0.15** - Developer Analytics Dashboard (December 2025)
 
 ### Recent Changelog
+- **v1.0.15**: Developer Analytics Dashboard
+  - Full analytics tracking system with tenant-aware data isolation (demo vs nissan_beta)
+  - AnalyticsSection component in DevDashboard with Bento grid layout
+  - Metrics cards: Total Visits, Unique Visitors, Unique Users, Visits Today, Visits This Week
+  - Recharts visualizations: Line chart for daily visits, Bar chart for top routes
+  - Tenant toggle dropdown for switching between demo and nissan_beta data
+  - SEO tag edit tracking and history
+  - Automatic page visit tracking on route changes
+  - Input validation and route sanitization on API endpoints
+  - Database tables: analytics_visits, analytics_daily_rollups, seo_tag_edits
 - **v1.0.14**: Event Setup System + Full Enhancement Suite
   - Event Setup page with bento grid layout (David's landing page)
   - Pre-Event Checklist validation before activation
@@ -75,6 +85,7 @@ Orby is a full-stack PWA built with a React frontend and an Express backend, uti
 - **Genesis Hallmark Stamping System:** Universal asset stamping with ORB numbers and optional blockchain verification via Solana for tamper-proof records.
 - **Admin Controls:** Role-based widget visibility, alert level settings, data scope controls, and configurable layout presets for authorized managers.
 - **Multi-Tenant Architecture:** SaaS-ready platform supporting business, franchise, and beta tenant types with feature flags for content visibility.
+- **Developer Analytics Dashboard:** Full analytics tracking with tenant-aware data isolation, metrics visualization (visits, unique users, top routes), Recharts line/bar charts, and automatic page visit tracking.
 - **PWA Ready:** Designed for seamless installation and experience on web and mobile platforms.
 
 **Integration Strategy:**
