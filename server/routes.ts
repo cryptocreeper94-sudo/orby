@@ -6242,26 +6242,40 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   });
 
   // ============ ANALYTICS ============
+  
+  const VALID_TENANTS = ['demo', 'nissan_beta'] as const;
+  
+  const validateTenant = (tenantId: string | undefined): string => {
+    const tenant = tenantId || 'demo';
+    if (!VALID_TENANTS.includes(tenant as typeof VALID_TENANTS[number])) {
+      return 'demo';
+    }
+    return tenant;
+  };
+  
+  const sanitizeRoute = (route: string): string => {
+    return route.replace(/[<>"'&]/g, '').substring(0, 500);
+  };
 
   // Track a page visit
   app.post("/api/analytics/track", async (req: Request, res: Response) => {
     try {
-      const { route, tenantId = 'demo', sessionId, userId, userAgent, referrer } = req.body;
+      const { route, tenantId, sessionId, userId, userAgent, referrer } = req.body;
       if (!route || !sessionId) {
         return res.status(400).json({ error: "Route and sessionId required" });
       }
       
-      // Check if this session has visited before (unique visitor check)
-      const existingVisits = await storage.getAnalyticsSummary(tenantId, new Date(0), new Date());
+      const validTenant = validateTenant(tenantId);
+      const sanitizedRoute = sanitizeRoute(route);
       
       const visit = await storage.trackPageVisit({
-        route,
-        tenantId,
-        sessionId,
+        route: sanitizedRoute,
+        tenantId: validTenant,
+        sessionId: String(sessionId).substring(0, 64),
         userId: userId || null,
-        userAgent: userAgent || req.get('user-agent'),
-        referrer: referrer || req.get('referrer'),
-        isUniqueVisitor: false, // Will be determined by storage
+        userAgent: (userAgent || req.get('user-agent') || '').substring(0, 500),
+        referrer: (referrer || req.get('referrer') || '').substring(0, 500),
+        isUniqueVisitor: false,
         isUniqueUser: !!userId
       });
       
@@ -6275,8 +6289,8 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   // Get analytics summary for a tenant
   app.get("/api/analytics/summary", async (req: Request, res: Response) => {
     try {
-      const tenantId = (req.query.tenant as string) || 'demo';
-      const days = parseInt(req.query.days as string) || 30;
+      const tenantId = validateTenant(req.query.tenant as string);
+      const days = Math.min(parseInt(req.query.days as string) || 30, 365);
       
       const endDate = new Date();
       const startDate = new Date();
@@ -6286,57 +6300,58 @@ Maintain professional composure. Answer inspector questions honestly. Report any
       res.json(summary);
     } catch (error) {
       console.error("Failed to get analytics:", error);
-      res.status(500).json({ error: "Failed to get analytics" });
+      res.status(500).json({ error: "Failed to retrieve analytics summary" });
     }
   });
 
   // Get daily visit counts for charts
   app.get("/api/analytics/daily", async (req: Request, res: Response) => {
     try {
-      const tenantId = (req.query.tenant as string) || 'demo';
-      const days = parseInt(req.query.days as string) || 14;
+      const tenantId = validateTenant(req.query.tenant as string);
+      const days = Math.min(parseInt(req.query.days as string) || 14, 90);
       
       const data = await storage.getDailyVisitCounts(tenantId, days);
       res.json(data);
     } catch (error) {
       console.error("Failed to get daily analytics:", error);
-      res.status(500).json({ error: "Failed to get daily analytics" });
+      res.status(500).json({ error: "Failed to retrieve daily visit data" });
     }
   });
 
   // Get SEO edits log
   app.get("/api/analytics/seo", async (req: Request, res: Response) => {
     try {
-      const tenantId = (req.query.tenant as string) || 'demo';
-      const limit = parseInt(req.query.limit as string) || 20;
+      const tenantId = validateTenant(req.query.tenant as string);
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
       
       const edits = await storage.getSeoEdits(tenantId, limit);
       res.json(edits);
     } catch (error) {
       console.error("Failed to get SEO edits:", error);
-      res.status(500).json({ error: "Failed to get SEO edits" });
+      res.status(500).json({ error: "Failed to retrieve SEO edit history" });
     }
   });
 
   // Track SEO tag edit
   app.post("/api/analytics/seo", async (req: Request, res: Response) => {
     try {
-      const { tenantId = 'demo', tagType, oldValue, newValue, editedBy } = req.body;
+      const { tenantId, tagType, oldValue, newValue, editedBy } = req.body;
       if (!tagType) {
-        return res.status(400).json({ error: "tagType required" });
+        return res.status(400).json({ error: "tagType is required" });
       }
       
+      const validTenant = validateTenant(tenantId);
       const edit = await storage.createSeoEdit({
-        tenantId,
-        tagType,
-        oldValue,
-        newValue,
-        editedBy
+        tenantId: validTenant,
+        tagType: String(tagType).substring(0, 100),
+        oldValue: oldValue ? String(oldValue).substring(0, 1000) : null,
+        newValue: newValue ? String(newValue).substring(0, 1000) : null,
+        editedBy: editedBy || null
       });
-      res.json(edit);
+      res.status(201).json(edit);
     } catch (error) {
       console.error("Failed to track SEO edit:", error);
-      res.status(500).json({ error: "Failed to track SEO edit" });
+      res.status(500).json({ error: "Failed to record SEO tag edit" });
     }
   });
 
