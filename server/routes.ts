@@ -6378,6 +6378,59 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ============ ECOSYSTEM SNIPPETS ============
+  
+  // Serve local documentation snippets
+  app.get("/api/ecosystem/snippets/by-name/:name", async (req: Request, res: Response) => {
+    try {
+      const snippetName = req.params.name.replace(/[^a-zA-Z0-9._-]/g, '');
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      
+      const snippetPath = path.join(process.cwd(), 'server', 'snippets', snippetName);
+      
+      try {
+        const content = await fs.readFile(snippetPath, 'utf-8');
+        res.json({
+          success: true,
+          snippet: {
+            name: snippetName,
+            content,
+            language: snippetName.endsWith('.md') ? 'markdown' : 'text',
+            category: 'documentation'
+          }
+        });
+      } catch {
+        res.status(404).json({ error: `Snippet '${snippetName}' not found` });
+      }
+    } catch (error) {
+      console.error("Failed to get snippet:", error);
+      res.status(500).json({ error: "Failed to retrieve snippet" });
+    }
+  });
+
+  // List available snippets
+  app.get("/api/ecosystem/snippets", async (_req: Request, res: Response) => {
+    try {
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      
+      const snippetsDir = path.join(process.cwd(), 'server', 'snippets');
+      const files = await fs.readdir(snippetsDir);
+      
+      res.json({
+        success: true,
+        snippets: files.map(name => ({
+          name,
+          language: name.endsWith('.md') ? 'markdown' : 'text'
+        }))
+      });
+    } catch (error) {
+      console.error("Failed to list snippets:", error);
+      res.json({ success: true, snippets: [] });
+    }
+  });
+
   // Catch-all 404 handler for non-existent API routes
   app.all("/api/*", (_req: Request, res: Response) => {
     res.status(404).json({ error: "API endpoint not found" });
