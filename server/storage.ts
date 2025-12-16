@@ -12,6 +12,7 @@ import {
   keySets, radios, equipmentCheckoutHistory, equipmentAlerts,
   posDeviceTypes, posDevices, posLocationGrid, posAssignments, posReplacements, posIssues,
   documentTemplates, scannedDocuments,
+  analyticsVisits, analyticsDailyRollups, seoTagEdits,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -77,6 +78,9 @@ import {
   type DocumentTemplate, type InsertDocumentTemplate,
   type ScannedDocument, type InsertScannedDocument,
   type Release, type InsertRelease,
+  type AnalyticsVisit, type InsertAnalyticsVisit,
+  type AnalyticsDailyRollup, type InsertAnalyticsDailyRollup,
+  type SeoTagEdit, type InsertSeoTagEdit,
   releases
 } from "@shared/schema";
 import { db } from "./db";
@@ -598,6 +602,21 @@ export interface IStorage {
   createRelease(release: InsertRelease): Promise<Release>;
   publishRelease(id: string, blockchainTxHash?: string, releaseHash?: string): Promise<Release>;
   deleteRelease(id: string): Promise<void>;
+
+  // ============ ANALYTICS ============
+  trackPageVisit(visit: InsertAnalyticsVisit): Promise<AnalyticsVisit>;
+  getAnalyticsSummary(tenantId: string, startDate: Date, endDate: Date): Promise<{
+    totalVisits: number;
+    uniqueVisitors: number;
+    uniqueUsers: number;
+    visitsToday: number;
+    visitsThisWeek: number;
+    topRoutes: { route: string; count: number }[];
+  }>;
+  getDailyVisitCounts(tenantId: string, days: number): Promise<{ date: string; count: number }[]>;
+  getSeoEdits(tenantId: string, limit?: number): Promise<SeoTagEdit[]>;
+  createSeoEdit(edit: InsertSeoTagEdit): Promise<SeoTagEdit>;
+  getTenantList(): Promise<string[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3702,6 +3721,123 @@ export class DatabaseStorage implements IStorage {
 
   async deleteRelease(id: string): Promise<void> {
     await db.delete(releases).where(eq(releases.id, id));
+  }
+
+  // ============ ANALYTICS ============
+  async trackPageVisit(visit: InsertAnalyticsVisit): Promise<AnalyticsVisit> {
+    const [created] = await db.insert(analyticsVisits).values(visit).returning();
+    return created;
+  }
+
+  async getAnalyticsSummary(tenantId: string, startDate: Date, endDate: Date): Promise<{
+    totalVisits: number;
+    uniqueVisitors: number;
+    uniqueUsers: number;
+    visitsToday: number;
+    visitsThisWeek: number;
+    topRoutes: { route: string; count: number }[];
+  }> {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const totalsResult = await db.execute(sql`
+      SELECT 
+        COUNT(*)::text as total_visits,
+        COUNT(DISTINCT session_id)::text as unique_visitors,
+        COUNT(DISTINCT CASE WHEN user_id IS NOT NULL THEN user_id END)::text as unique_users
+      FROM analytics_visits
+      WHERE tenant_id = ${tenantId}
+        AND occurred_at >= ${startDate}
+        AND occurred_at <= ${endDate}
+    `);
+    const totals = (totalsResult as any).rows?.[0] || totalsResult[0] || {};
+
+    const todayResult = await db.execute(sql`
+      SELECT COUNT(*)::text as visits_today
+      FROM analytics_visits
+      WHERE tenant_id = ${tenantId}
+        AND occurred_at >= ${startOfToday}
+    `);
+    const todayCounts = (todayResult as any).rows?.[0] || todayResult[0] || {};
+
+    const weekResult = await db.execute(sql`
+      SELECT COUNT(*)::text as visits_week
+      FROM analytics_visits
+      WHERE tenant_id = ${tenantId}
+        AND occurred_at >= ${sevenDaysAgo}
+    `);
+    const weekCounts = (weekResult as any).rows?.[0] || weekResult[0] || {};
+
+    const topRoutesResult = await db.execute(sql`
+      SELECT route, COUNT(*)::text as count
+      FROM analytics_visits
+      WHERE tenant_id = ${tenantId}
+        AND occurred_at >= ${startDate}
+        AND occurred_at <= ${endDate}
+      GROUP BY route
+      ORDER BY COUNT(*) DESC
+      LIMIT 10
+    `);
+    const topRoutesRows = (topRoutesResult as any).rows || topRoutesResult || [];
+
+    return {
+      totalVisits: parseInt(totals?.total_visits || '0', 10),
+      uniqueVisitors: parseInt(totals?.unique_visitors || '0', 10),
+      uniqueUsers: parseInt(totals?.unique_users || '0', 10),
+      visitsToday: parseInt(todayCounts?.visits_today || '0', 10),
+      visitsThisWeek: parseInt(weekCounts?.visits_week || '0', 10),
+      topRoutes: topRoutesRows.map((r: any) => ({
+        route: r.route,
+        count: parseInt(r.count, 10)
+      }))
+    };
+  }
+
+  async getDailyVisitCounts(tenantId: string, days: number): Promise<{ date: string; count: number }[]> {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const result = await db.execute(sql`
+      SELECT 
+        DATE(occurred_at)::text as date,
+        COUNT(*)::text as count
+      FROM analytics_visits
+      WHERE tenant_id = ${tenantId}
+        AND occurred_at >= ${startDate}
+      GROUP BY DATE(occurred_at)
+      ORDER BY DATE(occurred_at) ASC
+    `);
+    const rows = (result as any).rows || result || [];
+
+    return rows.map((r: any) => ({
+      date: r.date,
+      count: parseInt(r.count, 10)
+    }));
+  }
+
+  async getSeoEdits(tenantId: string, limit?: number): Promise<SeoTagEdit[]> {
+    const query = db.select().from(seoTagEdits)
+      .where(eq(seoTagEdits.tenantId, tenantId))
+      .orderBy(desc(seoTagEdits.editedAt));
+    
+    if (limit) {
+      return await query.limit(limit);
+    }
+    return await query;
+  }
+
+  async createSeoEdit(edit: InsertSeoTagEdit): Promise<SeoTagEdit> {
+    const [created] = await db.insert(seoTagEdits).values(edit).returning();
+    return created;
+  }
+
+  async getTenantList(): Promise<string[]> {
+    const result = await db.execute(sql`
+      SELECT DISTINCT tenant_id FROM analytics_visits
+    `);
+    const rows = (result as any).rows || result || [];
+    return rows.map((r: any) => r.tenant_id);
   }
 }
 

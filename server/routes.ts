@@ -6241,6 +6241,118 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // ============ ANALYTICS ============
+
+  // Track a page visit
+  app.post("/api/analytics/track", async (req: Request, res: Response) => {
+    try {
+      const { route, tenantId = 'demo', sessionId, userId, userAgent, referrer } = req.body;
+      if (!route || !sessionId) {
+        return res.status(400).json({ error: "Route and sessionId required" });
+      }
+      
+      // Check if this session has visited before (unique visitor check)
+      const existingVisits = await storage.getAnalyticsSummary(tenantId, new Date(0), new Date());
+      
+      const visit = await storage.trackPageVisit({
+        route,
+        tenantId,
+        sessionId,
+        userId: userId || null,
+        userAgent: userAgent || req.get('user-agent'),
+        referrer: referrer || req.get('referrer'),
+        isUniqueVisitor: false, // Will be determined by storage
+        isUniqueUser: !!userId
+      });
+      
+      res.json({ success: true, visitId: visit.id });
+    } catch (error) {
+      console.error("Failed to track visit:", error);
+      res.status(500).json({ error: "Failed to track visit" });
+    }
+  });
+
+  // Get analytics summary for a tenant
+  app.get("/api/analytics/summary", async (req: Request, res: Response) => {
+    try {
+      const tenantId = (req.query.tenant as string) || 'demo';
+      const days = parseInt(req.query.days as string) || 30;
+      
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      
+      const summary = await storage.getAnalyticsSummary(tenantId, startDate, endDate);
+      res.json(summary);
+    } catch (error) {
+      console.error("Failed to get analytics:", error);
+      res.status(500).json({ error: "Failed to get analytics" });
+    }
+  });
+
+  // Get daily visit counts for charts
+  app.get("/api/analytics/daily", async (req: Request, res: Response) => {
+    try {
+      const tenantId = (req.query.tenant as string) || 'demo';
+      const days = parseInt(req.query.days as string) || 14;
+      
+      const data = await storage.getDailyVisitCounts(tenantId, days);
+      res.json(data);
+    } catch (error) {
+      console.error("Failed to get daily analytics:", error);
+      res.status(500).json({ error: "Failed to get daily analytics" });
+    }
+  });
+
+  // Get SEO edits log
+  app.get("/api/analytics/seo", async (req: Request, res: Response) => {
+    try {
+      const tenantId = (req.query.tenant as string) || 'demo';
+      const limit = parseInt(req.query.limit as string) || 20;
+      
+      const edits = await storage.getSeoEdits(tenantId, limit);
+      res.json(edits);
+    } catch (error) {
+      console.error("Failed to get SEO edits:", error);
+      res.status(500).json({ error: "Failed to get SEO edits" });
+    }
+  });
+
+  // Track SEO tag edit
+  app.post("/api/analytics/seo", async (req: Request, res: Response) => {
+    try {
+      const { tenantId = 'demo', tagType, oldValue, newValue, editedBy } = req.body;
+      if (!tagType) {
+        return res.status(400).json({ error: "tagType required" });
+      }
+      
+      const edit = await storage.createSeoEdit({
+        tenantId,
+        tagType,
+        oldValue,
+        newValue,
+        editedBy
+      });
+      res.json(edit);
+    } catch (error) {
+      console.error("Failed to track SEO edit:", error);
+      res.status(500).json({ error: "Failed to track SEO edit" });
+    }
+  });
+
+  // Get list of tenants for toggle
+  app.get("/api/analytics/tenants", async (req: Request, res: Response) => {
+    try {
+      const tenants = await storage.getTenantList();
+      // Always include default tenants
+      const allTenants = Array.from(new Set(['demo', 'nissan_beta', ...tenants]));
+      res.json(allTenants);
+    } catch (error) {
+      console.error("Failed to get tenants:", error);
+      res.json(['demo', 'nissan_beta']);
+    }
+  });
+
   // Catch-all 404 handler for non-existent API routes
   app.all("/api/*", (_req: Request, res: Response) => {
     res.status(404).json({ error: "API endpoint not found" });
