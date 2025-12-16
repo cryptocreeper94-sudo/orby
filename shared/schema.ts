@@ -2287,6 +2287,62 @@ export const DOCUMENT_TYPE_CONFIG = {
   }
 } as const;
 
+// Analytics metric type enum
+export const analyticsMetricTypeEnum = pgEnum('analytics_metric_type', [
+  'page_view', 'unique_visitor', 'unique_user', 'seo_edit', 'api_call', 'login', 'error'
+]);
+
+// Analytics visits - tracks each page visit
+export const analyticsVisits = pgTable("analytics_visits", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('demo'),
+  route: text("route").notNull(),
+  userId: varchar("user_id", { length: 36 }),
+  sessionId: varchar("session_id", { length: 64 }).notNull(),
+  userAgent: text("user_agent"),
+  referrer: text("referrer"),
+  isUniqueVisitor: boolean("is_unique_visitor").default(false),
+  isUniqueUser: boolean("is_unique_user").default(false),
+  occurredAt: timestamp("occurred_at").defaultNow(),
+}, (table) => [
+  index("analytics_visits_tenant_idx").on(table.tenantId),
+  index("analytics_visits_date_idx").on(table.occurredAt)
+]);
+
+// Analytics daily rollups - aggregated metrics by day and tenant
+export const analyticsDailyRollups = pgTable("analytics_daily_rollups", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('demo'),
+  date: text("date").notNull(),
+  metricType: analyticsMetricTypeEnum("metric_type").notNull(),
+  value: integer("value").notNull().default(0),
+  metadata: jsonb("metadata"),
+}, (table) => [
+  index("analytics_rollups_tenant_date_idx").on(table.tenantId, table.date)
+]);
+
+// SEO tag edits tracking
+export const seoTagEdits = pgTable("seo_tag_edits", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('demo'),
+  tagType: text("tag_type").notNull(),
+  oldValue: text("old_value"),
+  newValue: text("new_value"),
+  editedBy: varchar("edited_by", { length: 36 }),
+  editedAt: timestamp("edited_at").defaultNow(),
+});
+
+export type AnalyticsVisit = typeof analyticsVisits.$inferSelect;
+export type InsertAnalyticsVisit = typeof analyticsVisits.$inferInsert;
+export type AnalyticsDailyRollup = typeof analyticsDailyRollups.$inferSelect;
+export type InsertAnalyticsDailyRollup = typeof analyticsDailyRollups.$inferInsert;
+export type SeoTagEdit = typeof seoTagEdits.$inferSelect;
+export type InsertSeoTagEdit = typeof seoTagEdits.$inferInsert;
+
+export const insertAnalyticsVisitSchema = createInsertSchema(analyticsVisits).omit({ id: true, occurredAt: true });
+export const insertAnalyticsDailyRollupSchema = createInsertSchema(analyticsDailyRollups).omit({ id: true });
+export const insertSeoTagEditSchema = createInsertSchema(seoTagEdits).omit({ id: true, editedAt: true });
+
 // Default document templates (seed data)
 export const DEFAULT_DOCUMENT_TEMPLATES = [
   {
