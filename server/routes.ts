@@ -5981,6 +5981,16 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     }
   });
 
+  // Get snippet by name from Developer Hub
+  app.get("/api/dev-hub/snippets/by-name/:name", async (req: Request, res: Response) => {
+    try {
+      const result = await devHubClient.getSnippetByName(req.params.name);
+      res.json({ success: true, result });
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
   // Sync workers to Developer Hub (Orbit Staffing integration)
   app.post("/api/dev-hub/sync-workers", async (req: Request, res: Response) => {
     try {

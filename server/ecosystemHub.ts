@@ -95,6 +95,10 @@ export class EcosystemClient {
     return this.request('GET', '/snippets/public');
   }
 
+  async getSnippetByName(name: string) {
+    return this.request('GET', `/snippets/by-name/${encodeURIComponent(name)}`);
+  }
+
   async logActivity(action: string, details?: unknown) {
     return this.request('POST', '/logs', { action, details });
   }
