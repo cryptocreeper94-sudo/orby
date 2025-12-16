@@ -2343,6 +2343,69 @@ export const insertAnalyticsVisitSchema = createInsertSchema(analyticsVisits).om
 export const insertAnalyticsDailyRollupSchema = createInsertSchema(analyticsDailyRollups).omit({ id: true });
 export const insertSeoTagEditSchema = createInsertSchema(seoTagEdits).omit({ id: true, editedAt: true });
 
+// Tenant API Scopes
+export const TENANT_API_SCOPES = [
+  'events:read', 'events:write',
+  'analytics:read', 'analytics:write',
+  'inventory:read', 'inventory:write',
+  'deliveries:read', 'deliveries:write',
+  'staff:read', 'staff:write',
+  'compliance:read', 'compliance:write',
+  'documents:read', 'documents:write',
+  'messages:read', 'messages:write',
+] as const;
+
+// Tenant API Credentials - for partner/external API access
+export const tenantApiCredentials = pgTable("tenant_api_credentials", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  tenantId: varchar("tenant_id", { length: 50 }).notNull().default('demo'),
+  name: varchar("name", { length: 100 }).notNull(),
+  apiKey: varchar("api_key", { length: 64 }).notNull().unique(),
+  apiSecret: text("api_secret").notNull(),
+  environment: varchar("environment", { length: 20 }).default("production"),
+  scopes: text("scopes").array().default(sql`ARRAY['analytics:read']::text[]`),
+  rateLimitPerMinute: integer("rate_limit_per_minute").default(60),
+  rateLimitPerDay: integer("rate_limit_per_day").default(10000),
+  requestCount: integer("request_count").default(0),
+  lastUsedAt: timestamp("last_used_at"),
+  isActive: boolean("is_active").default(true),
+  expiresAt: timestamp("expires_at"),
+  createdBy: varchar("created_by", { length: 100 }),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+}, (table) => [
+  index("tenant_api_credentials_tenant_idx").on(table.tenantId),
+  index("tenant_api_credentials_key_idx").on(table.apiKey)
+]);
+
+// API Request Logs - detailed logging for tenant API requests
+export const apiRequestLogs = pgTable("api_request_logs", {
+  id: varchar("id", { length: 36 }).primaryKey().default(sql`gen_random_uuid()`),
+  credentialId: varchar("credential_id", { length: 36 }).notNull(),
+  tenantId: varchar("tenant_id", { length: 50 }).notNull(),
+  method: varchar("method", { length: 10 }).notNull(),
+  endpoint: varchar("endpoint", { length: 255 }).notNull(),
+  statusCode: integer("status_code"),
+  responseTimeMs: integer("response_time_ms"),
+  errorCode: varchar("error_code", { length: 50 }),
+  errorMessage: text("error_message"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("api_request_logs_tenant_idx").on(table.tenantId),
+  index("api_request_logs_credential_idx").on(table.credentialId),
+  index("api_request_logs_date_idx").on(table.createdAt)
+]);
+
+export type TenantApiCredential = typeof tenantApiCredentials.$inferSelect;
+export type InsertTenantApiCredential = typeof tenantApiCredentials.$inferInsert;
+export type ApiRequestLog = typeof apiRequestLogs.$inferSelect;
+export type InsertApiRequestLog = typeof apiRequestLogs.$inferInsert;
+
+export const insertTenantApiCredentialSchema = createInsertSchema(tenantApiCredentials).omit({ id: true, createdAt: true, updatedAt: true, requestCount: true, lastUsedAt: true });
+export const insertApiRequestLogSchema = createInsertSchema(apiRequestLogs).omit({ id: true, createdAt: true });
+
 // Default document templates (seed data)
 export const DEFAULT_DOCUMENT_TEMPLATES = [
   {

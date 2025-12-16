@@ -13,6 +13,7 @@ import {
   posDeviceTypes, posDevices, posLocationGrid, posAssignments, posReplacements, posIssues,
   documentTemplates, scannedDocuments,
   analyticsVisits, analyticsDailyRollups, seoTagEdits,
+  tenantApiCredentials, apiRequestLogs,
   type User, type InsertUser,
   type Stand, type InsertStand,
   type InventoryCount, type InsertInventoryCount,
@@ -81,6 +82,8 @@ import {
   type AnalyticsVisit, type InsertAnalyticsVisit,
   type AnalyticsDailyRollup, type InsertAnalyticsDailyRollup,
   type SeoTagEdit, type InsertSeoTagEdit,
+  type TenantApiCredential, type InsertTenantApiCredential,
+  type ApiRequestLog, type InsertApiRequestLog,
   releases
 } from "@shared/schema";
 import { db } from "./db";
@@ -617,6 +620,18 @@ export interface IStorage {
   getSeoEdits(tenantId: string, limit?: number): Promise<SeoTagEdit[]>;
   createSeoEdit(edit: InsertSeoTagEdit): Promise<SeoTagEdit>;
   getTenantList(): Promise<string[]>;
+
+  // Tenant API Credentials
+  getTenantApiCredentials(tenantId: string): Promise<TenantApiCredential[]>;
+  getTenantApiCredentialByApiKey(apiKey: string): Promise<TenantApiCredential | undefined>;
+  createTenantApiCredential(credential: InsertTenantApiCredential): Promise<TenantApiCredential>;
+  updateTenantApiCredential(id: string, updates: Partial<TenantApiCredential>): Promise<TenantApiCredential | undefined>;
+  deleteTenantApiCredential(id: string): Promise<void>;
+  incrementApiRequestCount(credentialId: string): Promise<void>;
+
+  // API Request Logs
+  createApiRequestLog(log: InsertApiRequestLog): Promise<ApiRequestLog>;
+  getApiRequestLogs(tenantId: string, limit?: number): Promise<ApiRequestLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3838,6 +3853,59 @@ export class DatabaseStorage implements IStorage {
     `);
     const rows = (result as any).rows || result || [];
     return rows.map((r: any) => r.tenant_id);
+  }
+
+  // ============ TENANT API CREDENTIALS ============
+  async getTenantApiCredentials(tenantId: string): Promise<TenantApiCredential[]> {
+    return await db.select().from(tenantApiCredentials)
+      .where(eq(tenantApiCredentials.tenantId, tenantId))
+      .orderBy(desc(tenantApiCredentials.createdAt));
+  }
+
+  async getTenantApiCredentialByApiKey(apiKey: string): Promise<TenantApiCredential | undefined> {
+    const [credential] = await db.select().from(tenantApiCredentials)
+      .where(eq(tenantApiCredentials.apiKey, apiKey))
+      .limit(1);
+    return credential || undefined;
+  }
+
+  async createTenantApiCredential(credential: InsertTenantApiCredential): Promise<TenantApiCredential> {
+    const [created] = await db.insert(tenantApiCredentials).values(credential).returning();
+    return created;
+  }
+
+  async updateTenantApiCredential(id: string, updates: Partial<TenantApiCredential>): Promise<TenantApiCredential | undefined> {
+    const [updated] = await db.update(tenantApiCredentials)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(tenantApiCredentials.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteTenantApiCredential(id: string): Promise<void> {
+    await db.delete(tenantApiCredentials).where(eq(tenantApiCredentials.id, id));
+  }
+
+  async incrementApiRequestCount(credentialId: string): Promise<void> {
+    await db.update(tenantApiCredentials)
+      .set({
+        requestCount: sql`${tenantApiCredentials.requestCount} + 1`,
+        lastUsedAt: new Date()
+      })
+      .where(eq(tenantApiCredentials.id, credentialId));
+  }
+
+  // ============ API REQUEST LOGS ============
+  async createApiRequestLog(log: InsertApiRequestLog): Promise<ApiRequestLog> {
+    const [created] = await db.insert(apiRequestLogs).values(log).returning();
+    return created;
+  }
+
+  async getApiRequestLogs(tenantId: string, limit: number = 50): Promise<ApiRequestLog[]> {
+    return await db.select().from(apiRequestLogs)
+      .where(eq(apiRequestLogs.tenantId, tenantId))
+      .orderBy(desc(apiRequestLogs.createdAt))
+      .limit(limit);
   }
 }
 
