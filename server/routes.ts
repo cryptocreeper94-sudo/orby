@@ -1,8 +1,9 @@
-import type { Express, Request, Response } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
+import crypto from "crypto";
 import { 
   insertUserSchema, insertStandSchema, insertItemSchema, insertMessageSchema,
   insertNpoSchema, insertStaffingGroupSchema, insertSupervisorDocSchema, insertDocSignatureSchema,
@@ -10,7 +11,7 @@ import {
   insertIncidentSchema, insertCountSessionSchema, insertStandIssueSchema, insertMenuBoardSchema,
   insertAuditLogSchema, insertEmergencyAlertSchema, insertOrbitRosterSchema, insertOrbitShiftSchema,
   insertAlcoholViolationSchema, insertAssetStampSchema, users,
-  QUICK_CALL_ROLES
+  QUICK_CALL_ROLES, TENANT_API_SCOPES
 } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -6428,6 +6429,326 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     } catch (error) {
       console.error("Failed to list snippets:", error);
       res.json({ success: true, snippets: [] });
+    }
+  });
+
+  // ============ TENANT API CREDENTIALS ============
+  
+  // Generate API key with orb_ prefix
+  function generateApiKey(environment: string = 'production'): string {
+    const prefix = environment === 'production' ? 'orb_live_' : 'orb_test_';
+    return `${prefix}${crypto.randomBytes(24).toString('hex')}`;
+  }
+  
+  function generateApiSecret(): string {
+    return crypto.randomBytes(32).toString('hex');
+  }
+
+  // Extend Express Request type for partner API
+  interface PartnerApiRequest extends Request {
+    tenantAuth?: {
+      tenantId: string;
+      credentialId: string;
+      scopes: string[];
+    };
+  }
+
+  // Partner API authentication middleware
+  async function partnerApiAuth(req: PartnerApiRequest, res: Response, next: NextFunction) {
+    const startTime = Date.now();
+    const apiKey = req.headers['x-api-key'] as string;
+    
+    if (!apiKey) {
+      return res.status(401).json({ error: "Missing API key", code: "MISSING_API_KEY" });
+    }
+
+    // Validate API key format
+    if (!apiKey.startsWith('orb_live_') && !apiKey.startsWith('orb_test_')) {
+      return res.status(401).json({ error: "Invalid API key format", code: "INVALID_KEY_FORMAT" });
+    }
+
+    const credential = await storage.getTenantApiCredentialByApiKey(apiKey);
+    if (!credential) {
+      return res.status(401).json({ error: "Invalid API key", code: "INVALID_API_KEY" });
+    }
+
+    if (!credential.isActive) {
+      return res.status(403).json({ error: "API key is disabled", code: "KEY_DISABLED" });
+    }
+
+    if (credential.expiresAt && new Date(credential.expiresAt) < new Date()) {
+      return res.status(403).json({ error: "API key has expired", code: "KEY_EXPIRED" });
+    }
+
+    // Increment request count
+    await storage.incrementApiRequestCount(credential.id);
+
+    // Attach auth info to request
+    req.tenantAuth = {
+      tenantId: credential.tenantId,
+      credentialId: credential.id,
+      scopes: credential.scopes || []
+    };
+
+    // Log API request on response finish
+    res.on('finish', async () => {
+      try {
+        await storage.createApiRequestLog({
+          credentialId: credential.id,
+          tenantId: credential.tenantId,
+          method: req.method,
+          endpoint: req.originalUrl.substring(0, 255),
+          statusCode: res.statusCode,
+          responseTimeMs: Date.now() - startTime,
+          ipAddress: (req.ip || req.socket.remoteAddress || '').substring(0, 45),
+          userAgent: (req.headers['user-agent'] || '').substring(0, 500)
+        });
+      } catch (err) {
+        console.error("Failed to log API request:", err);
+      }
+    });
+
+    next();
+  }
+
+  // Scope check middleware
+  function requireScope(scope: string) {
+    return (req: PartnerApiRequest, res: Response, next: NextFunction) => {
+      if (!req.tenantAuth?.scopes.includes(scope)) {
+        return res.status(403).json({ 
+          error: `Missing required scope: ${scope}`, 
+          code: "INSUFFICIENT_SCOPE" 
+        });
+      }
+      next();
+    };
+  }
+
+  // Get tenant API credentials (admin)
+  app.get("/api/tenants/:tenantId/credentials", async (req: Request, res: Response) => {
+    try {
+      const { tenantId } = req.params;
+      if (!tenantId || !/^[a-zA-Z0-9_-]+$/.test(tenantId)) {
+        return res.status(400).json({ error: "Invalid tenant ID" });
+      }
+      
+      const credentials = await storage.getTenantApiCredentials(tenantId);
+      // Mask secrets before returning
+      res.json(credentials.map(c => ({ ...c, apiSecret: '••••••••' })));
+    } catch (error) {
+      console.error("Failed to get API credentials:", error);
+      res.status(500).json({ error: "Failed to retrieve API credentials" });
+    }
+  });
+
+  // Create new API credential
+  app.post("/api/tenants/:tenantId/credentials", async (req: Request, res: Response) => {
+    try {
+      const { tenantId } = req.params;
+      const { name, environment, scopes, rateLimitPerMinute, rateLimitPerDay, expiresAt, createdBy } = req.body;
+      
+      if (!tenantId || !/^[a-zA-Z0-9_-]+$/.test(tenantId)) {
+        return res.status(400).json({ error: "Invalid tenant ID" });
+      }
+      if (!name || typeof name !== 'string' || name.length < 2 || name.length > 100) {
+        return res.status(400).json({ error: "Name is required (2-100 characters)" });
+      }
+
+      // Validate scopes
+      const validScopes = (scopes || ['analytics:read']).filter((s: string) => 
+        (TENANT_API_SCOPES as readonly string[]).includes(s)
+      );
+
+      const apiKey = generateApiKey(environment || 'production');
+      const apiSecret = generateApiSecret();
+
+      const credential = await storage.createTenantApiCredential({
+        tenantId,
+        name: name.substring(0, 100),
+        apiKey,
+        apiSecret,
+        environment: environment === 'sandbox' ? 'sandbox' : 'production',
+        scopes: validScopes,
+        rateLimitPerMinute: Math.min(rateLimitPerMinute || 60, 1000),
+        rateLimitPerDay: Math.min(rateLimitPerDay || 10000, 100000),
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+        createdBy: createdBy || 'admin'
+      });
+
+      // Return with secret (only shown once!)
+      res.status(201).json({
+        ...credential,
+        apiSecret,
+        message: "Save this secret - it will not be shown again!"
+      });
+    } catch (error) {
+      console.error("Failed to create API credential:", error);
+      res.status(500).json({ error: "Failed to create API credential" });
+    }
+  });
+
+  // Update API credential
+  app.put("/api/tenants/:tenantId/credentials/:credentialId", async (req: Request, res: Response) => {
+    try {
+      const { credentialId } = req.params;
+      const { name, scopes, rateLimitPerMinute, rateLimitPerDay, isActive, expiresAt } = req.body;
+
+      const updates: any = {};
+      if (name !== undefined) updates.name = String(name).substring(0, 100);
+      if (scopes !== undefined) {
+        updates.scopes = scopes.filter((s: string) => 
+          (TENANT_API_SCOPES as readonly string[]).includes(s)
+        );
+      }
+      if (rateLimitPerMinute !== undefined) updates.rateLimitPerMinute = Math.min(rateLimitPerMinute, 1000);
+      if (rateLimitPerDay !== undefined) updates.rateLimitPerDay = Math.min(rateLimitPerDay, 100000);
+      if (isActive !== undefined) updates.isActive = Boolean(isActive);
+      if (expiresAt !== undefined) updates.expiresAt = expiresAt ? new Date(expiresAt) : null;
+
+      const updated = await storage.updateTenantApiCredential(credentialId, updates);
+      if (!updated) {
+        return res.status(404).json({ error: "Credential not found" });
+      }
+      res.json({ ...updated, apiSecret: '••••••••' });
+    } catch (error) {
+      console.error("Failed to update API credential:", error);
+      res.status(500).json({ error: "Failed to update API credential" });
+    }
+  });
+
+  // Delete API credential
+  app.delete("/api/tenants/:tenantId/credentials/:credentialId", async (req: Request, res: Response) => {
+    try {
+      const { credentialId } = req.params;
+      await storage.deleteTenantApiCredential(credentialId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Failed to delete API credential:", error);
+      res.status(500).json({ error: "Failed to delete API credential" });
+    }
+  });
+
+  // Get API request logs
+  app.get("/api/tenants/:tenantId/api-logs", async (req: Request, res: Response) => {
+    try {
+      const { tenantId } = req.params;
+      const limit = Math.min(parseInt(req.query.limit as string) || 50, 200);
+      
+      const logs = await storage.getApiRequestLogs(tenantId, limit);
+      res.json(logs);
+    } catch (error) {
+      console.error("Failed to get API logs:", error);
+      res.status(500).json({ error: "Failed to retrieve API logs" });
+    }
+  });
+
+  // Get available scopes
+  app.get("/api/partner/v1/scopes", (_req: Request, res: Response) => {
+    res.json({ scopes: TENANT_API_SCOPES });
+  });
+
+  // Partner API health check
+  app.get("/api/partner/v1/health", (_req: Request, res: Response) => {
+    res.json({ 
+      status: "healthy", 
+      version: "1.0.0", 
+      timestamp: new Date().toISOString() 
+    });
+  });
+
+  // Partner API: Get auth info
+  app.get("/api/partner/v1/me", partnerApiAuth, (req: PartnerApiRequest, res: Response) => {
+    res.json({
+      tenantId: req.tenantAuth?.tenantId,
+      scopes: req.tenantAuth?.scopes
+    });
+  });
+
+  // Partner API: Get analytics (requires analytics:read scope)
+  app.get("/api/partner/v1/analytics", partnerApiAuth, requireScope('analytics:read'), async (req: PartnerApiRequest, res: Response) => {
+    try {
+      const tenantId = req.tenantAuth!.tenantId;
+      const days = Math.min(parseInt(req.query.days as string) || 30, 90);
+      
+      const summary = await storage.getAnalyticsSummary(tenantId, days);
+      res.json({
+        data: summary,
+        meta: { tenantId, days, timestamp: new Date().toISOString() }
+      });
+    } catch (error) {
+      console.error("Partner API analytics error:", error);
+      res.status(500).json({ error: "Failed to retrieve analytics" });
+    }
+  });
+
+  // Partner API: Get events (requires events:read scope)
+  app.get("/api/partner/v1/events", partnerApiAuth, requireScope('events:read'), async (req: PartnerApiRequest, res: Response) => {
+    try {
+      const events = await storage.getEvents();
+      res.json({
+        data: events,
+        meta: { total: events.length, tenantId: req.tenantAuth?.tenantId }
+      });
+    } catch (error) {
+      console.error("Partner API events error:", error);
+      res.status(500).json({ error: "Failed to retrieve events" });
+    }
+  });
+
+  // Partner API: Get deliveries (requires deliveries:read scope)
+  app.get("/api/partner/v1/deliveries", partnerApiAuth, requireScope('deliveries:read'), async (req: PartnerApiRequest, res: Response) => {
+    try {
+      const status = req.query.status as string;
+      let deliveries;
+      if (status) {
+        deliveries = await storage.getDeliveriesByStatus(status);
+      } else {
+        deliveries = await storage.getAllDeliveries();
+      }
+      res.json({
+        data: deliveries,
+        meta: { total: deliveries.length, tenantId: req.tenantAuth?.tenantId }
+      });
+    } catch (error) {
+      console.error("Partner API deliveries error:", error);
+      res.status(500).json({ error: "Failed to retrieve deliveries" });
+    }
+  });
+
+  // Partner API: Get inventory (requires inventory:read scope)
+  app.get("/api/partner/v1/inventory", partnerApiAuth, requireScope('inventory:read'), async (req: PartnerApiRequest, res: Response) => {
+    try {
+      const items = await storage.getItems();
+      const stands = await storage.getStands();
+      res.json({
+        data: { items, stands },
+        meta: { itemCount: items.length, standCount: stands.length, tenantId: req.tenantAuth?.tenantId }
+      });
+    } catch (error) {
+      console.error("Partner API inventory error:", error);
+      res.status(500).json({ error: "Failed to retrieve inventory" });
+    }
+  });
+
+  // Partner API: Get staff (requires staff:read scope)
+  app.get("/api/partner/v1/staff", partnerApiAuth, requireScope('staff:read'), async (req: PartnerApiRequest, res: Response) => {
+    try {
+      const users = await storage.getAllUsers();
+      // Return sanitized user data (no PINs)
+      const sanitizedUsers = users.map(u => ({
+        id: u.id,
+        name: u.name,
+        role: u.role,
+        department: u.department,
+        isActive: u.isActive
+      }));
+      res.json({
+        data: sanitizedUsers,
+        meta: { total: sanitizedUsers.length, tenantId: req.tenantAuth?.tenantId }
+      });
+    } catch (error) {
+      console.error("Partner API staff error:", error);
+      res.status(500).json({ error: "Failed to retrieve staff" });
     }
   });
 
