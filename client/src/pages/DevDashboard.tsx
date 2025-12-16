@@ -22,6 +22,7 @@ import { StaffPinsPanel } from '@/components/StaffPinsPanel';
 import { EventControlPanel } from '@/components/EventControlPanel';
 import { ReleaseManager } from '@/components/ReleaseManager';
 import { AnalyticsSection } from '@/components/AnalyticsSection';
+import ApiCredentialsSection from '@/components/ApiCredentialsSection';
 import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from '@/components/ui/bento';
 
 interface RoleButtonProps {
@@ -643,6 +644,10 @@ export default function DevDashboard() {
 
           <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-analytics">
             <AnalyticsSection />
+          </BentoCard>
+
+          <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-api-credentials">
+            <ApiCredentialsSection />
           </BentoCard>
 
           <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-support-section">

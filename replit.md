@@ -4,9 +4,22 @@
 Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designed to unify venue operations, replacing fragmented communication with a digital platform. It offers an Emergency Command Center, delivery lifecycle tracking, three-phase inventory counting, alcohol compliance monitoring, GPS-guided navigation, and real-time team communications. Orby aims to provide a complete operational solution for venues, from emergency response to inventory and team management, improving efficiency and compliance for event venues.
 
 ## Current Version
-**v1.0.15** - Developer Analytics Dashboard (December 2025)
+**v1.0.16** - Partner API & Tenant Credentials (December 2025)
 
 ### Recent Changelog
+- **v1.0.16**: Partner API & Tenant Credentials
+  - Secure API credentials system for tenant integrations
+  - API key generation with orb_live_/orb_test_ prefixes
+  - Scoped authorization (events, analytics, inventory, deliveries, staff, compliance, documents, messages)
+  - API request logging with response times, status codes, IP tracking
+  - Authentication middleware with key validation and expiry checking
+  - Rate limiting preparation (per minute and per day limits)
+  - ApiCredentialsSection UI in DevDashboard with Bento grid styling
+  - Credential CRUD: create, update, toggle active, delete
+  - Secret shown once on creation with copy functionality
+  - API logs viewer with last 10 requests
+  - Partner API v1 endpoints: /health, /scopes, /me, /analytics, /events, /deliveries, /inventory, /staff
+  - Database tables: tenant_api_credentials, api_request_logs
 - **v1.0.15**: Developer Analytics Dashboard
   - Full analytics tracking system with tenant-aware data isolation (demo vs nissan_beta)
   - AnalyticsSection component in DevDashboard with Bento grid layout

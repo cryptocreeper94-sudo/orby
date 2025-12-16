@@ -6670,7 +6670,11 @@ Maintain professional composure. Answer inspector questions honestly. Report any
       const tenantId = req.tenantAuth!.tenantId;
       const days = Math.min(parseInt(req.query.days as string) || 30, 90);
       
-      const summary = await storage.getAnalyticsSummary(tenantId, days);
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
+      
+      const summary = await storage.getAnalyticsSummary(tenantId, startDate, endDate);
       res.json({
         data: summary,
         meta: { tenantId, days, timestamp: new Date().toISOString() }
@@ -6684,7 +6688,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   // Partner API: Get events (requires events:read scope)
   app.get("/api/partner/v1/events", partnerApiAuth, requireScope('events:read'), async (req: PartnerApiRequest, res: Response) => {
     try {
-      const events = await storage.getEvents();
+      const events = await storage.getAllEvents();
       res.json({
         data: events,
         meta: { total: events.length, tenantId: req.tenantAuth?.tenantId }
@@ -6701,9 +6705,9 @@ Maintain professional composure. Answer inspector questions honestly. Report any
       const status = req.query.status as string;
       let deliveries;
       if (status) {
-        deliveries = await storage.getDeliveriesByStatus(status);
+        deliveries = await storage.getDeliveryRequestsByStatus(status);
       } else {
-        deliveries = await storage.getAllDeliveries();
+        deliveries = await storage.getAllDeliveryRequests();
       }
       res.json({
         data: deliveries,
@@ -6718,8 +6722,8 @@ Maintain professional composure. Answer inspector questions honestly. Report any
   // Partner API: Get inventory (requires inventory:read scope)
   app.get("/api/partner/v1/inventory", partnerApiAuth, requireScope('inventory:read'), async (req: PartnerApiRequest, res: Response) => {
     try {
-      const items = await storage.getItems();
-      const stands = await storage.getStands();
+      const items = await storage.getAllItems();
+      const stands = await storage.getAllStands();
       res.json({
         data: { items, stands },
         meta: { itemCount: items.length, standCount: stands.length, tenantId: req.tenantAuth?.tenantId }
@@ -6739,8 +6743,7 @@ Maintain professional composure. Answer inspector questions honestly. Report any
         id: u.id,
         name: u.name,
         role: u.role,
-        department: u.department,
-        isActive: u.isActive
+        department: u.department
       }));
       res.json({
         data: sanitizedUsers,
