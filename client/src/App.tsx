@@ -1,6 +1,9 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
+import { useEffect } from "react";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { trackPageVisit } from "@/lib/analytics";
+import { useStore } from "@/lib/mockData";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ModeProvider, useMode } from "@/lib/ModeContext";
@@ -65,8 +68,21 @@ function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
+function PageTracker() {
+  const [location] = useLocation();
+  const currentUser = useStore((state) => state.currentUser);
+  
+  useEffect(() => {
+    trackPageVisit(location, currentUser?.id);
+  }, [location, currentUser?.id]);
+  
+  return null;
+}
+
 function Router() {
   return (
+    <>
+    <PageTracker />
     <Switch>
       <Route path="/" component={LoginPage} />
       <Route path="/set-pin" component={SetPinPage} />
@@ -107,6 +123,7 @@ function Router() {
       <Route path="/event-history" component={EventHistory} />
       <Route component={NotFound} />
     </Switch>
+    </>
   );
 }
 
