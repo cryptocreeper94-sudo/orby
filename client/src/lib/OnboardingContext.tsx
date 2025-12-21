@@ -29,6 +29,8 @@ const OPS_MANAGER_TOUR_KEY = 'orby_ops_manager_tour_complete';
 const OPS_MANAGER_TOUR_PENDING_KEY = 'orby_ops_manager_tour_pending';
 const HR_ADMIN_TOUR_KEY = 'orby_hr_admin_tour_complete';
 const HR_ADMIN_TOUR_PENDING_KEY = 'orby_hr_admin_tour_pending';
+const SUPERVISOR_TOUR_KEY = 'orby_supervisor_tour_complete';
+const SUPERVISOR_TOUR_PENDING_KEY = 'orby_supervisor_tour_pending';
 
 interface OnboardingProgress {
   currentPageIndex: number;
@@ -716,6 +718,26 @@ export function scheduleHRAdminTour() {
 
 export function isHRAdminTourPending(): boolean {
   return localStorage.getItem(HR_ADMIN_TOUR_PENDING_KEY) === 'true' && !isHRAdminTourComplete();
+}
+
+// Supervisor Tour functions
+export function isSupervisorTourComplete(): boolean {
+  return localStorage.getItem(SUPERVISOR_TOUR_KEY) === 'true';
+}
+
+export function setSupervisorTourComplete() {
+  localStorage.setItem(SUPERVISOR_TOUR_KEY, 'true');
+  localStorage.removeItem(SUPERVISOR_TOUR_PENDING_KEY);
+}
+
+export function scheduleSupervisorTour() {
+  if (!isSupervisorTourComplete() && !localStorage.getItem(SUPERVISOR_TOUR_PENDING_KEY)) {
+    localStorage.setItem(SUPERVISOR_TOUR_PENDING_KEY, 'true');
+  }
+}
+
+export function isSupervisorTourPending(): boolean {
+  return localStorage.getItem(SUPERVISOR_TOUR_PENDING_KEY) === 'true' && !isSupervisorTourComplete();
 }
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
