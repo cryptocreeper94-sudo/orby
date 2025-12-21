@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ModeProvider, useMode } from "@/lib/ModeContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { OnboardingProvider } from "@/lib/OnboardingContext";
+import { TenantProvider } from "@/lib/TenantContext";
 import { SandboxBanner } from "@/components/SandboxBanner";
 import { SandboxWelcome } from "@/components/SandboxWelcome";
 import { OnboardingOverlay } from "@/components/OnboardingOverlay";
@@ -162,9 +163,10 @@ function TwinklingStars() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <ModeProvider>
-          <OnboardingProvider>
+      <TenantProvider>
+        <ThemeProvider>
+          <ModeProvider>
+            <OnboardingProvider>
             <TooltipProvider>
               <SonnerToaster position="top-right" richColors />
               <NotificationToast />
@@ -195,8 +197,9 @@ function App() {
               </ThemedBackground>
             </TooltipProvider>
           </OnboardingProvider>
-        </ModeProvider>
-      </ThemeProvider>
+          </ModeProvider>
+        </ThemeProvider>
+      </TenantProvider>
     </QueryClientProvider>
   );
 }
