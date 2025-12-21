@@ -48,6 +48,8 @@ import { useSupervisorSession } from '@/hooks/useSupervisorSession';
 import { PersonalizedWelcomeTour } from '@/components/PersonalizedWelcomeTour';
 import { LayoutShell, BentoCard, CarouselRail, AccordionStack } from "@/components/ui/bento";
 import { EventHeader } from '@/components/EventHeader';
+import SupervisorTutorialModal from '@/components/SupervisorTutorialModal';
+import { isSupervisorTourPending, isSupervisorTourComplete } from '@/lib/OnboardingContext';
 
 type WarehouseProduct = {
   id: string;
@@ -122,6 +124,17 @@ export default function SupervisorDashboard() {
   const [showWarehouseRequest, setShowWarehouseRequest] = useState(false);
   const [showQuickScan, setShowQuickScan] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Show supervisor tutorial on login until completed
+  useEffect(() => {
+    if (isSupervisorTourPending() && !isSupervisorTourComplete()) {
+      const timer = setTimeout(() => {
+        setShowTutorial(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
   
   const signatureRef = useRef<SignatureCanvas>(null);
   const [complianceSubmitting, setComplianceSubmitting] = useState(false);
@@ -500,6 +513,10 @@ export default function SupervisorDashboard() {
       <AnimatedBackground>
         <EventHeader compact showDepartmentNotes="Operations" />
         <PersonalizedWelcomeTour />
+        <SupervisorTutorialModal 
+          isOpen={showTutorial} 
+          onClose={() => setShowTutorial(false)} 
+        />
         <GlobalModeBar />
         <PageHeader 
           title="Supervisor"

@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { ShieldCheck, FlaskConical, Radio, Code, Briefcase, ChevronDown, HelpCircle, AlertTriangle, Clock } from "lucide-react";
 import { useMode } from "@/lib/ModeContext";
 import { ModeGate } from "@/components/ModeGate";
-import { scheduleOpsManagerTour, scheduleHRAdminTour } from "@/lib/OnboardingContext";
+import { scheduleOpsManagerTour, scheduleHRAdminTour, scheduleSupervisorTour } from "@/lib/OnboardingContext";
 import { schedulePersonalizedTour } from "@/components/PersonalizedWelcomeTour";
 import { CompactModeIndicator } from "@/components/GlobalModeBar";
 import { motion, AnimatePresence } from "framer-motion";
@@ -149,6 +149,12 @@ export default function LoginPage() {
       }
       if (values.pin === '8888') {
         scheduleHRAdminTour();
+      }
+      // Supervisor PINs: Shelia (4545), Sup. Sarah (3333), Sup. Mike (3334)
+      const SUPERVISOR_PINS = ['4545', '3333', '3334'];
+      const userRole = user?.role as string | undefined;
+      if (SUPERVISOR_PINS.includes(values.pin) || userRole === 'StandSupervisor' || userRole === 'Supervisor') {
+        scheduleSupervisorTour();
       }
       if (enablePersistence && MANAGER_PINS.includes(values.pin)) {
         localStorage.setItem(PERSISTENCE_KEY, 'true');
