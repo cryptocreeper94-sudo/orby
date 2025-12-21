@@ -155,6 +155,9 @@ export default function LoginPage() {
       const userRole = user?.role as string | undefined;
       if (SUPERVISOR_PINS.includes(values.pin) || userRole === 'StandSupervisor' || userRole === 'Supervisor') {
         scheduleSupervisorTour();
+        // Force supervisors into Sandbox mode - skip ModeGate selection
+        sessionStorage.setItem(MODE_SELECTED_KEY, 'true');
+        sessionStorage.setItem('orby_mode', 'sandbox');
       }
       if (enablePersistence && MANAGER_PINS.includes(values.pin)) {
         localStorage.setItem(PERSISTENCE_KEY, 'true');

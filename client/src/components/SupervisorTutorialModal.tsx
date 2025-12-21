@@ -31,12 +31,14 @@ const tutorialSteps: TutorialStep[] = [
   {
     id: 'welcome',
     title: 'Welcome to Your Supervisor Dashboard',
-    description: 'As a supervisor, you have access to powerful tools for managing your section of the venue. This tutorial will guide you through all the key features available to you.',
+    description: "You're currently in Sandbox Mode - a safe practice environment. Feel free to explore and play around - nothing here affects real operations. This tutorial will guide you through all the key features available to you.",
     icon: <Sparkles className="w-12 h-12 text-cyan-400" />,
     tips: [
-      'Your dashboard is customized for supervisor-level access',
-      'You can oversee multiple stands in your assigned section',
-      'All actions are logged for accountability and tracking'
+      "You're in Sandbox Mode - a safe space to learn and practice",
+      'Feel free to explore! Nothing here affects real operations',
+      'There is a Live mode toggle in the header, but Live mode only works when an event is active',
+      'Events are started by Operations Manager (David) - once an event is live, you can work in Live mode',
+      'Your dashboard is customized for supervisor-level access'
     ]
   },
   {
