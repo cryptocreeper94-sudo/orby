@@ -213,7 +213,7 @@ export default function DevDashboard() {
     ],
     admin: [
       { name: "Developer", description: "Jason - full system access (hidden)", pin: "0424", route: "/admin", icon: <Shield className="h-5 w-5" />, color: "red" },
-      { name: "Executive", description: "Brian/Megan - high-level view", pin: "7777", route: "/executive", icon: <Eye className="h-5 w-5" />, color: "purple" },
+      { name: "Executive", description: "Brian/Meghann - high-level view", pin: "7777", route: "/executive", icon: <Eye className="h-5 w-5" />, color: "purple" },
     ]
   };
 
@@ -553,7 +553,7 @@ export default function DevDashboard() {
                 data-testid="quick-dashboard-gm"
               >
                 <div className="text-sm font-medium text-teal-400">GM</div>
-                <div className="text-[10px] text-slate-500">Megan (9090)</div>
+                <div className="text-[10px] text-slate-500">Meghann (9090)</div>
               </button>
               <button 
                 onClick={() => handleRoleSwitch('5555', '/alcohol-compliance')}

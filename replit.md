@@ -73,7 +73,7 @@ Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designe
 |-----|------|------|-----------|
 | 2424 | David | Ops Controller | Ops Command Center |
 | 8080 | Brian | Regional VP | Executive Dashboard |
-| 9090 | Megan | General Manager | Executive Dashboard |
+| 9090 | Meghann | General Manager | Executive Dashboard |
 | 5555 | Compliance | Alcohol Compliance | Compliance Dashboard |
 | 9999 | New User | Registration | First-time registration flow |
 

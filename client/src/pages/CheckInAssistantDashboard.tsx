@@ -64,7 +64,7 @@ const MANAGERS: Manager[] = [
   { id: '4', name: 'Chef Deb', role: 'Culinary Manager', department: 'Kitchen', isOnline: true },
   { id: '5', name: 'Darby', role: 'Beverage Manager', department: 'Bar Manager', isOnline: false },
   { id: '6', name: 'Shelia', role: 'Operations Supervisor', department: 'Operations', isOnline: true },
-  { id: '7', name: 'Megan', role: 'General Manager', department: 'Manager', isOnline: true },
+  { id: '7', name: 'Meghann', role: 'General Manager', department: 'Manager', isOnline: true },
 ];
 
 const INCIDENT_TYPES = [
