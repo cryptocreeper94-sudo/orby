@@ -128,10 +128,16 @@ export default function SupervisorDashboard() {
 
   // Show supervisor tutorial on login until completed
   useEffect(() => {
-    if (isSupervisorTourPending() && !isSupervisorTourComplete()) {
+    // Only show if tour is pending AND not already completed
+    const shouldShowTour = isSupervisorTourPending() && !isSupervisorTourComplete();
+    if (shouldShowTour) {
+      // Delay to allow PersonalizedWelcomeTour to show first
       const timer = setTimeout(() => {
-        setShowTutorial(true);
-      }, 500);
+        // Double-check completion status before showing (in case user completed during delay)
+        if (!isSupervisorTourComplete()) {
+          setShowTutorial(true);
+        }
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, []);
