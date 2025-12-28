@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { WeatherWidget, WeatherAlertBanner } from '@/components/WeatherWidget';
 import { LiveSalesWidget } from '@/components/LiveSalesWidget';
+import { useTenant } from '@/lib/TenantContext';
 import ComplianceAlertPanel from '@/components/ComplianceAlertPanel';
 import { GlobalModeBar } from '@/components/GlobalModeBar';
 import { SupervisorLiveWall } from '@/components/SupervisorLiveWall';
@@ -120,11 +121,14 @@ function formatTimeAgo(isoString: string): string {
 }
 
 export default function ManagerDashboard() {
+  const { tenant } = useTenant();
   const logout = useStore((state) => state.logout);
   const currentUser = useStore((state) => state.currentUser);
   const stands = useStore((state) => state.stands);
   const fetchAll = useStore((state) => state.fetchAll);
   const [, setLocation] = useLocation();
+  
+  const showSalesContent = tenant.features.showSalesContent;
 
   const [deliveryRequests] = useState<DeliveryRequest[]>(MOCK_DELIVERY_REQUESTS);
   const [itAlerts] = useState<ITAlert[]>(MOCK_IT_ALERTS);
@@ -191,9 +195,11 @@ export default function ManagerDashboard() {
     <div key="weather" className="w-[200px] h-[100px]">
       <WeatherWidget compact className="h-full" />
     </div>,
-    <div key="sales" className="w-[200px] h-[100px]">
-      <LiveSalesWidget compact className="h-full" />
-    </div>,
+    ...(showSalesContent ? [
+      <div key="sales" className="w-[200px] h-[100px]">
+        <LiveSalesWidget compact className="h-full" />
+      </div>
+    ] : []),
   ];
 
   const quickActions = [

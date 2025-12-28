@@ -24,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useTenant } from '@/lib/TenantContext';
 
 interface IntegrationHubProps {
   onClose?: () => void;
@@ -52,10 +53,13 @@ const mockStaffingData = {
 };
 
 export function IntegrationHub({ onClose }: IntegrationHubProps) {
+  const { tenant } = useTenant();
   const [showSalesDemo, setShowSalesDemo] = useState(false);
   const [activeView, setActiveView] = useState<string | null>(null);
+  
+  const showSalesContent = tenant.features.showSalesContent;
 
-  const integrations = [
+  const allIntegrations = [
     {
       id: 'pax',
       name: 'PAX Payment Systems',
@@ -68,7 +72,8 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
       dataFlow: 'PAX → Sales Metrics → Orby Dashboard',
       features: ['Real-time transaction data', 'Device health monitoring', 'Sales by stand/zone', 'Payment method breakdown'],
       nextStep: 'PAX API integration endpoint',
-      demoData: mockSalesData
+      demoData: mockSalesData,
+      isSalesRelated: true
     },
     {
       id: 'yellowdog',
@@ -82,7 +87,8 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
       dataFlow: 'Yellow Dog → Inventory → Orby Counts',
       features: ['EOD inventory import', 'Variance reporting', 'Purchase order sync', 'Par level alerts'],
       nextStep: 'Yellow Dog export file ingest',
-      demoData: mockInventoryData
+      demoData: mockInventoryData,
+      isSalesRelated: false
     },
     {
       id: 'orbitstaffing',
@@ -96,9 +102,15 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
       dataFlow: 'OrbitStaffing → Roster → Orby Presence',
       features: ['Staff roster sync', 'GPS clock-in verification', 'Section assignments', 'Certification tracking'],
       nextStep: 'OrbitStaffing API bridge',
-      demoData: mockStaffingData
+      demoData: mockStaffingData,
+      isSalesRelated: false
     }
   ];
+
+  // Filter out sales-related integrations for production tenants
+  const integrations = showSalesContent 
+    ? allIntegrations 
+    : allIntegrations.filter(i => !i.isSalesRelated);
 
   const statusColors: Record<string, { bg: string; text: string; label: string }> = {
     configurable: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', label: 'Configurable' },
@@ -118,25 +130,27 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
             Single dashboard view • No more switching screens
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="demo-mode" className="text-xs text-slate-400">Beta</Label>
-            <Switch
-              id="demo-mode"
-              checked={showSalesDemo}
-              onCheckedChange={setShowSalesDemo}
-              className="data-[state=checked]:bg-cyan-500"
-              data-testid="switch-demo-mode"
-            />
-            <Label htmlFor="demo-mode" className="text-xs text-slate-400">Sales Demo</Label>
+        {showSalesContent && (
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Label htmlFor="demo-mode" className="text-xs text-slate-400">Beta</Label>
+              <Switch
+                id="demo-mode"
+                checked={showSalesDemo}
+                onCheckedChange={setShowSalesDemo}
+                className="data-[state=checked]:bg-cyan-500"
+                data-testid="switch-demo-mode"
+              />
+              <Label htmlFor="demo-mode" className="text-xs text-slate-400">Sales Demo</Label>
+            </div>
+            {showSalesDemo && (
+              <Badge className="bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-300 border-cyan-500/40">
+                <Sparkles className="w-3 h-3 mr-1" />
+                Stripe Ready
+              </Badge>
+            )}
           </div>
-          {showSalesDemo && (
-            <Badge className="bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-300 border-cyan-500/40">
-              <Sparkles className="w-3 h-3 mr-1" />
-              Stripe Ready
-            </Badge>
-          )}
-        </div>
+        )}
       </div>
 
       <div className="bg-slate-800/30 rounded-xl p-4 border border-cyan-500/20">
@@ -325,7 +339,7 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
           <RefreshCw className="w-3 h-3" />
           <span>Visual preview only • Not live yet</span>
         </div>
-        {showSalesDemo && (
+        {showSalesContent && showSalesDemo && (
           <Badge className="bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border-emerald-500/40">
             <CreditCard className="w-3 h-3 mr-1" />
             Pricing & Stripe Ready for Sales Demo

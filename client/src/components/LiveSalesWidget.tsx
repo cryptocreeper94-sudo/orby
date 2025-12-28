@@ -12,6 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTenant } from '@/lib/TenantContext';
 
 interface StandSales {
   standId: string;
@@ -66,10 +67,13 @@ interface LiveSalesWidgetProps {
 }
 
 export function LiveSalesWidget({ compact = false, className = '' }: LiveSalesWidgetProps) {
+  const { tenant } = useTenant();
   const [stands, setStands] = useState<StandSales[]>(SIMULATED_STANDS);
   const [alerts, setAlerts] = useState<SalesAlert[]>(SIMULATED_ALERTS);
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [isSimulating, setIsSimulating] = useState(true);
+  
+  const showSalesContent = tenant.features.showSalesContent;
 
   useEffect(() => {
     if (!isSimulating) return;
@@ -86,6 +90,11 @@ export function LiveSalesWidget({ compact = false, className = '' }: LiveSalesWi
 
     return () => clearInterval(interval);
   }, [isSimulating]);
+
+  // Hide sales widget on production tenant (nissan_beta)
+  if (!showSalesContent) {
+    return null;
+  }
 
   const totalRevenue = stands.reduce((sum, s) => sum + s.hourlyRevenue, 0);
   const totalUnits = stands.reduce((sum, s) => sum + s.hourlyUnits, 0);
