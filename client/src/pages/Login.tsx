@@ -91,14 +91,14 @@ export default function LoginPage() {
         }
         const savedRole = sessionStorage.getItem('orby_dev_role');
         if (savedRole === 'ops_manager') {
-          setLocation("/command-center");
+          setLocation("/mission-control");
         } else {
           setLocation("/dev");
         }
         return;
       }
       else if (role === 'OperationsManager') setLocation("/event-setup");
-      else if (role === 'GeneralManager' || role === 'RegionalVP') setLocation("/command-center");
+      else if (role === 'GeneralManager' || role === 'RegionalVP') setLocation("/mission-control");
       else if (role === 'Admin') setLocation("/admin");
       else if (role === 'IT') setLocation("/it");
       else if (role === 'StandLead') setLocation("/standlead");
