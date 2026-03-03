@@ -223,7 +223,7 @@ export function PaperCountSheetScanner({
                 <SwitchCamera className="h-4 w-4" />
               </Button>
             </div>
-            <p className="text-sm text-slate-400 text-center">
+            <p className="text-sm text-white/40 text-center">
               Position the paper count sheet clearly in frame. 
               Works with handwritten or printed sheets.
             </p>
@@ -271,7 +271,7 @@ export function PaperCountSheetScanner({
             {isScanning && (
               <div className="flex items-center justify-center gap-2 py-4">
                 <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-                <span className="text-slate-400">Reading count sheet...</span>
+                <span className="text-white/40">Reading count sheet...</span>
               </div>
             )}
 
@@ -285,7 +285,7 @@ export function PaperCountSheetScanner({
                 </div>
 
                 {scanResult.notes && (
-                  <p className="text-sm text-slate-400 bg-slate-800/50 p-2 rounded">
+                  <p className="text-sm text-white/40 bg-white/5 p-2 rounded">
                     {scanResult.notes}
                   </p>
                 )}
@@ -294,7 +294,7 @@ export function PaperCountSheetScanner({
                   <Button variant="link" size="sm" onClick={selectAll} className="p-0 h-auto">
                     Select All
                   </Button>
-                  <span className="text-gray-300">|</span>
+                  <span className="text-white/70">|</span>
                   <Button variant="link" size="sm" onClick={selectNone} className="p-0 h-auto">
                     Select None
                   </Button>
@@ -305,7 +305,7 @@ export function PaperCountSheetScanner({
                     <div 
                       key={index}
                       className={`flex items-center gap-2 p-2 rounded ${
-                        selectedItems.has(index) ? 'bg-blue-500/10 border border-blue-500/30' : 'bg-slate-800/50'
+                        selectedItems.has(index) ? 'bg-blue-500/10 border border-blue-500/30' : 'bg-white/5'
                       }`}
                       data-testid={`scanned-item-${index}`}
                     >
@@ -320,7 +320,7 @@ export function PaperCountSheetScanner({
                           {item.confidence !== 'high' && getConfidenceBadge(item.confidence)}
                         </div>
                         {item.notes && (
-                          <p className="text-xs text-slate-400 truncate">{item.notes}</p>
+                          <p className="text-xs text-white/40 truncate">{item.notes}</p>
                         )}
                       </div>
                       <div className="flex items-center gap-1">

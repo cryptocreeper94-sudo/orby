@@ -32,8 +32,8 @@ export default function ITDashboard() {
     switch (priority) {
       case 'High': return 'bg-red-500/20 text-red-400 border-red-500/30';
       case 'Medium': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-      case 'Low': return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
-      default: return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+      case 'Low': return 'bg-white/10 text-white/40 border-white/10';
+      default: return 'bg-white/10 text-white/40 border-white/10';
     }
   };
 
@@ -48,12 +48,12 @@ export default function ITDashboard() {
     <div 
       key={idx}
       data-testid={`status-card-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
-      className={`p-4 rounded-xl bg-slate-800/60 border border-${item.color}-500/20 w-[140px] h-[100px] hover:border-${item.color}-400/50 transition-colors`}
+      className={`p-4 rounded-xl bg-white/[0.06] border border-${item.color}-500/20 w-[140px] h-[100px] hover:border-${item.color}-400/50 transition-colors`}
     >
       <div className={`p-2 rounded-xl bg-${item.color}-500/20 w-fit mb-2`}>
         <div className={`text-${item.color}-400`}>{item.icon}</div>
       </div>
-      <div className="text-sm font-medium text-slate-300">{item.label}</div>
+      <div className="text-sm font-medium text-white/70">{item.label}</div>
       <Badge className={`bg-${item.color}-500/20 text-${item.color}-400 border border-${item.color}-500/30 text-[10px] uppercase mt-1`}>
         {item.status}
       </Badge>
@@ -64,16 +64,16 @@ export default function ITDashboard() {
     <div 
       key={ticket.id}
       data-testid={`ticket-card-${ticket.id}`}
-      className="p-4 rounded-xl bg-slate-800/60 border-l-4 border-l-cyan-500 border border-white/10 min-w-[220px] hover:bg-slate-800/80 transition-colors"
+      className="p-4 rounded-xl bg-white/[0.06] border-l-4 border-l-cyan-500 border border-white/10 min-w-[220px] hover:bg-white/5/80 transition-colors"
     >
       <div className="flex justify-between items-start mb-2">
-        <div className="font-bold text-slate-100">{ticket.location}</div>
+        <div className="font-bold text-white">{ticket.location}</div>
         <Badge className={`${getPriorityColor(ticket.priority)} text-xs border`}>
           {ticket.priority}
         </Badge>
       </div>
-      <div className="text-sm text-slate-400 mb-2">{ticket.issue}</div>
-      <div className="text-xs text-slate-500 flex items-center gap-1">
+      <div className="text-sm text-white/40 mb-2">{ticket.issue}</div>
+      <div className="text-xs text-white/30 flex items-center gap-1">
         <Clock className="h-3 w-3" />
         {ticket.time}
       </div>
@@ -94,19 +94,19 @@ export default function ITDashboard() {
         <div className="space-y-2 text-sm font-mono">
           <div className="flex items-start gap-2">
             <span className="text-emerald-400 text-xs">10:45</span>
-            <span className="text-slate-400">Network health check passed</span>
+            <span className="text-white/40">Network health check passed</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-amber-400 text-xs">10:32</span>
-            <span className="text-slate-400">POS-102 reconnected after timeout</span>
+            <span className="text-white/40">POS-102 reconnected after timeout</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-emerald-400 text-xs">10:15</span>
-            <span className="text-slate-400">Backup completed successfully</span>
+            <span className="text-white/40">Backup completed successfully</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-blue-400 text-xs">10:00</span>
-            <span className="text-slate-400">Scheduled maintenance window started</span>
+            <span className="text-white/40">Scheduled maintenance window started</span>
           </div>
         </div>
       )
@@ -117,15 +117,15 @@ export default function ITDashboard() {
         <div className="space-y-2 text-sm font-mono">
           <div className="flex items-start gap-2">
             <span className="text-red-400 text-xs">ERROR</span>
-            <span className="text-slate-400">Connection timeout on POS-102</span>
+            <span className="text-white/40">Connection timeout on POS-102</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-amber-400 text-xs">WARN</span>
-            <span className="text-slate-400">High CPU usage on Server-03</span>
+            <span className="text-white/40">High CPU usage on Server-03</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-red-400 text-xs">ERROR</span>
-            <span className="text-slate-400">Printer queue overflow at Stand 201</span>
+            <span className="text-white/40">Printer queue overflow at Stand 201</span>
           </div>
         </div>
       )
@@ -136,15 +136,15 @@ export default function ITDashboard() {
         <div className="space-y-2 text-sm">
           <div className="flex items-start gap-2">
             <span className="text-emerald-400">✓</span>
-            <span className="text-slate-400">No security incidents in the last 24 hours</span>
+            <span className="text-white/40">No security incidents in the last 24 hours</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-blue-400">ℹ</span>
-            <span className="text-slate-400">Last security scan: 2 hours ago</span>
+            <span className="text-white/40">Last security scan: 2 hours ago</span>
           </div>
           <div className="flex items-start gap-2">
             <span className="text-emerald-400">✓</span>
-            <span className="text-slate-400">All firewalls active and updated</span>
+            <span className="text-white/40">All firewalls active and updated</span>
           </div>
         </div>
       )
@@ -173,7 +173,7 @@ export default function ITDashboard() {
           icon={<Monitor className="h-5 w-5" />}
           iconColor="cyan"
           actions={
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-300 hover:bg-white/10" data-testid="button-logout">
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white/70 hover:bg-white/10" data-testid="button-logout">
               <LogOut className="h-5 w-5" />
             </Button>
           }
@@ -199,7 +199,7 @@ export default function ITDashboard() {
                 <div className="p-1.5 rounded-lg bg-cyan-500/20">
                   <AlertTriangle className="h-4 w-4 text-cyan-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Active Tickets</span>
+                <span className="font-bold text-sm text-white/80">Active Tickets</span>
                 <Badge className="bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 text-xs ml-auto">
                   {tickets.length} open
                 </Badge>
@@ -215,7 +215,7 @@ export default function ITDashboard() {
                 <div className="p-1.5 rounded-lg bg-violet-500/20">
                   <Terminal className="h-4 w-4 text-violet-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Logs & Guides</span>
+                <span className="font-bold text-sm text-white/80">Logs & Guides</span>
               </div>
               <AccordionStack 
                 items={logAccordionItems} 
@@ -229,7 +229,7 @@ export default function ITDashboard() {
                 <div className="p-1.5 rounded-lg bg-emerald-500/20">
                   <Server className="h-4 w-4 text-emerald-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Equipment Metrics</span>
+                <span className="font-bold text-sm text-white/80">Equipment Metrics</span>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                 {equipmentMetrics.map((metric, idx) => (
@@ -237,14 +237,14 @@ export default function ITDashboard() {
                     key={idx}
                     whileHover={{ scale: 1.02 }}
                     data-testid={`equipment-metric-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}
-                    className={`p-4 rounded-xl bg-slate-800/40 border border-white/10 text-center hover:border-${metric.color}-500/30 transition-colors`}
+                    className={`p-4 rounded-xl bg-white/5 border border-white/10 text-center hover:border-${metric.color}-500/30 transition-colors`}
                   >
                     <div className={`p-2 rounded-lg bg-${metric.color}-500/20 w-fit mx-auto mb-2`}>
                       <div className={`text-${metric.color}-400`}>{metric.icon}</div>
                     </div>
-                    <div className="text-xs text-slate-400 uppercase tracking-wide">{metric.label}</div>
-                    <div className="text-lg font-bold text-slate-100">{metric.value}</div>
-                    <div className="text-xs text-slate-500">{metric.subValue}</div>
+                    <div className="text-xs text-white/40 uppercase tracking-wide">{metric.label}</div>
+                    <div className="text-lg font-bold text-white">{metric.value}</div>
+                    <div className="text-xs text-white/30">{metric.subValue}</div>
                   </motion.div>
                 ))}
               </div>
@@ -255,13 +255,13 @@ export default function ITDashboard() {
                 <div className="p-1.5 rounded-lg bg-blue-500/20">
                   <MessageSquare className="h-4 w-4 text-blue-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Messages</span>
+                <span className="font-bold text-sm text-white/80">Messages</span>
               </div>
               <div className="border-dashed border-2 border-white/20 rounded-xl py-8 text-center">
-                <div className="p-4 rounded-2xl bg-slate-500/10 w-fit mx-auto mb-3">
-                  <MessageSquare className="h-10 w-10 text-slate-500" />
+                <div className="p-4 rounded-2xl bg-white/5 w-fit mx-auto mb-3">
+                  <MessageSquare className="h-10 w-10 text-white/30" />
                 </div>
-                <p className="text-slate-400">No new messages</p>
+                <p className="text-white/40">No new messages</p>
               </div>
             </BentoCard>
           </LayoutShell>

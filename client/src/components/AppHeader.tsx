@@ -90,7 +90,7 @@ export function AppHeader({ showVerifiedBadge = true }: AppHeaderProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 text-gray-400 hover:text-cyan-400 hover:bg-gray-800/50"
+                    className="h-9 w-9 text-white/40 hover:text-cyan-400 hover:bg-gray-800/50"
                     data-testid="button-hamburger-menu"
                   >
                     <Menu className="h-5 w-5" />
@@ -106,7 +106,7 @@ export function AppHeader({ showVerifiedBadge = true }: AppHeaderProps) {
                       />
                       <div>
                         <SheetTitle className="text-white text-left">Orby Commander</SheetTitle>
-                        <p className="text-xs text-gray-400">Venue Operations Platform</p>
+                        <p className="text-xs text-white/40">Venue Operations Platform</p>
                       </div>
                     </div>
                   </SheetHeader>
@@ -119,7 +119,7 @@ export function AppHeader({ showVerifiedBadge = true }: AppHeaderProps) {
                         </div>
                         <div>
                           <p className="text-sm font-medium text-white">{currentUser.name}</p>
-                          <p className="text-xs text-gray-400">{currentUser.role}</p>
+                          <p className="text-xs text-white/40">{currentUser.role}</p>
                         </div>
                       </div>
                     </div>
@@ -133,16 +133,16 @@ export function AppHeader({ showVerifiedBadge = true }: AppHeaderProps) {
                         className="w-full px-4 py-3 flex items-center gap-3 hover:bg-gray-800/50 transition-colors group"
                         data-testid={`menu-item-${item.id}`}
                       >
-                        <div className="text-gray-400 group-hover:text-cyan-400 transition-colors">
+                        <div className="text-white/40 group-hover:text-cyan-400 transition-colors">
                           {item.icon}
                         </div>
                         <div className="flex-1 text-left">
                           <p className="text-sm font-medium text-white group-hover:text-cyan-400 transition-colors">
                             {item.label}
                           </p>
-                          <p className="text-xs text-gray-500">{item.description}</p>
+                          <p className="text-xs text-white/30">{item.description}</p>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-gray-600 group-hover:text-gray-400" />
+                        <ChevronRight className="w-4 h-4 text-white/20 group-hover:text-white/40" />
                       </button>
                     ))}
                   </div>
@@ -151,12 +151,12 @@ export function AppHeader({ showVerifiedBadge = true }: AppHeaderProps) {
 
                   <div className="p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <Building2 className="w-4 h-4 text-gray-500" />
-                      <span className="text-xs text-gray-500">Current Venue</span>
+                      <Building2 className="w-4 h-4 text-white/30" />
+                      <span className="text-xs text-white/30">Current Venue</span>
                     </div>
                     <div className="bg-gray-800/50 rounded-lg p-3 border border-gray-700/50">
                       <p className="text-sm font-medium text-white">Nissan Stadium</p>
-                      <p className="text-xs text-gray-400">Nashville, Tennessee</p>
+                      <p className="text-xs text-white/40">Nashville, Tennessee</p>
                       <Badge variant="outline" className="mt-2 text-xs border-cyan-500/50 text-cyan-400">
                         Beta Tenant
                       </Badge>
@@ -195,14 +195,14 @@ export function AppHeader({ showVerifiedBadge = true }: AppHeaderProps) {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 text-gray-400 hover:text-cyan-400 hover:bg-gray-800/50 relative"
+                    className="h-9 w-9 text-white/40 hover:text-cyan-400 hover:bg-gray-800/50 relative"
                     data-testid="button-theme-panel"
                   >
                     <Palette className="h-5 w-5" />
                     <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-80 sm:w-96 bg-slate-950 border-gray-700 p-0">
+                <SheetContent side="right" className="w-80 sm:w-96 bg-[#050508] border-gray-700 p-0">
                   <ThemeGallery />
                 </SheetContent>
               </Sheet>
@@ -300,12 +300,12 @@ function HallmarkViewerModal({ isOpen, onClose }: HallmarkViewerModalProps) {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white">Genesis Hallmarks</h2>
-              <p className="text-xs text-gray-400">Blockchain-verified asset stamps</p>
+              <p className="text-xs text-white/40">Blockchain-verified asset stamps</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} data-testid="button-close-hallmarks">
             <span className="sr-only">Close</span>
-            <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </Button>
@@ -329,7 +329,7 @@ function HallmarkViewerModal({ isOpen, onClose }: HallmarkViewerModalProps) {
             </div>
           ) : stamps.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-400 text-sm">No hallmarks found</p>
+              <p className="text-white/40 text-sm">No hallmarks found</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -353,16 +353,16 @@ function HallmarkViewerModal({ isOpen, onClose }: HallmarkViewerModalProps) {
                         )}
                       </div>
                       <p className="text-sm font-medium text-white">{stamp.displayName}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{getCategoryLabel(stamp.category)}</p>
+                      <p className="text-xs text-white/40 mt-0.5">{getCategoryLabel(stamp.category)}</p>
                     </div>
-                    <QrCode className="w-8 h-8 text-gray-600 flex-shrink-0" />
+                    <QrCode className="w-8 h-8 text-white/20 flex-shrink-0" />
                   </div>
 
                   {selectedStamp === stamp.assetNumber && (
                     <div className="mt-4 pt-4 border-t border-gray-700/50">
-                      <p className="text-xs text-gray-300 mb-3">{stamp.description || 'No description available'}</p>
+                      <p className="text-xs text-white/70 mb-3">{stamp.description || 'No description available'}</p>
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500">Created: {formatDate(stamp.createdAt)}</span>
+                        <span className="text-xs text-white/30">Created: {formatDate(stamp.createdAt)}</span>
                         {stamp.solanaTxSignature ? (
                           <a
                             href={`https://solscan.io/tx/${stamp.solanaTxSignature}`}
@@ -378,7 +378,7 @@ function HallmarkViewerModal({ isOpen, onClose }: HallmarkViewerModalProps) {
                             </svg>
                           </a>
                         ) : (
-                          <span className="text-xs text-gray-500">Pending blockchain verification</span>
+                          <span className="text-xs text-white/30">Pending blockchain verification</span>
                         )}
                       </div>
                     </div>
@@ -393,11 +393,11 @@ function HallmarkViewerModal({ isOpen, onClose }: HallmarkViewerModalProps) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-white/40">
                 {stamps.length} Genesis Hallmarks
               </span>
             </div>
-            <Badge variant="outline" className="text-xs border-gray-600 text-gray-400">
+            <Badge variant="outline" className="text-xs border-gray-600 text-white/40">
               Nissan Stadium Beta
             </Badge>
           </div>

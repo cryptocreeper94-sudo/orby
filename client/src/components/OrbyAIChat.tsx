@@ -341,7 +341,7 @@ export function OrbyAIChat() {
                 bottom: keyboardHeight > 0 ? `${keyboardHeight + 8}px` : '16px',
                 maxHeight: keyboardHeight > 0 ? `calc(100vh - ${keyboardHeight + 80}px)` : undefined
               }}
-              className="fixed inset-x-4 top-16 md:inset-auto md:bottom-8 md:left-8 md:w-96 md:h-[600px] md:max-h-[80vh] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 z-50 flex flex-col overflow-hidden"
+              className="fixed inset-x-4 top-16 md:inset-auto md:bottom-8 md:left-8 md:w-96 md:h-[600px] md:max-h-[80vh] bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 z-50 flex flex-col overflow-hidden"
               data-testid="orby-ai-chat-modal"
             >
               <div className="p-4 border-b border-cyan-500/20 bg-gradient-to-r from-cyan-500/10 to-teal-500/10">
@@ -372,7 +372,7 @@ export function OrbyAIChat() {
                           "transition-colors",
                           voiceEnabled 
                             ? "text-cyan-400 bg-cyan-500/20 hover:bg-cyan-500/30" 
-                            : "text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10"
+                            : "text-white/40 hover:text-cyan-400 hover:bg-cyan-500/10"
                         )}
                         data-testid="button-toggle-voice"
                       >
@@ -383,7 +383,7 @@ export function OrbyAIChat() {
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowGlossary(true)}
-                      className="text-slate-400 hover:text-cyan-400 hover:bg-cyan-500/10"
+                      className="text-white/40 hover:text-cyan-400 hover:bg-cyan-500/10"
                       data-testid="button-open-glossary"
                     >
                       <BookOpen className="h-5 w-5" />
@@ -396,7 +396,7 @@ export function OrbyAIChat() {
                         stopListening();
                         setIsOpen(false);
                       }}
-                      className="text-slate-400 hover:text-white"
+                      className="text-white/40 hover:text-white"
                       data-testid="button-close-chat"
                     >
                       <X className="h-5 w-5" />
@@ -420,7 +420,7 @@ export function OrbyAIChat() {
                       "max-w-[85%] rounded-2xl px-4 py-3 relative group",
                       msg.role === 'user' 
                         ? "bg-cyan-500 text-white rounded-br-md" 
-                        : "bg-slate-700/50 text-slate-200 rounded-bl-md border border-slate-600/50"
+                        : "bg-white/10 text-white/80 rounded-bl-md border border-white/10/50"
                     )}>
                       <p className="text-sm whitespace-pre-wrap pr-6">{msg.content}</p>
                       
@@ -431,7 +431,7 @@ export function OrbyAIChat() {
                             "absolute right-1 bottom-1 w-6 h-6 rounded-full flex items-center justify-center transition-all",
                             speakingId === msg.id
                               ? "bg-cyan-500 text-white shadow-lg shadow-cyan-500/50"
-                              : "bg-slate-600/80 text-slate-300 opacity-70 hover:opacity-100 hover:bg-cyan-500 hover:text-white"
+                              : "bg-white/15 text-white/70 opacity-70 hover:opacity-100 hover:bg-cyan-500 hover:text-white"
                           )}
                           data-testid={`button-speak-${msg.id}`}
                         >
@@ -452,7 +452,7 @@ export function OrbyAIChat() {
                     animate={{ opacity: 1, y: 0 }}
                     className="flex justify-start"
                   >
-                    <div className="bg-slate-700/50 rounded-2xl rounded-bl-md px-4 py-3 border border-slate-600/50">
+                    <div className="bg-white/10 rounded-2xl rounded-bl-md px-4 py-3 border border-white/10/50">
                       <div className="flex items-center gap-2 text-cyan-400">
                         <Loader2 className="h-4 w-4 animate-spin" />
                         <span className="text-sm">Thinking...</span>
@@ -466,7 +466,7 @@ export function OrbyAIChat() {
 
               {messages.length === 1 && (
                 <div className="px-4 pb-2">
-                  <p className="text-xs text-slate-500 mb-2">Quick questions:</p>
+                  <p className="text-xs text-white/30 mb-2">Quick questions:</p>
                   <div className="flex flex-wrap gap-2">
                     {quickQuestions.map((q, i) => (
                       <button
@@ -475,7 +475,7 @@ export function OrbyAIChat() {
                           setInputValue(q);
                           inputRef.current?.focus();
                         }}
-                        className="text-xs px-3 py-1.5 rounded-full bg-slate-700/50 text-slate-300 hover:bg-cyan-500/20 hover:text-cyan-400 border border-slate-600/50 transition-colors"
+                        className="text-xs px-3 py-1.5 rounded-full bg-white/10 text-white/70 hover:bg-cyan-500/20 hover:text-cyan-400 border border-white/10/50 transition-colors"
                         data-testid={`quick-question-${i}`}
                       >
                         {q}
@@ -485,7 +485,7 @@ export function OrbyAIChat() {
                 </div>
               )}
 
-              <div className="p-4 border-t border-cyan-500/20 bg-slate-900/50">
+              <div className="p-4 border-t border-cyan-500/20 bg-[rgba(12,18,36,0.65)]">
                 <div className="flex gap-2">
                   <input
                     ref={inputRef}
@@ -495,10 +495,10 @@ export function OrbyAIChat() {
                     onKeyDown={handleKeyDown}
                     placeholder={isListening ? "Listening..." : "Ask Orby anything..."}
                     className={cn(
-                      "flex-1 bg-slate-800/50 border rounded-xl px-4 py-2.5 text-white placeholder:text-slate-500 focus:outline-none focus:ring-1",
+                      "flex-1 bg-white/5 border rounded-xl px-4 py-2.5 text-white placeholder:text-white/30 focus:outline-none focus:ring-1",
                       isListening 
                         ? "border-cyan-400 ring-1 ring-cyan-400/50 placeholder:text-cyan-400" 
-                        : "border-slate-600/50 focus:border-cyan-500/50 focus:ring-cyan-500/30"
+                        : "border-white/10/50 focus:border-cyan-500/50 focus:ring-cyan-500/30"
                     )}
                     disabled={chatMutation.isPending}
                     data-testid="input-chat-message"
@@ -511,7 +511,7 @@ export function OrbyAIChat() {
                         "rounded-xl px-3",
                         isListening 
                           ? "bg-red-500 hover:bg-red-400 text-white animate-pulse" 
-                          : "bg-slate-700 hover:bg-slate-600 text-white"
+                          : "bg-white/10 hover:bg-white/10 text-white"
                       )}
                       data-testid="button-voice-input"
                     >
@@ -527,7 +527,7 @@ export function OrbyAIChat() {
                     <Send className="h-5 w-5" />
                   </Button>
                 </div>
-                <p className="text-xs text-slate-500 mt-2 text-center">
+                <p className="text-xs text-white/30 mt-2 text-center">
                   {voiceEnabled 
                     ? "Voice mode enabled - tap mic to speak" 
                     : "Tap the speaker icon on any response to hear it read aloud"}
@@ -552,7 +552,7 @@ export function OrbyAIChat() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-amber-500/30 p-6 max-w-sm w-full shadow-2xl"
+              className="bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] rounded-2xl border border-amber-500/30 p-6 max-w-sm w-full shadow-2xl"
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
@@ -561,11 +561,11 @@ export function OrbyAIChat() {
                 <h3 className="text-lg font-bold text-white">Voice Mode</h3>
               </div>
               
-              <p className="text-slate-300 text-sm mb-4">
+              <p className="text-white/70 text-sm mb-4">
                 The stadium is a noisy environment. Voice input may not work reliably in loud areas.
               </p>
               
-              <p className="text-slate-400 text-xs mb-6">
+              <p className="text-white/40 text-xs mb-6">
                 For best results, use voice input in quiet areas like offices or during low-traffic periods.
               </p>
               
@@ -573,7 +573,7 @@ export function OrbyAIChat() {
                 <Button
                   onClick={() => setShowVoiceDisclaimer(false)}
                   variant="outline"
-                  className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-700"
+                  className="flex-1 border-white/10 text-white/70 hover:bg-white/10"
                   data-testid="button-cancel-voice"
                 >
                   Cancel

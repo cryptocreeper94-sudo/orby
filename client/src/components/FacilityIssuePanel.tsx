@@ -70,9 +70,9 @@ const CATEGORY_COLORS: Record<IssueCategory, string> = {
   AV: 'bg-purple-500/10 text-purple-300 border border-purple-500/30',
   Menu: 'bg-orange-500/10 text-orange-300 border border-orange-500/30',
   FoodSafety: 'bg-red-500/10 text-red-300 border border-red-500/30',
-  Equipment: 'bg-slate-700/50 text-slate-300 border border-slate-500/30',
+  Equipment: 'bg-white/10 text-white/70 border border-white/10',
   Staffing: 'bg-green-500/10 text-green-300 border border-green-500/30',
-  Other: 'bg-slate-700/50 text-slate-400 border border-slate-500/30',
+  Other: 'bg-white/10 text-white/40 border border-white/10',
 };
 
 const SEVERITY_COLORS: Record<IssueSeverity, string> = {
@@ -187,7 +187,7 @@ export function FacilityIssuePanel({
   const openIssues = existingIssues.filter((i: any) => i.status !== 'Resolved' && i.status !== 'Closed');
 
   return (
-    <Card className="border-slate-200">
+    <Card className="border-white/10">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -200,7 +200,7 @@ export function FacilityIssuePanel({
             </Badge>
           )}
         </div>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-white/30">
           {standName} - Issues go directly to Operations
         </p>
       </CardHeader>
@@ -214,7 +214,7 @@ export function FacilityIssuePanel({
         )}
 
         <div className="space-y-2">
-          <p className="text-sm font-medium text-slate-700">Quick Report:</p>
+          <p className="text-sm font-medium text-white/40">Quick Report:</p>
           <div className="grid grid-cols-2 gap-2">
             {displayedQuickIssues.map((issue) => (
               <Button
@@ -239,7 +239,7 @@ export function FacilityIssuePanel({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full text-slate-500"
+              className="w-full text-white/30"
               onClick={() => setShowAllQuickIssues(!showAllQuickIssues)}
               data-testid="toggle-more-issues"
             >
@@ -268,7 +268,7 @@ export function FacilityIssuePanel({
         </div>
 
         {showCustomForm && (
-          <div className="space-y-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50">
+          <div className="space-y-3 p-3 bg-white/5 rounded-lg border border-white/[0.08]/50">
             <div>
               <label className="text-sm font-medium">Issue Description</label>
               <Textarea
@@ -302,7 +302,7 @@ export function FacilityIssuePanel({
         )}
 
         {(selectedIssue || showCustomForm) && (
-          <div className="space-y-3 p-3 border border-slate-700/50 rounded-lg bg-slate-800/50">
+          <div className="space-y-3 p-3 border border-white/[0.08]/50 rounded-lg bg-white/5">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
                 {selectedIssue ? selectedIssue.title : 'Custom Issue'}
@@ -391,7 +391,7 @@ export function FacilityIssuePanel({
         {openIssues.length > 0 && (
           <Collapsible>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm" className="w-full text-slate-600" data-testid="view-open-issues">
+              <Button variant="ghost" size="sm" className="w-full text-white/20" data-testid="view-open-issues">
                 View {openIssues.length} Open Issue{openIssues.length > 1 ? 's' : ''} <ChevronDown className="w-4 h-4 ml-1" />
               </Button>
             </CollapsibleTrigger>
@@ -399,7 +399,7 @@ export function FacilityIssuePanel({
               {openIssues.map((issue: any) => (
                 <div 
                   key={issue.id} 
-                  className="p-2 bg-slate-800/50 rounded-lg text-sm border border-slate-700/50"
+                  className="p-2 bg-white/5 rounded-lg text-sm border border-white/[0.08]/50"
                   data-testid={`open-issue-${issue.id}`}
                 >
                   <div className="flex items-center justify-between">
@@ -412,7 +412,7 @@ export function FacilityIssuePanel({
                     </div>
                   </div>
                   {issue.createdAt && (
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs text-white/30 mt-1">
                       Reported {new Date(issue.createdAt).toLocaleTimeString()}
                     </p>
                   )}

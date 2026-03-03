@@ -92,12 +92,12 @@ export function VersionBadge() {
                     </div>
                     <div>
                       <h3 className="text-white font-bold">Orby Version History</h3>
-                      <p className="text-gray-400 text-xs">Blockchain Certified Releases</p>
+                      <p className="text-white/40 text-xs">Blockchain Certified Releases</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setIsModalOpen(false)}
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className="text-white/40 hover:text-white transition-colors"
                     data-testid="button-close-version-modal"
                   >
                     <X className="w-5 h-5" />
@@ -107,7 +107,7 @@ export function VersionBadge() {
 
               <div className="p-4 overflow-y-auto max-h-[calc(70vh-80px)]">
                 {versionAssets?.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">
+                  <div className="text-center py-8 text-white/40">
                     No version history available
                   </div>
                 ) : (
@@ -142,7 +142,7 @@ export function VersionBadge() {
                                     Verified
                                   </span>
                                 ) : (
-                                  <span className="flex items-center gap-1 text-xs text-gray-400 bg-gray-700/50 px-2 py-0.5 rounded-full">
+                                  <span className="flex items-center gap-1 text-xs text-white/40 bg-gray-700/50 px-2 py-0.5 rounded-full">
                                     <Hash className="w-3 h-3" />
                                     Pending
                                   </span>
@@ -155,17 +155,17 @@ export function VersionBadge() {
                               )}
                             </div>
                             
-                            <div className="flex items-center gap-1 text-gray-400 text-xs mb-3">
+                            <div className="flex items-center gap-1 text-white/40 text-xs mb-3">
                               <Clock className="w-3 h-3" />
                               {formatDate(version.createdAt)}
                             </div>
                             
-                            <div className="text-gray-300 text-sm mb-3">{version.displayName}</div>
+                            <div className="text-white/70 text-sm mb-3">{version.displayName}</div>
                             
                             {version.changes && version.changes.length > 0 && (
                               <div className="space-y-1">
-                                <div className="text-gray-500 text-xs uppercase tracking-wider">Changes</div>
-                                <ul className="list-disc list-inside text-gray-300 text-xs space-y-0.5">
+                                <div className="text-white/30 text-xs uppercase tracking-wider">Changes</div>
+                                <ul className="list-disc list-inside text-white/70 text-xs space-y-0.5">
                                   {version.changes.map((change, i) => (
                                     <li key={i}>{change}</li>
                                   ))}
@@ -175,7 +175,7 @@ export function VersionBadge() {
                             
                             {version.isBlockchainAnchored && version.solanaTxSignature && (
                               <div className="mt-3 pt-3 border-t border-gray-700/50">
-                                <div className="text-gray-500 text-xs mb-1">Solana TX</div>
+                                <div className="text-white/30 text-xs mb-1">Solana TX</div>
                                 <div className="flex items-center gap-2">
                                   <span className="font-mono text-xs text-green-400 truncate flex-1">
                                     {version.solanaTxSignature.slice(0, 32)}...
@@ -195,7 +195,7 @@ export function VersionBadge() {
                             )}
                             
                             <div className="mt-3 pt-3 border-t border-gray-700/50">
-                              <div className="text-gray-500 text-xs mb-1">Asset Number</div>
+                              <div className="text-white/30 text-xs mb-1">Asset Number</div>
                               <span className="font-mono text-xs text-cyan-400">{version.assetNumber}</span>
                             </div>
                           </div>
@@ -208,7 +208,7 @@ export function VersionBadge() {
               
               <div className="p-4 border-t border-gray-700/50 bg-gray-900/50">
                 <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 text-gray-400">
+                  <div className="flex items-center gap-2 text-white/40">
                     <Shield className="w-4 h-4 text-cyan-400" />
                     <span>Powered by Genesis Hallmark System</span>
                   </div>

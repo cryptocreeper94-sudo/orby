@@ -186,7 +186,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-800 p-4" data-testid="login-page">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-[#0c1224] via-cyan-900 to-[#0c1224] p-4" data-testid="login-page">
       <div className="absolute top-4 left-4 right-4 flex justify-between items-center z-10">
         <CompactModeIndicator />
         <Button
@@ -207,7 +207,7 @@ export default function LoginPage() {
         <LayoutShell className="w-full max-w-6xl items-center justify-center">
           <BentoCard 
             span={4} 
-            className="col-span-4 md:col-start-2 md:col-span-4 lg:col-start-4 lg:col-span-6 p-6 bg-slate-800/40"
+            className="col-span-4 md:col-start-2 md:col-span-4 lg:col-start-4 lg:col-span-6 p-6 bg-white/5"
             data-testid="bento-card-login"
           >
             <div className="flex flex-col items-center text-center mb-8">
@@ -348,19 +348,19 @@ export default function LoginPage() {
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="mt-2 p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 space-y-3" data-testid="pin-help-content">
-                      <p className="text-xs text-slate-400 mb-3">
+                    <div className="mt-2 p-4 rounded-xl bg-white/5 border border-white/[0.08]/50 space-y-3" data-testid="pin-help-content">
+                      <p className="text-xs text-white/40 mb-3">
                         First time logging in?
                       </p>
                       
                       <div className="space-y-2 text-xs">
-                        <div className="flex justify-between items-center py-1.5 border-b border-slate-700/50">
-                          <span className="text-slate-300">New Staff Registration</span>
+                        <div className="flex justify-between items-center py-1.5 border-b border-white/[0.08]/50">
+                          <span className="text-white/70">New Staff Registration</span>
                           <span className="font-mono text-cyan-400 bg-cyan-500/20 px-2 py-0.5 rounded" data-testid="pin-hint-9999">9999</span>
                         </div>
                       </div>
 
-                      <p className="text-[10px] text-slate-500 mt-3 pt-2 border-t border-slate-700/50">
+                      <p className="text-[10px] text-white/30 mt-3 pt-2 border-t border-white/[0.08]/50">
                         All staff: Contact David for your PIN.
                       </p>
                     </div>
@@ -403,12 +403,12 @@ export default function LoginPage() {
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-cyan-500/30 p-6 max-w-sm w-full shadow-2xl shadow-cyan-500/20"
+              className="bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] rounded-2xl border border-cyan-500/30 p-6 max-w-sm w-full shadow-2xl shadow-cyan-500/20"
               data-testid="dev-role-picker-modal"
             >
               <div className="text-center mb-6">
                 <h3 className="text-xl font-bold text-white mb-2">Welcome, Admin</h3>
-                <p className="text-sm text-slate-400">How would you like to log in?</p>
+                <p className="text-sm text-white/40">How would you like to log in?</p>
               </div>
 
               <div className="space-y-3">
@@ -423,7 +423,7 @@ export default function LoginPage() {
                     </div>
                     <div className="text-left">
                       <div className="font-bold text-white">Developer Mode</div>
-                      <div className="text-xs text-slate-400">Dev Panel with tools & debugging</div>
+                      <div className="text-xs text-white/40">Dev Panel with tools & debugging</div>
                     </div>
                   </div>
                 </button>
@@ -439,13 +439,13 @@ export default function LoginPage() {
                     </div>
                     <div className="text-left">
                       <div className="font-bold text-white">Ops Manager</div>
-                      <div className="text-xs text-slate-400">Command Center (David's view)</div>
+                      <div className="text-xs text-white/40">Command Center (David's view)</div>
                     </div>
                   </div>
                 </button>
               </div>
 
-              <p className="text-center text-xs text-slate-500 mt-4">
+              <p className="text-center text-xs text-white/30 mt-4">
                 Your choice will be remembered for this session
               </p>
             </motion.div>

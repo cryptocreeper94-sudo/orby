@@ -200,13 +200,13 @@ export default function NPODashboard() {
     <div 
       key={idx}
       data-testid={`donation-metric-${metric.label.toLowerCase()}`}
-      className={`p-4 rounded-xl bg-slate-800/60 border border-white/10 w-[130px] h-[110px] hover:border-${metric.color}-400/50 transition-colors`}
+      className={`p-4 rounded-xl bg-white/[0.06] border border-white/10 w-[130px] h-[110px] hover:border-${metric.color}-400/50 transition-colors`}
     >
       <div className={`p-2 rounded-lg bg-${metric.color}-500/20 w-fit mb-2`}>
         <div className={`text-${metric.color}-400`}>{metric.icon}</div>
       </div>
-      <p className="text-[10px] text-slate-500 uppercase tracking-wider">{metric.label}</p>
-      <p className="font-bold text-sm text-slate-200">{metric.value}</p>
+      <p className="text-[10px] text-white/30 uppercase tracking-wider">{metric.label}</p>
+      <p className="font-bold text-sm text-white/80">{metric.value}</p>
     </div>
   ));
 
@@ -305,13 +305,13 @@ export default function NPODashboard() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-slate-300 hover:bg-white/10"
+                className="text-white/70 hover:bg-white/10"
                 onClick={() => setShowMap(true)}
                 data-testid="button-map"
               >
                 <Map className="h-5 w-5" />
               </Button>
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-300 hover:bg-white/10" data-testid="button-logout">
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white/70 hover:bg-white/10" data-testid="button-logout">
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
@@ -319,7 +319,7 @@ export default function NPODashboard() {
         />
 
         {showMap && (
-          <div className="fixed inset-0 z-50 bg-slate-950">
+          <div className="fixed inset-0 z-50 bg-[#050508]">
             <InteractiveMap 
               onClose={() => setShowMap(false)} 
               showNavigation={true}
@@ -329,7 +329,7 @@ export default function NPODashboard() {
         )}
 
         {showDirections && (
-          <div className="fixed inset-0 z-50 bg-slate-950 p-4">
+          <div className="fixed inset-0 z-50 bg-[#050508] p-4">
             <WalkingDirections 
               onClose={() => setShowDirections(false)}
               userLocation={location ? { lat: location.coords.latitude, lng: location.coords.longitude } : null}
@@ -339,7 +339,7 @@ export default function NPODashboard() {
         )}
 
         {showCounterLogin && (
-          <div className="fixed inset-0 z-50 bg-slate-950 p-4">
+          <div className="fixed inset-0 z-50 bg-[#050508] p-4">
             <CounterLogin
               standId={assignedSection.standId}
               standName={`${assignedSection.name} - ${assignedSection.stand}`}
@@ -353,7 +353,7 @@ export default function NPODashboard() {
         )}
 
         {showCountSheet && activeSession && (
-          <div className="fixed inset-0 z-50 bg-slate-950 p-4">
+          <div className="fixed inset-0 z-50 bg-[#050508] p-4">
             <CountSheet
               session={activeSession}
               standName={`${assignedSection.name} - ${assignedSection.stand}`}
@@ -394,9 +394,9 @@ export default function NPODashboard() {
                       <MapPin className={`h-5 w-5 ${isOnSite ? 'text-emerald-400' : 'text-amber-400'}`} />
                     </div>
                     <div>
-                      <span className="font-bold text-sm text-slate-200">Location Status</span>
+                      <span className="font-bold text-sm text-white/80">Location Status</span>
                       {isLoading ? (
-                        <p className="text-sm text-slate-400">Checking location...</p>
+                        <p className="text-sm text-white/40">Checking location...</p>
                       ) : error ? (
                         <p className="text-sm text-red-400">{error}</p>
                       ) : isOnSite ? (
@@ -417,7 +417,7 @@ export default function NPODashboard() {
                     variant="outline" 
                     onClick={requestLocation}
                     disabled={isLoading}
-                    className="bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
+                    className="bg-white/5 border-white/10 text-white/70 hover:bg-white/10"
                     data-testid="refresh-location"
                   >
                     <Navigation className="h-4 w-4 mr-1" />
@@ -452,7 +452,7 @@ export default function NPODashboard() {
                     Check In Now
                   </GlowButton>
                   {process.env.NODE_ENV === 'development' && !isOnSite && (
-                    <p className="text-xs text-slate-500">(Dev mode: Check-in available regardless of location)</p>
+                    <p className="text-xs text-white/30">(Dev mode: Check-in available regardless of location)</p>
                   )}
                 </div>
               </BentoCard>
@@ -513,7 +513,7 @@ export default function NPODashboard() {
                 <div className="p-1.5 rounded-lg bg-emerald-500/20">
                   <ClipboardList className="h-4 w-4 text-emerald-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Quick Actions</span>
+                <span className="font-bold text-sm text-white/80">Quick Actions</span>
               </div>
               <CarouselRail 
                 items={volunteersCarouselItems}
@@ -526,7 +526,7 @@ export default function NPODashboard() {
                 <div className="p-1.5 rounded-lg bg-violet-500/20">
                   <Shield className="h-4 w-4 text-violet-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Compliance</span>
+                <span className="font-bold text-sm text-white/80">Compliance</span>
               </div>
               <AccordionStack 
                 items={complianceAccordionItems} 
@@ -540,7 +540,7 @@ export default function NPODashboard() {
                 <div className="p-1.5 rounded-lg bg-blue-500/20">
                   <Map className="h-4 w-4 text-blue-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Navigation</span>
+                <span className="font-bold text-sm text-white/80">Navigation</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {eventsGridItems.map((item) => (
@@ -548,14 +548,14 @@ export default function NPODashboard() {
                     key={item.testId}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`p-4 rounded-xl bg-slate-800/40 border border-white/10 cursor-pointer text-center hover:border-${item.color}-500/30 transition-colors`}
+                    className={`p-4 rounded-xl bg-white/5 border border-white/10 cursor-pointer text-center hover:border-${item.color}-500/30 transition-colors`}
                     onClick={item.onClick}
                     data-testid={item.testId}
                   >
                     <div className={`p-3 rounded-xl bg-${item.color}-500/20 w-fit mx-auto mb-2`}>
                       <div className={`text-${item.color}-400`}>{item.icon}</div>
                     </div>
-                    <div className="font-bold text-xs text-slate-200">{item.label}</div>
+                    <div className="font-bold text-xs text-white/80">{item.label}</div>
                   </motion.div>
                 ))}
               </div>

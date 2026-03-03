@@ -65,7 +65,7 @@ const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }
   'available': { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/40' },
   'assigned': { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/40' },
   'maintenance': { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/40' },
-  'retired': { bg: 'bg-slate-500/20', text: 'text-slate-400', border: 'border-slate-500/40' }
+  'retired': { bg: 'bg-white/10', text: 'text-white/40', border: 'border-white/10' }
 };
 
 const LOCATION_TYPES = [
@@ -393,14 +393,14 @@ export function POSDeviceTracker() {
           </div>
           <div>
             <h2 className="text-xl font-bold text-white">POS Device Tracker</h2>
-            <p className="text-sm text-slate-400">Manage and track POS assignments</p>
+            <p className="text-sm text-white/40">Manage and track POS assignments</p>
           </div>
         </div>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => refetchOverview()}
-          className="text-slate-400 hover:text-white"
+          className="text-white/40 hover:text-white"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh
@@ -408,7 +408,7 @@ export function POSDeviceTracker() {
       </div>
       
       {/* View Tabs - Horizontal Scroll */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
         {[
           { id: 'overview', label: 'Overview', icon: Zap },
           { id: 'devices', label: 'All Devices', icon: Monitor },
@@ -422,7 +422,7 @@ export function POSDeviceTracker() {
               'min-w-fit h-11 px-4 rounded-xl transition-all whitespace-nowrap',
               selectedView === tab.id
                 ? 'bg-gradient-to-r from-cyan-600 to-cyan-700 text-white shadow-lg shadow-cyan-500/25'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                : 'text-white/40 hover:text-white hover:bg-white/5'
             )}
             onClick={() => setSelectedView(tab.id as any)}
           >
@@ -441,15 +441,15 @@ export function POSDeviceTracker() {
       {selectedView === 'overview' && overview && (
         <div className="space-y-6">
           {/* Stats Cards - Horizontal Scroll */}
-          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               className="min-w-[160px]"
             >
-              <div className="p-4 rounded-xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-slate-700/50 backdrop-blur-sm">
+              <div className="p-4 rounded-xl bg-gradient-to-br from-[#0c1224]/80 to-[#0c1224]/80 border border-white/[0.08]/50 backdrop-blur-sm">
                 <div className="text-3xl font-bold text-white">{overview.summary.total}</div>
-                <div className="text-sm text-slate-400 mt-1">Total Devices</div>
+                <div className="text-sm text-white/40 mt-1">Total Devices</div>
               </div>
             </motion.div>
             
@@ -501,7 +501,7 @@ export function POSDeviceTracker() {
                   animate={{ opacity: 1, scale: 1 }}
                   className={cn(
                     'p-4 rounded-xl bg-gradient-to-br border backdrop-blur-sm',
-                    DEVICE_TYPE_COLORS[type] || 'from-slate-600/30 to-slate-800/30 border-slate-500/40'
+                    DEVICE_TYPE_COLORS[type] || 'from-white/5 to-[#0c1224]/30 border-white/10'
                   )}
                 >
                   <div className="flex items-center gap-3 mb-3">
@@ -511,15 +511,15 @@ export function POSDeviceTracker() {
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div>
                       <div className="text-xl font-bold text-white">{stats.total}</div>
-                      <div className="text-xs text-slate-400">Total</div>
+                      <div className="text-xs text-white/40">Total</div>
                     </div>
                     <div>
                       <div className="text-xl font-bold text-emerald-400">{stats.available}</div>
-                      <div className="text-xs text-slate-400">Available</div>
+                      <div className="text-xs text-white/40">Available</div>
                     </div>
                     <div>
                       <div className="text-xl font-bold text-blue-400">{stats.assigned}</div>
-                      <div className="text-xs text-slate-400">Assigned</div>
+                      <div className="text-xs text-white/40">Assigned</div>
                     </div>
                   </div>
                 </motion.div>
@@ -541,13 +541,13 @@ export function POSDeviceTracker() {
                   View All <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
                 {overview.activeAssignments.slice(0, 6).map(assignment => (
                   <motion.div
                     key={assignment.id}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    className="min-w-[240px] p-4 rounded-xl bg-slate-800/60 border border-slate-700/50 backdrop-blur-sm"
+                    className="min-w-[240px] p-4 rounded-xl bg-white/[0.06] border border-white/[0.08]/50 backdrop-blur-sm"
                   >
                     <div className="flex items-center gap-2 mb-2">
                       {DEVICE_TYPE_ICONS[assignment.deviceType] || <Monitor className="h-4 w-4" />}
@@ -555,7 +555,7 @@ export function POSDeviceTracker() {
                         {assignment.deviceType} #{assignment.deviceNumber}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-400 mb-2">
+                    <div className="flex items-center gap-2 text-sm text-white/40 mb-2">
                       <MapPin className="h-3.5 w-3.5" />
                       {assignment.locationName}
                     </div>
@@ -628,13 +628,13 @@ export function POSDeviceTracker() {
                       <Badge className={cn(
                         issue.priority === 'Urgent' ? 'bg-red-500/20 text-red-400 border-red-500/40' :
                         issue.priority === 'High' ? 'bg-orange-500/20 text-orange-400 border-orange-500/40' :
-                        'bg-slate-500/20 text-slate-400 border-slate-500/40'
+                        'bg-white/10 text-white/40 border-white/10'
                       )}>
                         {issue.priority}
                       </Badge>
                     </div>
                     {issue.locationName && (
-                      <div className="text-sm text-slate-400 mt-1 ml-7">
+                      <div className="text-sm text-white/40 mt-1 ml-7">
                         Location: {issue.locationName}
                       </div>
                     )}
@@ -652,16 +652,16 @@ export function POSDeviceTracker() {
           {/* Search and Filters */}
           <div className="flex gap-3 flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
               <Input
                 placeholder="Search devices..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-slate-800/60 border-slate-700/50 text-white"
+                className="pl-10 bg-white/[0.06] border-white/[0.08]/50 text-white"
               />
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[140px] bg-slate-800/60 border-slate-700/50 text-white">
+              <SelectTrigger className="w-[140px] bg-white/[0.06] border-white/[0.08]/50 text-white">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
@@ -672,7 +672,7 @@ export function POSDeviceTracker() {
               </SelectContent>
             </Select>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[140px] bg-slate-800/60 border-slate-700/50 text-white">
+              <SelectTrigger className="w-[140px] bg-white/[0.06] border-white/[0.08]/50 text-white">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -685,7 +685,7 @@ export function POSDeviceTracker() {
           </div>
           
           {/* Device Grid - Horizontal Scroll on Mobile */}
-          <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-2 lg:grid-cols-3 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+          <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-2 lg:grid-cols-3 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
             {filteredDevices.map(device => (
               <motion.div
                 key={device.id}
@@ -693,7 +693,7 @@ export function POSDeviceTracker() {
                 animate={{ opacity: 1, y: 0 }}
                 className={cn(
                   'min-w-[280px] md:min-w-0 p-4 rounded-xl bg-gradient-to-br border backdrop-blur-sm',
-                  DEVICE_TYPE_COLORS[device.deviceType] || 'from-slate-600/30 to-slate-800/30 border-slate-500/40'
+                  DEVICE_TYPE_COLORS[device.deviceType] || 'from-white/5 to-[#0c1224]/30 border-white/10'
                 )}
               >
                 <div className="flex items-center justify-between mb-3">
@@ -713,24 +713,24 @@ export function POSDeviceTracker() {
                   </Badge>
                 </div>
                 
-                <div className="text-sm text-slate-300 mb-2">{device.deviceType}</div>
+                <div className="text-sm text-white/70 mb-2">{device.deviceType}</div>
                 
                 {device.currentLocationName && (
-                  <div className="flex items-center gap-2 text-sm text-slate-400 mb-3">
+                  <div className="flex items-center gap-2 text-sm text-white/40 mb-3">
                     <MapPin className="h-3.5 w-3.5" />
                     {device.currentLocationName}
                   </div>
                 )}
                 
                 {device.assignedByName && (
-                  <div className="flex items-center gap-2 text-sm text-slate-400 mb-3">
+                  <div className="flex items-center gap-2 text-sm text-white/40 mb-3">
                     <User className="h-3.5 w-3.5" />
                     Assigned by {device.assignedByName}
                   </div>
                 )}
                 
                 {canManagePOS && (
-                  <div className="flex gap-2 mt-3 pt-3 border-t border-slate-700/50">
+                  <div className="flex gap-2 mt-3 pt-3 border-t border-white/[0.08]/50">
                     {device.status === 'available' && (
                       <Button
                         size="sm"
@@ -762,7 +762,7 @@ export function POSDeviceTracker() {
           </div>
           
           {filteredDevices.length === 0 && (
-            <div className="text-center py-12 text-slate-400">
+            <div className="text-center py-12 text-white/40">
               <Monitor className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No devices found matching your filters</p>
             </div>
@@ -774,18 +774,18 @@ export function POSDeviceTracker() {
       {selectedView === 'assignments' && overview && (
         <div className="space-y-4">
           {overview.activeAssignments.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
+            <div className="text-center py-12 text-white/40">
               <MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No active assignments</p>
             </div>
           ) : (
-            <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-2 lg:grid-cols-3 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+            <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-2 lg:grid-cols-3 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
               {overview.activeAssignments.map(assignment => (
                 <motion.div
                   key={assignment.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="min-w-[280px] md:min-w-0 p-4 rounded-xl bg-slate-800/60 border border-slate-700/50 backdrop-blur-sm"
+                  className="min-w-[280px] md:min-w-0 p-4 rounded-xl bg-white/[0.06] border border-white/[0.08]/50 backdrop-blur-sm"
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -800,26 +800,26 @@ export function POSDeviceTracker() {
                   </div>
                   
                   <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                    <div className="flex items-center gap-2 text-white/70">
+                      <MapPin className="h-3.5 w-3.5 text-white/40" />
                       {assignment.locationName}
                     </div>
-                    <div className="flex items-center gap-2 text-slate-400">
+                    <div className="flex items-center gap-2 text-white/40">
                       <Building2 className="h-3.5 w-3.5" />
                       {assignment.locationType}
                     </div>
-                    <div className="flex items-center gap-2 text-slate-400">
+                    <div className="flex items-center gap-2 text-white/40">
                       <User className="h-3.5 w-3.5" />
                       Assigned by {assignment.assignedByName}
                     </div>
-                    <div className="flex items-center gap-2 text-slate-400">
+                    <div className="flex items-center gap-2 text-white/40">
                       <Clock className="h-3.5 w-3.5" />
                       {new Date(assignment.createdAt).toLocaleTimeString()}
                     </div>
                   </div>
                   
                   {canManagePOS && (
-                    <div className="flex gap-2 mt-4 pt-3 border-t border-slate-700/50">
+                    <div className="flex gap-2 mt-4 pt-3 border-t border-white/[0.08]/50">
                       <Button
                         variant="outline"
                         size="sm"
@@ -854,7 +854,7 @@ export function POSDeviceTracker() {
       {selectedView === 'issues' && (
         <div className="space-y-4">
           {openIssues.length === 0 ? (
-            <div className="text-center py-12 text-slate-400">
+            <div className="text-center py-12 text-white/40">
               <CheckCircle2 className="h-12 w-12 mx-auto mb-4 opacity-50 text-emerald-400" />
               <p>No open issues - All systems operational</p>
             </div>
@@ -869,7 +869,7 @@ export function POSDeviceTracker() {
                     'p-4 rounded-xl border backdrop-blur-sm',
                     issue.priority === 'Urgent' ? 'bg-red-900/20 border-red-500/30' :
                     issue.priority === 'High' ? 'bg-orange-900/20 border-orange-500/30' :
-                    'bg-slate-800/60 border-slate-700/50'
+                    'bg-white/[0.06] border-white/[0.08]/50'
                   )}
                 >
                   <div className="flex items-start justify-between">
@@ -884,16 +884,16 @@ export function POSDeviceTracker() {
                         <div className="font-semibold text-white">
                           POS #{issue.deviceNumber} - {issue.issueType}
                         </div>
-                        <div className="text-sm text-slate-400 mt-1">
+                        <div className="text-sm text-white/40 mt-1">
                           {issue.description}
                         </div>
                         {issue.locationName && (
-                          <div className="flex items-center gap-2 text-sm text-slate-400 mt-2">
+                          <div className="flex items-center gap-2 text-sm text-white/40 mt-2">
                             <MapPin className="h-3.5 w-3.5" />
                             {issue.locationName}
                           </div>
                         )}
-                        <div className="flex items-center gap-4 text-sm text-slate-500 mt-2">
+                        <div className="flex items-center gap-4 text-sm text-white/30 mt-2">
                           <span>Reported by {issue.reportedByName}</span>
                           <span>{new Date(issue.createdAt).toLocaleString()}</span>
                         </div>
@@ -903,7 +903,7 @@ export function POSDeviceTracker() {
                       <Badge className={cn(
                         issue.priority === 'Urgent' ? 'bg-red-500/20 text-red-400 border-red-500/40' :
                         issue.priority === 'High' ? 'bg-orange-500/20 text-orange-400 border-orange-500/40' :
-                        'bg-slate-500/20 text-slate-400 border-slate-500/40'
+                        'bg-white/10 text-white/40 border-white/10'
                       )}>
                         {issue.priority}
                       </Badge>
@@ -925,25 +925,25 @@ export function POSDeviceTracker() {
       
       {/* Assign Dialog */}
       <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md">
+        <DialogContent className="bg-[#0c1224] border-white/[0.08] text-white max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Plus className="h-5 w-5 text-cyan-400" />
               Assign POS Device
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-white/40">
               {selectedDevice && `Assign ${selectedDevice.deviceType} #${selectedDevice.deviceNumber} to a location`}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
             <div>
-              <Label className="text-slate-300">Location Type</Label>
+              <Label className="text-white/70">Location Type</Label>
               <Select 
                 value={assignForm.locationType} 
                 onValueChange={(value) => setAssignForm(prev => ({ ...prev, locationType: value }))}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white mt-1">
+                <SelectTrigger className="bg-white/5 border-white/[0.08] text-white mt-1">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -960,7 +960,7 @@ export function POSDeviceTracker() {
             </div>
             
             <div>
-              <Label className="text-slate-300">Location</Label>
+              <Label className="text-white/70">Location</Label>
               <Select
                 value={assignForm.locationId}
                 onValueChange={(value) => {
@@ -972,7 +972,7 @@ export function POSDeviceTracker() {
                   }));
                 }}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white mt-1">
+                <SelectTrigger className="bg-white/5 border-white/[0.08] text-white mt-1">
                   <SelectValue placeholder="Select location" />
                 </SelectTrigger>
                 <SelectContent>
@@ -986,12 +986,12 @@ export function POSDeviceTracker() {
             </div>
             
             <div>
-              <Label className="text-slate-300">Notes (optional)</Label>
+              <Label className="text-white/70">Notes (optional)</Label>
               <Textarea
                 placeholder="Add notes about this assignment..."
                 value={assignForm.notes}
                 onChange={(e) => setAssignForm(prev => ({ ...prev, notes: e.target.value }))}
-                className="bg-slate-800 border-slate-700 text-white mt-1"
+                className="bg-white/5 border-white/[0.08] text-white mt-1"
               />
             </div>
           </div>
@@ -1000,7 +1000,7 @@ export function POSDeviceTracker() {
             <Button
               variant="ghost"
               onClick={() => setShowAssignDialog(false)}
-              className="text-slate-400"
+              className="text-white/40"
             >
               Cancel
             </Button>
@@ -1022,35 +1022,35 @@ export function POSDeviceTracker() {
       
       {/* Replace Dialog */}
       <Dialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md">
+        <DialogContent className="bg-[#0c1224] border-white/[0.08] text-white max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Repeat2 className="h-5 w-5 text-amber-400" />
               Replace POS Device
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-white/40">
               {selectedAssignment && `Replace ${selectedAssignment.deviceType} #${selectedAssignment.deviceNumber} at ${selectedAssignment.locationName}`}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
             <div>
-              <Label className="text-slate-300">Issue</Label>
+              <Label className="text-white/70">Issue</Label>
               <Textarea
                 placeholder="What's wrong with the current device?"
                 value={replaceForm.reportedIssue}
                 onChange={(e) => setReplaceForm(prev => ({ ...prev, reportedIssue: e.target.value }))}
-                className="bg-slate-800 border-slate-700 text-white mt-1"
+                className="bg-white/5 border-white/[0.08] text-white mt-1"
               />
             </div>
             
             <div>
-              <Label className="text-slate-300">Replacement Device</Label>
+              <Label className="text-white/70">Replacement Device</Label>
               <Select
                 value={replaceForm.replacementDeviceId}
                 onValueChange={(value) => setReplaceForm(prev => ({ ...prev, replacementDeviceId: value }))}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white mt-1">
+                <SelectTrigger className="bg-white/5 border-white/[0.08] text-white mt-1">
                   <SelectValue placeholder="Select replacement device" />
                 </SelectTrigger>
                 <SelectContent>
@@ -1073,7 +1073,7 @@ export function POSDeviceTracker() {
             <Button
               variant="ghost"
               onClick={() => setShowReplaceDialog(false)}
-              className="text-slate-400"
+              className="text-white/40"
             >
               Cancel
             </Button>
@@ -1095,25 +1095,25 @@ export function POSDeviceTracker() {
       
       {/* Report Issue Dialog */}
       <Dialog open={showIssueDialog} onOpenChange={setShowIssueDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-md">
+        <DialogContent className="bg-[#0c1224] border-white/[0.08] text-white max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-400" />
               Report POS Issue
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-white/40">
               {selectedDevice && `Report an issue with ${selectedDevice.deviceType} #${selectedDevice.deviceNumber}`}
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
             <div>
-              <Label className="text-slate-300">Issue Type</Label>
+              <Label className="text-white/70">Issue Type</Label>
               <Select
                 value={issueForm.issueType}
                 onValueChange={(value) => setIssueForm(prev => ({ ...prev, issueType: value }))}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white mt-1">
+                <SelectTrigger className="bg-white/5 border-white/[0.08] text-white mt-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1131,12 +1131,12 @@ export function POSDeviceTracker() {
             </div>
             
             <div>
-              <Label className="text-slate-300">Priority</Label>
+              <Label className="text-white/70">Priority</Label>
               <Select
                 value={issueForm.priority}
                 onValueChange={(value) => setIssueForm(prev => ({ ...prev, priority: value }))}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-700 text-white mt-1">
+                <SelectTrigger className="bg-white/5 border-white/[0.08] text-white mt-1">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -1149,12 +1149,12 @@ export function POSDeviceTracker() {
             </div>
             
             <div>
-              <Label className="text-slate-300">Description</Label>
+              <Label className="text-white/70">Description</Label>
               <Textarea
                 placeholder="Describe the issue in detail..."
                 value={issueForm.description}
                 onChange={(e) => setIssueForm(prev => ({ ...prev, description: e.target.value }))}
-                className="bg-slate-800 border-slate-700 text-white mt-1"
+                className="bg-white/5 border-white/[0.08] text-white mt-1"
               />
             </div>
           </div>
@@ -1163,7 +1163,7 @@ export function POSDeviceTracker() {
             <Button
               variant="ghost"
               onClick={() => setShowIssueDialog(false)}
-              className="text-slate-400"
+              className="text-white/40"
             >
               Cancel
             </Button>

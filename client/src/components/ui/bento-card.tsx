@@ -41,7 +41,7 @@ const BentoCard = React.forwardRef<HTMLDivElement, BentoCardProps>(
         data-testid={`bento-card-${span}x${rowSpan}`}
         className={cn(
           "p-3 rounded-xl",
-          "bg-slate-800/60 backdrop-blur-md",
+          "bg-white/[0.06] backdrop-blur-md",
           "border border-white/10",
           "transition-all duration-200",
           "hover:border-cyan-400/50 hover:shadow-lg hover:shadow-cyan-500/10",
@@ -53,7 +53,7 @@ const BentoCard = React.forwardRef<HTMLDivElement, BentoCardProps>(
         {title && (
           <div
             data-testid="bento-card-title"
-            className="text-sm font-medium text-slate-300 mb-2"
+            className="text-sm font-medium text-white/70 mb-2"
           >
             {title}
           </div>

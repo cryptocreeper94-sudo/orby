@@ -211,8 +211,8 @@ export default function DocumentHub() {
           <BentoCard span={12} className="max-w-md mx-auto">
             <div className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-slate-200 mb-2">Access Restricted</h2>
-              <p className="text-slate-400 mb-4">Document Hub is restricted to managers only.</p>
+              <h2 className="text-xl font-bold text-white/80 mb-2">Access Restricted</h2>
+              <p className="text-white/40 mb-4">Document Hub is restricted to managers only.</p>
               <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600">
                 Return Home
               </Button>
@@ -236,7 +236,7 @@ export default function DocumentHub() {
     {
       title: "Document Retention",
       content: (
-        <ul className="space-y-1.5 text-xs text-slate-300">
+        <ul className="space-y-1.5 text-xs text-white/70">
           <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-cyan-400" /> Count reports: 90 days</li>
           <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-amber-400" /> Incidents: 1 year minimum</li>
           <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-red-400" /> Violations: 3 years</li>
@@ -247,10 +247,10 @@ export default function DocumentHub() {
     {
       title: "Access Levels",
       content: (
-        <ul className="space-y-1.5 text-xs text-slate-300">
+        <ul className="space-y-1.5 text-xs text-white/70">
           <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-green-400" /> Managers: Full access</li>
           <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-blue-400" /> Supervisors: View only</li>
-          <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-slate-400" /> Staff: No access</li>
+          <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-white/20" /> Staff: No access</li>
           <li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-amber-400" /> Auditors: Read-only export</li>
         </ul>
       )
@@ -258,7 +258,7 @@ export default function DocumentHub() {
     {
       title: "Submission Guidelines",
       content: (
-        <p className="text-xs text-slate-300 leading-relaxed">
+        <p className="text-xs text-white/70 leading-relaxed">
           All documents must include the event date, stand ID (if applicable), 
           and submitter information. Use descriptive titles and include 
           relevant notes for context.
@@ -272,8 +272,8 @@ export default function DocumentHub() {
       title: "Stand Filter",
       content: (
         <Select value={selectedStand} onValueChange={setSelectedStand}>
-          <SelectTrigger className="w-full bg-slate-800/50 border-slate-700/50 h-9" data-testid="select-stand">
-            <Store className="h-4 w-4 mr-2 text-slate-400" />
+          <SelectTrigger className="w-full bg-white/5 border-white/[0.08]/50 h-9" data-testid="select-stand">
+            <Store className="h-4 w-4 mr-2 text-white/40" />
             <SelectValue placeholder="All Stands" />
           </SelectTrigger>
           <SelectContent>
@@ -289,12 +289,12 @@ export default function DocumentHub() {
       title: "Date Filter",
       content: (
         <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-slate-400" />
+          <Calendar className="h-4 w-4 text-white/40" />
           <Input
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="flex-1 bg-slate-800/50 border-slate-700/50 text-slate-200 h-9"
+            className="flex-1 bg-white/5 border-white/[0.08]/50 text-white/80 h-9"
             data-testid="input-date-filter"
           />
         </div>
@@ -309,13 +309,13 @@ export default function DocumentHub() {
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              className="w-full justify-start text-slate-400 hover:text-white h-8"
+              className="w-full justify-start text-white/40 hover:text-white h-8"
               data-testid="button-clear-filters"
             >
               Clear All Filters
             </Button>
           )}
-          <p className="text-[10px] text-slate-500">
+          <p className="text-[10px] text-white/30">
             {filteredDocuments.length} of {documents.length} documents shown
           </p>
         </div>
@@ -328,7 +328,7 @@ export default function DocumentHub() {
     amber: 'text-amber-400',
     red: 'text-red-400',
     purple: 'text-purple-400',
-    slate: 'text-slate-400',
+    slate: 'text-white/40',
   };
 
   const bgColors: Record<string, string> = {
@@ -336,7 +336,7 @@ export default function DocumentHub() {
     amber: 'bg-amber-500/20',
     red: 'bg-red-500/20',
     purple: 'bg-purple-500/20',
-    slate: 'bg-slate-500/20',
+    slate: 'bg-white/10',
   };
 
   return (
@@ -352,7 +352,7 @@ export default function DocumentHub() {
                 </div>
                 <div>
                   <h1 className="text-xl font-bold text-white">Document Hub</h1>
-                  <p className="text-xs text-slate-400">Centralized archive for all reports and documents</p>
+                  <p className="text-xs text-white/40">Centralized archive for all reports and documents</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -375,7 +375,7 @@ export default function DocumentHub() {
                   Build Report
                 </Button>
                 <Link href="/manager">
-                  <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-white/10" data-testid="button-back">
+                  <Button variant="ghost" size="sm" className="text-white/70 hover:bg-white/10" data-testid="button-back">
                     <ChevronLeft className="h-4 w-4 mr-1" />
                     Back
                   </Button>
@@ -401,7 +401,7 @@ export default function DocumentHub() {
                     </div>
                   </div>
                   <p className="text-2xl font-bold text-white">{metric.value}</p>
-                  <p className="text-[11px] text-slate-300 mt-1">{metric.label}</p>
+                  <p className="text-[11px] text-white/70 mt-1">{metric.label}</p>
                 </div>
               ))}
               showDots
@@ -418,7 +418,7 @@ export default function DocumentHub() {
                     "w-32 p-4 rounded-xl border cursor-pointer transition-all hover:scale-105",
                     selectedCategory === 'all'
                       ? 'bg-gradient-to-br from-cyan-500/30 to-blue-500/30 border-cyan-500/50 shadow-lg shadow-cyan-500/20'
-                      : 'bg-slate-800/50 border-slate-700/50 hover:border-slate-600'
+                      : 'bg-white/5 border-white/[0.08]/50 hover:border-white/10'
                   )}
                   data-testid="category-all"
                 >
@@ -426,7 +426,7 @@ export default function DocumentHub() {
                     <Files className="h-5 w-5 text-cyan-400" />
                     <span className="text-lg font-bold text-white">{documents.length}</span>
                   </div>
-                  <p className="text-[11px] text-slate-300">All Documents</p>
+                  <p className="text-[11px] text-white/70">All Documents</p>
                 </div>,
                 ...Object.entries(CATEGORY_CONFIG).map(([key, config]) => {
                   const count = documentsByCategory[key]?.length || 0;
@@ -440,7 +440,7 @@ export default function DocumentHub() {
                         "w-32 p-4 rounded-xl border cursor-pointer transition-all hover:scale-105",
                         isSelected
                           ? `${bgColors[config.color]} border-${config.color}-500/50 shadow-lg`
-                          : 'bg-slate-800/50 border-slate-700/50 hover:border-slate-600'
+                          : 'bg-white/5 border-white/[0.08]/50 hover:border-white/10'
                       )}
                       data-testid={`category-${key}`}
                     >
@@ -448,7 +448,7 @@ export default function DocumentHub() {
                         <Icon className={cn("h-5 w-5", iconColors[config.color])} />
                         <span className="text-lg font-bold text-white">{count}</span>
                       </div>
-                      <p className="text-[11px] text-slate-300">{config.label}</p>
+                      <p className="text-[11px] text-white/70">{config.label}</p>
                     </div>
                   );
                 })
@@ -458,12 +458,12 @@ export default function DocumentHub() {
 
           <BentoCard span={12} title="Search" data-testid="card-search">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
               <Input
                 placeholder="Search documents by title or notes..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-slate-800/50 border-slate-700/50 text-slate-200 h-10"
+                className="pl-10 bg-white/5 border-white/[0.08]/50 text-white/80 h-10"
                 data-testid="input-search"
               />
             </div>
@@ -476,9 +476,9 @@ export default function DocumentHub() {
               </div>
             ) : filteredDocuments.length === 0 ? (
               <div className="text-center py-12">
-                <FolderOpen className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-400 text-sm font-medium">No documents found</p>
-                <p className="text-xs text-slate-500 mt-1">
+                <FolderOpen className="h-12 w-12 text-white/20 mx-auto mb-3" />
+                <p className="text-white/40 text-sm font-medium">No documents found</p>
+                <p className="text-xs text-white/30 mt-1">
                   {documents.length === 0 ? "Reports will appear here when submitted" : "Try adjusting your filters"}
                 </p>
               </div>
@@ -494,7 +494,7 @@ export default function DocumentHub() {
                         initial={{ opacity: 0, y: 5 }}
                         animate={{ opacity: 1, y: 0 }}
                         onClick={() => setViewingDoc(doc)}
-                        className="w-56 p-4 bg-slate-800/40 rounded-xl border border-slate-700/30 hover:bg-slate-800/60 hover:border-cyan-500/30 cursor-pointer transition-all"
+                        className="w-56 p-4 bg-white/5 rounded-xl border border-white/[0.08]/30 hover:bg-white/5/60 hover:border-cyan-500/30 cursor-pointer transition-all"
                         data-testid={`doc-${doc.id}`}
                       >
                         <div className="flex items-start gap-3">
@@ -502,19 +502,19 @@ export default function DocumentHub() {
                             <Icon className={cn("h-4 w-4", iconColors[config.color])} />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-200 truncate mb-1">{doc.title}</p>
+                            <p className="text-sm font-medium text-white/80 truncate mb-1">{doc.title}</p>
                             <div className="space-y-0.5">
                               {doc.standId && (
-                                <p className="text-[10px] text-slate-500 flex items-center gap-1">
+                                <p className="text-[10px] text-white/30 flex items-center gap-1">
                                   <Store className="h-3 w-3" />
                                   {getStandName(doc.standId)}
                                 </p>
                               )}
-                              <p className="text-[10px] text-slate-500">{formatDate(doc.createdAt)}</p>
+                              <p className="text-[10px] text-white/30">{formatDate(doc.createdAt)}</p>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-700/30">
+                        <div className="flex items-center justify-between mt-3 pt-2 border-t border-white/[0.08]/30">
                           <Badge className={cn("text-[9px] px-1.5 py-0.5", bgColors[config.color])}>
                             {config.label}
                           </Badge>
@@ -529,7 +529,7 @@ export default function DocumentHub() {
                                 <Download className="h-3 w-3 text-cyan-400" />
                               </Button>
                             )}
-                            <Eye className="h-3 w-3 text-slate-400" />
+                            <Eye className="h-3 w-3 text-white/40" />
                           </div>
                         </div>
                       </motion.div>
@@ -538,7 +538,7 @@ export default function DocumentHub() {
                   showDots
                 />
                 {filteredDocuments.length > 12 && (
-                  <p className="text-xs text-slate-500 text-center mt-3">
+                  <p className="text-xs text-white/30 text-center mt-3">
                     Showing 12 of {filteredDocuments.length} documents
                   </p>
                 )}
@@ -548,8 +548,8 @@ export default function DocumentHub() {
 
           <BentoCard span={4} title="Policies & Filters" rowSpan={2} data-testid="card-policies">
             <AccordionStack items={policyItems} defaultOpen={[0]} />
-            <div className="mt-4 pt-3 border-t border-slate-700/30">
-              <p className="text-xs font-medium text-slate-400 mb-2">Filters</p>
+            <div className="mt-4 pt-3 border-t border-white/[0.08]/30">
+              <p className="text-xs font-medium text-white/40 mb-2">Filters</p>
               <AccordionStack items={filterItems} defaultOpen={[0, 1]} />
             </div>
           </BentoCard>
@@ -557,9 +557,9 @@ export default function DocumentHub() {
         </LayoutShell>
 
         <Dialog open={!!viewingDoc} onOpenChange={() => setViewingDoc(null)}>
-          <DialogContent className="bg-slate-900 border-slate-700 max-w-lg" data-testid="dialog-view-doc">
+          <DialogContent className="bg-[#0c1224] border-white/[0.08] max-w-lg" data-testid="dialog-view-doc">
             <DialogHeader>
-              <DialogTitle className="text-slate-200 flex items-center gap-2">
+              <DialogTitle className="text-white/80 flex items-center gap-2">
                 <FileText className="h-5 w-5 text-cyan-400" />
                 {viewingDoc?.title}
               </DialogTitle>
@@ -579,40 +579,40 @@ export default function DocumentHub() {
                 <div className="grid grid-cols-2 gap-3">
                   {viewingDoc.standId && (
                     <div className="p-2 bg-white/5 rounded-lg">
-                      <p className="text-xs text-slate-500">Stand</p>
-                      <p className="text-sm text-slate-200">{getStandName(viewingDoc.standId)}</p>
+                      <p className="text-xs text-white/30">Stand</p>
+                      <p className="text-sm text-white/80">{getStandName(viewingDoc.standId)}</p>
                     </div>
                   )}
                   {viewingDoc.eventDate && (
                     <div className="p-2 bg-white/5 rounded-lg">
-                      <p className="text-xs text-slate-500">Event Date</p>
-                      <p className="text-sm text-slate-200">{viewingDoc.eventDate}</p>
+                      <p className="text-xs text-white/30">Event Date</p>
+                      <p className="text-sm text-white/80">{viewingDoc.eventDate}</p>
                     </div>
                   )}
                   <div className="p-2 bg-white/5 rounded-lg">
-                    <p className="text-xs text-slate-500">Created</p>
-                    <p className="text-sm text-slate-200">{formatDate(viewingDoc.createdAt)}</p>
+                    <p className="text-xs text-white/30">Created</p>
+                    <p className="text-sm text-white/80">{formatDate(viewingDoc.createdAt)}</p>
                   </div>
                   {viewingDoc.subcategory && (
                     <div className="p-2 bg-white/5 rounded-lg">
-                      <p className="text-xs text-slate-500">Subcategory</p>
-                      <p className="text-sm text-slate-200">{viewingDoc.subcategory}</p>
+                      <p className="text-xs text-white/30">Subcategory</p>
+                      <p className="text-sm text-white/80">{viewingDoc.subcategory}</p>
                     </div>
                   )}
                 </div>
 
                 {viewingDoc.notes && (
                   <div className="p-3 bg-white/5 rounded-lg">
-                    <p className="text-xs text-slate-500 mb-1">Notes</p>
-                    <p className="text-sm text-slate-300">{viewingDoc.notes}</p>
+                    <p className="text-xs text-white/30 mb-1">Notes</p>
+                    <p className="text-sm text-white/70">{viewingDoc.notes}</p>
                   </div>
                 )}
 
                 {viewingDoc.jsonData && (
                   <div className="p-3 bg-white/5 rounded-lg">
-                    <p className="text-xs text-slate-500 mb-2">Report Data</p>
+                    <p className="text-xs text-white/30 mb-2">Report Data</p>
                     <ScrollArea className="h-[200px]">
-                      <pre className="text-xs text-slate-300 whitespace-pre-wrap">
+                      <pre className="text-xs text-white/70 whitespace-pre-wrap">
                         {JSON.stringify(viewingDoc.jsonData, null, 2)}
                       </pre>
                     </ScrollArea>

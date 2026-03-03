@@ -255,37 +255,37 @@ export default function BarScheduler() {
     <div key="total-staff" className="min-w-[140px] p-3 bg-gradient-to-br from-amber-500/20 to-orange-500/10 rounded-lg border border-amber-500/30" data-testid="metric-total-staff">
       <div className="flex items-center gap-2 mb-1">
         <Users className="h-4 w-4 text-amber-400" />
-        <span className="text-xs text-slate-400">Total Staff</span>
+        <span className="text-xs text-white/40">Total Staff</span>
       </div>
-      <div className="text-2xl font-bold text-slate-200">{bartenders.length}</div>
+      <div className="text-2xl font-bold text-white/80">{bartenders.length}</div>
     </div>,
     <div key="online-now" className="min-w-[140px] p-3 bg-gradient-to-br from-emerald-500/20 to-green-500/10 rounded-lg border border-emerald-500/30" data-testid="metric-online-now">
       <div className="flex items-center gap-2 mb-1">
         <UserCheck className="h-4 w-4 text-emerald-400" />
-        <span className="text-xs text-slate-400">Online Now</span>
+        <span className="text-xs text-white/40">Online Now</span>
       </div>
-      <div className="text-2xl font-bold text-slate-200">{onlineBartenders.length}</div>
+      <div className="text-2xl font-bold text-white/80">{onlineBartenders.length}</div>
     </div>,
     <div key="today-shifts" className="min-w-[140px] p-3 bg-gradient-to-br from-cyan-500/20 to-blue-500/10 rounded-lg border border-cyan-500/30" data-testid="metric-today-shifts">
       <div className="flex items-center gap-2 mb-1">
         <CalendarCheck className="h-4 w-4 text-cyan-400" />
-        <span className="text-xs text-slate-400">Today's Shifts</span>
+        <span className="text-xs text-white/40">Today's Shifts</span>
       </div>
-      <div className="text-2xl font-bold text-slate-200">{todayShifts.length}</div>
+      <div className="text-2xl font-bold text-white/80">{todayShifts.length}</div>
     </div>,
     <div key="weekly-total" className="min-w-[140px] p-3 bg-gradient-to-br from-purple-500/20 to-violet-500/10 rounded-lg border border-purple-500/30" data-testid="metric-weekly-total">
       <div className="flex items-center gap-2 mb-1">
         <TrendingUp className="h-4 w-4 text-purple-400" />
-        <span className="text-xs text-slate-400">Weekly Shifts</span>
+        <span className="text-xs text-white/40">Weekly Shifts</span>
       </div>
-      <div className="text-2xl font-bold text-slate-200">{weeklyShiftCount}</div>
+      <div className="text-2xl font-bold text-white/80">{weeklyShiftCount}</div>
     </div>,
     <div key="pending-requests" className="min-w-[140px] p-3 bg-gradient-to-br from-rose-500/20 to-pink-500/10 rounded-lg border border-rose-500/30" data-testid="metric-pending-requests">
       <div className="flex items-center gap-2 mb-1">
         <ClipboardList className="h-4 w-4 text-rose-400" />
-        <span className="text-xs text-slate-400">Pending Requests</span>
+        <span className="text-xs text-white/40">Pending Requests</span>
       </div>
-      <div className="text-2xl font-bold text-slate-200">{pendingRequests}</div>
+      <div className="text-2xl font-bold text-white/80">{pendingRequests}</div>
     </div>,
   ];
 
@@ -301,10 +301,10 @@ export default function BarScheduler() {
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="font-medium text-sm text-slate-200 truncate">{bartender.name}</span>
+            <span className="font-medium text-sm text-white/80 truncate">{bartender.name}</span>
             {bartender.isOnline && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />}
           </div>
-          <span className="text-xs text-slate-500">{shifts.filter(s => s.bartenderId === bartender.id).length} shifts</span>
+          <span className="text-xs text-white/30">{shifts.filter(s => s.bartenderId === bartender.id).length} shifts</span>
         </div>
       </div>
       <div className="flex gap-1">
@@ -393,10 +393,10 @@ export default function BarScheduler() {
     return (
       <AnimatedBackground>
         <div className="min-h-screen flex items-center justify-center p-4" data-testid="access-restricted">
-          <div className="max-w-md w-full p-6 rounded-xl bg-slate-800/60 backdrop-blur-md border border-white/10 text-center">
+          <div className="max-w-md w-full p-6 rounded-xl bg-white/[0.06] backdrop-blur-md border border-white/10 text-center">
             <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
-            <h2 className="text-xl font-bold text-slate-200 mb-2">Access Restricted</h2>
-            <p className="text-slate-400 mb-4">Bar scheduler is only available for bar management.</p>
+            <h2 className="text-xl font-bold text-white/80 mb-2">Access Restricted</h2>
+            <p className="text-white/40 mb-4">Bar scheduler is only available for bar management.</p>
             <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-return-home">
               Return Home
             </Button>
@@ -416,7 +416,7 @@ export default function BarScheduler() {
           iconColor="amber"
           actions={
             <Link href="/manager">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-white/10" data-testid="button-back">
+              <Button variant="ghost" size="sm" className="text-white/70 hover:bg-white/10" data-testid="button-back">
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Back
               </Button>
@@ -427,12 +427,12 @@ export default function BarScheduler() {
         <main className="container mx-auto p-4 space-y-4">
           <div className="flex flex-col sm:flex-row justify-between gap-3 mb-2">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
               <Input
                 placeholder="Search bartenders..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white/5 border-white/10 text-slate-200"
+                className="pl-10 bg-white/5 border-white/10 text-white/80"
                 data-testid="input-search-bartenders"
               />
             </div>
@@ -471,7 +471,7 @@ export default function BarScheduler() {
                 <div className="p-1.5 rounded-lg bg-cyan-500/20">
                   <Calendar className="h-4 w-4 text-cyan-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Weekly Schedule</span>
+                <span className="font-bold text-sm text-white/80">Weekly Schedule</span>
               </div>
               <ScrollArea className="w-full">
                 <div className="grid grid-cols-7 gap-1.5 min-w-[600px]">
@@ -482,8 +482,8 @@ export default function BarScheduler() {
                           ? 'bg-cyan-500/20 border-b-2 border-cyan-400' 
                           : 'bg-white/5'
                       }`}>
-                        <div className="text-xs text-slate-400">{format(day, 'EEE')}</div>
-                        <div className="text-lg font-bold text-slate-200">{format(day, 'd')}</div>
+                        <div className="text-xs text-white/40">{format(day, 'EEE')}</div>
+                        <div className="text-lg font-bold text-white/80">{format(day, 'd')}</div>
                       </div>
                       <div className="min-h-[180px] max-h-[220px] overflow-y-auto bg-white/5 p-1.5 space-y-1 rounded-b-lg">
                         <AnimatePresence>
@@ -496,10 +496,10 @@ export default function BarScheduler() {
                               className="p-1.5 bg-amber-500/20 rounded-lg border border-amber-500/30 text-xs"
                               data-testid={`shift-${shift.id}`}
                             >
-                              <div className="font-medium text-slate-200 truncate text-[11px]">
+                              <div className="font-medium text-white/80 truncate text-[11px]">
                                 {getBartenderName(shift.bartenderId)}
                               </div>
-                              <div className="text-slate-400 flex items-center gap-0.5 text-[10px]">
+                              <div className="text-white/40 flex items-center gap-0.5 text-[10px]">
                                 <Clock className="h-2.5 w-2.5" />
                                 {shift.startTime}-{shift.endTime}
                               </div>
@@ -521,7 +521,7 @@ export default function BarScheduler() {
                           ))}
                         </AnimatePresence>
                         {getShiftsForDay(day).length === 0 && (
-                          <div className="text-center text-slate-600 text-[10px] py-4">
+                          <div className="text-center text-white/20 text-[10px] py-4">
                             No shifts
                           </div>
                         )}
@@ -537,7 +537,7 @@ export default function BarScheduler() {
                 <div className="p-1.5 rounded-lg bg-emerald-500/20">
                   <UserCheck className="h-4 w-4 text-emerald-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Staff Availability</span>
+                <span className="font-bold text-sm text-white/80">Staff Availability</span>
               </div>
               {loading ? (
                 <div className="flex items-center justify-center py-8">
@@ -558,26 +558,26 @@ export default function BarScheduler() {
                           </div>
                           <div>
                             <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-medium text-slate-200">{bartender.name}</span>
+                              <span className="text-xs font-medium text-white/80">{bartender.name}</span>
                               {bartender.isOnline && (
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                               )}
                             </div>
-                            <span className="text-[10px] text-slate-500">
+                            <span className="text-[10px] text-white/30">
                               {bartender.isOnline ? 'Available' : 'Offline'}
                             </span>
                           </div>
                         </div>
                         <Badge 
                           variant="outline" 
-                          className={`text-[10px] ${bartender.isOnline ? 'border-emerald-500/50 text-emerald-400' : 'border-slate-600 text-slate-500'}`}
+                          className={`text-[10px] ${bartender.isOnline ? 'border-emerald-500/50 text-emerald-400' : 'border-white/10 text-white/30'}`}
                         >
                           {bartender.isOnline ? 'On' : 'Off'}
                         </Badge>
                       </div>
                     ))}
                     {bartenders.length === 0 && (
-                      <div className="text-center py-6 text-slate-500 text-xs">
+                      <div className="text-center py-6 text-white/30 text-xs">
                         No staff members added yet
                       </div>
                     )}
@@ -591,7 +591,7 @@ export default function BarScheduler() {
                 <div className="p-1.5 rounded-lg bg-amber-500/20">
                   <Users className="h-4 w-4 text-amber-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">
+                <span className="font-bold text-sm text-white/80">
                   Staff Assignments ({filteredBartenders.length})
                 </span>
               </div>
@@ -602,8 +602,8 @@ export default function BarScheduler() {
                 />
               ) : (
                 <div className="text-center py-6">
-                  <Users className="h-8 w-8 text-slate-600 mx-auto mb-2" />
-                  <p className="text-slate-400 text-xs">No bartenders found</p>
+                  <Users className="h-8 w-8 text-white/20 mx-auto mb-2" />
+                  <p className="text-white/40 text-xs">No bartenders found</p>
                 </div>
               )}
             </BentoCard>
@@ -613,7 +613,7 @@ export default function BarScheduler() {
                 <div className="p-1.5 rounded-lg bg-rose-500/20">
                   <ClipboardList className="h-4 w-4 text-rose-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Shift Requests</span>
+                <span className="font-bold text-sm text-white/80">Shift Requests</span>
               </div>
               <div className="space-y-2">
                 {shiftRequestItems.map((request) => (
@@ -627,8 +627,8 @@ export default function BarScheduler() {
                         <User className="h-3.5 w-3.5 text-white" />
                       </div>
                       <div>
-                        <span className="text-xs font-medium text-slate-200">{request.name}</span>
-                        <div className="text-[10px] text-slate-500">{request.type} • {request.date}</div>
+                        <span className="text-xs font-medium text-white/80">{request.name}</span>
+                        <div className="text-[10px] text-white/30">{request.type} • {request.date}</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -657,7 +657,7 @@ export default function BarScheduler() {
                 <div className="p-1.5 rounded-lg bg-purple-500/20">
                   <BookOpen className="h-4 w-4 text-purple-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Policies & Guidelines</span>
+                <span className="font-bold text-sm text-white/80">Policies & Guidelines</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
                 {policyAccordionItems.map((item, idx) => (
@@ -675,31 +675,31 @@ export default function BarScheduler() {
         </main>
 
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-700" data-testid="dialog-add-bartender">
+          <DialogContent className="bg-[#0c1224] border-white/[0.08]" data-testid="dialog-add-bartender">
             <DialogHeader>
-              <DialogTitle className="text-slate-200">Add Bartender</DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogTitle className="text-white/80">Add Bartender</DialogTitle>
+              <DialogDescription className="text-white/40">
                 Add a new bartender to your team
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label className="text-slate-300">Name *</Label>
+                <Label className="text-white/70">Name *</Label>
                 <Input
                   value={newBartenderName}
                   onChange={(e) => setNewBartenderName(e.target.value)}
                   placeholder="Enter bartender's name"
-                  className="bg-white/5 border-white/10 text-slate-200"
+                  className="bg-white/5 border-white/10 text-white/80"
                   data-testid="input-bartender-name"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">Phone (optional)</Label>
+                <Label className="text-white/70">Phone (optional)</Label>
                 <Input
                   value={newBartenderPhone}
                   onChange={(e) => setNewBartenderPhone(e.target.value)}
                   placeholder="Enter phone number"
-                  className="bg-white/5 border-white/10 text-slate-200"
+                  className="bg-white/5 border-white/10 text-white/80"
                   data-testid="input-bartender-phone"
                 />
               </div>
@@ -716,23 +716,23 @@ export default function BarScheduler() {
         </Dialog>
 
         <Dialog open={shiftDialogOpen} onOpenChange={setShiftDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-700" data-testid="dialog-add-shift">
+          <DialogContent className="bg-[#0c1224] border-white/[0.08]" data-testid="dialog-add-shift">
             <DialogHeader>
-              <DialogTitle className="text-slate-200">Schedule Shift</DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogTitle className="text-white/80">Schedule Shift</DialogTitle>
+              <DialogDescription className="text-white/40">
                 Add a shift to the schedule
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label className="text-slate-300">Bartender *</Label>
+                <Label className="text-white/70">Bartender *</Label>
                 <Select value={selectedBartender} onValueChange={setSelectedBartender}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-slate-200" data-testid="select-bartender">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white/80" data-testid="select-bartender">
                     <SelectValue placeholder="Select bartender" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-white/5 border-white/[0.08]">
                     {bartenders.map(b => (
-                      <SelectItem key={b.id} value={b.id} className="text-slate-200">
+                      <SelectItem key={b.id} value={b.id} className="text-white/80">
                         {b.name}
                       </SelectItem>
                     ))}
@@ -740,25 +740,25 @@ export default function BarScheduler() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">Date *</Label>
+                <Label className="text-white/70">Date *</Label>
                 <Input
                   type="date"
                   value={selectedDate}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="bg-white/5 border-white/10 text-slate-200"
+                  className="bg-white/5 border-white/10 text-white/80"
                   data-testid="input-shift-date"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Start Time *</Label>
+                  <Label className="text-white/70">Start Time *</Label>
                   <Select value={selectedStartTime} onValueChange={setSelectedStartTime}>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-slate-200" data-testid="select-start-time">
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white/80" data-testid="select-start-time">
                       <SelectValue placeholder="Start" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectContent className="bg-white/5 border-white/[0.08]">
                       {SHIFT_TIMES.map(t => (
-                        <SelectItem key={t.value} value={t.value} className="text-slate-200">
+                        <SelectItem key={t.value} value={t.value} className="text-white/80">
                           {t.label}
                         </SelectItem>
                       ))}
@@ -766,14 +766,14 @@ export default function BarScheduler() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-300">End Time *</Label>
+                  <Label className="text-white/70">End Time *</Label>
                   <Select value={selectedEndTime} onValueChange={setSelectedEndTime}>
-                    <SelectTrigger className="bg-white/5 border-white/10 text-slate-200" data-testid="select-end-time">
+                    <SelectTrigger className="bg-white/5 border-white/10 text-white/80" data-testid="select-end-time">
                       <SelectValue placeholder="End" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectContent className="bg-white/5 border-white/[0.08]">
                       {SHIFT_TIMES.map(t => (
-                        <SelectItem key={t.value} value={t.value} className="text-slate-200">
+                        <SelectItem key={t.value} value={t.value} className="text-white/80">
                           {t.label}
                         </SelectItem>
                       ))}
@@ -782,14 +782,14 @@ export default function BarScheduler() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">Location (optional)</Label>
+                <Label className="text-white/70">Location (optional)</Label>
                 <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-slate-200" data-testid="select-location">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white/80" data-testid="select-location">
                     <SelectValue placeholder="Select location" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-white/5 border-white/[0.08]">
                     {LOCATIONS.map(loc => (
-                      <SelectItem key={loc} value={loc} className="text-slate-200">
+                      <SelectItem key={loc} value={loc} className="text-white/80">
                         {loc}
                       </SelectItem>
                     ))}

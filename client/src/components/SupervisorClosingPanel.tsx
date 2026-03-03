@@ -574,14 +574,14 @@ export function SupervisorClosingPanel({
 
   return (
     <Card className="w-full" data-testid="supervisor-closing-panel">
-      <CardHeader className="pb-2 bg-gradient-to-r from-slate-800/50 to-blue-500/10 border-b border-slate-700/50">
+      <CardHeader className="pb-2 bg-gradient-to-r from-[#0c1224]/50 to-blue-500/10 border-b border-white/[0.08]/50">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
               <ClipboardCheck className="h-5 w-5 text-blue-600" />
               End of Shift Closeout
             </CardTitle>
-            <p className="text-sm text-slate-600">{standName} - {eventDate}</p>
+            <p className="text-sm text-white/20">{standName} - {eventDate}</p>
           </div>
           {onClose && (
             <Button variant="ghost" size="icon" onClick={onClose}>
@@ -640,8 +640,8 @@ export function SupervisorClosingPanel({
           <TabsContent value="checklist" className="p-4 space-y-4">
             {!checklistId ? (
               <div className="text-center py-8">
-                <ClipboardCheck className="h-12 w-12 mx-auto text-slate-300 mb-4" />
-                <p className="text-slate-600 mb-4">Start your end-of-shift equipment checklist</p>
+                <ClipboardCheck className="h-12 w-12 mx-auto text-white/70 mb-4" />
+                <p className="text-white/20 mb-4">Start your end-of-shift equipment checklist</p>
                 <Button onClick={startChecklist} disabled={saving} data-testid="start-checklist">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   Start Checklist
@@ -649,12 +649,12 @@ export function SupervisorClosingPanel({
               </div>
             ) : (
               <>
-                <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+                <div className="bg-white/5 rounded-lg p-3 border border-white/[0.08]/50">
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span>Progress: {completedTasks}/{totalTasks} tasks</span>
                     <span className="font-medium">{checklistProgress}%</span>
                   </div>
-                  <div className="h-2 bg-slate-600/50 rounded-full overflow-hidden">
+                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                     <div 
                       className={`h-full rounded-full transition-all duration-300 ${
                         checklistProgress === 100 ? 'bg-green-500' : 'bg-blue-500'
@@ -669,7 +669,7 @@ export function SupervisorClosingPanel({
                     <div 
                       key={task.id}
                       className={`flex items-center gap-3 p-3 rounded-lg border ${
-                        task.isCompleted ? 'bg-green-500/10 border-green-500/30' : 'bg-slate-800/50 border-slate-700/50'
+                        task.isCompleted ? 'bg-green-500/10 border-green-500/30' : 'bg-white/5 border-white/[0.08]/50'
                       }`}
                       data-testid={`checklist-task-${task.taskKey}`}
                     >
@@ -679,7 +679,7 @@ export function SupervisorClosingPanel({
                         disabled={checklistComplete}
                         data-testid={`checkbox-${task.taskKey}`}
                       />
-                      <span className={task.isCompleted ? 'line-through text-slate-500' : ''}>
+                      <span className={task.isCompleted ? 'line-through text-white/30' : ''}>
                         {task.taskLabel}
                       </span>
                       {task.isCompleted && (
@@ -733,8 +733,8 @@ export function SupervisorClosingPanel({
           <TabsContent value="spoilage" className="p-4 space-y-4">
             {!spoilageReportId ? (
               <div className="text-center py-8">
-                <Trash2 className="h-12 w-12 mx-auto text-slate-300 mb-4" />
-                <p className="text-slate-600 mb-4">Track items thrown away, returned, or wasted</p>
+                <Trash2 className="h-12 w-12 mx-auto text-white/70 mb-4" />
+                <p className="text-white/20 mb-4">Track items thrown away, returned, or wasted</p>
                 <Button onClick={startSpoilageReport} disabled={saving} data-testid="start-spoilage">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   Start Spoilage Log
@@ -743,7 +743,7 @@ export function SupervisorClosingPanel({
             ) : (
               <>
                 {!spoilageSubmitted && (
-                  <div className="bg-slate-800/50 rounded-lg p-3 space-y-3 border border-slate-700/50">
+                  <div className="bg-white/5 rounded-lg p-3 space-y-3 border border-white/[0.08]/50">
                     <Input
                       placeholder="Item name (e.g., Hot Dogs, Bud Light)"
                       value={newSpoilage.itemName}
@@ -809,21 +809,21 @@ export function SupervisorClosingPanel({
 
                 <div className="space-y-2 max-h-60 overflow-y-auto">
                   {spoilageItems.length === 0 ? (
-                    <p className="text-center text-slate-500 py-4">No spoilage items recorded</p>
+                    <p className="text-center text-white/30 py-4">No spoilage items recorded</p>
                   ) : (
                     spoilageItems.map((item) => (
                       <div 
                         key={item.id}
-                        className="flex items-center justify-between p-3 bg-slate-800/50 border border-slate-700/50 rounded-lg"
+                        className="flex items-center justify-between p-3 bg-white/5 border border-white/[0.08]/50 rounded-lg"
                         data-testid={`spoilage-item-${item.id}`}
                       >
                         <div>
                           <p className="font-medium">{item.itemName}</p>
-                          <div className="flex items-center gap-2 text-sm text-slate-600">
+                          <div className="flex items-center gap-2 text-sm text-white/20">
                             <span>Qty: {item.quantity}</span>
                             <Badge variant="outline">{SPOILAGE_REASONS.find(r => r.value === item.reason)?.label}</Badge>
                           </div>
-                          {item.notes && <p className="text-xs text-slate-500">{item.notes}</p>}
+                          {item.notes && <p className="text-xs text-white/30">{item.notes}</p>}
                         </div>
                         {!spoilageSubmitted && (
                           <Button 
@@ -870,8 +870,8 @@ export function SupervisorClosingPanel({
           <TabsContent value="vouchers" className="p-4 space-y-4">
             {!voucherReportId ? (
               <div className="text-center py-8">
-                <Receipt className="h-12 w-12 mx-auto text-slate-300 mb-4" />
-                <p className="text-slate-600 mb-4">Record employee meal vouchers collected</p>
+                <Receipt className="h-12 w-12 mx-auto text-white/70 mb-4" />
+                <p className="text-white/20 mb-4">Record employee meal vouchers collected</p>
                 <Button onClick={startVoucherReport} disabled={saving} data-testid="start-vouchers">
                   {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
                   Start Voucher Report
@@ -914,7 +914,7 @@ export function SupervisorClosingPanel({
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Total Amount ($10/voucher)</span>
                     <div className="flex items-center gap-2">
-                      <DollarSign className="h-4 w-4 text-slate-500" />
+                      <DollarSign className="h-4 w-4 text-white/30" />
                       <Input
                         type="number"
                         value={voucherTotal}
@@ -929,7 +929,7 @@ export function SupervisorClosingPanel({
                   </div>
 
                   <div className="text-center py-2 border-t">
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm text-white/20">
                       {voucherCount} vouchers × $10 = <span className="font-bold">${voucherCount * 10}</span>
                     </p>
                     {voucherTotal !== voucherCount * 10 && voucherTotal > 0 && (

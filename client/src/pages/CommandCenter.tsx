@@ -80,11 +80,11 @@ const EMERGENCY_TYPES = [
   { id: 'Warehouse', icon: Package, color: 'from-purple-500 to-purple-600', bgColor: 'bg-purple-500', label: 'Warehouse Request', sla: 15 },
   { id: 'Weather', icon: Cloud, color: 'from-sky-500 to-sky-600', bgColor: 'bg-sky-500', label: 'Weather Alert', sla: 5 },
   { id: 'Crowd', icon: Users, color: 'from-violet-500 to-violet-600', bgColor: 'bg-violet-500', label: 'Crowd Control', sla: 5 },
-  { id: 'Other', icon: HelpCircle, color: 'from-slate-500 to-slate-600', bgColor: 'bg-slate-500', label: 'Other Emergency', sla: 10 }
+  { id: 'Other', icon: HelpCircle, color: 'from-white/10 to-white/10', bgColor: 'bg-white/10', label: 'Other Emergency', sla: 10 }
 ];
 
 const ESCALATION_LEVELS: Record<string, { label: string; color: string }> = {
-  'Level1': { label: 'L1 - Supervisor', color: 'bg-slate-500' },
+  'Level1': { label: 'L1 - Supervisor', color: 'bg-white/10' },
   'Level2': { label: 'L2 - Manager', color: 'bg-cyan-500' },
   'Level3': { label: 'L3 - Executive', color: 'bg-teal-500' },
   'Level4': { label: 'L4 - External', color: 'bg-rose-500' }
@@ -195,8 +195,8 @@ function IncidentCard({
         data-testid={`incident-card-${alert.id}`}
         className={`relative rounded-2xl border overflow-hidden transition-all duration-300 ${
           isResolved 
-            ? 'border-slate-700/50 bg-slate-800/30' 
-            : 'border-white/10 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-lg'
+            ? 'border-white/[0.08]/50 bg-white/[0.03]' 
+            : 'border-white/10 bg-gradient-to-br from-[#0c1224]/80 to-[#0c1224]/80 shadow-lg'
         } ${compact ? 'min-w-[280px] max-w-[320px]' : ''}`}
       >
         <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${typeConfig.color}`} />
@@ -217,9 +217,9 @@ function IncidentCard({
                 <StatusBadge status={alert.status || 'Reported'} pulse={!isResolved} />
               </div>
               
-              <div className="flex flex-wrap items-center gap-2 text-sm text-slate-400 mb-2">
+              <div className="flex flex-wrap items-center gap-2 text-sm text-white/40 mb-2">
                 {stand && (
-                  <span className="flex items-center gap-1 bg-slate-800/50 px-2 py-0.5 rounded-lg text-xs">
+                  <span className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-lg text-xs">
                     <MapPin className="w-3 h-3 text-cyan-400" />
                     {stand.name}
                   </span>
@@ -233,18 +233,18 @@ function IncidentCard({
               </div>
               
               {!compact && alert.description && (
-                <p className="text-sm text-slate-300 mb-3 line-clamp-2">{alert.description}</p>
+                <p className="text-sm text-white/70 mb-3 line-clamp-2">{alert.description}</p>
               )}
               
               {!compact && (
                 <div className="flex flex-wrap items-center gap-2 mb-3">
                   {alert.escalationLevel && (
-                    <Badge variant="outline" className={`text-xs border-slate-600 ${ESCALATION_LEVELS[alert.escalationLevel]?.color} text-white`}>
+                    <Badge variant="outline" className={`text-xs border-white/10 ${ESCALATION_LEVELS[alert.escalationLevel]?.color} text-white`}>
                       {ESCALATION_LEVELS[alert.escalationLevel]?.label}
                     </Badge>
                   )}
                   {acknowledger && (
-                    <span className="text-xs text-slate-500 flex items-center gap-1">
+                    <span className="text-xs text-white/30 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3 text-cyan-400" />
                       Claimed by {acknowledger.name}
                     </span>
@@ -325,7 +325,7 @@ function IncidentCard({
       </motion.div>
 
       <Dialog open={showResolveDialog} onOpenChange={setShowResolveDialog}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md" data-testid={`dialog-resolve-${alert.id}`}>
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-md" data-testid={`dialog-resolve-${alert.id}`}>
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-emerald-400" />
@@ -334,12 +334,12 @@ function IncidentCard({
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label className="text-slate-300">Resolution Type</Label>
+              <Label className="text-white/70">Resolution Type</Label>
               <Select value={resolutionType} onValueChange={setResolutionType}>
-                <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid={`select-resolution-type-${alert.id}`}>
+                <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1.5" data-testid={`select-resolution-type-${alert.id}`}>
                   <SelectValue placeholder="How was it resolved?" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectContent className="bg-white/5 border-white/[0.08]">
                   <SelectItem value="Handled Internally">Handled Internally</SelectItem>
                   <SelectItem value="External Services Called">External Services Called</SelectItem>
                   <SelectItem value="False Alarm">False Alarm</SelectItem>
@@ -348,9 +348,9 @@ function IncidentCard({
               </Select>
             </div>
             <div>
-              <Label className="text-slate-300">Resolution Notes</Label>
+              <Label className="text-white/70">Resolution Notes</Label>
               <Textarea 
-                className="bg-slate-800/50 border-white/10 text-white mt-1.5 focus:ring-cyan-500/30"
+                className="bg-white/5 border-white/10 text-white mt-1.5 focus:ring-cyan-500/30"
                 placeholder="Describe how the incident was resolved..."
                 value={resolveNotes}
                 onChange={(e) => setResolveNotes(e.target.value)}
@@ -359,7 +359,7 @@ function IncidentCard({
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setShowResolveDialog(false)} className="text-slate-400">Cancel</Button>
+            <Button variant="ghost" onClick={() => setShowResolveDialog(false)} className="text-white/40">Cancel</Button>
             <GlowButton 
               variant="green"
               onClick={handleResolve}
@@ -372,7 +372,7 @@ function IncidentCard({
       </Dialog>
 
       <Dialog open={showEscalateDialog} onOpenChange={setShowEscalateDialog}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md" data-testid={`dialog-escalate-${alert.id}`}>
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-md" data-testid={`dialog-escalate-${alert.id}`}>
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <ArrowUp className="w-5 h-5 text-violet-400" />
@@ -381,12 +381,12 @@ function IncidentCard({
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label className="text-slate-300">Escalate To</Label>
+              <Label className="text-white/70">Escalate To</Label>
               <Select value={nextLevel} onValueChange={setNextLevel}>
-                <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid={`select-escalation-level-${alert.id}`}>
+                <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1.5" data-testid={`select-escalation-level-${alert.id}`}>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectContent className="bg-white/5 border-white/[0.08]">
                   <SelectItem value="Level2">Level 2 - Manager</SelectItem>
                   <SelectItem value="Level3">Level 3 - Executive</SelectItem>
                   <SelectItem value="Level4">Level 4 - External Services</SelectItem>
@@ -394,9 +394,9 @@ function IncidentCard({
               </Select>
             </div>
             <div>
-              <Label className="text-slate-300">Reason for Escalation</Label>
+              <Label className="text-white/70">Reason for Escalation</Label>
               <Textarea 
-                className="bg-slate-800/50 border-white/10 text-white mt-1.5 focus:ring-violet-500/30"
+                className="bg-white/5 border-white/10 text-white mt-1.5 focus:ring-violet-500/30"
                 placeholder="Why does this need escalation?"
                 value={escalateReason}
                 onChange={(e) => setEscalateReason(e.target.value)}
@@ -405,7 +405,7 @@ function IncidentCard({
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <Button variant="ghost" onClick={() => setShowEscalateDialog(false)} className="text-slate-400">Cancel</Button>
+            <Button variant="ghost" onClick={() => setShowEscalateDialog(false)} className="text-white/40">Cancel</Button>
             <GlowButton 
               variant="purple"
               onClick={handleEscalate}
@@ -452,10 +452,10 @@ function MetricTile({ icon, label, value, subValue, color }: { icon: React.React
     <div className={`flex-shrink-0 min-w-[140px] p-3 rounded-xl bg-gradient-to-br ${colorClasses[color]} border`} data-testid={`metric-${label.toLowerCase().replace(/\s+/g, '-')}`}>
       <div className="flex items-center gap-2 mb-1">
         {icon}
-        <span className="text-xs text-slate-400">{label}</span>
+        <span className="text-xs text-white/40">{label}</span>
       </div>
       <div className="text-2xl font-bold">{value}</div>
-      {subValue && <div className="text-xs text-slate-500">{subValue}</div>}
+      {subValue && <div className="text-xs text-white/30">{subValue}</div>}
     </div>
   );
 }
@@ -610,9 +610,9 @@ export default function CommandCenter() {
         />
       ))
     : [
-        <div key="empty" className="min-w-[280px] p-6 rounded-xl bg-slate-800/30 border border-white/5 text-center">
+        <div key="empty" className="min-w-[280px] p-6 rounded-xl bg-white/[0.03] border border-white/5 text-center">
           <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
-          <p className="text-sm text-slate-400">All Clear - No active incidents</p>
+          <p className="text-sm text-white/40">All Clear - No active incidents</p>
         </div>
       ];
 
@@ -673,13 +673,13 @@ export default function CommandCenter() {
         <div key={alert.id} className="flex items-center gap-2 py-1 border-b border-white/5 last:border-0">
           <CheckCircle2 className="w-3 h-3 text-emerald-400 flex-shrink-0" />
           <span className="truncate flex-1">{alert.title}</span>
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-white/30">
             {alert.resolvedAt ? new Date(alert.resolvedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '-'}
           </span>
         </div>
       ))}
       {resolvedAlerts.length === 0 && (
-        <p className="text-slate-500 text-center py-2">No recent activity</p>
+        <p className="text-white/30 text-center py-2">No recent activity</p>
       )}
     </div>
   );
@@ -691,7 +691,7 @@ export default function CommandCenter() {
     'bg-teal-500': 'shadow-teal-500/25',
     'bg-sky-500': 'shadow-sky-500/25',
     'bg-violet-500': 'shadow-violet-500/25',
-    'bg-slate-500': 'shadow-slate-500/25',
+    'bg-white/10': 'shadow-white/10',
     'bg-indigo-500': 'shadow-indigo-500/25',
     'bg-emerald-500': 'shadow-emerald-500/25',
     'bg-amber-500': 'shadow-amber-500/25',
@@ -700,7 +700,7 @@ export default function CommandCenter() {
 
   const quickAlertCarouselItems = EMERGENCY_TYPES.map((type) => {
     const Icon = type.icon;
-    const shadowClass = shadowColors[type.bgColor] || 'shadow-slate-500/25';
+    const shadowClass = shadowColors[type.bgColor] || 'shadow-white/10';
     return (
       <motion.button
         key={type.id}
@@ -746,7 +746,7 @@ export default function CommandCenter() {
     return (
       <div 
         key={team.name}
-        className={`w-[140px] h-[90px] p-3 rounded-xl bg-slate-800/60 border ${styles.border} ${styles.hoverBorder} transition-colors`}
+        className={`w-[140px] h-[90px] p-3 rounded-xl bg-white/[0.06] border ${styles.border} ${styles.hoverBorder} transition-colors`}
         data-testid={`team-${team.name.toLowerCase().replace(' ', '-')}`}
       >
         <div className="flex items-center gap-2 mb-2">
@@ -755,7 +755,7 @@ export default function CommandCenter() {
           </div>
           <div className={`w-2 h-2 rounded-full ${styles.dot} animate-pulse`} />
         </div>
-        <p className="text-sm font-medium text-slate-200 truncate">{team.name}</p>
+        <p className="text-sm font-medium text-white/80 truncate">{team.name}</p>
         <Badge className={`mt-1 text-[10px] ${styles.badge} border-0`}>{team.status}</Badge>
       </div>
     );
@@ -783,14 +783,14 @@ export default function CommandCenter() {
     return (
       <div 
         key={comm.channel}
-        className={`w-[160px] h-[80px] p-3 rounded-xl bg-slate-800/60 border-l-4 ${styles.border} hover:bg-slate-800/80 transition-colors`}
+        className={`w-[160px] h-[80px] p-3 rounded-xl bg-white/[0.06] border-l-4 ${styles.border} hover:bg-white/5/80 transition-colors`}
         data-testid={`comm-${comm.channel.toLowerCase().replace(/[^a-z0-9]/g, '-')}`}
       >
         <div className="flex items-center gap-2 mb-1">
           <Icon className={`w-4 h-4 ${styles.text}`} />
-          <p className="text-xs text-slate-400 font-medium">{comm.channel}</p>
+          <p className="text-xs text-white/40 font-medium">{comm.channel}</p>
         </div>
-        <p className="text-sm text-slate-200 line-clamp-2">{comm.status}</p>
+        <p className="text-sm text-white/80 line-clamp-2">{comm.status}</p>
       </div>
     );
   });
@@ -849,7 +849,7 @@ export default function CommandCenter() {
               variant="ghost" 
               size="icon" 
               onClick={handleLogout}
-              className="text-slate-400 hover:text-white"
+              className="text-white/40 hover:text-white"
               aria-label="Log out"
             >
               <LogOut className="w-5 h-5" />
@@ -891,7 +891,7 @@ export default function CommandCenter() {
                 </Badge>
               </div>
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-auto">
-                <TabsList className="h-7 bg-slate-800/50 p-0.5">
+                <TabsList className="h-7 bg-white/5 p-0.5">
                   <TabsTrigger value="active" className="text-xs px-2 h-6 data-[state=active]:bg-cyan-500/20" data-testid="tab-active">
                     Active
                   </TabsTrigger>
@@ -904,7 +904,7 @@ export default function CommandCenter() {
             {alertsLoading ? (
               <div className="text-center py-8">
                 <Activity className="w-8 h-8 mx-auto mb-2 text-cyan-400 animate-pulse" />
-                <p className="text-sm text-slate-400">Loading...</p>
+                <p className="text-sm text-white/40">Loading...</p>
               </div>
             ) : activeTab === 'active' ? (
               <CarouselRail items={incidentCarouselItems} data-testid="carousel-active-incidents" />
@@ -1001,7 +1001,7 @@ export default function CommandCenter() {
       </main>
 
       <Dialog open={showNewIncident} onOpenChange={setShowNewIncident}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md" data-testid="dialog-new-incident">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-md" data-testid="dialog-new-incident">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               {selectedType && (() => {
@@ -1021,9 +1021,9 @@ export default function CommandCenter() {
           
           <div className="space-y-4">
             <div>
-              <Label className="text-slate-300">Title</Label>
+              <Label className="text-white/70">Title</Label>
               <Input 
-                className="bg-slate-800/50 border-white/10 text-white mt-1.5 focus:ring-cyan-500/30"
+                className="bg-white/5 border-white/10 text-white mt-1.5 focus:ring-cyan-500/30"
                 placeholder="Brief description of the emergency"
                 value={newIncident.title}
                 onChange={(e) => setNewIncident({...newIncident, title: e.target.value})}
@@ -1032,15 +1032,15 @@ export default function CommandCenter() {
             </div>
             
             <div>
-              <Label className="text-slate-300">Location (Stand)</Label>
+              <Label className="text-white/70">Location (Stand)</Label>
               <Select 
                 value={newIncident.standId} 
                 onValueChange={(v) => setNewIncident({...newIncident, standId: v})}
               >
-                <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid="select-incident-location">
+                <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1.5" data-testid="select-incident-location">
                   <SelectValue placeholder="Select location" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700 max-h-60">
+                <SelectContent className="bg-white/5 border-white/[0.08] max-h-60">
                   {(stands as Stand[]).map(stand => (
                     <SelectItem key={stand.id} value={stand.id} data-testid={`option-stand-${stand.id}`}>
                       {stand.name} - {stand.section}
@@ -1051,9 +1051,9 @@ export default function CommandCenter() {
             </div>
             
             <div>
-              <Label className="text-slate-300">Additional Location Details</Label>
+              <Label className="text-white/70">Additional Location Details</Label>
               <Input 
-                className="bg-slate-800/50 border-white/10 text-white mt-1.5"
+                className="bg-white/5 border-white/10 text-white mt-1.5"
                 placeholder="e.g., Near Section 115 entrance"
                 value={newIncident.locationDetails}
                 onChange={(e) => setNewIncident({...newIncident, locationDetails: e.target.value})}
@@ -1062,9 +1062,9 @@ export default function CommandCenter() {
             </div>
             
             <div>
-              <Label className="text-slate-300">Description</Label>
+              <Label className="text-white/70">Description</Label>
               <Textarea 
-                className="bg-slate-800/50 border-white/10 text-white mt-1.5"
+                className="bg-white/5 border-white/10 text-white mt-1.5"
                 placeholder="What is happening? Any additional details..."
                 value={newIncident.description}
                 onChange={(e) => setNewIncident({...newIncident, description: e.target.value})}
@@ -1081,7 +1081,7 @@ export default function CommandCenter() {
                 setShowNewIncident(false);
                 setSelectedType(null);
               }}
-              className="text-slate-400"
+              className="text-white/40"
               data-testid="button-cancel-new-incident"
             >
               Cancel
@@ -1105,7 +1105,7 @@ export default function CommandCenter() {
         className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40"
         data-testid="floating-tools-bar"
       >
-        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/90 backdrop-blur-xl border border-white/10 shadow-2xl">
+        <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(12,18,36,0.9)] backdrop-blur-xl border border-white/10 shadow-2xl">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -1175,7 +1175,7 @@ export default function CommandCenter() {
 
       {/* Stadium Map Dialog */}
       <Dialog open={showStadiumMap} onOpenChange={setShowStadiumMap}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-4xl h-[80vh] p-0 overflow-hidden">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-4xl h-[80vh] p-0 overflow-hidden">
           <InteractiveMap 
             onClose={() => setShowStadiumMap(false)}
             isManager={isManager}
@@ -1185,14 +1185,14 @@ export default function CommandCenter() {
 
       {/* Walking Directions Dialog */}
       <Dialog open={showDirections} onOpenChange={setShowDirections}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md max-h-[80vh] overflow-auto">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-md max-h-[80vh] overflow-auto">
           <WalkingDirections onClose={() => setShowDirections(false)} />
         </DialogContent>
       </Dialog>
 
       {/* Compliance Alerts Dialog */}
       <Dialog open={showCompliance} onOpenChange={setShowCompliance}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-2xl max-h-[80vh] overflow-auto">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-2xl max-h-[80vh] overflow-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <ShieldIcon className="w-5 h-5 text-purple-400" />
@@ -1209,14 +1209,14 @@ export default function CommandCenter() {
 
       {/* Genesis Hallmark Asset Tracker Dialog */}
       <Dialog open={showAssetTracker} onOpenChange={setShowAssetTracker}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-4xl max-h-[80vh] overflow-auto p-6">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-4xl max-h-[80vh] overflow-auto p-6">
           <AssetTracker />
         </DialogContent>
       </Dialog>
 
       {/* POS Device Tracker Dialog (IT/David only) */}
       <Dialog open={showPOSTracker} onOpenChange={setShowPOSTracker}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-5xl max-h-[85vh] overflow-auto p-6">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-5xl max-h-[85vh] overflow-auto p-6">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <Monitor className="w-5 h-5 text-violet-400" />
@@ -1229,7 +1229,7 @@ export default function CommandCenter() {
 
       {/* Integration Hub Dialog (David/Managers) */}
       <Dialog open={showIntegrationHub} onOpenChange={setShowIntegrationHub}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-3xl max-h-[85vh] overflow-auto p-6">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-3xl max-h-[85vh] overflow-auto p-6">
           <IntegrationHub onClose={() => setShowIntegrationHub(false)} />
         </DialogContent>
       </Dialog>
@@ -1244,7 +1244,7 @@ export default function CommandCenter() {
 
       {/* Staff PINs Panel for Senior Leadership */}
       <Dialog open={showStaffPins} onOpenChange={setShowStaffPins}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-2xl max-h-[85vh] overflow-auto p-6">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-2xl max-h-[85vh] overflow-auto p-6">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <KeyRound className="w-5 h-5 text-amber-400" />

@@ -370,8 +370,8 @@ export default function ItemManagement() {
           <GlassCard className="max-w-md w-full">
             <GlassCardContent className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-slate-200 mb-2">Access Restricted</h2>
-              <p className="text-slate-400 mb-4">Item management is only available for managers.</p>
+              <h2 className="text-xl font-bold text-white/80 mb-2">Access Restricted</h2>
+              <p className="text-white/40 mb-4">Item management is only available for managers.</p>
               <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-return-home">
                 Return Home
               </Button>
@@ -383,27 +383,27 @@ export default function ItemManagement() {
   }
 
   const metricsItems = [
-    <div key="total" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-total-items">
+    <div key="total" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-total-items">
       <Package className="h-5 w-5 text-cyan-400 mb-1" />
       <span className="text-xl font-bold text-white">{items.length}</span>
       <span className="text-[10px] text-white/50">Total Items</span>
     </div>,
-    <div key="beverage" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-beverages">
+    <div key="beverage" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-beverages">
       <Tag className="h-5 w-5 text-blue-400 mb-1" />
       <span className="text-xl font-bold text-white">{items.filter(i => i.category === 'Beverage').length}</span>
       <span className="text-[10px] text-white/50">Beverages</span>
     </div>,
-    <div key="beer" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-beer">
+    <div key="beer" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-beer">
       <Tag className="h-5 w-5 text-amber-400 mb-1" />
       <span className="text-xl font-bold text-white">{items.filter(i => i.category === 'Beer').length}</span>
       <span className="text-[10px] text-white/50">Beer</span>
     </div>,
-    <div key="food" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-food">
+    <div key="food" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-food">
       <Tag className="h-5 w-5 text-orange-400 mb-1" />
       <span className="text-xl font-bold text-white">{items.filter(i => i.category === 'Food').length}</span>
       <span className="text-[10px] text-white/50">Food</span>
     </div>,
-    <div key="snacks" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-snacks">
+    <div key="snacks" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-snacks">
       <Tag className="h-5 w-5 text-purple-400 mb-1" />
       <span className="text-xl font-bold text-white">{items.filter(i => i.category === 'Snacks').length}</span>
       <span className="text-[10px] text-white/50">Snacks</span>
@@ -416,7 +416,7 @@ export default function ItemManagement() {
       variant={selectedCategory === 'all' ? 'default' : 'outline'}
       size="sm"
       onClick={() => setSelectedCategory('all')}
-      className={`min-w-[80px] ${selectedCategory === 'all' ? 'bg-cyan-500' : 'border-white/20 text-slate-300'}`}
+      className={`min-w-[80px] ${selectedCategory === 'all' ? 'bg-cyan-500' : 'border-white/20 text-white/70'}`}
       data-testid="filter-all"
     >
       All ({items.length})
@@ -427,7 +427,7 @@ export default function ItemManagement() {
         variant={selectedCategory === cat ? 'default' : 'outline'}
         size="sm"
         onClick={() => setSelectedCategory(cat)}
-        className={`min-w-[80px] ${selectedCategory === cat ? 'bg-cyan-500' : 'border-white/20 text-slate-300'}`}
+        className={`min-w-[80px] ${selectedCategory === cat ? 'bg-cyan-500' : 'border-white/20 text-white/70'}`}
         data-testid={`filter-${cat.toLowerCase()}`}
       >
         {cat} ({items.filter(i => i.category === cat).length})
@@ -473,11 +473,11 @@ export default function ItemManagement() {
   return (
     <AnimatedBackground>
       <div className="min-h-screen pb-20" data-testid="item-management-page">
-        <div className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 px-4 py-3">
+        <div className="sticky top-0 z-50 bg-[rgba(12,18,36,0.9)] backdrop-blur-xl border-b border-white/10 px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link href="/manager">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-white/10" data-testid="button-back">
+                <Button variant="ghost" size="sm" className="text-white/70 hover:bg-white/10" data-testid="button-back">
                   <ChevronLeft className="h-4 w-4 mr-1" />
                   Back
                 </Button>
@@ -486,7 +486,7 @@ export default function ItemManagement() {
                 <Package className="h-5 w-5 text-cyan-400" />
                 <div>
                   <h1 className="text-lg font-bold text-white" data-testid="text-page-title">Item Management</h1>
-                  <p className="text-xs text-slate-400">Configure inventory items for all stands</p>
+                  <p className="text-xs text-white/40">Configure inventory items for all stands</p>
                 </div>
               </div>
             </div>
@@ -505,12 +505,12 @@ export default function ItemManagement() {
 
             <BentoCard span={12} className="p-2" data-testid="bento-card-search">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
                 <Input
                   placeholder="Search items..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-white/5 border-white/10 text-slate-200"
+                  className="pl-10 bg-white/5 border-white/10 text-white/80"
                   data-testid="input-search-items"
                 />
               </div>
@@ -523,9 +523,9 @@ export default function ItemManagement() {
                 </div>
               ) : filteredItems.length === 0 ? (
                 <div className="text-center py-8" data-testid="empty-items-state">
-                  <Package className="h-10 w-10 text-slate-600 mx-auto mb-3" />
-                  <p className="text-slate-400 text-sm">No items found</p>
-                  <p className="text-xs text-slate-500 mt-1">Add items or scan a count sheet to get started</p>
+                  <Package className="h-10 w-10 text-white/20 mx-auto mb-3" />
+                  <p className="text-white/40 text-sm">No items found</p>
+                  <p className="text-xs text-white/30 mt-1">Add items or scan a count sheet to get started</p>
                 </div>
               ) : (
                 <ScrollArea className="h-[400px]">
@@ -543,9 +543,9 @@ export default function ItemManagement() {
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex-1 min-w-0">
-                              <div className="font-medium text-slate-200 truncate text-sm" data-testid={`item-name-${item.id}`}>{item.name}</div>
+                              <div className="font-medium text-white/80 truncate text-sm" data-testid={`item-name-${item.id}`}>{item.name}</div>
                               <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className="text-[10px] border-white/20 text-slate-400">
+                                <Badge variant="outline" className="text-[10px] border-white/20 text-white/40">
                                   {item.category}
                                 </Badge>
                                 {item.price > 0 && (
@@ -584,33 +584,33 @@ export default function ItemManagement() {
         </div>
 
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-700" data-testid="dialog-add-item">
+          <DialogContent className="bg-[#0c1224] border-white/[0.08]" data-testid="dialog-add-item">
             <DialogHeader>
-              <DialogTitle className="text-slate-200">Add New Item</DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogTitle className="text-white/80">Add New Item</DialogTitle>
+              <DialogDescription className="text-white/40">
                 Add a new inventory item that can be counted at any stand
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label className="text-slate-300">Item Name *</Label>
+                <Label className="text-white/70">Item Name *</Label>
                 <Input
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
                   placeholder="e.g., Bud Light 16oz"
-                  className="bg-white/5 border-white/10 text-slate-200"
+                  className="bg-white/5 border-white/10 text-white/80"
                   data-testid="input-item-name"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">Category *</Label>
+                <Label className="text-white/70">Category *</Label>
                 <Select value={newItemCategory} onValueChange={setNewItemCategory}>
-                  <SelectTrigger className="bg-white/5 border-white/10 text-slate-200" data-testid="select-category">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white/80" data-testid="select-category">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-white/5 border-white/[0.08]">
                     {CATEGORIES.map(cat => (
-                      <SelectItem key={cat} value={cat} className="text-slate-200">
+                      <SelectItem key={cat} value={cat} className="text-white/80">
                         {cat}
                       </SelectItem>
                     ))}
@@ -618,16 +618,16 @@ export default function ItemManagement() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-slate-300">Price (optional)</Label>
+                <Label className="text-white/70">Price (optional)</Label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
                   <Input
                     type="number"
                     step="0.01"
                     value={newItemPrice}
                     onChange={(e) => setNewItemPrice(e.target.value)}
                     placeholder="0.00"
-                    className="pl-10 bg-white/5 border-white/10 text-slate-200"
+                    className="pl-10 bg-white/5 border-white/10 text-white/80"
                     data-testid="input-item-price"
                   />
                 </div>
@@ -645,13 +645,13 @@ export default function ItemManagement() {
         </Dialog>
 
         <Dialog open={scanDialogOpen} onOpenChange={setScanDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-700 max-w-lg" data-testid="dialog-scan-sheet">
+          <DialogContent className="bg-[#0c1224] border-white/[0.08] max-w-lg" data-testid="dialog-scan-sheet">
             <DialogHeader>
-              <DialogTitle className="text-slate-200 flex items-center gap-2">
+              <DialogTitle className="text-white/80 flex items-center gap-2">
                 <FileText className="h-5 w-5 text-cyan-400" />
                 Scan Count Sheet
               </DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogDescription className="text-white/40">
                 Scan a paper count sheet to add new items to the system
               </DialogDescription>
             </DialogHeader>
@@ -677,7 +677,7 @@ export default function ItemManagement() {
                     <Button 
                       onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')}
                       variant="outline"
-                      className="border-white/20 text-slate-300"
+                      className="border-white/20 text-white/70"
                       data-testid="button-switch-camera"
                     >
                       <SwitchCamera className="h-4 w-4" />
@@ -712,7 +712,7 @@ export default function ItemManagement() {
                   
                   {scanResult && (
                     <div className="space-y-2">
-                      <p className="text-sm text-slate-300">Found {scanResult.length} items:</p>
+                      <p className="text-sm text-white/70">Found {scanResult.length} items:</p>
                       <ScrollArea className="h-48">
                         <div className="space-y-1">
                           {scanResult.map((scannedItem, index) => {
@@ -731,7 +731,7 @@ export default function ItemManagement() {
                                   disabled={inInventory}
                                   data-testid={`checkbox-scanned-${index}`}
                                 />
-                                <span className={`text-sm flex-1 ${inInventory ? 'text-green-400' : 'text-slate-200'}`}>
+                                <span className={`text-sm flex-1 ${inInventory ? 'text-green-400' : 'text-white/80'}`}>
                                   {scannedItem.name}
                                 </span>
                                 {inInventory && (
@@ -749,7 +749,7 @@ export default function ItemManagement() {
                     <Button 
                       onClick={retakePhoto}
                       variant="outline"
-                      className="border-white/20 text-slate-300"
+                      className="border-white/20 text-white/70"
                       data-testid="button-retake"
                     >
                       <RotateCcw className="h-4 w-4 mr-2" />

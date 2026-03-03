@@ -51,7 +51,7 @@ function ReleaseCard({ release, publishMutation, deleteMutation, isCompact }: Re
         "p-3 rounded-lg border transition-all",
         release.isPublished
           ? "bg-emerald-500/10 border-emerald-500/30"
-          : "bg-slate-800/50 border-slate-700/50"
+          : "bg-white/5 border-white/[0.08]/50"
       )}
       data-testid={`release-${release.version}`}
     >
@@ -60,13 +60,13 @@ function ReleaseCard({ release, publishMutation, deleteMutation, isCompact }: Re
           <div className="flex items-center gap-2 flex-wrap">
             <Package className={cn(
               "h-4 w-4",
-              release.isPublished ? "text-emerald-400" : "text-slate-400"
+              release.isPublished ? "text-emerald-400" : "text-white/40"
             )} />
-            <span className="font-mono font-bold text-slate-200">
+            <span className="font-mono font-bold text-white/80">
               v{release.version}
             </span>
             {release.versionType && (
-              <span className="px-1.5 py-0.5 rounded text-[10px] bg-slate-700/50 text-slate-400 uppercase">
+              <span className="px-1.5 py-0.5 rounded text-[10px] bg-white/10 text-white/40 uppercase">
                 {release.versionType}
               </span>
             )}
@@ -95,7 +95,7 @@ function ReleaseCard({ release, publishMutation, deleteMutation, isCompact }: Re
               </a>
             )}
           </div>
-          <div className="text-sm text-slate-300 mt-1">{release.title}</div>
+          <div className="text-sm text-white/70 mt-1">{release.title}</div>
           {!isCompact && release.highlights && (
             <div className="text-xs text-cyan-400 mt-1 flex items-center gap-1">
               <Sparkles className="h-3 w-3" />
@@ -103,18 +103,18 @@ function ReleaseCard({ release, publishMutation, deleteMutation, isCompact }: Re
             </div>
           )}
           {!isCompact && release.description && (
-            <div className="text-xs text-slate-500 mt-1 line-clamp-2">
+            <div className="text-xs text-white/30 mt-1 line-clamp-2">
               {release.description}
             </div>
           )}
           {!isCompact && release.notes && (
-            <div className="text-xs text-slate-600 mt-1 flex items-center gap-1">
+            <div className="text-xs text-white/20 mt-1 flex items-center gap-1">
               <FileText className="h-3 w-3" />
               {release.notes}
             </div>
           )}
           {!isCompact && release.releaseHash && (
-            <div className="text-[10px] text-slate-600 mt-1 font-mono flex items-center gap-1">
+            <div className="text-[10px] text-white/20 mt-1 font-mono flex items-center gap-1">
               <Hash className="h-3 w-3" />
               {release.releaseHash.slice(0, 16)}...
             </div>
@@ -150,7 +150,7 @@ function ReleaseCard({ release, publishMutation, deleteMutation, isCompact }: Re
           )}
         </div>
       </div>
-      <div className="text-xs text-slate-600 mt-2">
+      <div className="text-xs text-white/20 mt-2">
         {release.isPublished && release.releasedAt
           ? `Published ${new Date(release.releasedAt).toLocaleDateString()}`
           : `Created ${new Date(release.createdAt).toLocaleDateString()}`}
@@ -258,19 +258,19 @@ export function ReleaseManager() {
           New Release
         </Button>
       ) : (
-        <div className="space-y-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700">
+        <div className="space-y-3 p-3 rounded-lg bg-white/5 border border-white/[0.08]">
           <div className="flex gap-2">
             <Input
               placeholder="Version (e.g., 1.0.14)"
               value={version}
               onChange={(e) => setVersion(e.target.value)}
-              className="bg-slate-900/50 border-slate-600 flex-1"
+              className="bg-[rgba(12,18,36,0.65)] border-white/10 flex-1"
               data-testid="input-version"
             />
             <select
               value={versionType}
               onChange={(e) => setVersionType(e.target.value)}
-              className="bg-slate-900/50 border border-slate-600 rounded-md px-2 text-sm text-slate-300"
+              className="bg-[rgba(12,18,36,0.65)] border border-white/10 rounded-md px-2 text-sm text-white/70"
               data-testid="select-version-type"
             >
               <option value="patch">Patch</option>
@@ -282,28 +282,28 @@ export function ReleaseManager() {
             placeholder="Release Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="bg-slate-900/50 border-slate-600"
+            className="bg-[rgba(12,18,36,0.65)] border-white/10"
             data-testid="input-title"
           />
           <Textarea
             placeholder="Description / Changelog"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="bg-slate-900/50 border-slate-600 min-h-[60px]"
+            className="bg-[rgba(12,18,36,0.65)] border-white/10 min-h-[60px]"
             data-testid="input-description"
           />
           <Input
             placeholder="Key Highlights (one-liner)"
             value={highlights}
             onChange={(e) => setHighlights(e.target.value)}
-            className="bg-slate-900/50 border-slate-600"
+            className="bg-[rgba(12,18,36,0.65)] border-white/10"
             data-testid="input-highlights"
           />
           <Textarea
             placeholder="Additional Notes (optional)"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="bg-slate-900/50 border-slate-600 min-h-[40px]"
+            className="bg-[rgba(12,18,36,0.65)] border-white/10 min-h-[40px]"
             data-testid="input-notes"
           />
           <div className="flex gap-2">
@@ -325,7 +325,7 @@ export function ReleaseManager() {
               size="sm"
               variant="outline"
               onClick={resetForm}
-              className="border-slate-600"
+              className="border-white/10"
               data-testid="button-cancel"
             >
               Cancel
@@ -335,7 +335,7 @@ export function ReleaseManager() {
       )}
 
       {releases.length === 0 ? (
-        <div className="text-center py-6 text-slate-500 text-sm">
+        <div className="text-center py-6 text-white/30 text-sm">
           No releases yet. Create your first release above.
         </div>
       ) : (
@@ -348,11 +348,11 @@ export function ReleaseManager() {
           {/* Put older releases in accordion */}
           {releases.length > 1 && (
             <details className="group" data-testid="accordion-release-history">
-              <summary className="cursor-pointer list-none flex items-center gap-2 p-2 rounded-lg bg-slate-800/30 border border-slate-700/30 hover:bg-slate-800/50 text-sm text-slate-400">
+              <summary className="cursor-pointer list-none flex items-center gap-2 p-2 rounded-lg bg-white/[0.03] border border-white/[0.08]/30 hover:bg-white/5 text-sm text-white/40">
                 <ChevronRight className="h-4 w-4 transition-transform group-open:rotate-90" />
                 <span>Release History ({releases.length - 1} older)</span>
               </summary>
-              <div className="mt-2 space-y-2 pl-2 border-l border-slate-700/30">
+              <div className="mt-2 space-y-2 pl-2 border-l border-white/[0.08]/30">
                 {releases.slice(1).map((release) => (
                   <ReleaseCard key={release.id} release={release} publishMutation={publishMutation} deleteMutation={deleteMutation} isCompact />
                 ))}

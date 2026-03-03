@@ -258,7 +258,7 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
       case 'door': return <DoorOpen className="h-5 w-5 text-green-600" />;
       case 'destination': return <MapPin className="h-5 w-5 text-red-600" />;
       case 'turn': return <ChevronRight className="h-5 w-5 text-amber-600" />;
-      default: return <Navigation className="h-5 w-5 text-slate-600" />;
+      default: return <Navigation className="h-5 w-5 text-white/20" />;
     }
   };
 
@@ -266,7 +266,7 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
   const needsElevator = selectedSectionData && selectedSectionData.floorLevel !== currentFloor;
 
   return (
-    <Card className="h-full flex flex-col bg-slate-900/90 border-white/10" data-testid="walking-directions">
+    <Card className="h-full flex flex-col bg-[rgba(12,18,36,0.9)] border-white/10" data-testid="walking-directions">
       <CardHeader className="pb-2 flex-shrink-0 border-b border-white/5">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2 text-white">
@@ -274,7 +274,7 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
             Walking Directions
           </CardTitle>
           {onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose} data-testid="close-directions" aria-label="Close directions" className="text-slate-400 hover:text-white hover:bg-white/10">
+            <Button variant="ghost" size="icon" onClick={onClose} data-testid="close-directions" aria-label="Close directions" className="text-white/40 hover:text-white hover:bg-white/10">
               <X className="h-4 w-4" />
             </Button>
           )}
@@ -310,7 +310,7 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
                     {Object.entries(groupedSections).map(([groupName, sections]) => (
                       sections.length > 0 && (
                         <div key={groupName}>
-                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-slate-800">
+                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-white/5">
                             {groupName}
                           </div>
                           {sections.map(section => (
@@ -352,7 +352,7 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
                       Est. Time: {getEstimatedTime(directions)}
                     </span>
                   </div>
-                  <Badge variant="outline" className="bg-slate-800/50">
+                  <Badge variant="outline" className="bg-white/5">
                     {directions.length} steps
                   </Badge>
                 </div>
@@ -363,11 +363,11 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
                       <div 
                         key={index}
                         className={`flex items-start gap-3 p-3 rounded-lg border ${
-                          step.floorChange ? 'bg-purple-500/10 border-purple-500/30' : 'bg-slate-800/50 border-slate-700'
+                          step.floorChange ? 'bg-purple-500/10 border-purple-500/30' : 'bg-white/5 border-white/[0.08]'
                         }`}
                       >
                         <div className={`p-2 rounded-full ${
-                          step.floorChange ? 'bg-purple-500/20' : 'bg-slate-700'
+                          step.floorChange ? 'bg-purple-500/20' : 'bg-white/10'
                         }`}>
                           {getStepIcon(step.icon)}
                         </div>
@@ -435,7 +435,7 @@ export function WalkingDirections({ userLocation, onClose, defaultDestination }:
               )}
 
               {directions[currentStep]?.distance && (
-                <Badge className="bg-slate-800/50 text-slate-300">
+                <Badge className="bg-white/5 text-white/70">
                   {directions[currentStep].distance}
                 </Badge>
               )}

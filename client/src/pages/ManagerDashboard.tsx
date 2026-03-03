@@ -99,13 +99,13 @@ const statusColors: Record<string, string> = {
   Acknowledged: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
   InProgress: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
   OnTheWay: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-  Delivered: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-  Resolved: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+  Delivered: 'bg-white/10 text-white/40 border-white/10',
+  Resolved: 'bg-white/10 text-white/40 border-white/10',
 };
 
 const standStatusColors: Record<string, string> = {
   Open: 'bg-emerald-500',
-  Closed: 'bg-slate-500',
+  Closed: 'bg-white/10',
   'Needs Power': 'bg-red-500',
   Spare: 'bg-amber-500',
   'Hot Spot': 'bg-orange-500',
@@ -224,11 +224,11 @@ export default function ManagerDashboard() {
       >
         <Button 
           variant="outline" 
-          className="h-auto py-2 px-3 flex flex-col items-center gap-1 bg-slate-800/60 border-white/10 hover:bg-white/10 hover:border-cyan-400/50"
+          className="h-auto py-2 px-3 flex flex-col items-center gap-1 bg-white/[0.06] border-white/10 hover:bg-white/10 hover:border-cyan-400/50"
           data-testid={action.testId}
         >
           <action.icon className={`h-5 w-5 text-${action.color}-400`} />
-          <span className="text-xs text-slate-300 whitespace-nowrap">{action.label}</span>
+          <span className="text-xs text-white/70 whitespace-nowrap">{action.label}</span>
         </Button>
       </motion.div>
     );
@@ -246,15 +246,15 @@ export default function ManagerDashboard() {
     >
       <motion.div 
         whileHover={{ scale: 1.02 }}
-        className="w-[140px] h-[88px] p-2 rounded-lg bg-slate-800/60 border border-white/10 hover:border-cyan-400/50 cursor-pointer"
+        className="w-[140px] h-[88px] p-2 rounded-lg bg-white/[0.06] border border-white/10 hover:border-cyan-400/50 cursor-pointer"
         data-testid={`staff-stand-${stand.id}`}
       >
         <div className="flex items-center gap-2 mb-1">
           <div className={`w-2 h-2 rounded-full ${standStatusColors[stand.status]}`} />
-          <span className="text-sm font-medium text-slate-200 truncate">{stand.name}</span>
+          <span className="text-sm font-medium text-white/80 truncate">{stand.name}</span>
         </div>
-        <div className="text-xs text-slate-500">{stand.section}</div>
-        <Badge variant="outline" className="text-xs border-white/20 text-slate-400 mt-1">
+        <div className="text-xs text-white/30">{stand.section}</div>
+        <Badge variant="outline" className="text-xs border-white/20 text-white/40 mt-1">
           {stand.status}
         </Badge>
       </motion.div>
@@ -265,19 +265,19 @@ export default function ManagerDashboard() {
     <motion.div 
       key={req.id}
       whileHover={{ scale: 1.02 }}
-      className="w-[200px] h-[100px] p-2 rounded-lg bg-slate-800/60 border border-white/10 hover:border-cyan-400/50"
+      className="w-[200px] h-[100px] p-2 rounded-lg bg-white/[0.06] border border-white/10 hover:border-cyan-400/50"
       data-testid={`inventory-delivery-${req.id}`}
     >
       <div className="flex items-center gap-2 mb-1">
         <div className={`p-1.5 rounded border ${departmentColors[req.department]}`}>
           {departmentIcons[req.department]}
         </div>
-        <span className="text-sm font-medium text-slate-200">{req.standName}</span>
+        <span className="text-sm font-medium text-white/80">{req.standName}</span>
         {req.priority === 'Emergency' && (
           <Badge className="text-xs bg-red-500/20 text-red-400 border border-red-500/30">!</Badge>
         )}
       </div>
-      <div className="text-xs text-slate-400 truncate">{req.description}</div>
+      <div className="text-xs text-white/40 truncate">{req.description}</div>
       <div className="flex items-center justify-between mt-1">
         <Badge className={`text-xs border ${statusColors[req.status]}`}>
           {req.status === 'OnTheWay' ? 'On Way' : req.status}
@@ -302,9 +302,9 @@ export default function ManagerDashboard() {
             userName={currentUser?.name} 
             isManager={true}
           />
-          <div className="flex items-center gap-2 p-2 rounded bg-slate-800/40">
+          <div className="flex items-center gap-2 p-2 rounded bg-white/5">
             <Shield className="h-4 w-4 text-emerald-400" />
-            <span className="text-sm text-slate-300">All safety protocols active</span>
+            <span className="text-sm text-white/70">All safety protocols active</span>
           </div>
         </div>
       ),
@@ -314,13 +314,13 @@ export default function ManagerDashboard() {
       content: (
         <div className="space-y-2" data-testid="accordion-sop-content">
           <Link href="/document-hub">
-            <div className="flex items-center gap-2 p-2 rounded bg-slate-800/40 hover:bg-slate-700/40 cursor-pointer">
+            <div className="flex items-center gap-2 p-2 rounded bg-white/5 hover:bg-white/10/40 cursor-pointer">
               <FileText className="h-4 w-4 text-cyan-400" />
-              <span className="text-sm text-slate-300">View Document Hub</span>
-              <ChevronRight className="h-4 w-4 text-slate-500 ml-auto" />
+              <span className="text-sm text-white/70">View Document Hub</span>
+              <ChevronRight className="h-4 w-4 text-white/30 ml-auto" />
             </div>
           </Link>
-          <div className="text-xs text-slate-500 pl-6">
+          <div className="text-xs text-white/30 pl-6">
             Opening procedures, closing checklists, emergency protocols
           </div>
         </div>
@@ -330,11 +330,11 @@ export default function ManagerDashboard() {
       title: 'Settings & Configuration',
       content: (
         <div className="space-y-2" data-testid="accordion-settings-content">
-          <div className="flex items-center gap-2 p-2 rounded bg-slate-800/40">
-            <Settings className="h-4 w-4 text-slate-400" />
-            <span className="text-sm text-slate-300">Dashboard Preferences</span>
+          <div className="flex items-center gap-2 p-2 rounded bg-white/5">
+            <Settings className="h-4 w-4 text-white/40" />
+            <span className="text-sm text-white/70">Dashboard Preferences</span>
           </div>
-          <div className="text-xs text-slate-500 pl-6">
+          <div className="text-xs text-white/30 pl-6">
             Notification settings, display options, role permissions
           </div>
         </div>
@@ -365,11 +365,11 @@ export default function ManagerDashboard() {
             <div className="flex items-center gap-2">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button size="icon" variant="ghost" className="md:hidden text-slate-300 hover:bg-white/10" data-testid="button-mobile-menu">
+                  <Button size="icon" variant="ghost" className="md:hidden text-white/70 hover:bg-white/10" data-testid="button-mobile-menu">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="bg-slate-900 border-slate-700">
+                <SheetContent side="left" className="bg-[#0c1224] border-white/[0.08]">
                   <nav className="grid gap-4 text-lg font-medium pt-8">
                     <Link href="/command-center" className="flex items-center gap-4 px-2.5 text-red-400 hover:text-red-300" data-testid="nav-command-center">
                       <Siren className="h-5 w-5" />
@@ -392,7 +392,7 @@ export default function ManagerDashboard() {
               </Sheet>
 
               <HeaderTutorialButton variant="icon" />
-              <Button variant="ghost" size="icon" className="relative text-slate-300 hover:bg-white/10" data-testid="button-notifications">
+              <Button variant="ghost" size="icon" className="relative text-white/70 hover:bg-white/10" data-testid="button-notifications">
                 <Bell className="h-5 w-5" />
                 {(emergencyDeliveries.length + emergencyITAlerts.length) > 0 && (
                   <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-xs flex items-center justify-center animate-pulse">
@@ -400,7 +400,7 @@ export default function ManagerDashboard() {
                   </span>
                 )}
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-slate-300 hover:bg-white/10" data-testid="button-logout">
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-white/70 hover:bg-white/10" data-testid="button-logout">
                 <LogOut className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Logout</span>
               </Button>
@@ -418,7 +418,7 @@ export default function ManagerDashboard() {
                 <div className="p-1.5 rounded-lg bg-cyan-500/20">
                   <TrendingUp className="h-4 w-4 text-cyan-400" />
                 </div>
-                <span className="font-medium text-slate-200">Event Overview</span>
+                <span className="font-medium text-white/80">Event Overview</span>
                 <SectionHelp
                   title="Event Metrics"
                   description="Live dashboard metrics showing current event status at a glance."
@@ -432,7 +432,7 @@ export default function ManagerDashboard() {
             {/* Operations Row: Quick Actions (span-6), Staff Status (span-6) */}
             <BentoCard span={6} className="col-span-4 md:col-span-3 lg:col-span-6" data-testid="quick-actions-card">
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-medium text-slate-200">Quick Actions</span>
+                <span className="font-medium text-white/80">Quick Actions</span>
                 <SectionHelp
                   title="Quick Actions"
                   description="One-tap access to common operations tasks."
@@ -448,7 +448,7 @@ export default function ManagerDashboard() {
                 <div className="p-1.5 rounded-lg bg-emerald-500/20">
                   <Users className="h-4 w-4 text-emerald-400" />
                 </div>
-                <span className="font-medium text-slate-200">Staff Roster</span>
+                <span className="font-medium text-white/80">Staff Roster</span>
                 <SectionHelp
                   title="Staff Status"
                   description="Live view of stand assignments and staff positions."
@@ -466,7 +466,7 @@ export default function ManagerDashboard() {
                   <div className="p-1.5 rounded-lg bg-blue-500/20">
                     <Truck className="h-4 w-4 text-blue-400" />
                   </div>
-                  <span className="font-medium text-slate-200">Active Deliveries</span>
+                  <span className="font-medium text-white/80">Active Deliveries</span>
                   <SectionHelp
                     title="Active Deliveries"
                     description="Track supply requests from stands to departments."
@@ -481,7 +481,7 @@ export default function ManagerDashboard() {
               {inventoryItems.length > 0 ? (
                 <CarouselRail items={inventoryItems} data-testid="inventory-carousel" />
               ) : (
-                <div className="text-center py-4 text-slate-500">
+                <div className="text-center py-4 text-white/30">
                   <CheckCircle2 className="h-6 w-6 mx-auto mb-1" />
                   <p className="text-sm">No active deliveries</p>
                 </div>
@@ -493,7 +493,7 @@ export default function ManagerDashboard() {
                 <div className="p-1.5 rounded-lg bg-red-500/20">
                   <AlertTriangle className="h-4 w-4 text-red-400" />
                 </div>
-                <span className="font-medium text-slate-200">Alerts</span>
+                <span className="font-medium text-white/80">Alerts</span>
               </div>
               <ScrollArea className="h-[140px]">
                 <div className="space-y-2">
@@ -512,8 +512,8 @@ export default function ManagerDashboard() {
                             {departmentIcons[req.department]}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium text-slate-200 truncate">{req.standName}</div>
-                            <div className="text-xs text-slate-400 truncate">{req.description}</div>
+                            <div className="text-sm font-medium text-white/80 truncate">{req.standName}</div>
+                            <div className="text-xs text-white/40 truncate">{req.description}</div>
                           </div>
                         </div>
                       </motion.div>
@@ -530,14 +530,14 @@ export default function ManagerDashboard() {
                       <div className="flex items-center gap-2">
                         <Monitor className="h-4 w-4 text-cyan-400" />
                         <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-slate-200 truncate">{alert.standName}</div>
-                          <div className="text-xs text-slate-400 truncate">{alert.description}</div>
+                          <div className="text-sm font-medium text-white/80 truncate">{alert.standName}</div>
+                          <div className="text-xs text-white/40 truncate">{alert.description}</div>
                         </div>
                       </div>
                     </motion.div>
                   ))}
                   {emergencyDeliveries.length === 0 && activeITAlerts.length === 0 && (
-                    <div className="text-center py-4 text-slate-500">
+                    <div className="text-center py-4 text-white/30">
                       <CheckCircle2 className="h-6 w-6 mx-auto mb-1" />
                       <p className="text-sm">No alerts</p>
                     </div>
@@ -558,7 +558,7 @@ export default function ManagerDashboard() {
                   <div className="p-1.5 rounded-lg bg-blue-500/20">
                     <Truck className="h-4 w-4 text-blue-400" />
                   </div>
-                  <span className="font-medium text-slate-200">Delivery Details</span>
+                  <span className="font-medium text-white/80">Delivery Details</span>
                 </div>
               </div>
               <Tabs defaultValue="all" className="w-full" data-testid="delivery-tabs">
@@ -590,12 +590,12 @@ export default function ManagerDashboard() {
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-sm font-medium text-slate-200">{req.standName}</span>
+                                    <span className="text-sm font-medium text-white/80">{req.standName}</span>
                                     {req.priority === 'Emergency' && (
                                       <Badge className="text-xs bg-red-500/20 text-red-400 border border-red-500/30">Urgent</Badge>
                                     )}
                                   </div>
-                                  <div className="text-xs text-slate-400 truncate">{req.description}</div>
+                                  <div className="text-xs text-white/40 truncate">{req.description}</div>
                                 </div>
                               </div>
                               <div className="text-right shrink-0 ml-2">
@@ -612,7 +612,7 @@ export default function ManagerDashboard() {
                             </motion.div>
                           ))}
                         {activeDeliveries.filter(d => tab === 'all' || d.department === tab).length === 0 && (
-                          <div className="text-center py-6 text-slate-500">
+                          <div className="text-center py-6 text-white/30">
                             <CheckCircle2 className="h-6 w-6 mx-auto mb-1" />
                             <p className="text-sm">No {tab === 'all' ? 'active' : tab} deliveries</p>
                           </div>
@@ -630,7 +630,7 @@ export default function ManagerDashboard() {
                 <div className="p-1.5 rounded-lg bg-emerald-500/20">
                   <MapPin className="h-4 w-4 text-emerald-400" />
                 </div>
-                <span className="font-medium text-slate-200">Stand Overview</span>
+                <span className="font-medium text-white/80">Stand Overview</span>
                 <SectionHelp
                   title="Stand Overview"
                   description="Real-time status of all concession stands."
@@ -653,11 +653,11 @@ export default function ManagerDashboard() {
                         <div className="flex items-center gap-2 min-w-0">
                           <div className={`w-2 h-2 rounded-full shrink-0 ${standStatusColors[stand.status]}`} />
                           <div className="min-w-0">
-                            <div className="text-sm text-slate-200 truncate">{stand.name}</div>
-                            <div className="text-xs text-slate-500">{stand.section}</div>
+                            <div className="text-sm text-white/80 truncate">{stand.name}</div>
+                            <div className="text-xs text-white/30">{stand.section}</div>
                           </div>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-slate-500 shrink-0" />
+                        <ChevronRight className="h-4 w-4 text-white/30 shrink-0" />
                       </motion.div>
                     </Link>
                   ))}
@@ -671,7 +671,7 @@ export default function ManagerDashboard() {
                 <div className="p-1.5 rounded-lg bg-purple-500/20">
                   <FileStack className="h-4 w-4 text-purple-400" />
                 </div>
-                <span className="font-medium text-slate-200">Support & Documentation</span>
+                <span className="font-medium text-white/80">Support & Documentation</span>
               </div>
               <AccordionStack 
                 items={supportSections} 

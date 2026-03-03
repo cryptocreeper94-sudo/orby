@@ -49,14 +49,14 @@ export default function KitchenDashboard() {
     <div 
       key={idx}
       data-testid={`metric-card-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}
-      className={`p-4 rounded-xl bg-slate-800/60 border border-white/10 w-[140px] h-[80px] hover:border-${metric.color}-400/50 transition-colors`}
+      className={`p-4 rounded-xl bg-white/[0.06] border border-white/10 w-[140px] h-[80px] hover:border-${metric.color}-400/50 transition-colors`}
     >
       <div className={`p-2 rounded-lg bg-${metric.color}-500/20 w-fit mb-2`}>
         <div className={`text-${metric.color}-400`}>{metric.icon}</div>
       </div>
-      <div className="text-xs text-slate-400 uppercase tracking-wide">{metric.label}</div>
-      <div className="text-xl font-bold text-slate-100">{metric.value}</div>
-      <div className="text-xs text-slate-500">{metric.subValue}</div>
+      <div className="text-xs text-white/40 uppercase tracking-wide">{metric.label}</div>
+      <div className="text-xl font-bold text-white">{metric.value}</div>
+      <div className="text-xs text-white/30">{metric.subValue}</div>
     </div>
   ));
 
@@ -72,20 +72,20 @@ export default function KitchenDashboard() {
               className={`text-[10px] border ${
                 msg.type === 'Urgent' 
                   ? 'bg-red-500/20 text-red-400 border-red-500/30' 
-                  : 'bg-slate-500/20 text-slate-400 border-slate-500/30'
+                  : 'bg-white/10 text-white/40 border-white/10'
               }`}
             >
               {msg.type}
             </Badge>
-            <span className="text-[10px] text-slate-500">
+            <span className="text-[10px] text-white/30">
               {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
             </span>
           </div>
-          <p className="text-slate-300 text-sm line-clamp-2">{msg.content}</p>
+          <p className="text-white/70 text-sm line-clamp-2">{msg.content}</p>
         </div>
       ))
     : [
-        <div key="empty" className="p-6 text-center text-slate-500 w-[180px] h-[90px]">
+        <div key="empty" className="p-6 text-center text-white/30 w-[180px] h-[90px]">
           <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">No messages yet</p>
         </div>
@@ -147,7 +147,7 @@ export default function KitchenDashboard() {
           actions={
             <div className="flex items-center gap-2">
               <Link href="/messages">
-                <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-white/10 relative" data-testid="button-messages">
+                <Button variant="ghost" size="icon" className="text-white/70 hover:bg-white/10 relative" data-testid="button-messages">
                   <MessageSquare className="h-5 w-5" />
                   {urgentMessages.length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-amber-400 text-amber-900 text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">
@@ -156,7 +156,7 @@ export default function KitchenDashboard() {
                   )}
                 </Button>
               </Link>
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-300 hover:bg-white/10" data-testid="button-logout">
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white/70 hover:bg-white/10" data-testid="button-logout">
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
@@ -196,7 +196,7 @@ export default function KitchenDashboard() {
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        className="p-3 bg-red-500/10 rounded-xl border border-red-500/20 text-sm text-slate-200"
+                        className="p-3 bg-red-500/10 rounded-xl border border-red-500/20 text-sm text-white/80"
                         data-testid={`urgent-message-${msg.id}`}
                       >
                         {msg.content}
@@ -224,7 +224,7 @@ export default function KitchenDashboard() {
                   <div className="p-1.5 rounded-lg bg-cyan-500/20">
                     <MessageSquare className="h-4 w-4 text-cyan-400" />
                   </div>
-                  <span className="font-bold text-sm text-slate-200">Recent Messages</span>
+                  <span className="font-bold text-sm text-white/80">Recent Messages</span>
                 </div>
                 <Link href="/messages">
                   <Button variant="ghost" size="sm" className="text-xs text-cyan-400 hover:bg-cyan-500/10" data-testid="view-all-messages">
@@ -243,7 +243,7 @@ export default function KitchenDashboard() {
                 <div className="p-1.5 rounded-lg bg-violet-500/20">
                   <BookOpen className="h-4 w-4 text-violet-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Procedures</span>
+                <span className="font-bold text-sm text-white/80">Procedures</span>
               </div>
               <AccordionStack 
                 items={procedureAccordionItems} 
@@ -257,7 +257,7 @@ export default function KitchenDashboard() {
                 <div className="p-1.5 rounded-lg bg-emerald-500/20">
                   <Utensils className="h-4 w-4 text-emerald-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Quick Actions</span>
+                <span className="font-bold text-sm text-white/80">Quick Actions</span>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
                 {prepStatusCards.map((card) => (
@@ -265,7 +265,7 @@ export default function KitchenDashboard() {
                     key={card.testId}
                     whileHover={{ scale: card.disabled ? 1 : 1.02 }} 
                     whileTap={{ scale: card.disabled ? 1 : 0.98 }}
-                    className={`p-4 rounded-xl bg-slate-800/40 border border-white/10 cursor-pointer text-center transition-colors ${
+                    className={`p-4 rounded-xl bg-white/5 border border-white/10 cursor-pointer text-center transition-colors ${
                       card.disabled ? 'opacity-50' : `hover:border-${card.color}-500/30`
                     }`}
                     onClick={card.disabled ? undefined : card.onClick}
@@ -274,9 +274,9 @@ export default function KitchenDashboard() {
                     <div className={`p-3 rounded-xl bg-${card.color}-500/20 w-fit mx-auto mb-2`}>
                       <div className={`text-${card.color}-400`}>{card.icon}</div>
                     </div>
-                    <div className="font-bold text-sm text-slate-200">{card.label}</div>
+                    <div className="font-bold text-sm text-white/80">{card.label}</div>
                     {card.disabled && (
-                      <Badge variant="secondary" className="bg-white/10 text-slate-400 text-[10px] mt-1">Coming soon</Badge>
+                      <Badge variant="secondary" className="bg-white/10 text-white/40 text-[10px] mt-1">Coming soon</Badge>
                     )}
                   </motion.div>
                 ))}
@@ -293,7 +293,7 @@ export default function KitchenDashboard() {
           </LayoutShell>
 
           {showMap && (
-            <div className="fixed inset-0 z-50 bg-slate-950">
+            <div className="fixed inset-0 z-50 bg-[#050508]">
               <InteractiveMap 
                 onClose={() => setShowMap(false)} 
                 showNavigation={true}

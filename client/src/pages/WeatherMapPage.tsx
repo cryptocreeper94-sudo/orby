@@ -68,38 +68,38 @@ export default function WeatherMapPage() {
   };
 
   const weatherMetrics = weather ? [
-    <div key="temp" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-temp">
+    <div key="temp" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-temp">
       <Thermometer className="h-5 w-5 text-orange-400 mb-1" />
       <span className="text-xl font-bold text-white">{weather.current.temp}°F</span>
       <span className="text-[10px] text-white/50">Temperature</span>
     </div>,
-    <div key="feels" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-feels">
+    <div key="feels" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-feels">
       <Thermometer className="h-5 w-5 text-cyan-400 mb-1" />
       <span className="text-xl font-bold text-white">{weather.current.feelsLike}°F</span>
       <span className="text-[10px] text-white/50">Feels Like</span>
     </div>,
-    <div key="wind" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-wind">
-      <Wind className="h-5 w-5 text-slate-400 mb-1" />
+    <div key="wind" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-wind">
+      <Wind className="h-5 w-5 text-white/40 mb-1" />
       <span className="text-xl font-bold text-white">{weather.current.windSpeed}</span>
       <span className="text-[10px] text-white/50">mph {weather.current.windDirection}</span>
     </div>,
-    <div key="humidity" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-humidity">
+    <div key="humidity" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-humidity">
       <Droplets className="h-5 w-5 text-blue-400 mb-1" />
       <span className="text-xl font-bold text-white">{weather.current.humidity}%</span>
       <span className="text-[10px] text-white/50">Humidity</span>
     </div>,
-    <div key="visibility" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-visibility">
-      <Eye className="h-5 w-5 text-slate-400 mb-1" />
+    <div key="visibility" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-visibility">
+      <Eye className="h-5 w-5 text-white/40 mb-1" />
       <span className="text-xl font-bold text-white">{weather.current.visibility}</span>
       <span className="text-[10px] text-white/50">mi Visibility</span>
     </div>,
-    <div key="pressure" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-pressure">
-      <Gauge className="h-5 w-5 text-slate-400 mb-1" />
+    <div key="pressure" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-pressure">
+      <Gauge className="h-5 w-5 text-white/40 mb-1" />
       <span className="text-xl font-bold text-white">{weather.current.pressure}</span>
       <span className="text-[10px] text-white/50">in Pressure</span>
     </div>,
-    <div key="clouds" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-clouds">
-      <Cloud className="h-5 w-5 text-slate-400 mb-1" />
+    <div key="clouds" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-clouds">
+      <Cloud className="h-5 w-5 text-white/40 mb-1" />
       <span className="text-xl font-bold text-white">{weather.current.cloudCover}%</span>
       <span className="text-[10px] text-white/50">Cloud Cover</span>
     </div>,
@@ -108,7 +108,7 @@ export default function WeatherMapPage() {
   const hourlyItems = weather?.hourly.slice(0, 12).map((hour, i) => (
     <div 
       key={i} 
-      className="flex flex-col items-center p-2 bg-slate-800/60 rounded-lg min-w-[60px]"
+      className="flex flex-col items-center p-2 bg-white/[0.06] rounded-lg min-w-[60px]"
       data-testid={`hourly-${i}`}
     >
       <span className="text-[10px] text-white/60">{hour.time}</span>
@@ -125,19 +125,19 @@ export default function WeatherMapPage() {
     content: (
       <div className="space-y-2" data-testid={`forecast-detail-${i}`}>
         <div className="flex items-center justify-between">
-          <span className="text-slate-400">Description</span>
+          <span className="text-white/40">Description</span>
           <span className="text-white">{day.description}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-slate-400">Precipitation</span>
+          <span className="text-white/40">Precipitation</span>
           <span className="text-blue-400">{day.precipitation}%</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-slate-400">Sunrise</span>
+          <span className="text-white/40">Sunrise</span>
           <span className="text-orange-400">{day.sunrise}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-slate-400">Sunset</span>
+          <span className="text-white/40">Sunset</span>
           <span className="text-indigo-400">{day.sunset}</span>
         </div>
       </div>
@@ -145,8 +145,8 @@ export default function WeatherMapPage() {
   })) || [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900" data-testid="weather-map-page">
-      <div className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 px-4 py-3">
+    <div className="min-h-screen bg-gradient-to-b from-[#0c1224] via-[#0c1224] to-[#0c1224]" data-testid="weather-map-page">
+      <div className="sticky top-0 z-50 bg-[rgba(12,18,36,0.9)] backdrop-blur-xl border-b border-white/10 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button 
@@ -218,7 +218,7 @@ export default function WeatherMapPage() {
           </BentoCard>
 
           <BentoCard span={12} rowSpan={2} className="p-0 overflow-hidden" data-testid="bento-card-map">
-            <div className="relative h-[400px] lg:h-[500px] w-full bg-slate-900">
+            <div className="relative h-[400px] lg:h-[500px] w-full bg-[#0c1224]">
               <div className="absolute top-3 left-3 z-10 flex gap-2">
                 {(['radar', 'temp', 'precip'] as const).map((layer) => (
                   <Button
@@ -226,7 +226,7 @@ export default function WeatherMapPage() {
                     variant={mapLayer === layer ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setMapLayer(layer)}
-                    className={`text-xs ${mapLayer === layer ? 'bg-cyan-500 text-white' : 'bg-slate-800/80 text-white border-white/20'}`}
+                    className={`text-xs ${mapLayer === layer ? 'bg-cyan-500 text-white' : 'bg-white/10 text-white border-white/20'}`}
                     data-testid={`button-layer-${layer}`}
                   >
                     {layer === 'radar' && <CloudRain className="h-3 w-3 mr-1" />}
@@ -246,7 +246,7 @@ export default function WeatherMapPage() {
               />
               
               <div className="absolute bottom-3 left-3 z-10">
-                <div className="px-3 py-2 flex items-center gap-2 bg-slate-800/80 backdrop-blur-sm rounded-lg border border-white/10">
+                <div className="px-3 py-2 flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/10">
                   <MapPin className="h-4 w-4 text-cyan-400" />
                   <span className="text-xs text-white">Nissan Stadium</span>
                 </div>

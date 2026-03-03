@@ -81,28 +81,28 @@ export default function RosterBuilder() {
   const metricsCards = [
     <div key="groups" className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid="metric-groups">
       <ClipboardList className="h-4 w-4 text-cyan-400 mb-1" />
-      <div className="text-lg font-bold text-slate-200">{staffingGroups.length}</div>
-      <div className="text-xs text-slate-500">Groups</div>
+      <div className="text-lg font-bold text-white/80">{staffingGroups.length}</div>
+      <div className="text-xs text-white/30">Groups</div>
     </div>,
     <div key="supervisors" className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid="metric-supervisors">
       <Users className="h-4 w-4 text-cyan-400 mb-1" />
-      <div className="text-lg font-bold text-slate-200">{supervisors.length}</div>
-      <div className="text-xs text-slate-500">Supervisors</div>
+      <div className="text-lg font-bold text-white/80">{supervisors.length}</div>
+      <div className="text-xs text-white/30">Supervisors</div>
     </div>,
     <div key="stands" className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid="metric-stands">
       <Building2 className="h-4 w-4 text-cyan-400 mb-1" />
-      <div className="text-lg font-bold text-slate-200">{stands.length}</div>
-      <div className="text-xs text-slate-500">Stands</div>
+      <div className="text-lg font-bold text-white/80">{stands.length}</div>
+      <div className="text-xs text-white/30">Stands</div>
     </div>,
     <div key="npos" className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid="metric-npos">
       <Users className="h-4 w-4 text-amber-400 mb-1" />
-      <div className="text-lg font-bold text-slate-200">{npos.length}</div>
-      <div className="text-xs text-slate-500">NPO Groups</div>
+      <div className="text-lg font-bold text-white/80">{npos.length}</div>
+      <div className="text-xs text-white/30">NPO Groups</div>
     </div>,
     <div key="selected" className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 min-w-[120px]" data-testid="metric-selected">
       <div className="text-xs text-cyan-400 mb-1">Selected</div>
       <div className="text-lg font-bold text-cyan-400">{selectedStands.length}</div>
-      <div className="text-xs text-slate-500">Stands</div>
+      <div className="text-xs text-white/30">Stands</div>
     </div>
   ];
 
@@ -121,19 +121,19 @@ export default function RosterBuilder() {
         <div className="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
           <Users className="h-3.5 w-3.5 text-white" />
         </div>
-        <span className="font-medium text-slate-200 text-sm truncate">{sup.name}</span>
+        <span className="font-medium text-white/80 text-sm truncate">{sup.name}</span>
       </div>
-      <div className="text-xs text-slate-500">{sup.department}</div>
+      <div className="text-xs text-white/30">{sup.department}</div>
     </div>
   ));
 
   const existingGroupCards = staffingGroups.map(group => (
-    <div key={group.id} className="p-3 rounded-lg bg-slate-800/80 border border-slate-700 min-w-[180px]" data-testid={`group-card-${group.id}`}>
+    <div key={group.id} className="p-3 rounded-lg bg-white/10 border border-white/[0.08] min-w-[180px]" data-testid={`group-card-${group.id}`}>
       <div className="flex items-center justify-between mb-1">
-        <span className="font-bold text-sm text-slate-200 truncate">{group.name}</span>
+        <span className="font-bold text-sm text-white/80 truncate">{group.name}</span>
         <Badge variant="secondary" className="text-[10px]">{group.standIds?.length ?? 0}</Badge>
       </div>
-      <div className="text-xs text-slate-400">
+      <div className="text-xs text-white/40">
         Sup: {users.find(u => u.id === group.supervisorId)?.name}
       </div>
       {group.npoId && (
@@ -172,7 +172,7 @@ export default function RosterBuilder() {
           icon={<ClipboardList className="h-6 w-6 text-cyan-400" />}
           iconColor="cyan"
           actions={
-            <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="text-slate-300 hover:bg-white/10" data-testid="button-back">
+            <Button variant="ghost" size="sm" onClick={() => window.history.back()} className="text-white/70 hover:bg-white/10" data-testid="button-back">
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back
             </Button>
@@ -186,12 +186,12 @@ export default function RosterBuilder() {
             </BentoCard>
 
             <BentoCard span={12} className="lg:col-span-5" data-testid="staff-carousel-card">
-              <div className="text-sm font-medium text-slate-300 mb-2">Select Supervisor</div>
+              <div className="text-sm font-medium text-white/70 mb-2">Select Supervisor</div>
               <CarouselRail items={staffCards} showDots data-testid="staff-carousel" />
               
               {staffingGroups.length > 0 && (
                 <div className="mt-4">
-                  <div className="text-sm font-medium text-slate-300 mb-2">Existing Groups</div>
+                  <div className="text-sm font-medium text-white/70 mb-2">Existing Groups</div>
                   <CarouselRail items={existingGroupCards} showDots data-testid="groups-carousel" />
                 </div>
               )}
@@ -200,18 +200,18 @@ export default function RosterBuilder() {
             <BentoCard span={12} rowSpan={2} className="lg:col-span-4" data-testid="assignments-grid-card">
               <div className="space-y-3">
                 <div className="space-y-2">
-                  <Label className="text-slate-400 text-xs">Group Name</Label>
+                  <Label className="text-white/40 text-xs">Group Name</Label>
                   <Input 
                     placeholder="e.g., 'Joe's Section' or 'Group A'" 
                     value={groupName}
                     onChange={(e) => setGroupName(e.target.value)}
-                    className="bg-white/5 border-white/10 text-slate-200"
+                    className="bg-white/5 border-white/10 text-white/80"
                     data-testid="input-group-name"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-slate-400 text-xs">NPO Group (Optional)</Label>
+                  <Label className="text-white/40 text-xs">NPO Group (Optional)</Label>
                   <Select value={selectedNPO} onValueChange={setSelectedNPO}>
                     <SelectTrigger className="bg-white/5 border-white/10" data-testid="select-npo">
                       <SelectValue placeholder="Select NPO" />
@@ -223,7 +223,7 @@ export default function RosterBuilder() {
                     </SelectContent>
                   </Select>
                   {selectedNPO && (
-                    <div className="text-xs text-slate-400 bg-slate-800 border border-slate-700 p-2 rounded" data-testid="npo-info">
+                    <div className="text-xs text-white/40 bg-white/5 border border-white/[0.08] p-2 rounded" data-testid="npo-info">
                       Leader: {npos.find(n => n.id === selectedNPO)?.groupLeader}<br/>
                       Contact: {npos.find(n => n.id === selectedNPO)?.contact}
                     </div>
@@ -233,7 +233,7 @@ export default function RosterBuilder() {
                 <Separator className="bg-white/10" />
 
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-300">Select Stands ({selectedStands.length})</span>
+                  <span className="text-sm font-medium text-white/70">Select Stands ({selectedStands.length})</span>
                   <Select value={filterSection} onValueChange={setFilterSection}>
                     <SelectTrigger className="w-[120px] bg-white/5 border-white/10 h-7 text-xs" data-testid="select-section">
                       <SelectValue placeholder="Section" />
@@ -254,7 +254,7 @@ export default function RosterBuilder() {
                           flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-all
                           ${selectedStands.includes(stand.id) 
                             ? 'bg-cyan-950/30 border-cyan-500 ring-1 ring-cyan-500' 
-                            : 'bg-slate-900/80 border-slate-700 hover:border-cyan-500/50'}
+                            : 'bg-[rgba(12,18,36,0.8)] border-white/[0.08] hover:border-cyan-500/50'}
                         `}
                         onClick={() => toggleStand(stand.id)}
                         data-testid={`stand-${stand.id}`}
@@ -264,8 +264,8 @@ export default function RosterBuilder() {
                           onCheckedChange={() => toggleStand(stand.id)}
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-xs text-slate-200 truncate">{stand.name}</div>
-                          <Badge variant="outline" className="text-[10px] h-4 px-1 border-slate-600">{stand.section}</Badge>
+                          <div className="font-medium text-xs text-white/80 truncate">{stand.name}</div>
+                          <Badge variant="outline" className="text-[10px] h-4 px-1 border-white/10">{stand.section}</Badge>
                         </div>
                       </div>
                     ))}

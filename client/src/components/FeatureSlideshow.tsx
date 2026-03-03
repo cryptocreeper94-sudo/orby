@@ -102,8 +102,8 @@ export function FeatureSlideshow() {
             maxWidth: '380px',
           }}
         >
-          <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-cyan-500/30 shadow-2xl shadow-cyan-500/20 overflow-hidden w-full" data-testid="feature-slideshow">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-slate-700">
+          <Card className="bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] border-cyan-500/30 shadow-2xl shadow-cyan-500/20 overflow-hidden w-full" data-testid="feature-slideshow">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-white/10">
               <motion.div
                 className="h-full bg-gradient-to-r from-cyan-400 to-blue-500"
                 initial={{ width: 0 }}
@@ -117,7 +117,7 @@ export function FeatureSlideshow() {
                 variant="ghost"
                 size="icon"
                 onClick={closeSlideshow}
-                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-700"
+                className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10"
                 data-testid="close-slideshow"
               >
                 <X className="h-4 w-4" />
@@ -141,7 +141,7 @@ export function FeatureSlideshow() {
                       </div>
                       
                       <h2 className="text-2xl font-bold text-white mb-2">{slide.title}</h2>
-                      <p className="text-slate-400 text-sm mb-6">{slide.description}</p>
+                      <p className="text-white/40 text-sm mb-6">{slide.description}</p>
 
                       <div className="w-full space-y-2 mb-6">
                         {slide.features.slice(0, 4).map((feature, idx) => (
@@ -150,7 +150,7 @@ export function FeatureSlideshow() {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.1 }}
-                            className="flex items-center gap-2 text-sm text-slate-300 bg-slate-800/50 rounded-lg px-3 py-2"
+                            className="flex items-center gap-2 text-sm text-white/70 bg-white/5 rounded-lg px-3 py-2"
                           >
                             <Sparkles className="h-3 w-3 text-cyan-400 flex-shrink-0" />
                             {feature}
@@ -173,12 +173,12 @@ export function FeatureSlideshow() {
                 </AnimatePresence>
               </div>
 
-              <div className="flex items-center justify-between p-4 border-t border-slate-700/50">
+              <div className="flex items-center justify-between p-4 border-t border-white/[0.08]/50">
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handlePrev}
-                  className="text-slate-400 hover:text-white hover:bg-slate-700"
+                  className="text-white/40 hover:text-white hover:bg-white/10"
                   data-testid="slideshow-prev"
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
@@ -193,7 +193,7 @@ export function FeatureSlideshow() {
                       className={`h-2 w-2 rounded-full transition-all ${
                         idx === currentSlide 
                           ? 'bg-cyan-400 w-6' 
-                          : 'bg-slate-600 hover:bg-slate-500'
+                          : 'bg-white/10 hover:bg-white/20'
                       }`}
                       data-testid={`slide-dot-${idx}`}
                     />
@@ -204,7 +204,7 @@ export function FeatureSlideshow() {
                   variant="ghost"
                   size="sm"
                   onClick={handleNext}
-                  className="text-slate-400 hover:text-white hover:bg-slate-700"
+                  className="text-white/40 hover:text-white hover:bg-white/10"
                   data-testid="slideshow-next"
                 >
                   Next
@@ -217,7 +217,7 @@ export function FeatureSlideshow() {
                   variant="outline"
                   size="sm"
                   onClick={handleRestartTour}
-                  className="w-full border-slate-600 text-slate-400 hover:bg-slate-700 hover:text-white"
+                  className="w-full border-white/10 text-white/40 hover:bg-white/10 hover:text-white"
                   data-testid="restart-tour"
                 >
                   <Users className="h-4 w-4 mr-2" />

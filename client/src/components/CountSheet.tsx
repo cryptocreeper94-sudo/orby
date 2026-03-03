@@ -223,14 +223,14 @@ export function CountSheet({
 
   return (
     <Card className="h-full flex flex-col" data-testid="count-sheet">
-      <CardHeader className="pb-2 flex-shrink-0 bg-gradient-to-r from-slate-800/50 to-blue-900/30">
+      <CardHeader className="pb-2 flex-shrink-0 bg-gradient-to-r from-[#0c1224]/50 to-blue-900/30">
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="text-lg flex items-center gap-2">
               <ClipboardList className="h-5 w-5 text-blue-400" />
               {standName}
             </CardTitle>
-            <p className="text-sm text-slate-400">{session.eventDate}</p>
+            <p className="text-sm text-white/40">{session.eventDate}</p>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} data-testid="close-count-sheet">
             <X className="h-4 w-4" />
@@ -254,7 +254,7 @@ export function CountSheet({
           </Badge>
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-slate-500 mt-2">
+        <div className="flex items-center gap-2 text-xs text-white/30 mt-2">
           <Clock className="h-3 w-3" />
           Started: {formatTime(session.startedAt)}
           {session.status === 'InProgress' && (
@@ -262,12 +262,12 @@ export function CountSheet({
           )}
         </div>
 
-        <div className="mt-3 bg-slate-800/50 rounded-lg p-2 border border-slate-700">
-          <div className="flex items-center justify-between text-sm text-slate-300">
+        <div className="mt-3 bg-white/5 rounded-lg p-2 border border-white/[0.08]">
+          <div className="flex items-center justify-between text-sm text-white/70">
             <span>Progress: {totalItemsCounted}/{totalItems} items</span>
             <span className="font-medium">{countProgress}%</span>
           </div>
-          <div className="h-2 bg-slate-700/50 rounded-full mt-1 overflow-hidden">
+          <div className="h-2 bg-white/10 rounded-full mt-1 overflow-hidden">
             <div 
               className="h-full bg-blue-500 rounded-full transition-all duration-300"
               style={{ width: `${countProgress}%` }}
@@ -335,9 +335,9 @@ export function CountSheet({
               value={category}
               className="border rounded-lg overflow-hidden"
             >
-              <AccordionTrigger className="px-3 py-2 bg-slate-800/50 hover:bg-slate-700/50">
+              <AccordionTrigger className="px-3 py-2 bg-white/5 hover:bg-white/10">
                 <div className="flex items-center gap-2">
-                  <Package className="h-4 w-4 text-slate-400" />
+                  <Package className="h-4 w-4 text-white/40" />
                   <span className="font-medium">{category}</span>
                   <Badge variant="secondary" className="ml-2">
                     {itemsByCategory[category].length} items
@@ -348,18 +348,18 @@ export function CountSheet({
                 {itemsByCategory[category].map((item) => (
                   <div 
                     key={item.id}
-                    className="flex items-center gap-2 p-2 bg-slate-800/50 border border-slate-700 rounded-lg"
+                    className="flex items-center gap-2 p-2 bg-white/5 border border-white/[0.08] rounded-lg"
                     data-testid={`count-item-${item.id}`}
                   >
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{item.name}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-white/30">
                         ${(item.price / 100).toFixed(2)}
                       </p>
                     </div>
                     
                     {isReadOnly ? (
-                      <div className="text-lg font-bold text-slate-700 px-4">
+                      <div className="text-lg font-bold text-white/40 px-4">
                         {counts[item.id] || 0}
                       </div>
                     ) : (
@@ -418,7 +418,7 @@ export function CountSheet({
       </CardContent>
 
       {!isReadOnly && session.status === 'InProgress' && (
-        <div className="p-3 border-t border-slate-700 bg-slate-800/50">
+        <div className="p-3 border-t border-white/[0.08] bg-white/5">
           <Button
             onClick={onCompleteSession}
             className="w-full bg-green-600 hover:bg-green-700 text-white py-6 text-lg shadow-lg flex items-center justify-center gap-2"
@@ -427,7 +427,7 @@ export function CountSheet({
             <Check className="h-5 w-5" />
             Complete {STAGE_LABELS[session.stage]}
           </Button>
-          <p className="text-xs text-center text-slate-500 mt-2">
+          <p className="text-xs text-center text-white/30 mt-2">
             This will finalize your count and record the completion time
           </p>
         </div>

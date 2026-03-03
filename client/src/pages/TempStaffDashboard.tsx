@@ -129,7 +129,7 @@ export default function TempStaffDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 pb-20" data-testid="temp-staff-dashboard">
+    <div className="min-h-screen bg-gradient-to-b from-[#050508] via-[#0c1224] to-[#050508] pb-20" data-testid="temp-staff-dashboard">
       <LocationAcknowledgement 
         onAccept={() => setLocationAccepted(true)}
         onDecline={() => setLocation("/")}
@@ -178,7 +178,7 @@ export default function TempStaffDashboard() {
 
       <main className="p-3 max-w-6xl mx-auto">
         <div className="text-center py-3 mb-2">
-          <h1 className="text-xl font-black text-slate-200" data-testid="text-welcome">
+          <h1 className="text-xl font-black text-white/80" data-testid="text-welcome">
             Welcome, {currentUser?.name || 'Temp Staff'}
           </h1>
           <p className="text-sm text-muted-foreground">Temporary Staff Dashboard</p>
@@ -261,12 +261,12 @@ export default function TempStaffDashboard() {
               <BentoCard span={12} title="Assignment Metrics" data-testid="card-assignment-metrics">
                 <CarouselRail
                   items={assignmentMetrics.map((metric, idx) => (
-                    <div key={idx} className="w-32 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50" data-testid={`metric-${metric.label.toLowerCase()}`}>
+                    <div key={idx} className="w-32 p-3 bg-white/5 rounded-lg border border-white/[0.08]/50" data-testid={`metric-${metric.label.toLowerCase()}`}>
                       <div className="flex items-center gap-2 mb-1">
                         {metric.icon}
-                        <span className="text-xs text-slate-400">{metric.label}</span>
+                        <span className="text-xs text-white/40">{metric.label}</span>
                       </div>
-                      <p className="text-sm font-bold text-slate-200">{metric.value}</p>
+                      <p className="text-sm font-bold text-white/80">{metric.value}</p>
                     </div>
                   ))}
                   showDots
@@ -276,14 +276,14 @@ export default function TempStaffDashboard() {
               <BentoCard span={6} title="Tasks" data-testid="card-tasks">
                 <CarouselRail
                   items={tasks.map((task) => (
-                    <div key={task.id} className="w-40 p-2 bg-slate-800/50 rounded-lg border border-slate-700/50" data-testid={`task-${task.id}`}>
+                    <div key={task.id} className="w-40 p-2 bg-white/5 rounded-lg border border-white/[0.08]/50" data-testid={`task-${task.id}`}>
                       <div className="flex items-center gap-2 mb-1">
-                        <ClipboardCheck className={`h-3 w-3 ${task.status === 'completed' ? 'text-green-400' : 'text-slate-400'}`} />
-                        <Badge variant="outline" className={`text-[9px] px-1 ${task.priority === 'high' ? 'border-red-500/50 text-red-400' : task.priority === 'medium' ? 'border-amber-500/50 text-amber-400' : 'border-slate-500/50 text-slate-400'}`}>
+                        <ClipboardCheck className={`h-3 w-3 ${task.status === 'completed' ? 'text-green-400' : 'text-white/40'}`} />
+                        <Badge variant="outline" className={`text-[9px] px-1 ${task.priority === 'high' ? 'border-red-500/50 text-red-400' : task.priority === 'medium' ? 'border-amber-500/50 text-amber-400' : 'border-white/10 text-white/40'}`}>
                           {task.priority}
                         </Badge>
                       </div>
-                      <p className={`text-xs ${task.status === 'completed' ? 'text-slate-500 line-through' : 'text-slate-200'}`}>{task.title}</p>
+                      <p className={`text-xs ${task.status === 'completed' ? 'text-white/30 line-through' : 'text-white/80'}`}>{task.title}</p>
                     </div>
                   ))}
                 />
@@ -292,9 +292,9 @@ export default function TempStaffDashboard() {
               <BentoCard span={6} title="Schedule" data-testid="card-schedule">
                 <div className="grid grid-cols-2 gap-2">
                   {scheduleItems.map((item, idx) => (
-                    <div key={idx} className="p-2 bg-slate-800/50 rounded-lg border border-slate-700/50" data-testid={`schedule-item-${idx}`}>
+                    <div key={idx} className="p-2 bg-white/5 rounded-lg border border-white/[0.08]/50" data-testid={`schedule-item-${idx}`}>
                       <p className="text-xs text-cyan-400 font-mono">{item.time}</p>
-                      <p className="text-xs text-slate-300">{item.task}</p>
+                      <p className="text-xs text-white/70">{item.task}</p>
                     </div>
                   ))}
                 </div>
@@ -311,7 +311,7 @@ export default function TempStaffDashboard() {
               <div className="p-3 rounded-full bg-blue-900/30 mb-2">
                 <Map className="h-5 w-5 text-blue-400" />
               </div>
-              <span className="font-bold text-xs text-slate-200">Map</span>
+              <span className="font-bold text-xs text-white/80">Map</span>
             </div>
           </BentoCard>
 
@@ -320,7 +320,7 @@ export default function TempStaffDashboard() {
               <div className="p-3 rounded-full bg-green-900/30 mb-2">
                 <Route className="h-5 w-5 text-green-400" />
               </div>
-              <span className="font-bold text-xs text-slate-200">Directions</span>
+              <span className="font-bold text-xs text-white/80">Directions</span>
             </div>
           </BentoCard>
 
@@ -329,7 +329,7 @@ export default function TempStaffDashboard() {
               <div className="p-3 rounded-full bg-teal-900/30 mb-2">
                 <MessageSquare className="h-5 w-5 text-teal-400" />
               </div>
-              <span className="font-bold text-xs text-slate-200">Messages</span>
+              <span className="font-bold text-xs text-white/80">Messages</span>
             </div>
           </BentoCard>
 

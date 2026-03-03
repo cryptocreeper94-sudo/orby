@@ -89,7 +89,7 @@ export const GlassCard = React.forwardRef<
     className={cn(
       "relative bg-[rgba(12,18,36,0.65)] backdrop-blur-2xl border border-white/[0.08] rounded-xl overflow-hidden transition-all duration-300",
       glow ? "shadow-[0_0_40px_rgba(0,255,255,0.15)]" : "shadow-lg shadow-black/20",
-      gradient && "bg-gradient-to-br from-slate-800/80 via-slate-900/80 to-slate-950/80",
+      gradient && "bg-gradient-to-br from-[#0c1224]/80 via-[#0c1224]/80 to-[#050508]/80",
       className
     )}
     {...props}
@@ -284,8 +284,8 @@ export function StatusBadge({
     "in progress": { bg: "bg-blue-500/20", text: "text-blue-400", glow: "shadow-blue-500/30" },
     reported: { bg: "bg-amber-500/20", text: "text-amber-400", glow: "shadow-amber-500/30" },
     "under review": { bg: "bg-blue-500/20", text: "text-blue-400", glow: "shadow-blue-500/30" },
-    resolved: { bg: "bg-slate-500/20", text: "text-slate-400" },
-    closed: { bg: "bg-slate-500/20", text: "text-slate-400" },
+    resolved: { bg: "bg-white/10", text: "text-white/40" },
+    closed: { bg: "bg-white/10", text: "text-white/40" },
     critical: { bg: "bg-red-500/20", text: "text-red-400", glow: "shadow-red-500/30" },
     emergency: { bg: "bg-red-500/20", text: "text-red-400", glow: "shadow-red-500/30" },
     rush: { bg: "bg-orange-500/20", text: "text-orange-400", glow: "shadow-orange-500/30" },
@@ -293,7 +293,7 @@ export function StatusBadge({
     confirmed: { bg: "bg-emerald-500/20", text: "text-emerald-400" },
   };
 
-  const config = statusConfig[status.toLowerCase()] || { bg: "bg-slate-500/20", text: "text-slate-400" };
+  const config = statusConfig[status.toLowerCase()] || { bg: "bg-white/10", text: "text-white/40" };
 
   return (
     <motion.span
@@ -420,7 +420,7 @@ export function ListItem({
       whileTap={{ scale: 0.99 }}
       onClick={onClick}
       className={cn(
-        "relative p-4 rounded-xl border border-white/5 bg-slate-800/40 transition-colors cursor-pointer group",
+        "relative p-4 rounded-xl border border-white/5 bg-white/5 transition-colors cursor-pointer group",
         active && "border-cyan-500/30 bg-cyan-500/10",
         className
       )}
@@ -548,7 +548,7 @@ export function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          className="stroke-slate-700"
+          className="stroke-white/10"
           strokeWidth={strokeWidth}
           fill="none"
         />
@@ -649,7 +649,7 @@ export function DesktopSidebar({
 }) {
   return (
     <aside className={cn(
-      "hidden lg:flex lg:flex-col lg:w-72 xl:w-80 border-r border-white/10 bg-slate-950/50 backdrop-blur-sm",
+      "hidden lg:flex lg:flex-col lg:w-72 xl:w-80 border-r border-white/10 bg-[#050508]/50 backdrop-blur-sm",
       className
     )}>
       {children}

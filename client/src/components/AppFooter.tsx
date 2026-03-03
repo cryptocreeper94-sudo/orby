@@ -85,13 +85,13 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
               ) : (
                 <span className="text-xs font-semibold text-white/80">{companyName}</span>
               )}
-              <span className="hidden sm:inline text-[10px] text-gray-500">Beta</span>
+              <span className="hidden sm:inline text-[10px] text-white/30">Beta</span>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsVersionModalOpen(true)}
-                className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-cyan-400 transition-colors"
+                className="flex items-center gap-1 text-[10px] text-white/40 hover:text-cyan-400 transition-colors"
                 data-testid="footer-version-badge"
               >
                 <Shield className="w-3 h-3" />
@@ -101,7 +101,7 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
                 )}
               </button>
 
-              <span className="text-gray-600">|</span>
+              <span className="text-white/20">|</span>
 
               <a 
                 href="https://darkwavestudios.io" 
@@ -144,12 +144,12 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
                     </div>
                     <div>
                       <h3 className="text-white font-bold">Orby Version History</h3>
-                      <p className="text-gray-400 text-xs">Blockchain Certified Releases</p>
+                      <p className="text-white/40 text-xs">Blockchain Certified Releases</p>
                     </div>
                   </div>
                   <button
                     onClick={() => setIsVersionModalOpen(false)}
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className="text-white/40 hover:text-white transition-colors"
                     data-testid="button-close-version-modal"
                   >
                     <X className="w-5 h-5" />
@@ -159,7 +159,7 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
 
               <div className="p-4 overflow-y-auto max-h-[calc(60vh-80px)]">
                 {versionAssets?.length === 0 ? (
-                  <div className="text-center py-8 text-gray-400">
+                  <div className="text-center py-8 text-white/40">
                     No version history available
                   </div>
                 ) : (
@@ -194,7 +194,7 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
                                     Verified
                                   </span>
                                 ) : (
-                                  <span className="flex items-center gap-1 text-xs text-gray-400 bg-gray-700/50 px-2 py-0.5 rounded-full">
+                                  <span className="flex items-center gap-1 text-xs text-white/40 bg-gray-700/50 px-2 py-0.5 rounded-full">
                                     <Hash className="w-3 h-3" />
                                     Pending
                                   </span>
@@ -207,17 +207,17 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
                               )}
                             </div>
                             
-                            <div className="flex items-center gap-1 text-gray-400 text-xs mb-3">
+                            <div className="flex items-center gap-1 text-white/40 text-xs mb-3">
                               <Clock className="w-3 h-3" />
                               {formatDate(version.createdAt)}
                             </div>
                             
-                            <div className="text-gray-300 text-sm mb-3">{version.displayName}</div>
+                            <div className="text-white/70 text-sm mb-3">{version.displayName}</div>
                             
                             {version.changes && version.changes.length > 0 && (
                               <div className="space-y-1">
-                                <div className="text-gray-500 text-xs uppercase tracking-wider">Changes</div>
-                                <ul className="list-disc list-inside text-gray-300 text-xs space-y-0.5">
+                                <div className="text-white/30 text-xs uppercase tracking-wider">Changes</div>
+                                <ul className="list-disc list-inside text-white/70 text-xs space-y-0.5">
                                   {version.changes.map((change, i) => (
                                     <li key={i}>{change}</li>
                                   ))}
@@ -227,7 +227,7 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
                             
                             {version.isBlockchainAnchored && version.solanaTxSignature && (
                               <div className="mt-3 pt-3 border-t border-gray-700/50">
-                                <div className="text-gray-500 text-xs mb-1">Solana TX</div>
+                                <div className="text-white/30 text-xs mb-1">Solana TX</div>
                                 <div className="flex items-center gap-2">
                                   <span className="font-mono text-xs text-green-400 truncate flex-1">
                                     {version.solanaTxSignature.slice(0, 32)}...
@@ -247,7 +247,7 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
                             )}
                             
                             <div className="mt-3 pt-3 border-t border-gray-700/50">
-                              <div className="text-gray-500 text-xs mb-1">Asset Number</div>
+                              <div className="text-white/30 text-xs mb-1">Asset Number</div>
                               <span className="font-mono text-xs text-cyan-400">{version.assetNumber}</span>
                             </div>
                           </div>
@@ -260,7 +260,7 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
               
               <div className="p-4 border-t border-gray-700/50 bg-gray-900/50">
                 <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 text-gray-400">
+                  <div className="flex items-center gap-2 text-white/40">
                     <Shield className="w-4 h-4 text-cyan-400" />
                     <span>Powered by Genesis Hallmark System</span>
                   </div>

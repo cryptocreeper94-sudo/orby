@@ -47,12 +47,12 @@ const statusColors: Record<string, { bg: string; text: string; dot: string }> = 
   online: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', dot: 'bg-emerald-400' },
   away: { bg: 'bg-amber-500/20', text: 'text-amber-400', dot: 'bg-amber-400' },
   busy: { bg: 'bg-red-500/20', text: 'text-red-400', dot: 'bg-red-400' },
-  offline: { bg: 'bg-slate-500/20', text: 'text-slate-400', dot: 'bg-slate-400' },
+  offline: { bg: 'bg-white/10', text: 'text-white/40', dot: 'bg-white/20' },
 };
 
 const activityIcons: Record<string, React.ReactNode> = {
   login: <Radio className="h-3.5 w-3.5 text-emerald-400" />,
-  logout: <WifiOff className="h-3.5 w-3.5 text-slate-400" />,
+  logout: <WifiOff className="h-3.5 w-3.5 text-white/40" />,
   stand_selected: <MapPin className="h-3.5 w-3.5 text-blue-400" />,
   tab_changed: <Eye className="h-3.5 w-3.5 text-purple-400" />,
   delivery_requested: <Package className="h-3.5 w-3.5 text-amber-400" />,
@@ -84,7 +84,7 @@ function SupervisorCard({ session }: { session: SupervisorSession }) {
       exit={{ opacity: 0, y: -10 }}
       className={cn(
         "p-3 rounded-xl border transition-all",
-        "bg-slate-800/60 border-slate-700/50 hover:border-slate-600/50",
+        "bg-white/[0.06] border-white/[0.08]/50 hover:border-white/10/50",
         "hover:shadow-lg hover:shadow-cyan-500/5"
       )}
     >
@@ -98,7 +98,7 @@ function SupervisorCard({ session }: { session: SupervisorSession }) {
               {session.supervisorName.charAt(0).toUpperCase()}
             </div>
             <div className={cn(
-              "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-slate-800",
+              "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white/5",
               colors.dot
             )} />
           </div>
@@ -109,7 +109,7 @@ function SupervisorCard({ session }: { session: SupervisorSession }) {
                 <FlaskConical className="h-3 w-3 text-cyan-400" />
               )}
             </div>
-            <div className="flex items-center gap-1 text-xs text-slate-400">
+            <div className="flex items-center gap-1 text-xs text-white/40">
               <Badge variant="outline" className={cn("text-[10px] px-1.5 py-0", colors.bg, colors.text)}>
                 {session.status.toUpperCase()}
               </Badge>
@@ -119,26 +119,26 @@ function SupervisorCard({ session }: { session: SupervisorSession }) {
       </div>
       
       {session.currentStandName && (
-        <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-300 bg-slate-700/30 rounded-lg px-2 py-1.5">
+        <div className="mt-2 flex items-center gap-1.5 text-xs text-white/70 bg-white/10/30 rounded-lg px-2 py-1.5">
           <MapPin className="h-3 w-3 text-cyan-400" />
           <span className="font-medium">{session.currentStandName}</span>
           {session.currentSection && (
             <>
-              <ChevronRight className="h-3 w-3 text-slate-500" />
-              <span className="text-slate-400">{session.currentSection}</span>
+              <ChevronRight className="h-3 w-3 text-white/30" />
+              <span className="text-white/40">{session.currentSection}</span>
             </>
           )}
         </div>
       )}
       
       {session.currentTab && (
-        <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-slate-500">
+        <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-white/30">
           <Eye className="h-3 w-3" />
           <span>Viewing: {session.currentTab}</span>
         </div>
       )}
       
-      <div className="mt-2 flex items-center gap-1 text-[10px] text-slate-500">
+      <div className="mt-2 flex items-center gap-1 text-[10px] text-white/30">
         <Clock className="h-3 w-3" />
         <span>Last active {formatTimeAgo(session.lastHeartbeat)}</span>
       </div>
@@ -147,28 +147,28 @@ function SupervisorCard({ session }: { session: SupervisorSession }) {
 }
 
 function ActivityItem({ activity }: { activity: SupervisorActivity }) {
-  const icon = activityIcons[activity.kind] || <Activity className="h-3.5 w-3.5 text-slate-400" />;
+  const icon = activityIcons[activity.kind] || <Activity className="h-3.5 w-3.5 text-white/40" />;
   
   return (
     <motion.div
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
-      className="flex items-start gap-2 py-2 border-b border-slate-700/30 last:border-0"
+      className="flex items-start gap-2 py-2 border-b border-white/[0.08]/30 last:border-0"
     >
-      <div className="w-6 h-6 rounded-full bg-slate-800 flex items-center justify-center flex-shrink-0 mt-0.5">
+      <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0 mt-0.5">
         {icon}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <span className="font-medium text-white text-xs">{activity.supervisorName}</span>
           {activity.standName && (
-            <Badge variant="outline" className="text-[9px] px-1 py-0 bg-slate-700/30 text-slate-300">
+            <Badge variant="outline" className="text-[9px] px-1 py-0 bg-white/10/30 text-white/70">
               {activity.standName}
             </Badge>
           )}
         </div>
-        <p className="text-xs text-slate-400 truncate">{activity.description || activity.kind.replace(/_/g, ' ')}</p>
-        <span className="text-[10px] text-slate-500">{formatTimeAgo(activity.createdAt)}</span>
+        <p className="text-xs text-white/40 truncate">{activity.description || activity.kind.replace(/_/g, ' ')}</p>
+        <span className="text-[10px] text-white/30">{formatTimeAgo(activity.createdAt)}</span>
       </div>
     </motion.div>
   );
@@ -189,7 +189,7 @@ export function SupervisorLiveWall({ className }: { className?: string }) {
   const recentActivity = data?.recentActivity || [];
 
   return (
-    <Card className={cn("bg-slate-900/50 border-slate-700/50", className)}>
+    <Card className={cn("bg-[rgba(12,18,36,0.65)] border-white/[0.08]/50", className)}>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -198,10 +198,10 @@ export function SupervisorLiveWall({ className }: { className?: string }) {
             </div>
             <div>
               <span className="text-base font-bold text-white">Supervisor Live View</span>
-              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5 text-xs text-white/40">
                 <Wifi className="h-3 w-3 text-emerald-400" />
                 <span>{onlineSupervisors.length} online</span>
-                <span className="text-slate-600">•</span>
+                <span className="text-white/20">•</span>
                 <span>Updates every 10s</span>
               </div>
             </div>
@@ -216,12 +216,12 @@ export function SupervisorLiveWall({ className }: { className?: string }) {
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+              <h4 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3 flex items-center gap-1.5">
                 <Radio className="h-3.5 w-3.5 text-emerald-400" />
                 Active Supervisors
               </h4>
               {onlineSupervisors.length === 0 ? (
-                <div className="text-center py-6 text-slate-500 text-sm">
+                <div className="text-center py-6 text-white/30 text-sm">
                   <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p>No supervisors online</p>
                 </div>
@@ -239,12 +239,12 @@ export function SupervisorLiveWall({ className }: { className?: string }) {
             </div>
             
             <div>
-              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+              <h4 className="text-xs font-semibold text-white/40 uppercase tracking-wide mb-3 flex items-center gap-1.5">
                 <Activity className="h-3.5 w-3.5 text-purple-400" />
                 Recent Activity
               </h4>
               {recentActivity.length === 0 ? (
-                <div className="text-center py-6 text-slate-500 text-sm">
+                <div className="text-center py-6 text-white/30 text-sm">
                   <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
                   <p>No recent activity</p>
                 </div>

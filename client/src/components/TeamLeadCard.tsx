@@ -101,7 +101,7 @@ export function TeamLeadCard({ department }: { department?: string }) {
           <div className="p-1.5 rounded-lg bg-cyan-500/20">
             <Users className="h-4 w-4 text-cyan-400" />
           </div>
-          <span className="font-bold text-sm text-slate-200">Your Team</span>
+          <span className="font-bold text-sm text-white/80">Your Team</span>
         </div>
       </GlassCardHeader>
       <GlassCardContent className="space-y-4 pt-0">
@@ -122,12 +122,12 @@ export function TeamLeadCard({ department }: { department?: string }) {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-medium text-slate-200">{displayLead.name}</span>
+                    <span className="font-medium text-white/80">{displayLead.name}</span>
                     <Badge className="text-[10px] bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
                       Team Lead
                     </Badge>
                   </div>
-                  <span className="text-xs text-slate-400">{defaultTeamLead?.title || displayLead.department}</span>
+                  <span className="text-xs text-white/40">{defaultTeamLead?.title || displayLead.department}</span>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -148,14 +148,14 @@ export function TeamLeadCard({ department }: { department?: string }) {
           </motion.div>
         ) : (
           <div className="text-center py-4">
-            <p className="text-sm text-slate-500">No team lead assigned</p>
-            <p className="text-xs text-slate-600 mt-1">Contact your manager directly</p>
+            <p className="text-sm text-white/30">No team lead assigned</p>
+            <p className="text-xs text-white/20 mt-1">Contact your manager directly</p>
           </div>
         )}
 
         {managers.length > 0 && (
           <div className="space-y-2">
-            <h4 className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+            <h4 className="text-xs font-medium text-white/40 uppercase tracking-wider">
               Department Managers
             </h4>
             {managers.map((manager, idx) => (
@@ -169,15 +169,15 @@ export function TeamLeadCard({ department }: { department?: string }) {
                 data-testid={`manager-${manager.id}`}
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center">
-                    <User className="h-4 w-4 text-slate-400" />
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                    <User className="h-4 w-4 text-white/40" />
                   </div>
                   <div>
-                    <span className="text-sm text-slate-200">{manager.name}</span>
-                    <span className="text-xs text-slate-500 block">{manager.title}</span>
+                    <span className="text-sm text-white/80">{manager.name}</span>
+                    <span className="text-xs text-white/30 block">{manager.title}</span>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-slate-500" />
+                <ChevronRight className="h-4 w-4 text-white/30" />
               </motion.div>
             ))}
           </div>

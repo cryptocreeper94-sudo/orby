@@ -247,7 +247,7 @@ export function PDFExportBanner({
   description
 }: PDFActionButtonsProps & { description?: string }) {
   return (
-    <div className="p-4 rounded-xl bg-gradient-to-r from-slate-800/80 to-slate-900/80 border border-cyan-500/20 backdrop-blur-sm">
+    <div className="p-4 rounded-xl bg-gradient-to-r from-[#0c1224]/80 to-[#0c1224]/80 border border-cyan-500/20 backdrop-blur-sm">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h3 className="font-semibold text-white flex items-center gap-2">
@@ -255,7 +255,7 @@ export function PDFExportBanner({
             {title || 'Export Report'}
           </h3>
           {description && (
-            <p className="text-sm text-slate-400 mt-1">{description}</p>
+            <p className="text-sm text-white/40 mt-1">{description}</p>
           )}
         </div>
         <PDFActionButtons

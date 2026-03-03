@@ -30,7 +30,7 @@ const statusColors: Record<string, { bg: string; text: string }> = {
   requested: { bg: 'bg-amber-500/20', text: 'text-amber-300' },
   picking: { bg: 'bg-blue-500/20', text: 'text-blue-300' },
   on_the_way: { bg: 'bg-green-500/20', text: 'text-green-300' },
-  delivered: { bg: 'bg-slate-500/20', text: 'text-slate-400' },
+  delivered: { bg: 'bg-white/10', text: 'text-white/40' },
   active: { bg: 'bg-red-500/20', text: 'text-red-300' },
   responding: { bg: 'bg-amber-500/20', text: 'text-amber-300' },
 };
@@ -155,7 +155,7 @@ export default function ReportingDashboard() {
   const trendIcon = {
     up: <ArrowUpRight className="h-3 w-3 text-emerald-400" />,
     down: <ArrowDownRight className="h-3 w-3 text-red-400" />,
-    stable: <Minus className="h-3 w-3 text-slate-400" />,
+    stable: <Minus className="h-3 w-3 text-white/40" />,
   };
 
   const recentReports = [
@@ -210,8 +210,8 @@ export default function ReportingDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" data-testid="reporting-dashboard">
-      <header className="sticky top-0 z-50 bg-slate-950/95 backdrop-blur-md border-b border-cyan-500/20 px-3 py-2">
+    <div className="min-h-screen bg-gradient-to-b from-[#050508] via-[#0c1224] to-[#050508]" data-testid="reporting-dashboard">
+      <header className="sticky top-0 z-50 bg-[#050508]/95 backdrop-blur-md border-b border-cyan-500/20 px-3 py-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-teal-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
@@ -219,7 +219,7 @@ export default function ReportingDashboard() {
             </div>
             <div>
               <h1 className="text-sm font-bold text-cyan-400" data-testid="text-title">Orby Reports</h1>
-              <p className="text-[10px] text-slate-500 hidden sm:block">Nissan Stadium Operations</p>
+              <p className="text-[10px] text-white/30 hidden sm:block">Nissan Stadium Operations</p>
             </div>
           </div>
 
@@ -229,7 +229,7 @@ export default function ReportingDashboard() {
               variant="ghost"
               size="sm"
               onClick={loadData}
-              className="p-1.5 text-slate-400 hover:text-cyan-400"
+              className="p-1.5 text-white/40 hover:text-cyan-400"
               data-testid="button-refresh"
             >
               <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
@@ -238,7 +238,7 @@ export default function ReportingDashboard() {
               variant="ghost"
               size="sm"
               onClick={() => { logout(); navigate('/'); }}
-              className="p-1.5 text-slate-400 hover:text-white"
+              className="p-1.5 text-white/40 hover:text-white"
               data-testid="button-logout"
             >
               <LogOut className="h-4 w-4" />
@@ -252,13 +252,13 @@ export default function ReportingDashboard() {
           <BentoCard span={12} title="Report Metrics" data-testid="card-metrics">
             <CarouselRail
               items={reportMetrics.map((metric, idx) => (
-                <div key={idx} className="w-36 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50" data-testid={`metric-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}>
+                <div key={idx} className="w-36 p-3 bg-white/5 rounded-lg border border-white/[0.08]/50" data-testid={`metric-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}>
                   <div className="flex items-center justify-between mb-1">
                     {metric.icon}
                     {trendIcon[metric.trend]}
                   </div>
                   <p className="text-lg font-bold text-white">{metric.value}</p>
-                  <p className="text-xs text-slate-400">{metric.label}</p>
+                  <p className="text-xs text-white/40">{metric.label}</p>
                 </div>
               ))}
               showDots
@@ -268,20 +268,20 @@ export default function ReportingDashboard() {
           <BentoCard span={6} title="Recent Reports" data-testid="card-recent-reports">
             <CarouselRail
               items={recentReports.map((report) => (
-                <div key={report.id} className="w-44 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50" data-testid={`report-${report.id}`}>
+                <div key={report.id} className="w-44 p-3 bg-white/5 rounded-lg border border-white/[0.08]/50" data-testid={`report-${report.id}`}>
                   <div className="flex items-center justify-between mb-2">
                     <Badge variant="outline" className="text-[9px] px-1.5">{report.type}</Badge>
                     <Badge className={cn(
                       "text-[9px] px-1.5",
                       report.status === 'Complete' ? 'bg-green-500/20 text-green-300' :
                       report.status === 'Review' ? 'bg-amber-500/20 text-amber-300' :
-                      'bg-slate-500/20 text-slate-300'
+                      'bg-white/10 text-white/70'
                     )}>
                       {report.status}
                     </Badge>
                   </div>
-                  <p className="text-sm font-medium text-slate-200 truncate">{report.title}</p>
-                  <p className="text-xs text-slate-500 mt-1">{report.date}</p>
+                  <p className="text-sm font-medium text-white/80 truncate">{report.title}</p>
+                  <p className="text-xs text-white/30 mt-1">{report.date}</p>
                 </div>
               ))}
             />
@@ -299,7 +299,7 @@ export default function ReportingDashboard() {
                   data-testid={`template-${template.id}`}
                 >
                   <div className={`text-${template.color}-400 mb-1`}>{template.icon}</div>
-                  <p className="text-[10px] text-slate-300 truncate">{template.name}</p>
+                  <p className="text-[10px] text-white/70 truncate">{template.name}</p>
                 </div>
               ))}
             </div>
@@ -310,11 +310,11 @@ export default function ReportingDashboard() {
               {activeDeliveries.slice(0, 4).map((d) => {
                 const status = statusColors[d.status] || statusColors.requested;
                 return (
-                  <div key={d.id} className="flex items-center gap-2 p-2 rounded-lg bg-slate-800/30 border border-slate-700/30" data-testid={`delivery-${d.id}`}>
+                  <div key={d.id} className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.03] border border-white/[0.08]/30" data-testid={`delivery-${d.id}`}>
                     <div className={cn("w-2 h-2 rounded-full", status.bg.replace('/20', ''))} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-slate-200 truncate">{d.standName}</p>
-                      <p className="text-[10px] text-slate-500 truncate">{d.items}</p>
+                      <p className="text-xs font-medium text-white/80 truncate">{d.standName}</p>
+                      <p className="text-[10px] text-white/30 truncate">{d.items}</p>
                     </div>
                     <Badge variant="outline" className={cn("text-[9px] px-1", status.bg, status.text)}>
                       {d.status.replace('_', ' ')}
@@ -323,7 +323,7 @@ export default function ReportingDashboard() {
                 );
               })}
               {activeDeliveries.length === 0 && (
-                <div className="flex items-center justify-center py-4 text-slate-500 text-xs">
+                <div className="flex items-center justify-center py-4 text-white/30 text-xs">
                   <CheckCircle2 className="h-4 w-4 mr-2" /> All deliveries complete
                 </div>
               )}
@@ -341,8 +341,8 @@ export default function ReportingDashboard() {
                   )} data-testid={`alert-${e.id}`}>
                     <AlertTriangle className={cn("h-4 w-4", isActive ? "text-red-400" : "text-amber-400")} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-slate-200 truncate">{e.type}</p>
-                      <p className="text-[10px] text-slate-500">{e.location}</p>
+                      <p className="text-xs font-medium text-white/80 truncate">{e.type}</p>
+                      <p className="text-[10px] text-white/30">{e.location}</p>
                     </div>
                     <Badge variant="outline" className={cn("text-[9px]", isActive ? "border-red-500/50 text-red-300" : "border-amber-500/50 text-amber-300")}>
                       {e.priority}
@@ -351,7 +351,7 @@ export default function ReportingDashboard() {
                 );
               })}
               {activeEmergencies.length === 0 && (
-                <div className="flex items-center justify-center py-4 text-slate-500 text-xs">
+                <div className="flex items-center justify-center py-4 text-white/30 text-xs">
                   <CheckCircle2 className="h-4 w-4 mr-2" /> No active alerts
                 </div>
               )}
@@ -364,21 +364,21 @@ export default function ReportingDashboard() {
                 const isUnread = m.status === 'unread';
                 return (
                   <div key={m.id} className={cn(
-                    "flex items-start gap-2 p-2 rounded-lg border border-slate-700/30",
-                    isUnread ? "bg-cyan-950/20" : "bg-slate-800/20"
+                    "flex items-start gap-2 p-2 rounded-lg border border-white/[0.08]/30",
+                    isUnread ? "bg-cyan-950/20" : "bg-white/[0.03]"
                   )} data-testid={`message-${m.id}`}>
                     <div className={cn(
                       "w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-bold",
-                      isUnread ? "bg-cyan-500/30 text-cyan-300" : "bg-slate-700/50 text-slate-400"
+                      isUnread ? "bg-cyan-500/30 text-cyan-300" : "bg-white/10 text-white/40"
                     )}>
                       {m.from.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1">
-                        <span className="text-xs font-medium text-slate-200">{m.from}</span>
-                        <span className="text-[10px] text-slate-500">{formatTimeAgo(m.timestamp)}</span>
+                        <span className="text-xs font-medium text-white/80">{m.from}</span>
+                        <span className="text-[10px] text-white/30">{formatTimeAgo(m.timestamp)}</span>
                       </div>
-                      <p className="text-[10px] text-slate-400 truncate">{m.content}</p>
+                      <p className="text-[10px] text-white/40 truncate">{m.content}</p>
                     </div>
                     {isUnread && <div className="w-2 h-2 rounded-full bg-cyan-400 flex-shrink-0" />}
                   </div>

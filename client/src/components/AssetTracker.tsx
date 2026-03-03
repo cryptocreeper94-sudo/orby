@@ -55,7 +55,7 @@ const categoryColors: Record<string, string> = {
   incident: 'text-red-400',
   violation: 'text-orange-400',
   compliance: 'text-cyan-400',
-  other: 'text-gray-400'
+  other: 'text-white/40'
 };
 
 export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
@@ -116,22 +116,22 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
         
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="bg-gray-800/50 rounded-lg p-2">
-            <div className="text-gray-400 text-xs">Blockchain Verified</div>
+            <div className="text-white/40 text-xs">Blockchain Verified</div>
             <div className="text-white font-bold">{stats?.blockchain || 0}</div>
           </div>
           <div className="bg-gray-800/50 rounded-lg p-2">
-            <div className="text-gray-400 text-xs">Categories</div>
+            <div className="text-white/40 text-xs">Categories</div>
             <div className="text-white font-bold">{Object.keys(stats?.byCategory || {}).length}</div>
           </div>
         </div>
         
         {assets && assets.length > 0 && (
           <div className="mt-3 pt-3 border-t border-gray-700/50">
-            <div className="text-xs text-gray-400 mb-2">Recent Assets</div>
+            <div className="text-xs text-white/40 mb-2">Recent Assets</div>
             {assets.slice(0, 3).map(asset => (
               <div key={asset.id} className="flex items-center gap-2 py-1">
                 <span className="text-cyan-400 font-mono text-xs">{asset.assetNumber.slice(0, 16)}...</span>
-                <span className="text-gray-400 text-xs truncate flex-1">{asset.displayName}</span>
+                <span className="text-white/40 text-xs truncate flex-1">{asset.displayName}</span>
                 {asset.isBlockchainAnchored && (
                   <Link2 className="w-3 h-3 text-green-400" />
                 )}
@@ -152,7 +152,7 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
           </div>
           <div>
             <h2 className="text-xl font-bold text-white">Genesis Hallmark Tracker</h2>
-            <p className="text-gray-400 text-sm">Blockchain-certified asset registry</p>
+            <p className="text-white/40 text-sm">Blockchain-certified asset registry</p>
           </div>
         </div>
         
@@ -160,19 +160,19 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
           <div className="bg-gray-800/50 rounded-lg px-4 py-2 flex items-center gap-2">
             <Hash className="w-4 h-4 text-cyan-400" />
             <span className="text-white font-bold">{stats?.total || 0}</span>
-            <span className="text-gray-400 text-sm">stamped</span>
+            <span className="text-white/40 text-sm">stamped</span>
           </div>
           <div className="bg-gray-800/50 rounded-lg px-4 py-2 flex items-center gap-2">
             <Link2 className="w-4 h-4 text-green-400" />
             <span className="text-white font-bold">{stats?.blockchain || 0}</span>
-            <span className="text-gray-400 text-sm">on-chain</span>
+            <span className="text-white/40 text-sm">on-chain</span>
           </div>
         </div>
       </div>
 
       <div className="flex gap-4 mb-6">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/40" />
           <input
             type="text"
             placeholder="Search by asset number, name, or description..."
@@ -188,9 +188,9 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
             className="flex items-center gap-2 bg-gray-800/50 border border-gray-700/50 rounded-lg px-4 py-3 text-white hover:border-cyan-500/50 transition-colors"
             data-testid="button-filter-category"
           >
-            <Filter className="w-5 h-5 text-gray-400" />
+            <Filter className="w-5 h-5 text-white/40" />
             <span>{selectedCategory || 'All Categories'}</span>
-            <ChevronDown className="w-4 h-4 text-gray-400" />
+            <ChevronDown className="w-4 h-4 text-white/40" />
           </button>
         </div>
       </div>
@@ -202,7 +202,7 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
             className={`px-3 py-1.5 rounded-full text-sm transition-all ${
               !selectedCategory
                 ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-500/50'
-                : 'bg-gray-800/50 text-gray-400 border border-gray-700/50 hover:border-gray-600'
+                : 'bg-gray-800/50 text-white/40 border border-gray-700/50 hover:border-gray-600'
             }`}
             data-testid="button-category-all"
           >
@@ -217,7 +217,7 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
                 className={`px-3 py-1.5 rounded-full text-sm transition-all flex items-center gap-1.5 ${
                   selectedCategory === cat
                     ? 'bg-cyan-500/30 text-cyan-300 border border-cyan-500/50'
-                    : 'bg-gray-800/50 text-gray-400 border border-gray-700/50 hover:border-gray-600'
+                    : 'bg-gray-800/50 text-white/40 border border-gray-700/50 hover:border-gray-600'
                 }`}
                 data-testid={`button-category-${cat}`}
               >
@@ -231,15 +231,15 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
 
       <div className="space-y-3 max-h-[500px] overflow-y-auto">
         {isLoading ? (
-          <div className="text-center py-8 text-gray-400">Loading assets...</div>
+          <div className="text-center py-8 text-white/40">Loading assets...</div>
         ) : filteredAssets.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
+          <div className="text-center py-8 text-white/40">
             {searchQuery ? 'No assets match your search' : 'No assets stamped yet'}
           </div>
         ) : (
           filteredAssets.map((asset) => {
             const Icon = categoryIcons[asset.category] || Hash;
-            const colorClass = categoryColors[asset.category] || 'text-gray-400';
+            const colorClass = categoryColors[asset.category] || 'text-white/40';
             const isExpanded = expandedAsset === asset.id;
             const solscanUrl = asset.solanaTxSignature ? getSolscanUrl(asset.solanaTxSignature, asset.solanaNetwork) : null;
             
@@ -268,7 +268,7 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
                               On-Chain
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1 text-xs text-gray-400 bg-gray-700/50 px-2 py-0.5 rounded-full">
+                            <span className="flex items-center gap-1 text-xs text-white/40 bg-gray-700/50 px-2 py-0.5 rounded-full">
                               <XCircle className="w-3 h-3" />
                               Internal
                             </span>
@@ -280,7 +280,7 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
                     
                     <div className="flex items-center gap-3">
                       <div className="text-right">
-                        <div className="text-gray-400 text-xs flex items-center gap-1">
+                        <div className="text-white/40 text-xs flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           {formatDate(asset.createdAt)}
                         </div>
@@ -292,7 +292,7 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
                         animate={{ rotate: isExpanded ? 180 : 0 }}
                         transition={{ duration: 0.2 }}
                       >
-                        <ChevronDown className="w-5 h-5 text-gray-400" />
+                        <ChevronDown className="w-5 h-5 text-white/40" />
                       </motion.div>
                     </div>
                   </div>
@@ -309,27 +309,27 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
                     >
                       <div className="p-4 bg-gray-900/30">
                         {asset.description && (
-                          <p className="text-gray-300 text-sm mb-4">{asset.description}</p>
+                          <p className="text-white/70 text-sm mb-4">{asset.description}</p>
                         )}
                         
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <div className="text-gray-500 mb-1">Category</div>
+                            <div className="text-white/30 mb-1">Category</div>
                             <div className={`${colorClass} capitalize`}>{asset.category}</div>
                           </div>
                           <div>
-                            <div className="text-gray-500 mb-1">Source</div>
+                            <div className="text-white/30 mb-1">Source</div>
                             <div className="text-white">{asset.sourceType || 'N/A'}</div>
                           </div>
                           <div className="col-span-2">
-                            <div className="text-gray-500 mb-1">SHA-256 Hash</div>
+                            <div className="text-white/30 mb-1">SHA-256 Hash</div>
                             <div className="font-mono text-xs text-cyan-400 break-all bg-gray-800/50 p-2 rounded">
                               {asset.sha256Hash || 'N/A'}
                             </div>
                           </div>
                           {asset.isBlockchainAnchored && asset.solanaTxSignature && (
                             <div className="col-span-2">
-                              <div className="text-gray-500 mb-1">Solana Transaction</div>
+                              <div className="text-white/30 mb-1">Solana Transaction</div>
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-xs text-green-400 break-all">
                                   {asset.solanaTxSignature}
@@ -350,8 +350,8 @@ export function AssetTracker({ isCompact = false }: { isCompact?: boolean }) {
                           )}
                           {asset.changes && asset.changes.length > 0 && (
                             <div className="col-span-2">
-                              <div className="text-gray-500 mb-1">Changelog</div>
-                              <ul className="list-disc list-inside text-gray-300 text-xs space-y-1">
+                              <div className="text-white/30 mb-1">Changelog</div>
+                              <ul className="list-disc list-inside text-white/70 text-xs space-y-1">
                                 {asset.changes.map((change, i) => (
                                   <li key={i}>{change}</li>
                                 ))}

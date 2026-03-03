@@ -74,7 +74,7 @@ const INCIDENT_TYPES = [
   { id: 'medical', label: 'Medical Issue', icon: Shield, color: 'from-red-500 to-red-600' },
   { id: 'spill', label: 'Spill/Cleanup', icon: Sparkles, color: 'from-cyan-500 to-cyan-600' },
   { id: 'disturbance', label: 'Guest Disturbance', icon: Users, color: 'from-purple-500 to-purple-600' },
-  { id: 'other', label: 'Other', icon: MessageSquare, color: 'from-slate-500 to-slate-600' },
+  { id: 'other', label: 'Other', icon: MessageSquare, color: 'from-white/10 to-white/10' },
 ];
 
 const QUICK_LOCATIONS = [
@@ -112,7 +112,7 @@ function MetricCard({ icon: Icon, label, value, color, subValue }: {
 }) {
   return (
     <div 
-      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-white/5 min-w-[130px]"
+      className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 min-w-[130px]"
       data-testid={`metric-${label.toLowerCase().replace(/\s+/g, '-')}`}
     >
       <div className={`p-2 rounded-lg bg-${color}-500/20`}>
@@ -120,8 +120,8 @@ function MetricCard({ icon: Icon, label, value, color, subValue }: {
       </div>
       <div>
         <div className="text-lg font-bold text-white">{value}</div>
-        <div className="text-xs text-slate-400">{label}</div>
-        {subValue && <div className="text-xs text-slate-500">{subValue}</div>}
+        <div className="text-xs text-white/40">{label}</div>
+        {subValue && <div className="text-xs text-white/30">{subValue}</div>}
       </div>
     </div>
   );
@@ -140,19 +140,19 @@ function ManagerCard({ manager, selected, onSelect }: {
       className={`relative p-3 rounded-xl border overflow-hidden text-left transition-all min-w-[140px] ${
         selected
           ? 'bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-cyan-500/50 shadow-lg shadow-cyan-500/20'
-          : 'bg-slate-800/50 border-white/10 hover:border-white/20'
+          : 'bg-white/5 border-white/10 hover:border-white/20'
       }`}
       data-testid={`manager-${manager.id}`}
     >
       <div className="flex items-center gap-2 mb-1">
         <motion.span 
-          className={`w-2 h-2 rounded-full ${manager.isOnline ? 'bg-emerald-400' : 'bg-slate-500'}`}
+          className={`w-2 h-2 rounded-full ${manager.isOnline ? 'bg-emerald-400' : 'bg-white/10'}`}
           animate={manager.isOnline ? { scale: [1, 1.3, 1], opacity: [1, 0.7, 1] } : {}}
           transition={{ repeat: Infinity, duration: 2 }}
         />
         <span className="text-sm font-semibold text-white truncate">{manager.name}</span>
       </div>
-      <p className="text-xs text-slate-400 truncate">{manager.role}</p>
+      <p className="text-xs text-white/40 truncate">{manager.role}</p>
       {selected && (
         <motion.div 
           className="absolute top-2 right-2"
@@ -169,7 +169,7 @@ function ManagerCard({ manager, selected, onSelect }: {
 function MessageCard({ message, getStatusIcon }: { message: Message; getStatusIcon: (status: Message['status']) => React.ReactNode }) {
   return (
     <motion.div 
-      className="p-3 bg-slate-800/30 rounded-xl border border-white/5 min-w-[200px]"
+      className="p-3 bg-white/[0.03] rounded-xl border border-white/5 min-w-[200px]"
       whileHover={{ x: 4 }}
       data-testid={`message-item-${message.id}`}
     >
@@ -177,12 +177,12 @@ function MessageCard({ message, getStatusIcon }: { message: Message; getStatusIc
         <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs">
           To: {message.recipient}
         </Badge>
-        <div className="flex items-center gap-1 text-xs text-slate-500">
+        <div className="flex items-center gap-1 text-xs text-white/30">
           {getStatusIcon(message.status)}
           <span>{message.sentAt}</span>
         </div>
       </div>
-      <p className="text-xs text-slate-300 line-clamp-2">{message.content}</p>
+      <p className="text-xs text-white/70 line-clamp-2">{message.content}</p>
     </motion.div>
   );
 }
@@ -193,18 +193,18 @@ function IncidentCard({ incident }: { incident: Incident }) {
   
   return (
     <div 
-      className="p-3 rounded-lg bg-slate-800/40 border border-white/5"
+      className="p-3 rounded-lg bg-white/5 border border-white/5"
       data-testid={`incident-card-${incident.id}`}
     >
       <div className="flex items-center gap-2 mb-2">
-        <div className={`p-1.5 rounded-lg bg-gradient-to-br ${typeConfig?.color || 'from-slate-500 to-slate-600'}`}>
+        <div className={`p-1.5 rounded-lg bg-gradient-to-br ${typeConfig?.color || 'from-white/10 to-white/10'}`}>
           <TypeIcon className="w-3 h-3 text-white" />
         </div>
         <span className="text-sm font-medium text-white">{incident.type}</span>
         <StatusBadge status={incident.status} />
       </div>
-      <p className="text-xs text-slate-400 line-clamp-1">{incident.description}</p>
-      <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
+      <p className="text-xs text-white/40 line-clamp-1">{incident.description}</p>
+      <div className="flex items-center gap-2 mt-2 text-xs text-white/30">
         <MapPin className="w-3 h-3" />
         <span>{incident.location}</span>
         <span>•</span>
@@ -352,7 +352,7 @@ export default function CheckInAssistantDashboard() {
 
   const getStatusIcon = (status: Message['status']) => {
     switch (status) {
-      case 'sent': return <Clock className="h-3 w-3 text-slate-400" />;
+      case 'sent': return <Clock className="h-3 w-3 text-white/40" />;
       case 'delivered': return <CheckCircle2 className="h-3 w-3 text-blue-400" />;
       case 'read': return <CheckCircle2 className="h-3 w-3 text-emerald-400" />;
     }
@@ -383,7 +383,7 @@ export default function CheckInAssistantDashboard() {
   return (
     <AnimatedBackground>
       <GlobalModeBar />
-      <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-900/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-[rgba(12,18,36,0.8)] backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <motion.div 
@@ -400,7 +400,7 @@ export default function CheckInAssistantDashboard() {
                   animate={isOnSite ? { scale: [1, 1.2, 1] } : {}}
                   transition={{ repeat: Infinity, duration: 2 }}
                 />
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-white/40">
                   {isOnSite ? 'On Site' : gpsLoading ? 'Locating...' : 'Location pending'}
                 </p>
               </div>
@@ -410,7 +410,7 @@ export default function CheckInAssistantDashboard() {
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="text-slate-400 hover:text-white hover:bg-white/10"
+            className="text-white/40 hover:text-white hover:bg-white/10"
             data-testid="button-logout"
           >
             <LogOut className="h-4 w-4" />
@@ -433,7 +433,7 @@ export default function CheckInAssistantDashboard() {
           <BentoCard span={8} rowSpan={2} className="flex flex-col" data-testid="messaging-section">
             <div className="flex items-center gap-2 mb-3">
               <Users className="w-4 h-4 text-cyan-400" />
-              <span className="text-sm font-medium text-slate-300">Contact a Manager</span>
+              <span className="text-sm font-medium text-white/70">Contact a Manager</span>
             </div>
             
             <CarouselRail items={managerItems} className="mb-3" data-testid="managers-carousel" />
@@ -454,7 +454,7 @@ export default function CheckInAssistantDashboard() {
                     placeholder="Describe the situation or ask a question..."
                     value={messageContent}
                     onChange={(e) => setMessageContent(e.target.value)}
-                    className="min-h-[80px] bg-slate-800/50 border-white/10 text-white placeholder:text-slate-500 focus:border-cyan-500/50 resize-none text-sm"
+                    className="min-h-[80px] bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-cyan-500/50 resize-none text-sm"
                     data-testid="message-input"
                   />
                   <div className="flex gap-2">
@@ -473,7 +473,7 @@ export default function CheckInAssistantDashboard() {
                       variant="outline"
                       size="sm"
                       onClick={() => setSelectedManager(null)}
-                      className="border-white/10 text-slate-300 hover:bg-white/5"
+                      className="border-white/10 text-white/70 hover:bg-white/5"
                       data-testid="button-cancel"
                     >
                       Cancel
@@ -486,8 +486,8 @@ export default function CheckInAssistantDashboard() {
             {messages.length > 0 && !selectedManager && (
               <div className="mt-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <Clock className="h-4 w-4 text-slate-400" />
-                  <span className="text-xs text-slate-400">Recent Messages</span>
+                  <Clock className="h-4 w-4 text-white/40" />
+                  <span className="text-xs text-white/40">Recent Messages</span>
                 </div>
                 <CarouselRail items={messageItems} data-testid="messages-carousel" />
               </div>
@@ -497,7 +497,7 @@ export default function CheckInAssistantDashboard() {
           <BentoCard span={4} rowSpan={2} title="Procedures" data-testid="procedures-section">
             <div className="flex items-center gap-2 mb-3">
               <BookOpen className="w-4 h-4 text-cyan-400" />
-              <span className="text-xs text-slate-400">Reference Guide</span>
+              <span className="text-xs text-white/40">Reference Guide</span>
             </div>
             <AccordionStack 
               items={CHECK_IN_PROCEDURES}
@@ -510,7 +510,7 @@ export default function CheckInAssistantDashboard() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <span className="text-xs text-slate-400">Document issues</span>
+                <span className="text-xs text-white/40">Document issues</span>
               </div>
               <GlowButton
                 onClick={() => setShowIncidentForm(true)}
@@ -524,8 +524,8 @@ export default function CheckInAssistantDashboard() {
             
             {incidents.length === 0 ? (
               <div className="text-center py-6">
-                <ClipboardCheck className="w-8 h-8 mx-auto mb-2 text-slate-600" />
-                <p className="text-xs text-slate-400">No incidents reported</p>
+                <ClipboardCheck className="w-8 h-8 mx-auto mb-2 text-white/20" />
+                <p className="text-xs text-white/40">No incidents reported</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -539,13 +539,13 @@ export default function CheckInAssistantDashboard() {
           <BentoCard span={6} title="Quick Navigation" data-testid="navigation-section">
             <div className="flex items-center gap-2 mb-3">
               <Map className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs text-slate-400">Stadium Map & Directions</span>
+              <span className="text-xs text-white/40">Stadium Map & Directions</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="outline"
                 onClick={() => setShowMap(true)}
-                className="border-white/10 text-slate-300 hover:bg-white/5 h-auto py-3"
+                className="border-white/10 text-white/70 hover:bg-white/5 h-auto py-3"
                 data-testid="button-show-map"
               >
                 <div className="flex flex-col items-center gap-1">
@@ -556,7 +556,7 @@ export default function CheckInAssistantDashboard() {
               <Button
                 variant="outline"
                 onClick={requestLocation}
-                className="border-white/10 text-slate-300 hover:bg-white/5 h-auto py-3"
+                className="border-white/10 text-white/70 hover:bg-white/5 h-auto py-3"
                 data-testid="button-locate"
               >
                 <div className="flex flex-col items-center gap-1">
@@ -570,7 +570,7 @@ export default function CheckInAssistantDashboard() {
       </main>
 
       <Dialog open={showIncidentForm} onOpenChange={setShowIncidentForm}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600">
@@ -582,7 +582,7 @@ export default function CheckInAssistantDashboard() {
           
           <div className="space-y-4">
             <div>
-              <label className="text-xs text-slate-400 mb-2 block font-medium">Incident Type</label>
+              <label className="text-xs text-white/40 mb-2 block font-medium">Incident Type</label>
               <div className="grid grid-cols-2 gap-2">
                 {INCIDENT_TYPES.map((type) => {
                   const TypeIcon = type.icon;
@@ -595,14 +595,14 @@ export default function CheckInAssistantDashboard() {
                       className={`p-3 rounded-xl border text-center transition-all ${
                         incidentType === type.id
                           ? 'bg-gradient-to-br border-amber-500/50 shadow-lg shadow-amber-500/20 ' + type.color.replace('from-', 'from-').replace(' to-', '/20 to-') + '/10'
-                          : 'bg-slate-800/50 border-white/10 hover:border-white/20'
+                          : 'bg-white/5 border-white/10 hover:border-white/20'
                       }`}
                       data-testid={`incident-type-${type.id}`}
                     >
                       <div className={`w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center bg-gradient-to-br ${type.color}`}>
                         <TypeIcon className="h-4 w-4 text-white" />
                       </div>
-                      <span className="text-xs text-slate-300 font-medium">{type.label}</span>
+                      <span className="text-xs text-white/70 font-medium">{type.label}</span>
                     </motion.button>
                   );
                 })}
@@ -610,10 +610,10 @@ export default function CheckInAssistantDashboard() {
             </div>
 
             <div>
-              <label className="text-xs text-slate-400 mb-2 block font-medium">Location</label>
+              <label className="text-xs text-white/40 mb-2 block font-medium">Location</label>
               <div className="flex gap-2">
                 <Select value={incidentLocation} onValueChange={setIncidentLocation}>
-                  <SelectTrigger className="flex-1 bg-slate-800/50 border-white/10" data-testid="select-incident-location">
+                  <SelectTrigger className="flex-1 bg-white/5 border-white/10" data-testid="select-incident-location">
                     <SelectValue placeholder="Select location..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -635,22 +635,22 @@ export default function CheckInAssistantDashboard() {
             </div>
 
             <div>
-              <label className="text-xs text-slate-400 mb-2 block font-medium">Description</label>
+              <label className="text-xs text-white/40 mb-2 block font-medium">Description</label>
               <Textarea
                 placeholder="Describe the incident..."
                 value={incidentDescription}
                 onChange={(e) => setIncidentDescription(e.target.value)}
-                className="min-h-[100px] bg-slate-800/50 border-white/10 text-white"
+                className="min-h-[100px] bg-white/5 border-white/10 text-white"
                 data-testid="incident-description"
               />
             </div>
 
             <div>
-              <label className="text-xs text-slate-400 mb-2 block font-medium">Photos (optional)</label>
+              <label className="text-xs text-white/40 mb-2 block font-medium">Photos (optional)</label>
               <Button
                 type="button"
                 variant="outline"
-                className="w-full border-white/10 text-slate-300"
+                className="w-full border-white/10 text-white/70"
                 onClick={() => fileInputRef.current?.click()}
                 data-testid="button-add-photo"
               >
@@ -691,7 +691,7 @@ export default function CheckInAssistantDashboard() {
               <Button
                 variant="outline"
                 onClick={() => setShowIncidentForm(false)}
-                className="flex-1 border-white/10 text-slate-300"
+                className="flex-1 border-white/10 text-white/70"
                 data-testid="button-cancel-incident"
               >
                 Cancel
@@ -711,7 +711,7 @@ export default function CheckInAssistantDashboard() {
       </Dialog>
 
       <Dialog open={showMap} onOpenChange={setShowMap}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-4xl max-h-[90vh]">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-4xl max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="text-white">Stadium Map</DialogTitle>
           </DialogHeader>
@@ -720,7 +720,7 @@ export default function CheckInAssistantDashboard() {
       </Dialog>
 
       <Dialog open={showDirections} onOpenChange={setShowDirections}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">Walking Directions</DialogTitle>
           </DialogHeader>

@@ -345,7 +345,7 @@
 @media (min-width: 1024px) {
   .desktop-sidebar {
     @apply sticky top-0 h-screen overflow-y-auto;
-    @apply border-r border-white/5 bg-slate-950/80 backdrop-blur-xl;
+    @apply border-r border-white/5 bg-[#050508]/80 backdrop-blur-xl;
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
@@ -361,7 +361,7 @@
 
 /* Premium table styles */
 .table-premium thead {
-  @apply bg-slate-800/50 border-b border-white/10;
+  @apply bg-white/5 border-b border-white/10;
 }
 
 .table-premium thead th {
@@ -378,12 +378,12 @@
 
 /* Chart container */
 .chart-container {
-  @apply bg-slate-800/30 rounded-xl p-4 border border-white/5;
+  @apply bg-white/[0.03] rounded-xl p-4 border border-white/5;
 }
 
 /* Interactive list item */
 .list-item-interactive {
-  @apply p-4 rounded-xl border border-white/5 bg-slate-800/40;
+  @apply p-4 rounded-xl border border-white/5 bg-white/5;
   @apply transition-all duration-200 cursor-pointer;
   @apply hover:bg-cyan-500/5 hover:border-cyan-500/20;
   @apply active:scale-[0.99];
@@ -392,7 +392,7 @@
 /* Mobile bottom nav */
 .mobile-nav {
   @apply fixed bottom-0 left-0 right-0 z-50;
-  @apply bg-slate-950/95 backdrop-blur-xl border-t border-white/10;
+  @apply bg-[#050508]/95 backdrop-blur-xl border-t border-white/10;
   @apply px-2 py-2;
   padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
 }
@@ -421,7 +421,7 @@
 
 /* Loading skeleton with gradient */
 .skeleton-premium {
-  @apply bg-slate-800/50 rounded-lg overflow-hidden relative;
+  @apply bg-white/5 rounded-lg overflow-hidden relative;
 }
 
 .skeleton-premium::after {

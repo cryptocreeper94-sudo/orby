@@ -135,11 +135,11 @@ export function OnboardingOverlay() {
   };
 
   const cardElement = (
-    <Card className="w-[360px] max-w-[90vw] bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-cyan-500/30 shadow-2xl shadow-cyan-500/20" data-testid="onboarding-card">
+    <Card className="w-[360px] max-w-[90vw] bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] border-cyan-500/30 shadow-2xl shadow-cyan-500/20" data-testid="onboarding-card">
       <CardContent className="p-0">
-        <div className="relative p-4 border-b border-slate-700/50">
+        <div className="relative p-4 border-b border-white/[0.08]/50">
           <div className="absolute top-0 left-0 right-0 h-1">
-            <Progress value={progress} className="h-1 rounded-none bg-slate-700" />
+            <Progress value={progress} className="h-1 rounded-none bg-white/10" />
           </div>
           
           <div className="flex items-center justify-between mt-2">
@@ -161,7 +161,7 @@ export function OnboardingOverlay() {
                 className={`h-8 w-8 transition-colors ${
                   isPeekMode 
                     ? 'text-cyan-400 bg-cyan-500/20 hover:bg-cyan-500/30' 
-                    : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                    : 'text-white/40 hover:text-white hover:bg-white/10'
                 }`}
                 data-testid="peek-mode-toggle"
                 title={isPeekMode ? 'Hide page' : 'View page'}
@@ -172,7 +172,7 @@ export function OnboardingOverlay() {
                 variant="ghost"
                 size="icon"
                 onClick={pauseOnboarding}
-                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-700"
+                className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10"
                 data-testid="pause-onboarding"
               >
                 <Pause className="h-4 w-4" />
@@ -181,7 +181,7 @@ export function OnboardingOverlay() {
                 variant="ghost"
                 size="icon"
                 onClick={handleSkip}
-                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-700"
+                className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10"
                 data-testid="skip-onboarding"
               >
                 <X className="h-4 w-4" />
@@ -202,7 +202,7 @@ export function OnboardingOverlay() {
               <Sparkles className="h-4 w-4 text-cyan-400" />
               {currentStep.title}
             </h4>
-            <p className="text-slate-300 text-sm leading-relaxed">
+            <p className="text-white/70 text-sm leading-relaxed">
               {currentStep.description}
             </p>
           </motion.div>
@@ -240,7 +240,7 @@ export function OnboardingOverlay() {
                     ? 'bg-cyan-400' 
                     : idx < currentPageIndex 
                       ? 'bg-cyan-600' 
-                      : 'bg-slate-600'
+                      : 'bg-white/10'
                 }`}
                 data-testid={`page-dot-${idx}`}
               />
@@ -254,7 +254,7 @@ export function OnboardingOverlay() {
             size="sm"
             onClick={prevStep}
             disabled={isFirstStep}
-            className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white disabled:opacity-30"
+            className="border-white/10 text-white/70 hover:bg-white/10 hover:text-white disabled:opacity-30"
             data-testid="prev-step"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />

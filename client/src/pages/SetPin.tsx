@@ -111,8 +111,8 @@ export default function SetPinPage() {
                 <KeyRound className="h-10 w-10 text-white drop-shadow-md" />
               </motion.div>
               <h2 className="text-2xl font-bold text-white">Set Your Personal PIN</h2>
-              <p className="text-sm text-slate-400 mt-2">Welcome, {currentUser.name}!</p>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-sm text-white/40 mt-2">Welcome, {currentUser.name}!</p>
+              <p className="text-xs text-white/30 mt-1">
                 As a {getRoleTitle()}, you need to set your own 4-digit PIN to continue.
               </p>
             </GlassCardHeader>
@@ -132,12 +132,12 @@ export default function SetPinPage() {
                     name="newPin"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-300">New PIN</FormLabel>
+                        <FormLabel className="text-white/70">New PIN</FormLabel>
                         <FormControl>
                           <Input 
                             type="password" 
                             placeholder="••••" 
-                            className="text-center text-2xl tracking-[0.5em] h-14 font-mono bg-slate-800/50 border-white/10 text-white" 
+                            className="text-center text-2xl tracking-[0.5em] h-14 font-mono bg-white/5 border-white/10 text-white" 
                             maxLength={4}
                             data-testid="input-new-pin"
                             {...field} 
@@ -153,12 +153,12 @@ export default function SetPinPage() {
                     name="confirmPin"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-300">Confirm PIN</FormLabel>
+                        <FormLabel className="text-white/70">Confirm PIN</FormLabel>
                         <FormControl>
                           <Input 
                             type="password" 
                             placeholder="••••" 
-                            className="text-center text-2xl tracking-[0.5em] h-14 font-mono bg-slate-800/50 border-white/10 text-white" 
+                            className="text-center text-2xl tracking-[0.5em] h-14 font-mono bg-white/5 border-white/10 text-white" 
                             maxLength={4}
                             data-testid="input-confirm-pin"
                             {...field} 
@@ -199,7 +199,7 @@ export default function SetPinPage() {
                 </form>
               </Form>
 
-              <p className="text-xs text-center text-slate-500 mt-6">
+              <p className="text-xs text-center text-white/30 mt-6">
                 You will need to log in again with your new PIN after setting it.
               </p>
             </GlassCardContent>
@@ -207,7 +207,7 @@ export default function SetPinPage() {
         </motion.div>
 
         <footer className="mt-8 text-center">
-          <div className="text-xs text-slate-600">
+          <div className="text-xs text-white/20">
             Powered by <span className="font-bold text-cyan-500">DarkWave Studios, LLC</span>
           </div>
         </footer>

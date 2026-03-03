@@ -375,7 +375,7 @@ const categories: Category[] = [
   {
     title: "System & Integrations",
     icon: Link2,
-    gradient: "from-slate-400 to-zinc-500",
+    gradient: "from-white/20 to-zinc-500",
     description: "Manage platform integrations, API connections, and system configuration. Connect with external services and monitor integration health.",
     cards: [
       {
@@ -530,14 +530,14 @@ function CategoryCarousel({ category, cardIndex }: { category: Category; cardInd
             <button
               data-testid={`carousel-prev-${category.title.toLowerCase().replace(/\s+/g, '-')}`}
               onClick={scrollLeft}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-slate-800/80 backdrop-blur-sm border border-white/10 text-white/60 hover:text-cyan-400 hover:border-cyan-400/50 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-white/60 hover:text-cyan-400 hover:border-cyan-400/50 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               data-testid={`carousel-next-${category.title.toLowerCase().replace(/\s+/g, '-')}`}
               onClick={scrollRight}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-slate-800/80 backdrop-blur-sm border border-white/10 text-white/60 hover:text-cyan-400 hover:border-cyan-400/50 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm border border-white/10 text-white/60 hover:text-cyan-400 hover:border-cyan-400/50 flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
             >
               <ChevronRight className="w-4 h-4" />
             </button>

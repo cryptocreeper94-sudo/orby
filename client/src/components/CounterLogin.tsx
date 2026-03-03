@@ -135,15 +135,15 @@ export function CounterLogin({
             <X className="h-4 w-4" />
           </Button>
         </div>
-        <p className="text-sm text-slate-400 mt-1">
+        <p className="text-sm text-white/40 mt-1">
           {standName} • {eventDate}
         </p>
       </CardHeader>
 
       <CardContent className="flex-1 overflow-auto p-4 space-y-4">
         {existingSessions.length > 0 && (
-          <div className="bg-slate-800/50 rounded-lg p-3 space-y-2 border border-slate-700">
-            <p className="text-sm font-medium text-slate-300">Previous Counts:</p>
+          <div className="bg-white/5 rounded-lg p-3 space-y-2 border border-white/[0.08]">
+            <p className="text-sm font-medium text-white/70">Previous Counts:</p>
             {existingSessions.map((session) => (
               <div 
                 key={session.stage} 
@@ -187,7 +187,7 @@ export function CounterLogin({
 
         <div className="space-y-2">
           <Label htmlFor="name" className="text-sm font-medium flex items-center gap-2">
-            <User className="h-4 w-4 text-slate-500" />
+            <User className="h-4 w-4 text-white/30" />
             Your Name
           </Label>
           <Input
@@ -201,7 +201,7 @@ export function CounterLogin({
 
         <div className="space-y-2">
           <Label htmlFor="role" className="text-sm font-medium flex items-center gap-2">
-            <Briefcase className="h-4 w-4 text-slate-500" />
+            <Briefcase className="h-4 w-4 text-white/30" />
             Your Role
           </Label>
           <Select value={role} onValueChange={(v) => setRole(v as CounterRole)}>
@@ -216,7 +216,7 @@ export function CounterLogin({
               ))}
             </SelectContent>
           </Select>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-white/30">
             {stage === 'PreEvent' && 'Pre-event counts are done by NPO Stand Leads'}
             {stage === 'PostEvent' && 'Post-event counts are done by Stand Supervisors'}
             {stage === 'DayAfter' && 'Day-after recounts are done by Managers'}
@@ -225,7 +225,7 @@ export function CounterLogin({
 
         <div className="space-y-2">
           <Label htmlFor="phone" className="text-sm font-medium flex items-center gap-2">
-            <Phone className="h-4 w-4 text-slate-500" />
+            <Phone className="h-4 w-4 text-white/30" />
             Last 4 of Phone Number
           </Label>
           <Input
@@ -238,7 +238,7 @@ export function CounterLogin({
             className="text-center text-2xl tracking-widest font-mono"
             data-testid="input-phone-last4"
           />
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-white/30">
             This identifies you as the person doing this count
           </p>
         </div>
@@ -259,7 +259,7 @@ export function CounterLogin({
           Start {STAGE_LABELS[stage]}
         </Button>
 
-        <div className="text-xs text-center text-slate-500 pt-2">
+        <div className="text-xs text-center text-white/30 pt-2">
           Your identity will be recorded with this count session
         </div>
       </CardContent>

@@ -261,9 +261,9 @@ function FeatureInventory() {
         </Card>
       </div>
 
-      <Card className="bg-gradient-to-br from-slate-800 to-slate-900 border-slate-600">
+      <Card className="bg-gradient-to-br from-[#0c1224] to-[#0c1224] border-white/10">
         <CardHeader className="pb-2">
-          <CardTitle className="text-slate-100 flex items-center gap-2 text-base">
+          <CardTitle className="text-white flex items-center gap-2 text-base">
             <Rocket className="h-5 w-5 text-cyan-400" />
             Orby Publish History
           </CardTitle>
@@ -271,14 +271,14 @@ function FeatureInventory() {
         <CardContent>
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {[...PUBLISH_LOG].reverse().map((log, idx) => (
-              <div key={idx} className="flex items-start gap-3 p-2 bg-slate-800/50 rounded-lg border border-slate-700/50">
+              <div key={idx} className="flex items-start gap-3 p-2 bg-white/5 rounded-lg border border-white/[0.08]/50">
                 <div className="text-center min-w-[80px]">
                   <div className="text-cyan-400 font-mono text-sm font-bold">{log.version}</div>
-                  <div className="text-slate-500 text-[10px]">{log.date}</div>
-                  <div className="text-slate-500 text-[10px]">{log.time}</div>
+                  <div className="text-white/30 text-[10px]">{log.date}</div>
+                  <div className="text-white/30 text-[10px]">{log.time}</div>
                 </div>
                 <div className="flex-1">
-                  <p className="text-slate-300 text-sm">{log.notes}</p>
+                  <p className="text-white/70 text-sm">{log.notes}</p>
                 </div>
                 {idx === 0 && <Badge className="bg-green-600 text-white text-[10px]">LATEST</Badge>}
               </div>
@@ -330,10 +330,10 @@ function FeatureInventory() {
       </div>
 
       <div className="flex justify-between items-center">
-        <div className="text-slate-400 text-sm">
+        <div className="text-white/40 text-sm">
           {Math.round((completedFeatures / totalFeatures) * 100)}% complete ({completedFeatures}/{totalFeatures} features)
         </div>
-        <Button variant="outline" size="sm" className="text-slate-400 border-slate-600 hover:bg-slate-800" onClick={() => { setCheckedFeatures([]); localStorage.removeItem('orby_feature_checklist'); }}>Reset Checklist</Button>
+        <Button variant="outline" size="sm" className="text-white/40 border-white/10 hover:bg-white/5" onClick={() => { setCheckedFeatures([]); localStorage.removeItem('orby_feature_checklist'); }}>Reset Checklist</Button>
       </div>
     </div>
   );

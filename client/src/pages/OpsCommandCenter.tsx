@@ -283,9 +283,9 @@ export default function OpsCommandCenter() {
           {alertTypeIcons[alert.alertType] || <AlertTriangle className="h-4 w-4 text-red-400 mt-0.5" />}
           <div className="flex-1 min-w-0">
             <p className="font-medium text-white truncate">{alert.title}</p>
-            <p className="text-xs text-gray-400 truncate">{alert.description}</p>
+            <p className="text-xs text-white/40 truncate">{alert.description}</p>
             {alert.standId && (
-              <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+              <p className="text-xs text-white/30 flex items-center gap-1 mt-1">
                 <MapPin className="h-3 w-3" /> Stand {alert.standId}
               </p>
             )}
@@ -336,7 +336,7 @@ export default function OpsCommandCenter() {
   const teamItems = culinaryStats.assignments.slice(0, 6).map((assignment, idx) => (
     <div
       key={idx}
-      className="flex items-center justify-between p-2 rounded bg-slate-900/50 w-[180px] h-[48px]"
+      className="flex items-center justify-between p-2 rounded bg-[rgba(12,18,36,0.65)] w-[180px] h-[48px]"
       data-testid={`culinary-assignment-${idx}`}
     >
       <div className="flex items-center gap-2">
@@ -370,7 +370,7 @@ export default function OpsCommandCenter() {
                     {departmentIcons[dept]}
                   </span>
                   <span className="text-white text-sm">{dept}</span>
-                  <Badge variant="secondary" className="ml-1 bg-slate-700 text-xs">
+                  <Badge variant="secondary" className="ml-1 bg-white/10 text-xs">
                     {deptDeliveries.length}
                   </Badge>
                 </div>
@@ -379,10 +379,10 @@ export default function OpsCommandCenter() {
                     <button
                       key={delivery.id}
                       onClick={() => setSelectedDelivery(delivery)}
-                      className="w-full text-left p-2 rounded bg-slate-900/60 hover:bg-slate-800/60 text-xs"
+                      className="w-full text-left p-2 rounded bg-[rgba(12,18,36,0.65)] hover:bg-white/5/60 text-xs"
                       data-testid={`delivery-item-${delivery.id}`}
                     >
-                      <span className="text-gray-300 truncate block">{delivery.description}</span>
+                      <span className="text-white/70 truncate block">{delivery.description}</span>
                     </button>
                   ))}
                 </div>
@@ -390,7 +390,7 @@ export default function OpsCommandCenter() {
             );
           })}
           {normalDeliveries.length === 0 && (
-            <div className="text-center py-4 text-gray-500">
+            <div className="text-center py-4 text-white/30">
               <Truck className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No active deliveries</p>
             </div>
@@ -407,16 +407,16 @@ export default function OpsCommandCenter() {
               recentActivity.map((log) => (
                 <div
                   key={log.id}
-                  className="flex items-center gap-2 p-2 rounded bg-slate-900/50"
+                  className="flex items-center gap-2 p-2 rounded bg-[rgba(12,18,36,0.65)]"
                   data-testid={`activity-${log.id}`}
                 >
                   <div className="h-2 w-2 rounded-full bg-cyan-400" />
-                  <span className="text-xs text-gray-300 flex-1">{log.action}</span>
-                  <span className="text-xs text-gray-500">{formatTimeAgo(log.createdAt)}</span>
+                  <span className="text-xs text-white/70 flex-1">{log.action}</span>
+                  <span className="text-xs text-white/30">{formatTimeAgo(log.createdAt)}</span>
                 </div>
               ))
             ) : (
-              <div className="text-center py-4 text-gray-500">
+              <div className="text-center py-4 text-white/30">
                 <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">No recent activity</p>
               </div>
@@ -428,8 +428,8 @@ export default function OpsCommandCenter() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950" data-testid="ops-command-center">
-      <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-900/80 border-b border-cyan-500/20">
+    <div className="min-h-screen bg-gradient-to-br from-[#050508] via-[#0c1224] to-cyan-950" data-testid="ops-command-center">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-[rgba(12,18,36,0.8)] border-b border-cyan-500/20">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -438,11 +438,11 @@ export default function OpsCommandCenter() {
             </div>
             <div>
               <h1 className="text-lg font-bold text-white">Ops Command</h1>
-              <p className="text-xs text-gray-400">Real-time Operations View</p>
+              <p className="text-xs text-white/40">Real-time Operations View</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-800">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-white/5">
               {isConnected ? (
                 <>
                   <Wifi className="h-3.5 w-3.5 text-green-400" />
@@ -459,7 +459,7 @@ export default function OpsCommandCenter() {
               variant="ghost" 
               size="icon"
               onClick={loadDashboardData}
-              className="text-gray-400"
+              className="text-white/40"
               data-testid="button-refresh"
             >
               <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
@@ -468,7 +468,7 @@ export default function OpsCommandCenter() {
               variant="ghost" 
               size="icon"
               onClick={handleLogout}
-              className="text-gray-400"
+              className="text-white/40"
               data-testid="button-logout"
             >
               <LogOut className="h-5 w-5" />
@@ -499,7 +499,7 @@ export default function OpsCommandCenter() {
             {incidentCarouselItems.length > 0 ? (
               <CarouselRail items={incidentCarouselItems} showDots />
             ) : (
-              <div className="text-center py-6 text-gray-500">
+              <div className="text-center py-6 text-white/30">
                 <Truck className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">No active incidents</p>
               </div>
@@ -512,23 +512,23 @@ export default function OpsCommandCenter() {
               <span className="text-sm font-medium text-orange-400">Response Teams</span>
             </div>
             <div className="grid grid-cols-3 gap-2 mb-3">
-              <div className="p-2 rounded bg-slate-900/50 text-center">
+              <div className="p-2 rounded bg-[rgba(12,18,36,0.65)] text-center">
                 <p className="text-lg font-bold text-white">{culinaryStats.total}</p>
-                <p className="text-xs text-gray-400">Assigned</p>
+                <p className="text-xs text-white/40">Assigned</p>
               </div>
               <div className="p-2 rounded bg-green-900/30 text-center">
                 <p className="text-lg font-bold text-green-400">{culinaryStats.checkedIn}</p>
-                <p className="text-xs text-gray-400">In</p>
+                <p className="text-xs text-white/40">In</p>
               </div>
               <div className="p-2 rounded bg-yellow-900/30 text-center">
                 <p className="text-lg font-bold text-yellow-400">{culinaryStats.pending}</p>
-                <p className="text-xs text-gray-400">Pending</p>
+                <p className="text-xs text-white/40">Pending</p>
               </div>
             </div>
             {teamItems.length > 0 ? (
               <CarouselRail items={teamItems} />
             ) : (
-              <div className="text-center py-4 text-gray-500">
+              <div className="text-center py-4 text-white/30">
                 <ChefHat className="h-6 w-6 mx-auto mb-1 opacity-50" />
                 <p className="text-xs">No assignments</p>
               </div>
@@ -546,13 +546,13 @@ export default function OpsCommandCenter() {
                   culinaryStats.assignments.map((assignment, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center justify-between p-2 rounded bg-slate-900/50"
+                      className="flex items-center justify-between p-2 rounded bg-[rgba(12,18,36,0.65)]"
                       data-testid={`staff-assignment-${idx}`}
                     >
                       <div className="flex items-center gap-2">
                         <ChefHat className="h-4 w-4 text-orange-400" />
                         <span className="text-sm text-white">{assignment.cookName}</span>
-                        <span className="text-xs text-gray-500">{assignment.standName}</span>
+                        <span className="text-xs text-white/30">{assignment.standName}</span>
                       </div>
                       {assignment.checkInTime ? (
                         <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
@@ -566,7 +566,7 @@ export default function OpsCommandCenter() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-4 text-gray-500">
+                  <div className="text-center py-4 text-white/30">
                     <ChefHat className="h-8 w-8 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">No culinary assignments</p>
                   </div>
@@ -581,7 +581,7 @@ export default function OpsCommandCenter() {
               <span className="text-sm font-medium text-cyan-400">Equipment Status</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              <div className="p-3 rounded bg-slate-900/50 flex items-center gap-2" data-testid="equipment-pos">
+              <div className="p-3 rounded bg-[rgba(12,18,36,0.65)] flex items-center gap-2" data-testid="equipment-pos">
                 <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center">
                   <Monitor className="h-4 w-4 text-green-400" />
                 </div>
@@ -590,7 +590,7 @@ export default function OpsCommandCenter() {
                   <p className="text-xs text-green-400">All Online</p>
                 </div>
               </div>
-              <div className="p-3 rounded bg-slate-900/50 flex items-center gap-2" data-testid="equipment-comms">
+              <div className="p-3 rounded bg-[rgba(12,18,36,0.65)] flex items-center gap-2" data-testid="equipment-comms">
                 <div className="h-8 w-8 rounded-full bg-cyan-500/20 flex items-center justify-center">
                   <Radio className="h-4 w-4 text-cyan-400" />
                 </div>
@@ -599,7 +599,7 @@ export default function OpsCommandCenter() {
                   <p className="text-xs text-cyan-400">Active</p>
                 </div>
               </div>
-              <div className="p-3 rounded bg-slate-900/50 flex items-center gap-2" data-testid="equipment-kitchen">
+              <div className="p-3 rounded bg-[rgba(12,18,36,0.65)] flex items-center gap-2" data-testid="equipment-kitchen">
                 <div className="h-8 w-8 rounded-full bg-orange-500/20 flex items-center justify-center">
                   <Utensils className="h-4 w-4 text-orange-400" />
                 </div>
@@ -608,7 +608,7 @@ export default function OpsCommandCenter() {
                   <p className="text-xs text-orange-400">Operational</p>
                 </div>
               </div>
-              <div className="p-3 rounded bg-slate-900/50 flex items-center gap-2" data-testid="equipment-delivery">
+              <div className="p-3 rounded bg-[rgba(12,18,36,0.65)] flex items-center gap-2" data-testid="equipment-delivery">
                 <div className="h-8 w-8 rounded-full bg-purple-500/20 flex items-center justify-center">
                   <Truck className="h-4 w-4 text-purple-400" />
                 </div>
@@ -627,34 +627,34 @@ export default function OpsCommandCenter() {
       </main>
 
       <Dialog open={!!selectedDelivery} onOpenChange={() => setSelectedDelivery(null)}>
-        <DialogContent className="bg-slate-900 border-cyan-500/30">
+        <DialogContent className="bg-[#0c1224] border-cyan-500/30">
           <DialogHeader>
             <DialogTitle className="text-white">Update Delivery Status</DialogTitle>
           </DialogHeader>
           {selectedDelivery && (
             <div className="space-y-4">
-              <div className="p-3 rounded bg-slate-800">
-                <p className="text-sm text-gray-400">{selectedDelivery.description}</p>
+              <div className="p-3 rounded bg-white/5">
+                <p className="text-sm text-white/40">{selectedDelivery.description}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge className={departmentColors[selectedDelivery.department]}>
                     {selectedDelivery.department}
                   </Badge>
-                  <span className="text-xs text-gray-500">Stand {selectedDelivery.standId}</span>
+                  <span className="text-xs text-white/30">Stand {selectedDelivery.standId}</span>
                 </div>
               </div>
               
               <div className="space-y-2">
-                <p className="text-sm text-gray-400">Current Status: <span className="text-white">{selectedDelivery.status}</span></p>
+                <p className="text-sm text-white/40">Current Status: <span className="text-white">{selectedDelivery.status}</span></p>
                 
                 {selectedDelivery.status === 'OnTheWay' && (
                   <div className="space-y-2">
-                    <label className="text-sm text-gray-400">ETA (minutes)</label>
+                    <label className="text-sm text-white/40">ETA (minutes)</label>
                     <Input
                       type="number"
                       value={etaMinutes}
                       onChange={(e) => setEtaMinutes(e.target.value)}
                       placeholder="Enter minutes"
-                      className="bg-slate-800 border-slate-700"
+                      className="bg-white/5 border-white/[0.08]"
                       data-testid="input-eta"
                     />
                   </div>
@@ -709,7 +709,7 @@ export default function OpsCommandCenter() {
       </Dialog>
 
       <Dialog open={!!selectedEmergency} onOpenChange={() => setSelectedEmergency(null)}>
-        <DialogContent className="bg-slate-900 border-red-500/30">
+        <DialogContent className="bg-[#0c1224] border-red-500/30">
           <DialogHeader>
             <DialogTitle className="text-white">Resolve Emergency Alert</DialogTitle>
           </DialogHeader>
@@ -717,16 +717,16 @@ export default function OpsCommandCenter() {
             <div className="space-y-4">
               <div className="p-3 rounded bg-red-900/30">
                 <p className="font-medium text-white">{selectedEmergency.title}</p>
-                <p className="text-sm text-gray-400 mt-1">{selectedEmergency.description}</p>
+                <p className="text-sm text-white/40 mt-1">{selectedEmergency.description}</p>
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm text-gray-400">Resolution Notes</label>
+                <label className="text-sm text-white/40">Resolution Notes</label>
                 <Textarea
                   value={resolveNotes}
                   onChange={(e) => setResolveNotes(e.target.value)}
                   placeholder="Describe how the issue was resolved..."
-                  className="bg-slate-800 border-slate-700"
+                  className="bg-white/5 border-white/[0.08]"
                   data-testid="input-resolution-notes"
                 />
               </div>
@@ -746,21 +746,21 @@ export default function OpsCommandCenter() {
         </DialogContent>
       </Dialog>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-md border-t border-cyan-500/20 px-4 py-3" data-testid="nav-bottom">
+      <nav className="fixed bottom-0 left-0 right-0 bg-[rgba(12,18,36,0.9)] backdrop-blur-md border-t border-cyan-500/20 px-4 py-3" data-testid="nav-bottom">
         <div className="flex justify-around items-center">
           <Button variant="ghost" className="flex-col gap-1 h-auto text-cyan-400" data-testid="nav-command">
             <Radio className="h-5 w-5" />
             <span className="text-xs">Command</span>
           </Button>
-          <Button variant="ghost" className="flex-col gap-1 h-auto text-gray-400" data-testid="nav-deliveries">
+          <Button variant="ghost" className="flex-col gap-1 h-auto text-white/40" data-testid="nav-deliveries">
             <Truck className="h-5 w-5" />
             <span className="text-xs">Deliveries</span>
           </Button>
-          <Button variant="ghost" className="flex-col gap-1 h-auto text-gray-400" data-testid="nav-alerts">
+          <Button variant="ghost" className="flex-col gap-1 h-auto text-white/40" data-testid="nav-alerts">
             <Bell className="h-5 w-5" />
             <span className="text-xs">Alerts</span>
           </Button>
-          <Button variant="ghost" className="flex-col gap-1 h-auto text-gray-400" data-testid="nav-staff">
+          <Button variant="ghost" className="flex-col gap-1 h-auto text-white/40" data-testid="nav-staff">
             <Users className="h-5 w-5" />
             <span className="text-xs">Staff</span>
           </Button>
@@ -778,11 +778,11 @@ function StatCard({ value, label, icon, bgColor, testId }: {
   testId: string;
 }) {
   return (
-    <div className="p-3 rounded-lg bg-slate-800/60 border border-white/10 w-[140px] h-[72px]" data-testid={testId}>
+    <div className="p-3 rounded-lg bg-white/[0.06] border border-white/10 w-[140px] h-[72px]" data-testid={testId}>
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xl font-bold text-white">{value}</p>
-          <p className="text-xs text-gray-400">{label}</p>
+          <p className="text-xs text-white/40">{label}</p>
         </div>
         <div className={`h-9 w-9 rounded-full ${bgColor} flex items-center justify-center`}>
           {icon}
@@ -798,14 +798,14 @@ function DeliveryCard({ delivery, onSelect }: { delivery: DeliveryRequest; onSel
   return (
     <button
       onClick={onSelect}
-      className="text-left p-3 rounded-lg bg-slate-900/50 border border-slate-700/50 hover:border-cyan-500/30 transition-colors w-[220px] h-[120px]"
+      className="text-left p-3 rounded-lg bg-[rgba(12,18,36,0.65)] border border-white/[0.08]/50 hover:border-cyan-500/30 transition-colors w-[220px] h-[120px]"
       data-testid={`delivery-card-${delivery.id}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-sm text-white truncate">{delivery.description}</p>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-gray-500 flex items-center gap-1">
+            <span className="text-xs text-white/30 flex items-center gap-1">
               <MapPin className="h-3 w-3" />
               Stand {delivery.standId}
             </span>
@@ -822,7 +822,7 @@ function DeliveryCard({ delivery, onSelect }: { delivery: DeliveryRequest; onSel
             <span className={`${statusCfg.color} text-white`}>{statusCfg.icon}</span>
             <span className="text-xs text-white">{statusCfg.label}</span>
           </div>
-          <span className="text-xs text-gray-500">{formatTimeAgo(delivery.createdAt)}</span>
+          <span className="text-xs text-white/30">{formatTimeAgo(delivery.createdAt)}</span>
         </div>
       </div>
       {delivery.priority === 'Emergency' && (

@@ -77,7 +77,7 @@ const VIOLATION_TYPES = [
   { id: 'OpenContainer', label: 'Open Container', icon: Wine, color: 'from-teal-500 to-teal-600' },
   { id: 'UnauthorizedSale', label: 'Unauthorized Sale', icon: Shield, color: 'from-rose-600 to-rose-700' },
   { id: 'PricingViolation', label: 'Pricing Violation', icon: AlertTriangle, color: 'from-amber-600 to-amber-700' },
-  { id: 'Other', label: 'Other', icon: AlertCircle, color: 'from-slate-500 to-slate-600' }
+  { id: 'Other', label: 'Other', icon: AlertCircle, color: 'from-white/10 to-white/10' }
 ];
 
 const SEVERITY_OPTIONS = [
@@ -115,7 +115,7 @@ function MetricCard({ icon: Icon, label, value, color, subValue }: {
 }) {
   return (
     <div 
-      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-white/5 min-w-[140px]"
+      className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 min-w-[140px]"
       data-testid={`metric-${label.toLowerCase().replace(/\s+/g, '-')}`}
     >
       <div className={`p-2 rounded-lg bg-${color}-500/20`}>
@@ -123,8 +123,8 @@ function MetricCard({ icon: Icon, label, value, color, subValue }: {
       </div>
       <div>
         <div className="text-lg font-bold text-white">{value}</div>
-        <div className="text-xs text-slate-400">{label}</div>
-        {subValue && <div className="text-xs text-slate-500">{subValue}</div>}
+        <div className="text-xs text-white/40">{label}</div>
+        {subValue && <div className="text-xs text-white/30">{subValue}</div>}
       </div>
     </div>
   );
@@ -164,8 +164,8 @@ function ViolationCard({
       onClick={() => onView(violation)}
       className={`relative rounded-xl border overflow-hidden cursor-pointer transition-all duration-300 min-w-[280px] ${
         isResolved 
-          ? 'border-slate-700/50 bg-slate-800/30' 
-          : 'border-white/10 bg-gradient-to-br from-slate-800/80 to-slate-900/80 shadow-lg hover:shadow-xl'
+          ? 'border-white/[0.08]/50 bg-white/[0.03]' 
+          : 'border-white/10 bg-gradient-to-br from-[#0c1224]/80 to-[#0c1224]/80 shadow-lg hover:shadow-xl'
       }`}
       data-testid={`violation-card-${violation.id}`}
     >
@@ -186,9 +186,9 @@ function ViolationCard({
               <StatusBadge status={violation.status || 'Reported'} pulse={!isResolved} />
             </div>
             
-            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mb-2">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-white/40 mb-2">
               {stand && (
-                <span className="flex items-center gap-1 bg-slate-800/50 px-1.5 py-0.5 rounded">
+                <span className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded">
                   <MapPin className="w-3 h-3 text-cyan-400" />
                   {stand.name}
                 </span>
@@ -199,7 +199,7 @@ function ViolationCard({
               </span>
             </div>
             
-            <p className="text-xs text-slate-300 line-clamp-2 mb-2">{violation.description}</p>
+            <p className="text-xs text-white/70 line-clamp-2 mb-2">{violation.description}</p>
             
             <div className="flex flex-wrap items-center gap-1.5">
               <Badge className={`text-xs bg-${severityConfig?.color || 'slate'}-500/20 text-${severityConfig?.color || 'slate'}-400 border-${severityConfig?.color || 'slate'}-500/30`}>
@@ -224,7 +224,7 @@ function InspectionCard({ stand }: { stand: Stand }) {
   
   return (
     <div 
-      className="p-3 rounded-lg bg-slate-800/40 border border-white/5 hover:border-cyan-500/30 transition-colors"
+      className="p-3 rounded-lg bg-white/5 border border-white/5 hover:border-cyan-500/30 transition-colors"
       data-testid={`inspection-card-${stand.id}`}
     >
       <div className="flex items-center justify-between mb-2">
@@ -237,7 +237,7 @@ function InspectionCard({ stand }: { stand: Stand }) {
           {inspectionStatus}
         </Badge>
       </div>
-      <div className="text-xs text-slate-400">Last checked: 2h ago</div>
+      <div className="text-xs text-white/40">Last checked: 2h ago</div>
     </div>
   );
 }
@@ -410,7 +410,7 @@ export default function AlcoholComplianceDashboard() {
             variant="ghost" 
             size="icon" 
             onClick={handleLogout}
-            className="text-slate-400 hover:text-white"
+            className="text-white/40 hover:text-white"
             data-testid="button-logout"
           >
             <LogOut className="w-5 h-5" />
@@ -434,7 +434,7 @@ export default function AlcoholComplianceDashboard() {
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400" />
-                <span className="text-sm font-medium text-slate-300">Violations</span>
+                <span className="text-sm font-medium text-white/70">Violations</span>
               </div>
               <GlowButton
                 size="sm"
@@ -448,7 +448,7 @@ export default function AlcoholComplianceDashboard() {
             </div>
             
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-              <TabsList className="w-full bg-slate-800/50 rounded-lg p-1 grid grid-cols-4 mb-3">
+              <TabsList className="w-full bg-white/5 rounded-lg p-1 grid grid-cols-4 mb-3">
                 <TabsTrigger 
                   value="all" 
                   className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-lg text-xs"
@@ -483,12 +483,12 @@ export default function AlcoholComplianceDashboard() {
                 {loadingViolations ? (
                   <div className="text-center py-8">
                     <Wine className="w-8 h-8 mx-auto mb-2 text-cyan-400 animate-pulse" />
-                    <p className="text-sm text-slate-400">Loading...</p>
+                    <p className="text-sm text-white/40">Loading...</p>
                   </div>
                 ) : violationItems.length === 0 ? (
                   <div className="text-center py-8">
-                    <Wine className="w-10 h-10 mx-auto mb-2 text-slate-600" />
-                    <p className="text-sm text-slate-400">No violations found</p>
+                    <Wine className="w-10 h-10 mx-auto mb-2 text-white/20" />
+                    <p className="text-sm text-white/40">No violations found</p>
                   </div>
                 ) : (
                   <CarouselRail 
@@ -504,7 +504,7 @@ export default function AlcoholComplianceDashboard() {
           <BentoCard span={4} rowSpan={2} title="Compliance Policies" data-testid="policies-section">
             <div className="flex items-center gap-2 mb-3">
               <BookOpen className="w-4 h-4 text-cyan-400" />
-              <span className="text-xs text-slate-400">Reference Guide</span>
+              <span className="text-xs text-white/40">Reference Guide</span>
             </div>
             <AccordionStack 
               items={COMPLIANCE_POLICIES}
@@ -516,7 +516,7 @@ export default function AlcoholComplianceDashboard() {
           <BentoCard span={12} title="Inspection Grid" data-testid="inspection-section">
             <div className="flex items-center gap-2 mb-3">
               <ClipboardList className="w-4 h-4 text-green-400" />
-              <span className="text-xs text-slate-400">Stand Compliance Status</span>
+              <span className="text-xs text-white/40">Stand Compliance Status</span>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
               {stands.slice(0, 12).map(stand => (
@@ -544,7 +544,7 @@ export default function AlcoholComplianceDashboard() {
       </main>
       
       <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2">
               <div className="p-2 rounded-lg bg-gradient-to-br from-rose-500 to-amber-500">
@@ -556,12 +556,12 @@ export default function AlcoholComplianceDashboard() {
           
           <div className="space-y-4">
             <div>
-              <Label className="text-slate-300">Violation Type *</Label>
+              <Label className="text-white/70">Violation Type *</Label>
               <Select value={violationType} onValueChange={setViolationType}>
-                <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid="select-violation-type">
+                <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1.5" data-testid="select-violation-type">
                   <SelectValue placeholder="Select type..." />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectContent className="bg-white/5 border-white/[0.08]">
                   {VIOLATION_TYPES.map(type => (
                     <SelectItem key={type.id} value={type.id} className="text-white">
                       <div className="flex items-center gap-2">
@@ -575,12 +575,12 @@ export default function AlcoholComplianceDashboard() {
             </div>
             
             <div>
-              <Label className="text-slate-300">Severity</Label>
+              <Label className="text-white/70">Severity</Label>
               <Select value={severity} onValueChange={setSeverity}>
-                <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid="select-severity">
+                <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1.5" data-testid="select-severity">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-700">
+                <SelectContent className="bg-white/5 border-white/[0.08]">
                   {SEVERITY_OPTIONS.map(opt => (
                     <SelectItem key={opt.value} value={opt.value} className="text-white">
                       {opt.label}
@@ -591,10 +591,10 @@ export default function AlcoholComplianceDashboard() {
             </div>
             
             <div>
-              <Label className="text-slate-300">Description *</Label>
+              <Label className="text-white/70">Description *</Label>
               <Textarea 
                 placeholder="Describe what you observed..."
-                className="bg-slate-800/50 border-white/10 text-white min-h-[100px] mt-1.5"
+                className="bg-white/5 border-white/10 text-white min-h-[100px] mt-1.5"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 data-testid="input-description"
@@ -603,12 +603,12 @@ export default function AlcoholComplianceDashboard() {
             
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-slate-300">Location/Stand</Label>
+                <Label className="text-white/70">Location/Stand</Label>
                 <Select value={standId} onValueChange={setStandId}>
-                  <SelectTrigger className="bg-slate-800/50 border-white/10 text-white mt-1.5" data-testid="select-stand">
+                  <SelectTrigger className="bg-white/5 border-white/10 text-white mt-1.5" data-testid="select-stand">
                     <SelectValue placeholder="Select stand..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700 max-h-48">
+                  <SelectContent className="bg-white/5 border-white/[0.08] max-h-48">
                     {stands.map(stand => (
                       <SelectItem key={stand.id} value={stand.id} className="text-white">
                         {stand.name}
@@ -618,10 +618,10 @@ export default function AlcoholComplianceDashboard() {
                 </Select>
               </div>
               <div>
-                <Label className="text-slate-300">Section</Label>
+                <Label className="text-white/70">Section</Label>
                 <Input 
                   placeholder="e.g. Section 127"
-                  className="bg-slate-800/50 border-white/10 text-white mt-1.5"
+                  className="bg-white/5 border-white/10 text-white mt-1.5"
                   value={section}
                   onChange={(e) => setSection(e.target.value)}
                   data-testid="input-section"
@@ -631,20 +631,20 @@ export default function AlcoholComplianceDashboard() {
             
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-slate-300">Vendor Name</Label>
+                <Label className="text-white/70">Vendor Name</Label>
                 <Input 
                   placeholder="Name if known"
-                  className="bg-slate-800/50 border-white/10 text-white mt-1.5"
+                  className="bg-white/5 border-white/10 text-white mt-1.5"
                   value={vendorName}
                   onChange={(e) => setVendorName(e.target.value)}
                   data-testid="input-vendor-name"
                 />
               </div>
               <div>
-                <Label className="text-slate-300">Badge #</Label>
+                <Label className="text-white/70">Badge #</Label>
                 <Input 
                   placeholder="Badge number"
-                  className="bg-slate-800/50 border-white/10 text-white mt-1.5"
+                  className="bg-white/5 border-white/10 text-white mt-1.5"
                   value={vendorBadge}
                   onChange={(e) => setVendorBadge(e.target.value)}
                   data-testid="input-vendor-badge"
@@ -653,12 +653,12 @@ export default function AlcoholComplianceDashboard() {
             </div>
             
             <div>
-              <Label className="text-slate-300 mb-2 block">Evidence Photos</Label>
+              <Label className="text-white/70 mb-2 block">Evidence Photos</Label>
               <div className="flex gap-2">
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 border-white/10 text-slate-300"
+                  className="flex-1 border-white/10 text-white/70"
                   onClick={() => cameraInputRef.current?.click()}
                   data-testid="button-camera"
                 >
@@ -668,7 +668,7 @@ export default function AlcoholComplianceDashboard() {
                 <Button
                   type="button"
                   variant="outline"
-                  className="flex-1 border-white/10 text-slate-300"
+                  className="flex-1 border-white/10 text-white/70"
                   onClick={() => fileInputRef.current?.click()}
                   data-testid="button-upload"
                 >
@@ -720,7 +720,7 @@ export default function AlcoholComplianceDashboard() {
             <Button
               variant="outline"
               onClick={() => setShowReportDialog(false)}
-              className="border-white/10 text-slate-300"
+              className="border-white/10 text-white/70"
               data-testid="button-cancel-report"
             >
               Cancel
@@ -738,7 +738,7 @@ export default function AlcoholComplianceDashboard() {
       </Dialog>
       
       <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
-        <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-md">
+        <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-white">Violation Details</DialogTitle>
           </DialogHeader>
@@ -746,7 +746,7 @@ export default function AlcoholComplianceDashboard() {
           {selectedViolation && (
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${VIOLATION_TYPES.find(t => t.id === selectedViolation.violationType)?.color || 'from-slate-500 to-slate-600'}`}>
+                <div className={`p-3 rounded-xl bg-gradient-to-br ${VIOLATION_TYPES.find(t => t.id === selectedViolation.violationType)?.color || 'from-white/10 to-white/10'}`}>
                   {(() => {
                     const TypeIcon = VIOLATION_TYPES.find(t => t.id === selectedViolation.violationType)?.icon || AlertCircle;
                     return <TypeIcon className="w-5 h-5 text-white" />;
@@ -762,31 +762,31 @@ export default function AlcoholComplianceDashboard() {
               
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Severity</span>
+                  <span className="text-white/40">Severity</span>
                   <Badge>{selectedViolation.severity}</Badge>
                 </div>
                 {selectedViolation.standId && (
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Location</span>
+                    <span className="text-white/40">Location</span>
                     <span className="text-white">{stands.find(s => s.id === selectedViolation.standId)?.name}</span>
                   </div>
                 )}
                 {selectedViolation.vendorName && (
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Vendor</span>
+                    <span className="text-white/40">Vendor</span>
                     <span className="text-white">{selectedViolation.vendorName}</span>
                   </div>
                 )}
               </div>
               
               <div>
-                <h4 className="text-slate-400 text-sm mb-1">Description</h4>
+                <h4 className="text-white/40 text-sm mb-1">Description</h4>
                 <p className="text-white text-sm">{selectedViolation.description}</p>
               </div>
               
               {selectedViolation.mediaUrls && selectedViolation.mediaUrls.length > 0 && (
                 <div>
-                  <h4 className="text-slate-400 text-sm mb-2">Evidence</h4>
+                  <h4 className="text-white/40 text-sm mb-2">Evidence</h4>
                   <div className="flex gap-2 flex-wrap">
                     {selectedViolation.mediaUrls.map((url, idx) => (
                       <img 

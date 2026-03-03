@@ -87,7 +87,7 @@ const SEVERITY_COLORS: Record<string, string> = {
   Emergency: 'bg-red-500/10 text-red-300 border border-red-500/30',
   High: 'bg-orange-500/10 text-orange-300 border border-orange-500/30',
   Normal: 'bg-blue-500/10 text-blue-300 border border-blue-500/30',
-  Low: 'bg-slate-700/50 text-slate-300 border border-slate-500/30'
+  Low: 'bg-white/10 text-white/70 border border-white/10'
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -95,7 +95,7 @@ const STATUS_COLORS: Record<string, string> = {
   Acknowledged: 'bg-blue-500/10 text-blue-300',
   InProgress: 'bg-purple-500/10 text-purple-300',
   Resolved: 'bg-green-500/10 text-green-300',
-  Closed: 'bg-slate-700/50 text-slate-300',
+  Closed: 'bg-white/10 text-white/70',
   Completed: 'bg-green-500/10 text-green-300',
   Verified: 'bg-emerald-500/10 text-emerald-300'
 };
@@ -312,8 +312,8 @@ export function EndOfEventReport({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-auto bg-slate-900 border-slate-700">
-        <CardHeader className="sticky top-0 bg-slate-900 z-10 border-b border-slate-700">
+      <Card className="w-full max-w-4xl max-h-[90vh] overflow-auto bg-[#0c1224] border-white/[0.08]">
+        <CardHeader className="sticky top-0 bg-[#0c1224] z-10 border-b border-white/[0.08]">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center border border-blue-500/30">
@@ -350,19 +350,19 @@ export function EndOfEventReport({
               <div className="text-2xl font-bold text-green-400">{inventoryCounts.length}</div>
               <div className="text-xs text-green-400">Items Counted</div>
             </div>
-            <div className={`rounded-lg p-3 text-center ${hasVarianceIssues ? 'bg-red-500/10 border border-red-500/30' : 'bg-slate-800/50 border border-slate-700/50'}`}>
-              <div className={`text-2xl font-bold ${hasVarianceIssues ? 'text-red-400' : 'text-slate-400'}`}>
+            <div className={`rounded-lg p-3 text-center ${hasVarianceIssues ? 'bg-red-500/10 border border-red-500/30' : 'bg-white/5 border border-white/[0.08]/50'}`}>
+              <div className={`text-2xl font-bold ${hasVarianceIssues ? 'text-red-400' : 'text-white/40'}`}>
                 {totalVariance}
               </div>
-              <div className={`text-xs ${hasVarianceIssues ? 'text-red-400' : 'text-slate-400'}`}>
+              <div className={`text-xs ${hasVarianceIssues ? 'text-red-400' : 'text-white/40'}`}>
                 Total Variance
               </div>
             </div>
-            <div className={`rounded-lg p-3 text-center ${issues.length > 0 ? 'bg-orange-500/10 border border-orange-500/30' : 'bg-slate-800/50 border border-slate-700/50'}`}>
-              <div className={`text-2xl font-bold ${issues.length > 0 ? 'text-orange-400' : 'text-slate-400'}`}>
+            <div className={`rounded-lg p-3 text-center ${issues.length > 0 ? 'bg-orange-500/10 border border-orange-500/30' : 'bg-white/5 border border-white/[0.08]/50'}`}>
+              <div className={`text-2xl font-bold ${issues.length > 0 ? 'text-orange-400' : 'text-white/40'}`}>
                 {issues.length}
               </div>
-              <div className={`text-xs ${issues.length > 0 ? 'text-orange-400' : 'text-slate-400'}`}>
+              <div className={`text-xs ${issues.length > 0 ? 'text-orange-400' : 'text-white/40'}`}>
                 Issues Reported
               </div>
             </div>
@@ -379,23 +379,23 @@ export function EndOfEventReport({
               <AccordionContent className="px-4 pb-4">
                 <div className="space-y-3">
                   {sortedSessions.map((session) => (
-                    <div key={session.id} className="border border-slate-700/50 rounded-lg p-3 bg-slate-800/50">
+                    <div key={session.id} className="border border-white/[0.08]/50 rounded-lg p-3 bg-white/5">
                       <div className="flex items-center justify-between mb-2">
                         <Badge variant="outline" className="bg-blue-500/10 border-blue-500/30 text-blue-300">
                           {session.stage}
                         </Badge>
-                        <Badge className={STATUS_COLORS[session.status] || 'bg-slate-700/50'}>
+                        <Badge className={STATUS_COLORS[session.status] || 'bg-white/10'}>
                           {session.status}
                         </Badge>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-sm">
                         <div className="flex items-center gap-1">
-                          <User className="w-3 h-3 text-gray-400" />
+                          <User className="w-3 h-3 text-white/40" />
                           <span>{session.counterName}</span>
                         </div>
-                        <div className="text-gray-500">{session.counterRole}</div>
+                        <div className="text-white/30">{session.counterRole}</div>
                         <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-gray-400" />
+                          <Clock className="w-3 h-3 text-white/40" />
                           <span>{formatTime(session.startedAt)}</span>
                         </div>
                         {session.completedAt && (
@@ -406,14 +406,14 @@ export function EndOfEventReport({
                         )}
                       </div>
                       {session.assistingCounterName && (
-                        <div className="mt-2 text-xs text-gray-500">
+                        <div className="mt-2 text-xs text-white/30">
                           Assisted by: {session.assistingCounterName}
                         </div>
                       )}
                     </div>
                   ))}
                   {sortedSessions.length === 0 && (
-                    <p className="text-sm text-gray-500 text-center py-4">No count sessions recorded</p>
+                    <p className="text-sm text-white/30 text-center py-4">No count sessions recorded</p>
                   )}
                 </div>
               </AccordionContent>
@@ -433,15 +433,15 @@ export function EndOfEventReport({
                 <div className="space-y-3">
                   {Object.entries(groupedCounts).map(([category, items]) => (
                     <div key={category} className="border rounded-lg overflow-hidden">
-                      <div className="bg-slate-700/50 px-3 py-2 font-medium text-sm">{category}</div>
+                      <div className="bg-white/10 px-3 py-2 font-medium text-sm">{category}</div>
                       <div className="divide-y">
                         {items.map((item) => (
                           <div key={item.itemId} className="px-3 py-2 flex items-center justify-between">
                             <span className="text-sm">{item.itemName}</span>
                             <div className="flex items-center gap-4 text-xs">
-                              <span className="text-gray-500">Start: {item.startCount}</span>
-                              <span className="text-gray-500">End: {item.endCount}</span>
-                              <span className="text-gray-500">Sold: {item.sold}</span>
+                              <span className="text-white/30">Start: {item.startCount}</span>
+                              <span className="text-white/30">End: {item.endCount}</span>
+                              <span className="text-white/30">Sold: {item.sold}</span>
                               {item.variance !== 0 && (
                                 <Badge variant="outline" className="bg-red-500/10 text-red-400 border-red-500/30">
                                   Var: {item.variance}
@@ -454,7 +454,7 @@ export function EndOfEventReport({
                     </div>
                   ))}
                   {inventoryCounts.length === 0 && (
-                    <p className="text-sm text-gray-500 text-center py-4">No inventory counts recorded</p>
+                    <p className="text-sm text-white/30 text-center py-4">No inventory counts recorded</p>
                   )}
                 </div>
               </AccordionContent>
@@ -470,7 +470,7 @@ export function EndOfEventReport({
               <AccordionContent className="px-4 pb-4">
                 <div className="space-y-3">
                   {issues.map((issue) => (
-                    <div key={issue.id} className={`border rounded-lg p-3 ${SEVERITY_COLORS[issue.severity] || 'bg-slate-800/50'}`}>
+                    <div key={issue.id} className={`border rounded-lg p-3 ${SEVERITY_COLORS[issue.severity] || 'bg-white/5'}`}>
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">{issue.category}</Badge>
@@ -478,18 +478,18 @@ export function EndOfEventReport({
                             {issue.severity}
                           </Badge>
                         </div>
-                        <Badge className={STATUS_COLORS[issue.status] || 'bg-slate-700/50'}>
+                        <Badge className={STATUS_COLORS[issue.status] || 'bg-white/10'}>
                           {issue.status}
                         </Badge>
                       </div>
                       <h4 className="font-medium text-sm">{issue.title}</h4>
-                      <p className="text-xs text-gray-600 mt-1">{issue.description}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                      <p className="text-xs text-white/20 mt-1">{issue.description}</p>
+                      <div className="flex items-center gap-4 mt-2 text-xs text-white/30">
                         <span>Reported: {formatTime(issue.createdAt)}</span>
                         {issue.resolvedAt && <span>Resolved: {formatTime(issue.resolvedAt)}</span>}
                       </div>
                       {issue.resolutionNotes && (
-                        <div className="mt-2 text-xs bg-slate-800/50 rounded p-2">
+                        <div className="mt-2 text-xs bg-white/5 rounded p-2">
                           <span className="font-medium">Resolution: </span>
                           {issue.resolutionNotes}
                         </div>
@@ -497,7 +497,7 @@ export function EndOfEventReport({
                     </div>
                   ))}
                   {issues.length === 0 && (
-                    <p className="text-sm text-gray-500 text-center py-4">No issues reported</p>
+                    <p className="text-sm text-white/30 text-center py-4">No issues reported</p>
                   )}
                 </div>
               </AccordionContent>
@@ -513,16 +513,16 @@ export function EndOfEventReport({
               <AccordionContent className="px-4 pb-4">
                 <div className="space-y-2">
                   {signatures.map((sig, idx) => (
-                    <div key={idx} className="flex items-center justify-between border border-slate-700/50 rounded-lg p-3 bg-slate-800/50">
+                    <div key={idx} className="flex items-center justify-between border border-white/[0.08]/50 rounded-lg p-3 bg-white/5">
                       <div>
                         <div className="font-medium text-sm">{sig.docTitle}</div>
-                        <div className="text-xs text-gray-500">Signed by: {sig.signedBy}</div>
+                        <div className="text-xs text-white/30">Signed by: {sig.signedBy}</div>
                       </div>
-                      <div className="text-xs text-gray-500">{formatTime(sig.signedAt)}</div>
+                      <div className="text-xs text-white/30">{formatTime(sig.signedAt)}</div>
                     </div>
                   ))}
                   {signatures.length === 0 && (
-                    <p className="text-sm text-gray-500 text-center py-4">No documents signed</p>
+                    <p className="text-sm text-white/30 text-center py-4">No documents signed</p>
                   )}
                 </div>
               </AccordionContent>
@@ -530,7 +530,7 @@ export function EndOfEventReport({
           </Accordion>
 
           {supervisorName && (
-            <div className="mt-4 pt-4 border-t text-center text-sm text-gray-500">
+            <div className="mt-4 pt-4 border-t text-center text-sm text-white/30">
               <div className="flex items-center justify-center gap-2">
                 <User className="w-4 h-4" />
                 <span>Supervisor: {supervisorName}</span>

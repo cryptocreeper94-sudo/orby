@@ -54,8 +54,8 @@ function ThemeCard({ theme, isActive, isLocked, onClick }: ThemeCardProps) {
       )}
       
       {isLocked && (
-        <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-slate-800/80 flex items-center justify-center">
-          <Lock className="w-3 h-3 text-slate-400" />
+        <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-white/10 flex items-center justify-center">
+          <Lock className="w-3 h-3 text-white/40" />
         </div>
       )}
       
@@ -97,7 +97,7 @@ function ThemeCategorySection({ categoryId, themes }: ThemeCategorySectionProps)
           </div>
           <div className="flex flex-col items-start">
             <span className="font-semibold text-white">{categoryInfo.label}</span>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-white/40">
               {themes.length} themes
               {lockedCount > 0 && ` (${lockedCount} locked)`}
             </span>
@@ -133,7 +133,7 @@ export function ThemeGallery() {
   ).length;
   
   return (
-    <div className="flex flex-col h-full bg-slate-950" data-testid="theme-gallery">
+    <div className="flex flex-col h-full bg-[#050508]" data-testid="theme-gallery">
       <div className="p-4 border-b border-white/10">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center">
@@ -141,7 +141,7 @@ export function ThemeGallery() {
           </div>
           <div>
             <h2 className="text-lg font-bold text-white">Theme Gallery</h2>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-white/40">
               {unlockedThemes} of {totalThemes} themes unlocked
             </p>
           </div>
@@ -155,7 +155,7 @@ export function ThemeGallery() {
             <Crown className="w-6 h-6 text-white/70" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-slate-400">Current Theme</p>
+            <p className="text-xs text-white/40">Current Theme</p>
             <p className="text-sm font-semibold text-white truncate">{currentTheme.name}</p>
           </div>
         </div>
@@ -175,7 +175,7 @@ export function ThemeGallery() {
           <button
             data-testid="toggle-demo-mode"
             onClick={() => setIsSubscriber(false)}
-            className="w-full mt-3 py-2 px-4 rounded-xl bg-white/10 text-slate-300 font-medium text-sm flex items-center justify-center gap-2 hover:bg-white/20 transition-colors"
+            className="w-full mt-3 py-2 px-4 rounded-xl bg-white/10 text-white/70 font-medium text-sm flex items-center justify-center gap-2 hover:bg-white/20 transition-colors"
           >
             Switch to Demo Mode
           </button>

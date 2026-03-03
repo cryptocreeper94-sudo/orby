@@ -548,7 +548,7 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-slate-900/95 backdrop-blur-xl border-white/10 max-w-2xl max-h-[85vh] overflow-hidden p-0" data-testid="event-report-builder">
+      <DialogContent className="bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 max-w-2xl max-h-[85vh] overflow-hidden p-0" data-testid="event-report-builder">
         <DialogHeader className="p-6 pb-4 border-b border-white/10">
           <DialogTitle className="text-white flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-cyan-400" />
@@ -570,7 +570,7 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                   <div className="text-center mb-6">
                     <Calendar className="h-12 w-12 text-cyan-400 mx-auto mb-3" />
                     <h3 className="text-lg font-semibold text-white">Select Event Date</h3>
-                    <p className="text-sm text-slate-400">Choose the event you want to generate a report for</p>
+                    <p className="text-sm text-white/40">Choose the event you want to generate a report for</p>
                   </div>
 
                   <Input
@@ -583,7 +583,7 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
 
                   {availableDates.length > 0 && (
                     <div className="mt-4">
-                      <p className="text-xs text-slate-500 mb-2">Recent events with documents:</p>
+                      <p className="text-xs text-white/30 mb-2">Recent events with documents:</p>
                       <div className="flex flex-wrap gap-2">
                         {availableDates.slice(0, 6).map(date => (
                           <Badge
@@ -592,7 +592,7 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                             className={`cursor-pointer ${
                               eventDate === date 
                                 ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/50' 
-                                : 'border-white/20 text-slate-400 hover:bg-white/10'
+                                : 'border-white/20 text-white/40 hover:bg-white/10'
                             }`}
                             onClick={() => setEventDate(date)}
                           >
@@ -628,7 +628,7 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                   <div className="text-center mb-4">
                     <Package className="h-12 w-12 text-cyan-400 mx-auto mb-3" />
                     <h3 className="text-lg font-semibold text-white">Choose Report Template</h3>
-                    <p className="text-sm text-slate-400">Select a preset or build your own custom package</p>
+                    <p className="text-sm text-white/40">Select a preset or build your own custom package</p>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -656,11 +656,11 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                                 <h4 className="font-medium text-white">{template.name}</h4>
                                 {isSelected && <CheckCircle2 className="h-4 w-4 text-cyan-400" />}
                               </div>
-                              <p className="text-xs text-slate-400 mt-1">{template.description}</p>
+                              <p className="text-xs text-white/40 mt-1">{template.description}</p>
                               {template.categories.length > 0 && (
                                 <div className="flex flex-wrap gap-1 mt-2">
                                   {template.categories.map(cat => (
-                                    <Badge key={cat} variant="outline" className="text-[10px] border-white/20 text-slate-400">
+                                    <Badge key={cat} variant="outline" className="text-[10px] border-white/20 text-white/40">
                                       {CATEGORY_CONFIG[cat].label}
                                     </Badge>
                                   ))}
@@ -679,7 +679,7 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                       animate={{ opacity: 1, height: 'auto' }}
                       className="p-4 bg-white/5 rounded-xl border border-white/10 mt-4"
                     >
-                      <p className="text-sm text-slate-300 mb-3">Select categories to include:</p>
+                      <p className="text-sm text-white/70 mb-3">Select categories to include:</p>
                       <div className="space-y-2">
                         {(Object.entries(CATEGORY_CONFIG) as [DocumentCategory, typeof CATEGORY_CONFIG[DocumentCategory]][]).map(([key, config]) => {
                           const Icon = config.icon;
@@ -696,8 +696,8 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                                 className="border-white/30"
                               />
                               <Icon className={`h-4 w-4 text-${config.color}-400`} />
-                              <span className="text-sm text-slate-200 flex-1">{config.label}</span>
-                              <Badge variant="outline" className="text-[10px] border-white/20 text-slate-500">
+                              <span className="text-sm text-white/80 flex-1">{config.label}</span>
+                              <Badge variant="outline" className="text-[10px] border-white/20 text-white/30">
                                 {docCount} docs
                               </Badge>
                             </div>
@@ -711,7 +711,7 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                     <Button
                       variant="ghost"
                       onClick={() => setStep('date')}
-                      className="text-slate-400"
+                      className="text-white/40"
                     >
                       Back
                     </Button>
@@ -739,7 +739,7 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                   <div className="text-center mb-4">
                     <FileStack className="h-12 w-12 text-cyan-400 mx-auto mb-3" />
                     <h3 className="text-lg font-semibold text-white">Report Preview</h3>
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-white/40">
                       {filteredDocsCount} documents will be included
                     </p>
                   </div>
@@ -747,19 +747,19 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                   <div className="p-4 bg-white/5 rounded-xl border border-white/10">
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
-                        <p className="text-slate-500">Event Date</p>
+                        <p className="text-white/30">Event Date</p>
                         <p className="text-white font-medium">{eventDate}</p>
                       </div>
                       <div>
-                        <p className="text-slate-500">Template</p>
+                        <p className="text-white/30">Template</p>
                         <p className="text-white font-medium">{selectedTemplate?.name}</p>
                       </div>
                       <div>
-                        <p className="text-slate-500">Categories</p>
+                        <p className="text-white/30">Categories</p>
                         <p className="text-white font-medium">{getSelectedCategories().length}</p>
                       </div>
                       <div>
-                        <p className="text-slate-500">Documents</p>
+                        <p className="text-white/30">Documents</p>
                         <p className="text-white font-medium">{filteredDocsCount}</p>
                       </div>
                     </div>
@@ -775,7 +775,7 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      <p className="text-xs text-slate-500 uppercase tracking-wide">Documents by Category</p>
+                      <p className="text-xs text-white/30 uppercase tracking-wide">Documents by Category</p>
                       {Object.entries(getDocumentsByCategory()).map(([category, docs]) => {
                         const config = CATEGORY_CONFIG[category as DocumentCategory];
                         const Icon = config.icon;
@@ -790,12 +790,12 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                             </div>
                             <div className="space-y-1">
                               {docs.slice(0, 3).map(doc => (
-                                <p key={doc.id} className="text-xs text-slate-400 truncate pl-6">
+                                <p key={doc.id} className="text-xs text-white/40 truncate pl-6">
                                   {doc.title}
                                 </p>
                               ))}
                               {docs.length > 3 && (
-                                <p className="text-xs text-slate-500 pl-6">
+                                <p className="text-xs text-white/30 pl-6">
                                   +{docs.length - 3} more...
                                 </p>
                               )}
@@ -810,7 +810,7 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                     <Button
                       variant="ghost"
                       onClick={() => setStep('template')}
-                      className="text-slate-400"
+                      className="text-white/40"
                     >
                       Back
                     </Button>
@@ -842,7 +842,7 @@ export function EventReportBuilder({ isOpen, onClose }: EventReportBuilderProps)
                     <Loader2 className="h-16 w-16 text-cyan-400" />
                   </motion.div>
                   <h3 className="text-lg font-semibold text-white mb-2">Generating Report</h3>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-white/40">
                     Compiling {filteredDocsCount} documents into one PDF...
                   </p>
                   <motion.div
