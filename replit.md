@@ -66,7 +66,20 @@ Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designe
 - Domain: getorby.io
 - Strict bento grid styling with horizontal carousels
 - Minimal white space with accordions
-- Dark theme throughout
+- Dark theme throughout (Trust Layer Canonical UI Protocol enforced)
+
+## UI Protocol Alignment (Trust Layer Canonical UI)
+- **Theme**: Dark-only, no light mode. Background: `#050508` (Deep Space Blue)
+- **Colors**: Primary `#00ffff` (Cyan Neon), Secondary `#9333ea` (Electric Purple)
+- **GlassCard**: `bg-[rgba(12,18,36,0.65)]`, `backdrop-blur-2xl`, `border-white/[0.08]`, spring hover animation
+- **Typography**: Inter font for headings (font-weight: 900), JetBrains Mono for code
+- **Gradient Text**: `from-cyan-400 via-blue-400 to-purple-400` (primary), `from-white to-white/70` (section titles)
+- **Text Hierarchy**: `text-white` (primary), `text-white/70` (secondary), `text-white/40` (tertiary), `text-white/30` (muted), `text-white/20` (disabled)
+- **Nav Bar**: Fixed top, `h-14`, `bg-slate-950/90 backdrop-blur-xl`, `border-b border-white/5`
+- **Backgrounds**: Glow orbs (cyan/purple/pink), dot grid overlay, stars
+- **Buttons**: Gradient CTAs with glow shadows, 44px min touch targets
+- **Skeleton Loaders**: Full library in `loading-skeleton.tsx` (Card, Table, Stats, Chart, Profile, Transaction, NftCard, Page)
+- **Protocol Doc**: `attached_assets/CANONICAL-UI-PROTOCOL_1772510712193.md`
 
 ## PIN Access Structure
 | PIN | User | Role | Dashboard |

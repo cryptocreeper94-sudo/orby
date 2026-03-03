@@ -444,13 +444,12 @@ function LaunchCardComponent({ card, index }: { card: LaunchCard; index: number 
       className={`
         relative flex-none cursor-pointer group
         ${card.featured ? 'w-[300px]' : 'w-[260px]'}
-        rounded-2xl overflow-hidden
+        rounded-xl overflow-hidden
         border border-white/[0.08]
-        bg-white/[0.03] backdrop-blur-xl
+        bg-[rgba(12,18,36,0.65)] backdrop-blur-2xl
         hover:border-white/[0.15]
         transition-all duration-300
-        hover:scale-[1.03]
-        hover:${card.glowColor}
+        shadow-lg shadow-black/20
       `}
     >
       <div className={`absolute inset-0 bg-gradient-to-br ${card.gradient} opacity-[0.08] group-hover:opacity-[0.15] transition-opacity duration-300`} />
@@ -512,9 +511,10 @@ function CategoryCarousel({ category, cardIndex }: { category: Category; cardInd
       </div>
 
       <div className="relative group/carousel">
+        <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-[#050508] to-transparent z-10 pointer-events-none opacity-0 group-hover/carousel:opacity-100 transition-opacity" />
         <div
           ref={setScrollRef}
-          className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 px-1 snap-x snap-mandatory"
+          className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 px-1 snap-x snap-mandatory"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {category.cards.map((card, i) => (
@@ -523,6 +523,7 @@ function CategoryCarousel({ category, cardIndex }: { category: Category; cardInd
             </div>
           ))}
         </div>
+        <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#050508] to-transparent z-10 pointer-events-none" />
 
         {category.cards.length > 2 && (
           <>
@@ -590,7 +591,7 @@ export default function UnifiedCommandCenter() {
       <div className="min-h-[100dvh] flex flex-col">
         <header
           data-testid="command-center-header"
-          className="sticky top-0 z-50 backdrop-blur-xl bg-[#070b16]/80 border-b border-white/5"
+          className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-slate-950/90 border-b border-white/5"
         >
           <div className="flex items-center justify-between px-4 py-3">
             <div className="flex items-center gap-3">
@@ -653,7 +654,9 @@ export default function UnifiedCommandCenter() {
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 space-y-8 max-w-6xl mx-auto w-full">
+        <div className="h-[100px] sm:h-[60px]" />
+
+        <main className="flex-1 px-4 sm:px-6 lg:px-8 py-6 space-y-8 max-w-6xl mx-auto w-full relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

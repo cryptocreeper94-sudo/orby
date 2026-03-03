@@ -5,9 +5,18 @@ import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 export function AnimatedBackground({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={cn("relative min-h-[100dvh] overflow-x-hidden", className)}>
-      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-cyan-950/30 -z-20" />
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-900/20 via-transparent to-transparent -z-10" />
+    <div className={cn("relative min-h-[100dvh] bg-[#050508] text-white overflow-x-hidden", className)}>
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-cyan-500/[0.06] rounded-full blur-[120px]" />
+        <div className="absolute top-1/3 right-1/4 w-[600px] h-[600px] bg-purple-500/[0.05] rounded-full blur-[100px]" />
+        <div className="absolute bottom-1/4 left-1/3 w-[400px] h-[400px] bg-pink-500/[0.04] rounded-full blur-[100px]" />
+      </div>
+      <div className="fixed inset-0 pointer-events-none -z-10"
+        style={{
+          backgroundImage: 'radial-gradient(rgba(255,255,255,0.02) 1px, transparent 1px)',
+          backgroundSize: '40px 40px'
+        }}
+      />
       <Stars />
       <OrbyWatermark />
       {children}
@@ -69,21 +78,36 @@ function OrbyWatermark() {
 
 export const GlassCard = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & { glow?: boolean; gradient?: boolean }
->(({ className, glow, gradient, children, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement> & { glow?: boolean; hover?: boolean; locked?: boolean; gradient?: boolean; variant?: "default" | "stat" | "feature" }
+>(({ className, glow, hover = true, locked, gradient, variant, children, ...props }, ref) => (
   <motion.div
     ref={ref}
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.3 }}
+    whileHover={hover ? { scale: 1.02, y: -2 } : undefined}
+    transition={{ type: "spring", stiffness: 400, damping: 25 }}
     className={cn(
-      "relative rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur-xl shadow-xl overflow-hidden",
-      glow && "shadow-cyan-500/20 shadow-lg",
+      "relative bg-[rgba(12,18,36,0.65)] backdrop-blur-2xl border border-white/[0.08] rounded-xl overflow-hidden transition-all duration-300",
+      glow ? "shadow-[0_0_40px_rgba(0,255,255,0.15)]" : "shadow-lg shadow-black/20",
       gradient && "bg-gradient-to-br from-slate-800/80 via-slate-900/80 to-slate-950/80",
       className
     )}
+    {...props}
   >
+    {glow && (
+      <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-primary/30 via-cyan-400/20 to-secondary/30 -z-10 blur-sm opacity-50" />
+    )}
     {children}
+    {locked && (
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10 rounded-xl">
+        <div className="text-center">
+          <svg className="w-6 h-6 text-white/40 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <span className="text-white/40 text-xs font-medium">Coming Soon</span>
+        </div>
+      </div>
+    )}
   </motion.div>
 ));
 GlassCard.displayName = "GlassCard";
@@ -155,13 +179,13 @@ export function StatCard({
       <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       <div className="relative flex items-start justify-between">
         <div className="space-y-1">
-          <p className="text-xs md:text-sm text-slate-400 font-medium">{label}</p>
+          <p className="text-xs md:text-sm text-white/70 font-medium">{label}</p>
           <p className={cn(
             "font-bold tracking-tight",
             size === "compact" ? "text-xl" : size === "large" ? "text-3xl md:text-4xl" : "text-2xl md:text-3xl"
           )}>{value}</p>
           {subValue && (
-            <p className="text-xs text-slate-500">{subValue}</p>
+            <p className="text-xs text-white/30">{subValue}</p>
           )}
         </div>
         <div className={cn(
@@ -176,7 +200,7 @@ export function StatCard({
           "absolute bottom-2 right-2 text-xs font-medium",
           trend === "up" && "text-emerald-400",
           trend === "down" && "text-red-400",
-          trend === "neutral" && "text-slate-500"
+          trend === "neutral" && "text-white/30"
         )}>
           {trend === "up" && "↑"}
           {trend === "down" && "↓"}
@@ -199,7 +223,7 @@ export function GlowButton({
 }: {
   children: React.ReactNode;
   className?: string;
-  variant?: "cyan" | "green" | "amber" | "red" | "purple";
+  variant?: "cyan" | "green" | "amber" | "red" | "purple" | "secondary" | "hero";
   size?: "sm" | "default" | "lg";
   onClick?: () => void;
   disabled?: boolean;
@@ -207,17 +231,19 @@ export function GlowButton({
   "data-testid"?: string;
 }) {
   const variantClasses = {
-    cyan: "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 shadow-cyan-500/40 hover:shadow-cyan-400/60",
-    green: "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 shadow-emerald-500/40 hover:shadow-emerald-400/60",
-    amber: "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 shadow-amber-500/40 hover:shadow-amber-400/60",
-    red: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 shadow-red-500/40 hover:shadow-red-400/60",
-    purple: "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 shadow-purple-500/40 hover:shadow-purple-400/60",
+    cyan: "bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-[0_0_30px_rgba(6,182,212,0.25)]",
+    green: "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.25)]",
+    amber: "bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.25)]",
+    red: "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-400 hover:to-red-500 shadow-[0_0_30px_rgba(239,68,68,0.25)]",
+    purple: "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-400 hover:to-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.25)]",
+    secondary: "bg-transparent border border-white/10 hover:border-cyan-500/30 hover:bg-white/5",
+    hero: "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 shadow-[0_0_50px_rgba(168,85,247,0.3)] border-0",
   };
 
   const sizeClasses = {
     sm: "px-4 py-2.5 min-h-[44px] text-sm",
     default: "px-5 py-3 min-h-[44px] md:px-6 md:py-3",
-    lg: "px-7 py-4 min-h-[48px] text-lg",
+    lg: "h-13 px-10 min-h-[44px] text-base",
   };
 
   return (
@@ -228,7 +254,7 @@ export function GlowButton({
       disabled={disabled}
       type={type}
       className={cn(
-        "relative rounded-xl font-semibold text-white shadow-lg transition-all duration-200",
+        "relative rounded-xl font-bold text-white shadow-lg transition-all duration-200",
         variantClasses[variant],
         sizeClasses[size],
         disabled && "opacity-50 cursor-not-allowed",
@@ -409,13 +435,42 @@ export function SectionHeader({
   title, 
   subtitle, 
   action,
-  icon 
+  icon,
+  badge,
+  centered = false
 }: { 
   title: string;
   subtitle?: string;
   action?: React.ReactNode;
   icon?: React.ReactNode;
+  badge?: string;
+  centered?: boolean;
 }) {
+  if (centered) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className="text-center mb-12"
+      >
+        {badge && (
+          <span className="inline-flex items-center rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-3 py-1 text-xs font-medium mb-4">
+            {badge}
+          </span>
+        )}
+        <h2 className="text-3xl sm:text-4xl font-bold mb-3">
+          <span className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+            {title}
+          </span>
+        </h2>
+        {subtitle && (
+          <p className="text-white/40 max-w-xl mx-auto">{subtitle}</p>
+        )}
+      </motion.div>
+    );
+  }
+
   return (
     <div className="flex items-center justify-between mb-4 md:mb-6">
       <div className="flex items-center gap-3">
@@ -426,7 +481,7 @@ export function SectionHeader({
         )}
         <div>
           <h2 className="text-lg md:text-xl font-bold text-white">{title}</h2>
-          {subtitle && <p className="text-sm text-slate-400">{subtitle}</p>}
+          {subtitle && <p className="text-sm text-white/40">{subtitle}</p>}
         </div>
       </div>
       {action}
@@ -451,11 +506,11 @@ export function EmptyState({
       animate={{ opacity: 1, y: 0 }}
       className="flex flex-col items-center justify-center py-12 px-4 text-center"
     >
-      <div className="p-4 rounded-2xl bg-slate-800/50 mb-4 text-slate-500">
+      <div className="p-4 rounded-2xl bg-white/5 mb-4 text-white/30">
         {icon}
       </div>
-      <h3 className="text-lg font-semibold text-slate-300 mb-1">{title}</h3>
-      {description && <p className="text-sm text-slate-500 mb-4 max-w-xs">{description}</p>}
+      <h3 className="text-lg font-semibold text-white/70 mb-1">{title}</h3>
+      {description && <p className="text-sm text-white/40 mb-4 max-w-xs">{description}</p>}
       {action}
     </motion.div>
   );
@@ -547,37 +602,41 @@ export function PageHeader({
   backAction?: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl">
-      <div className="flex h-16 items-center justify-between px-4 md:px-6">
-        <div className="flex items-center gap-3">
-          {backAction && (
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={backAction}
-              className="p-2 -ml-2 rounded-lg hover:bg-white/5 text-slate-400"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </motion.button>
-          )}
-          {icon && (
-            <div className={cn("p-2 rounded-xl bg-gradient-to-br", ICON_COLORS[iconColor])}>
-              {icon}
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-slate-950/90 backdrop-blur-xl">
+        <div className="container mx-auto px-4 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {backAction && (
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={backAction}
+                className="p-2 -ml-2 rounded-lg hover:bg-white/5 text-white/40 min-h-[44px] flex items-center"
+                data-testid="button-back"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </motion.button>
+            )}
+            {icon && (
+              <div className={cn("p-2 rounded-xl bg-gradient-to-br", ICON_COLORS[iconColor])}>
+                {icon}
+              </div>
+            )}
+            <div>
+              <h1 className="text-lg font-bold text-white">{title}</h1>
+              {subtitle && <p className={cn("text-xs", subtitleColor || "text-white/40")}>{subtitle}</p>}
+            </div>
+          </div>
+          {actions && (
+            <div className="flex items-center gap-2">
+              {actions}
             </div>
           )}
-          <div>
-            <h1 className="text-lg md:text-xl font-bold text-white">{title}</h1>
-            {subtitle && <p className={cn("text-xs md:text-sm", subtitleColor || "text-slate-400")}>{subtitle}</p>}
-          </div>
         </div>
-        {actions && (
-          <div className="flex items-center gap-2">
-            {actions}
-          </div>
-        )}
-      </div>
-    </header>
+      </nav>
+      <div className="h-14" />
+    </>
   );
 }
 
