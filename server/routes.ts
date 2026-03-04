@@ -2,7 +2,7 @@ import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import crypto from "crypto";
 import { 
   insertUserSchema, insertStandSchema, insertItemSchema, insertMessageSchema,
@@ -10,7 +10,7 @@ import {
   insertInventoryCountSchema, insertQuickMessageSchema, insertConversationSchema, insertConversationMessageSchema,
   insertIncidentSchema, insertCountSessionSchema, insertStandIssueSchema, insertMenuBoardSchema,
   insertAuditLogSchema, insertEmergencyAlertSchema, insertOrbitRosterSchema, insertOrbitShiftSchema,
-  insertAlcoholViolationSchema, insertAssetStampSchema, users,
+  insertAlcoholViolationSchema, insertAssetStampSchema, users, affiliateReferrals,
   QUICK_CALL_ROLES, TENANT_API_SCOPES
 } from "@shared/schema";
 import { z } from "zod";
@@ -129,6 +129,16 @@ export async function registerRoutes(
         return res.status(401).json({ error: "Invalid PIN" });
       }
       await storage.updateUserOnlineStatus(user.id, true);
+
+      try {
+        const { createTrustStamp } = await import("./hallmark");
+        await createTrustStamp({
+          userId: parseInt(user.id),
+          category: 'auth-login',
+          data: { device: req.headers['user-agent'] || 'unknown', ip: req.ip || 'unknown' },
+        });
+      } catch (_e) {}
+
       res.json({ user });
     } catch (error) {
       console.error("Login error:", error);
@@ -141,6 +151,10 @@ export async function registerRoutes(
       const { userId } = req.body;
       if (userId) {
         await storage.updateUserOnlineStatus(userId, false);
+        try {
+          const { createTrustStamp } = await import("./hallmark");
+          await createTrustStamp({ userId: parseInt(userId), category: 'auth-logout', data: {} });
+        } catch (_e) {}
       }
       res.json({ success: true });
     } catch (error) {
@@ -255,6 +269,31 @@ export async function registerRoutes(
         undefined,
         req
       );
+
+      try {
+        const { createTrustStamp } = await import("./hallmark");
+        const { ensureUserHash, convertReferral } = await import("./affiliate");
+        await ensureUserHash(user.id);
+        await createTrustStamp({
+          userId: parseInt(user.id),
+          category: 'auth-register',
+          data: { department, appContext: 'orby-commander' },
+        });
+
+        const { referralHash: refHash } = req.body;
+        if (refHash) {
+          const pendingReferrals = await db.select().from(affiliateReferrals)
+            .where(and(
+              eq(affiliateReferrals.referralHash, refHash),
+              eq(affiliateReferrals.status, 'pending'),
+            ))
+            .orderBy(desc(affiliateReferrals.createdAt))
+            .limit(1);
+          if (pendingReferrals.length > 0) {
+            await convertReferral(pendingReferrals[0].id, parseInt(user.id));
+          }
+        }
+      } catch (_e) {}
       
       res.status(201).json({ success: true, message: "Registration successful" });
     } catch (error) {
@@ -6752,6 +6791,128 @@ Maintain professional composure. Answer inspector questions honestly. Report any
     } catch (error) {
       console.error("Partner API staff error:", error);
       res.status(500).json({ error: "Failed to retrieve staff" });
+    }
+  });
+
+  // ========== TRUST LAYER HALLMARK SYSTEM ==========
+  const hallmarkService = await import("./hallmark");
+
+  app.get("/api/hallmark/genesis", async (_req: Request, res: Response) => {
+    try {
+      const genesis = await hallmarkService.getGenesisHallmark();
+      if (!genesis) return res.status(404).json({ error: "Genesis hallmark not yet created" });
+      res.json(genesis);
+    } catch (error) {
+      console.error("Error getting genesis hallmark:", error);
+      res.status(500).json({ error: "Failed to get genesis hallmark" });
+    }
+  });
+
+  app.get("/api/hallmark/:id/verify", async (req: Request, res: Response) => {
+    try {
+      const result = await hallmarkService.verifyHallmark(req.params.id);
+      if (!result.verified) return res.status(404).json(result);
+      res.json(result);
+    } catch (error) {
+      console.error("Error verifying hallmark:", error);
+      res.status(500).json({ error: "Failed to verify hallmark" });
+    }
+  });
+
+  app.get("/api/hallmarks", async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const hallmarksList = await hallmarkService.getAllHallmarks(limit);
+      res.json(hallmarksList);
+    } catch (error) {
+      console.error("Error getting hallmarks:", error);
+      res.status(500).json({ error: "Failed to get hallmarks" });
+    }
+  });
+
+  app.get("/api/hallmarks/user/:userId", async (req: Request, res: Response) => {
+    try {
+      const hallmarksList = await hallmarkService.getHallmarksByUser(parseInt(req.params.userId));
+      res.json(hallmarksList);
+    } catch (error) {
+      console.error("Error getting user hallmarks:", error);
+      res.status(500).json({ error: "Failed to get user hallmarks" });
+    }
+  });
+
+  app.get("/api/trust-stamps", async (req: Request, res: Response) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 100;
+      const category = req.query.category as string | undefined;
+      const stamps = category
+        ? await hallmarkService.getTrustStampsByCategory(category, limit)
+        : await hallmarkService.getAllTrustStamps(limit);
+      res.json(stamps);
+    } catch (error) {
+      console.error("Error getting trust stamps:", error);
+      res.status(500).json({ error: "Failed to get trust stamps" });
+    }
+  });
+
+  app.get("/api/trust-stamps/user/:userId", async (req: Request, res: Response) => {
+    try {
+      const stamps = await hallmarkService.getTrustStampsByUser(parseInt(req.params.userId));
+      res.json(stamps);
+    } catch (error) {
+      console.error("Error getting user trust stamps:", error);
+      res.status(500).json({ error: "Failed to get user trust stamps" });
+    }
+  });
+
+  // ========== AFFILIATE & REFERRAL SYSTEM ==========
+  const affiliateService = await import("./affiliate");
+
+  app.get("/api/affiliate/dashboard", async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.userId as string;
+      if (!userId) return res.status(400).json({ error: "userId required" });
+      const dashboard = await affiliateService.getAffiliateDashboard(userId);
+      res.json(dashboard);
+    } catch (error) {
+      console.error("Error getting affiliate dashboard:", error);
+      res.status(500).json({ error: "Failed to get affiliate dashboard" });
+    }
+  });
+
+  app.get("/api/affiliate/link", async (req: Request, res: Response) => {
+    try {
+      const userId = req.query.userId as string;
+      if (!userId) return res.status(400).json({ error: "userId required" });
+      const linkData = await affiliateService.getAffiliateLink(userId);
+      res.json(linkData);
+    } catch (error) {
+      console.error("Error getting affiliate link:", error);
+      res.status(500).json({ error: "Failed to get affiliate link" });
+    }
+  });
+
+  app.post("/api/affiliate/track", async (req: Request, res: Response) => {
+    try {
+      const { referralHash, platform } = req.body;
+      if (!referralHash) return res.status(400).json({ error: "referralHash required" });
+      const referral = await affiliateService.trackReferral(referralHash, platform || 'orby-commander');
+      if (!referral) return res.status(404).json({ error: "Referrer not found" });
+      res.json({ success: true, referral });
+    } catch (error) {
+      console.error("Error tracking referral:", error);
+      res.status(500).json({ error: "Failed to track referral" });
+    }
+  });
+
+  app.post("/api/affiliate/request-payout", async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) return res.status(400).json({ error: "userId required" });
+      const result = await affiliateService.requestPayout(userId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error requesting payout:", error);
+      res.status(500).json({ error: "Failed to request payout" });
     }
   });
 

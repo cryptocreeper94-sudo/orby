@@ -4,9 +4,25 @@
 Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designed to unify venue operations, replacing fragmented communication with a digital platform. It offers an Emergency Command Center, delivery lifecycle tracking, three-phase inventory counting, alcohol compliance monitoring, GPS-guided navigation, and real-time team communications. Orby aims to provide a complete operational solution for venues, from emergency response to inventory and team management, improving efficiency and compliance for event venues.
 
 ## Current Version
-**v1.0.16** - Partner API & Tenant Credentials (December 2025)
+**v1.0.17** - Trust Layer Hallmark System & Affiliate Program (March 2026)
 
 ### Recent Changelog
+- **v1.0.17**: Trust Layer Hallmark System & Affiliate Program
+  - Full Trust Layer ecosystem integration with OC prefix (App #20)
+  - Genesis hallmark OC-00000001 auto-created on server boot with parentGenesis TH-00000001
+  - Hallmark generation with SHA-256 hashing, simulated tx hashes, block heights
+  - Trust stamps on auth events (login, logout) with standardized categories
+  - Public verification endpoint: GET /api/hallmark/:id/verify
+  - Genesis hallmark detail page with blockchain record, ecosystem details, verification section
+  - Affiliate & Referral system with 5-tier commission structure (Base 10% to Diamond 20%)
+  - Affiliate dashboard with referral link, tier progress, stats, recent referrals/commissions
+  - Cross-app referral links (works across all 32 Trust Layer ecosystem apps)
+  - Referral tracking via /ref/:hash URL and POST /api/affiliate/track
+  - Payout request system (min 10 SIG) with trust stamp audit trail
+  - Footer: Genesis Hallmark badge (OC-00000001), Share & Earn link
+  - Users table: unique_hash column for ecosystem-wide affiliate IDs
+  - Database tables: hallmarks, trust_stamps, hallmark_counter, affiliate_referrals, affiliate_commissions
+  - Server files: server/hallmark.ts, server/affiliate.ts
 - **v1.0.16**: Partner API & Tenant Credentials
   - Secure API credentials system for tenant integrations
   - API key generation with orb_live_/orb_test_ prefixes

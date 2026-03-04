@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import { useLocation } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
-import { Shield, X, Clock, CheckCircle2, ExternalLink, Hash, Layers } from 'lucide-react';
+import { Shield, X, Clock, CheckCircle2, ExternalLink, Hash, Layers, Share2 } from 'lucide-react';
 
 interface AssetStamp {
   id: string;
@@ -25,6 +26,7 @@ interface AppFooterProps {
 }
 
 export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterProps) {
+  const [, navigate] = useLocation();
   const [isVersionModalOpen, setIsVersionModalOpen] = useState(false);
 
   const { data: packageVersion } = useQuery<{ version: string }>({
@@ -90,11 +92,22 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
 
             <div className="flex items-center gap-2">
               <button
+                onClick={() => navigate('/hallmark/OC-00000001')}
+                className="flex items-center gap-1 text-[10px] text-white/40 hover:text-cyan-400 transition-colors"
+                data-testid="footer-genesis-badge"
+              >
+                <Shield className="w-3 h-3 text-cyan-400" />
+                <span className="font-mono">OC-00000001</span>
+                <CheckCircle2 className="w-2.5 h-2.5 text-green-400" />
+              </button>
+
+              <span className="text-white/20">|</span>
+
+              <button
                 onClick={() => setIsVersionModalOpen(true)}
                 className="flex items-center gap-1 text-[10px] text-white/40 hover:text-cyan-400 transition-colors"
                 data-testid="footer-version-badge"
               >
-                <Shield className="w-3 h-3" />
                 <span className="font-mono">{currentVersion}</span>
                 {(latestVersion?.isBlockchainAnchored || hasReleaseVerification) && (
                   <CheckCircle2 className="w-2.5 h-2.5 text-green-400" />
@@ -103,16 +116,14 @@ export function AppFooter({ companyLogo, companyName = 'Legends' }: AppFooterPro
 
               <span className="text-white/20">|</span>
 
-              <a 
-                href="https://darkwavestudios.io" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-purple-400 hover:text-purple-300 transition-colors flex items-center gap-1 text-[10px]"
-                data-testid="link-darkwave"
+              <button
+                onClick={() => navigate('/affiliate')}
+                className="flex items-center gap-1 text-[10px] text-white/40 hover:text-emerald-400 transition-colors"
+                data-testid="footer-affiliate"
               >
-                <span>&copy; 2025 DarkWave Studios LLC</span>
-                <ExternalLink className="w-2.5 h-2.5" />
-              </a>
+                <Share2 className="w-3 h-3" />
+                <span>Share & Earn</span>
+              </button>
             </div>
           </div>
         </div>

@@ -58,6 +58,8 @@ import StadiumMapPage from "@/pages/StadiumMapPage";
 import EventSetup from "@/pages/EventSetup";
 import EventHistory from "@/pages/EventHistory";
 import UnifiedCommandCenter from "@/pages/UnifiedCommandCenter";
+import HallmarkDetail from "@/pages/HallmarkDetail";
+import AffiliateDashboard from "@/pages/AffiliateDashboard";
 import orbyCommanderImg from "@assets/generated_images/orby_commander_nobg.png";
 
 function SandboxContentWrapper({ children }: { children: React.ReactNode }) {
@@ -124,6 +126,9 @@ function Router() {
       <Route path="/event-setup" component={EventSetup} />
       <Route path="/event-history" component={EventHistory} />
       <Route path="/mission-control" component={UnifiedCommandCenter} />
+      <Route path="/hallmark/:id" component={HallmarkDetail} />
+      <Route path="/affiliate" component={AffiliateDashboard} />
+      <Route path="/ref/:hash" component={LoginPage} />
       <Route component={NotFound} />
     </Switch>
     </>

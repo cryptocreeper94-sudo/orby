@@ -66,6 +66,13 @@ app.use((req, res, next) => {
 (async () => {
   await registerRoutes(httpServer, app);
 
+  try {
+    const { seedGenesisHallmark } = await import("./hallmark");
+    await seedGenesisHallmark();
+  } catch (genesisErr) {
+    log(`Genesis hallmark seeding: ${genesisErr}`, 'hallmark');
+  }
+
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import { useStore } from "@/lib/mockData";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -45,9 +45,20 @@ function clearPersistence() {
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
+  const [, refParams] = useRoute('/ref/:hash');
   const login = useStore((state) => state.login);
   const currentUser = useStore((state) => state.currentUser);
   const { enterSandbox, isSandbox } = useMode();
+
+  useEffect(() => {
+    if (refParams?.hash) {
+      fetch('/api/affiliate/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ referralHash: refParams.hash, platform: 'orby-commander' }),
+      }).catch(() => {});
+    }
+  }, [refParams?.hash]);
   const [modeSelected, setModeSelected] = useState(() => {
     return sessionStorage.getItem(MODE_SELECTED_KEY) === 'true';
   });
