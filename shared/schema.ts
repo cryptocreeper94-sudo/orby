@@ -1677,12 +1677,12 @@ export const NISSAN_STADIUM_BETA_CONFIG = {
   showCommercialFeatures: false,
   showSalesContent: false,
   showInvestorContent: false,
-  hallmarkPrefix: 'ORB',
+  hallmarkPrefix: 'OC',
   metadata: {
     venueName: 'Nissan Stadium',
     operator: 'Legends Hospitality',
-    genesisHallmark: 'ORB-000000000013',
-    betaVersion: 'v1.0.7',
+    genesisHallmark: 'OC-00000001',
+    betaVersion: 'v1.0.17',
   }
 };
 
