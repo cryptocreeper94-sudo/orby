@@ -63,7 +63,7 @@ function MetricCard({ icon: Icon, label, value, color }: {
 }) {
   return (
     <div 
-      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-white/5 min-w-[130px]"
+      className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 min-w-[130px]"
       data-testid={`metric-${label.toLowerCase().replace(/\s+/g, '-')}`}
     >
       <div className={`p-2 rounded-lg bg-${color}-500/20`}>
@@ -71,7 +71,7 @@ function MetricCard({ icon: Icon, label, value, color }: {
       </div>
       <div>
         <div className="text-lg font-bold text-white">{value}</div>
-        <div className="text-xs text-slate-400">{label}</div>
+        <div className="text-xs text-white/40">{label}</div>
       </div>
     </div>
   );
@@ -98,7 +98,7 @@ function ShiftCard({ assignment, isToday }: { assignment: Assignment; isToday: b
       className={`p-3 rounded-lg border min-w-[200px] ${
         isToday 
           ? 'bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border-cyan-500/30' 
-          : 'bg-slate-800/40 border-white/5'
+          : 'bg-white/5 border-white/5'
       }`}
       data-testid={`shift-card-${assignment.id}`}
     >
@@ -108,10 +108,10 @@ function ShiftCard({ assignment, isToday }: { assignment: Assignment; isToday: b
         </span>
         {getStatusBadge(assignment.status || 'Scheduled')}
       </div>
-      <div className="text-xs text-slate-400 mb-1">
+      <div className="text-xs text-white/40 mb-1">
         {assignment.position} @ {assignment.stand_name || 'TBD'}
       </div>
-      <div className="text-xs text-slate-500">
+      <div className="text-xs text-white/30">
         {assignment.shift_start} - {assignment.shift_end}
       </div>
     </div>
@@ -128,7 +128,7 @@ function QuickActionCard({ href, icon: Icon, title, subtitle, color }: {
   return (
     <Link href={href}>
       <div 
-        className={`p-3 rounded-lg bg-slate-800/40 border border-white/5 hover:border-${color}-500/30 transition-colors cursor-pointer`}
+        className={`p-3 rounded-lg bg-white/5 border border-white/5 hover:border-${color}-500/30 transition-colors cursor-pointer`}
         data-testid={`action-${title.toLowerCase().replace(/\s+/g, '-')}`}
       >
         <div className="flex flex-col items-center text-center">
@@ -147,7 +147,7 @@ function StationStatusCard({ assignment }: { assignment: Assignment | null }) {
   if (!assignment) {
     return (
       <div 
-        className="p-4 rounded-lg bg-slate-800/40 border border-white/10 text-center"
+        className="p-4 rounded-lg bg-white/5 border border-white/10 text-center"
         data-testid="station-status-empty"
       >
         <Calendar className="h-8 w-8 mx-auto text-white/30 mb-2" />
@@ -268,12 +268,12 @@ export default function CulinaryCookDashboard() {
               <BentoCard span={8} title="Upcoming Shifts" data-testid="orders-section">
                 <div className="flex items-center gap-2 mb-3">
                   <Calendar className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs text-slate-400">Your scheduled shifts</span>
+                  <span className="text-xs text-white/40">Your scheduled shifts</span>
                 </div>
                 {shiftItems.length === 0 ? (
                   <div className="text-center py-6">
-                    <Calendar className="w-8 h-8 mx-auto mb-2 text-slate-600" />
-                    <p className="text-xs text-slate-400">No upcoming shifts</p>
+                    <Calendar className="w-8 h-8 mx-auto mb-2 text-white/20" />
+                    <p className="text-xs text-white/40">No upcoming shifts</p>
                   </div>
                 ) : (
                   <CarouselRail items={shiftItems} data-testid="orders-carousel" />
@@ -283,7 +283,7 @@ export default function CulinaryCookDashboard() {
               <BentoCard span={4} rowSpan={2} title="Recipe Guides" data-testid="recipes-section">
                 <div className="flex items-center gap-2 mb-3">
                   <BookOpen className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs text-slate-400">Quick Reference</span>
+                  <span className="text-xs text-white/40">Quick Reference</span>
                 </div>
                 <AccordionStack 
                   items={RECIPE_GUIDES}

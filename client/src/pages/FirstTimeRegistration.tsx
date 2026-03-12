@@ -154,7 +154,7 @@ export default function FirstTimeRegistration() {
                   </motion.div>
                   
                   <h2 className="text-2xl font-bold text-white mb-3">Location Check</h2>
-                  <p className="text-slate-400 mb-6">
+                  <p className="text-white/40 mb-6">
                     First-time registration requires you to be at Nissan Stadium.
                   </p>
                   
@@ -181,7 +181,7 @@ export default function FirstTimeRegistration() {
                     </GlowButton>
                   ) : null}
                   
-                  <p className="text-xs text-slate-500 mt-8">
+                  <p className="text-xs text-white/30 mt-8">
                     Your location is only used to verify you're on-site and is not stored.
                   </p>
                 </GlassCardContent>
@@ -208,7 +208,7 @@ export default function FirstTimeRegistration() {
                     <UserPlus className="h-10 w-10 text-white" />
                   </motion.div>
                   <h2 className="text-2xl font-bold text-white">Welcome to Orby</h2>
-                  <p className="text-sm text-slate-400 mt-2">Create your account to get started</p>
+                  <p className="text-sm text-white/40 mt-2">Create your account to get started</p>
                 </GlassCardHeader>
                 
                 <GlassCardContent>
@@ -224,11 +224,11 @@ export default function FirstTimeRegistration() {
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-300">Your Name</FormLabel>
+                            <FormLabel className="text-white/70">Your Name</FormLabel>
                             <FormControl>
                               <Input 
                                 placeholder="Enter your full name"
-                                className="bg-slate-800/50 border-white/10 text-white placeholder:text-slate-500"
+                                className="bg-white/5 border-white/10 text-white placeholder:text-white/30"
                                 data-testid="input-name"
                                 {...field} 
                               />
@@ -243,11 +243,11 @@ export default function FirstTimeRegistration() {
                         name="department"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-slate-300">Department</FormLabel>
+                            <FormLabel className="text-white/70">Department</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger 
-                                  className="bg-slate-800/50 border-white/10 text-white"
+                                  className="bg-white/5 border-white/10 text-white"
                                   data-testid="select-department"
                                 >
                                   <SelectValue placeholder="Select your department" />
@@ -272,7 +272,7 @@ export default function FirstTimeRegistration() {
                       <div className="pt-2">
                         <div className="flex items-center gap-2 mb-4">
                           <KeyRound className="h-4 w-4 text-cyan-400" />
-                          <span className="text-sm text-slate-300 font-medium">Create Your Personal PIN</span>
+                          <span className="text-sm text-white/70 font-medium">Create Your Personal PIN</span>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4">
@@ -281,12 +281,12 @@ export default function FirstTimeRegistration() {
                             name="newPin"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-slate-400 text-xs">New PIN</FormLabel>
+                                <FormLabel className="text-white/40 text-xs">New PIN</FormLabel>
                                 <FormControl>
                                   <Input 
                                     type="password"
                                     placeholder="••••"
-                                    className="text-center text-2xl tracking-[0.5em] h-14 font-mono bg-slate-800/50 border-white/10 text-white"
+                                    className="text-center text-2xl tracking-[0.5em] h-14 font-mono bg-white/5 border-white/10 text-white"
                                     maxLength={4}
                                     data-testid="input-new-pin"
                                     {...field} 
@@ -302,12 +302,12 @@ export default function FirstTimeRegistration() {
                             name="confirmPin"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-slate-400 text-xs">Confirm PIN</FormLabel>
+                                <FormLabel className="text-white/40 text-xs">Confirm PIN</FormLabel>
                                 <FormControl>
                                   <Input 
                                     type="password"
                                     placeholder="••••"
-                                    className="text-center text-2xl tracking-[0.5em] h-14 font-mono bg-slate-800/50 border-white/10 text-white"
+                                    className="text-center text-2xl tracking-[0.5em] h-14 font-mono bg-white/5 border-white/10 text-white"
                                     maxLength={4}
                                     data-testid="input-confirm-pin"
                                     {...field} 
@@ -347,7 +347,7 @@ export default function FirstTimeRegistration() {
                   <Button
                     variant="ghost"
                     onClick={() => setLocation('/')}
-                    className="w-full mt-4 text-slate-500 hover:text-slate-300"
+                    className="w-full mt-4 text-white/30 hover:text-white/70"
                     data-testid="button-back-to-login"
                   >
                     Back to Login
@@ -376,7 +376,7 @@ export default function FirstTimeRegistration() {
                   </motion.div>
                   
                   <h2 className="text-2xl font-bold text-white mb-3">Welcome Aboard!</h2>
-                  <p className="text-slate-400 mb-6">
+                  <p className="text-white/40 mb-6">
                     Your account has been created successfully. Redirecting to login...
                   </p>
                   
@@ -391,7 +391,7 @@ export default function FirstTimeRegistration() {
         </AnimatePresence>
 
         <footer className="mt-8 text-center">
-          <div className="text-xs text-slate-600">
+          <div className="text-xs text-white/20">
             Powered by <span className="font-bold text-cyan-500">DarkWave Studios, LLC</span>
           </div>
         </footer>

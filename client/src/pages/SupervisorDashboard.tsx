@@ -84,7 +84,7 @@ const SECTION_COLORS: Record<string, string> = {
   'Premium': 'from-amber-500 to-amber-600',
   'Outdoor Areas': 'from-cyan-500 to-cyan-600',
   'Vending': 'from-orange-500 to-orange-600',
-  'Other Locations': 'from-slate-500 to-slate-600'
+  'Other Locations': 'from-white/10 to-white/10'
 };
 
 export default function SupervisorDashboard() {
@@ -340,34 +340,34 @@ export default function SupervisorDashboard() {
     <div key="metric-stands" data-testid="metric-card-stands" className="w-32 md:w-40 h-24 p-3 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/10 border border-emerald-500/30">
       <div className="flex items-center gap-2 mb-1">
         <Activity className="h-4 w-4 text-emerald-400" />
-        <span className="text-xs text-slate-400">Stands</span>
+        <span className="text-xs text-white/40">Stands</span>
       </div>
       <div className="text-2xl font-bold text-emerald-400">{stands.length}</div>
-      <div className="text-xs text-slate-500">{openStands} open</div>
+      <div className="text-xs text-white/30">{openStands} open</div>
     </div>,
     <div key="metric-open" data-testid="metric-card-open" className="w-32 md:w-40 h-24 p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/30">
       <div className="flex items-center gap-2 mb-1">
         <CheckCircle2 className="h-4 w-4 text-blue-400" />
-        <span className="text-xs text-slate-400">Open</span>
+        <span className="text-xs text-white/40">Open</span>
       </div>
       <div className="text-2xl font-bold text-blue-400">{openStands}</div>
-      <div className="text-xs text-slate-500">operational</div>
+      <div className="text-xs text-white/30">operational</div>
     </div>,
     <div key="metric-closed" data-testid="metric-card-closed" className="w-32 md:w-40 h-24 p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30">
       <div className="flex items-center gap-2 mb-1">
         <Clock className="h-4 w-4 text-amber-400" />
-        <span className="text-xs text-slate-400">Closed</span>
+        <span className="text-xs text-white/40">Closed</span>
       </div>
       <div className="text-2xl font-bold text-amber-400">{closedStands}</div>
-      <div className="text-xs text-slate-500">pending</div>
+      <div className="text-xs text-white/30">pending</div>
     </div>,
     <div key="metric-sections" data-testid="metric-card-sections" className="w-32 md:w-40 h-24 p-3 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-600/10 border border-violet-500/30">
       <div className="flex items-center gap-2 mb-1">
         <Users className="h-4 w-4 text-violet-400" />
-        <span className="text-xs text-slate-400">Sections</span>
+        <span className="text-xs text-white/40">Sections</span>
       </div>
       <div className="text-2xl font-bold text-violet-400">{sortedSections.length}</div>
-      <div className="text-xs text-slate-500">areas</div>
+      <div className="text-xs text-white/30">areas</div>
     </div>,
   ];
 
@@ -398,23 +398,23 @@ export default function SupervisorDashboard() {
       key="action-map"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="w-24 h-20 rounded-xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-3 flex flex-col items-center justify-center gap-1 hover:bg-slate-700/50 transition-colors"
+      className="w-24 h-20 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-3 flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors"
       onClick={() => setShowMap(true)}
       data-testid="open-map"
     >
       <Map className="h-5 w-5 text-blue-400" />
-      <span className="text-xs font-medium text-slate-200">Map</span>
+      <span className="text-xs font-medium text-white/80">Map</span>
     </motion.button>,
     <motion.button
       key="action-warehouse"
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="w-24 h-20 rounded-xl border border-white/10 bg-slate-800/50 backdrop-blur-sm p-3 flex flex-col items-center justify-center gap-1 hover:bg-slate-700/50 transition-colors"
+      className="w-24 h-20 rounded-xl border border-white/10 bg-white/5 backdrop-blur-sm p-3 flex flex-col items-center justify-center gap-1 hover:bg-white/10 transition-colors"
       onClick={() => setShowWarehouseRequest(true)}
       data-testid="open-warehouse-request"
     >
       <Warehouse className="h-5 w-5 text-amber-400" />
-      <span className="text-xs font-medium text-slate-200">Supplies</span>
+      <span className="text-xs font-medium text-white/80">Supplies</span>
     </motion.button>,
   ];
 
@@ -427,13 +427,13 @@ export default function SupervisorDashboard() {
         onClick={() => { setActiveStandId(stand.id); updateStand(stand.id, stand.name, getStandSection(stand.name)); }}
         className={cn(
           "w-36 md:w-44 h-20 p-3 rounded-xl flex flex-col",
-          "bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-200",
+          "bg-white/5 hover:bg-white/10 transition-all duration-200",
           "border-l-3",
           stand.status === 'Open' ? "border-l-emerald-500" : "border-l-red-500"
         )}
         data-testid={`stand-carousel-${stand.id}`}
       >
-        <span className="text-slate-200 font-medium text-sm truncate">{stand.name}</span>
+        <span className="text-white/80 font-medium text-sm truncate">{stand.name}</span>
         <div className="flex items-center gap-2 mt-1">
           <Badge 
             variant="outline" 
@@ -446,7 +446,7 @@ export default function SupervisorDashboard() {
           >
             {stand.status}
           </Badge>
-          <span className="text-xs text-slate-500">{section}</span>
+          <span className="text-xs text-white/30">{section}</span>
         </div>
       </motion.button>
     ))
@@ -457,15 +457,15 @@ export default function SupervisorDashboard() {
       title: "Standard Operating Procedures",
       content: (
         <div className="space-y-2" data-testid="sop-content">
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-white/10/30 hover:bg-white/10 cursor-pointer">
             <FileText className="h-4 w-4 text-blue-400" />
             <span className="text-sm">Opening Procedures</span>
           </div>
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-white/10/30 hover:bg-white/10 cursor-pointer">
             <FileText className="h-4 w-4 text-blue-400" />
             <span className="text-sm">Closing Procedures</span>
           </div>
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-white/10/30 hover:bg-white/10 cursor-pointer">
             <FileText className="h-4 w-4 text-blue-400" />
             <span className="text-sm">Emergency Protocols</span>
           </div>
@@ -477,7 +477,7 @@ export default function SupervisorDashboard() {
       content: (
         <div className="space-y-2" data-testid="compliance-content">
           {supervisorDocs.filter(d => d.category === 'Compliance').map(doc => (
-            <div key={doc.id} className="flex items-center justify-between p-2 rounded-lg bg-slate-700/30">
+            <div key={doc.id} className="flex items-center justify-between p-2 rounded-lg bg-white/10/30">
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-amber-400" />
                 <span className="text-sm">{doc.title}</span>
@@ -488,7 +488,7 @@ export default function SupervisorDashboard() {
             </div>
           ))}
           {supervisorDocs.filter(d => d.category === 'Compliance').length === 0 && (
-            <p className="text-sm text-slate-500">No compliance documents</p>
+            <p className="text-sm text-white/30">No compliance documents</p>
           )}
         </div>
       )
@@ -497,15 +497,15 @@ export default function SupervisorDashboard() {
       title: "Documentation & Resources",
       content: (
         <div className="space-y-2" data-testid="documentation-content">
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-white/10/30 hover:bg-white/10 cursor-pointer">
             <FileText className="h-4 w-4 text-violet-400" />
             <span className="text-sm">Training Materials</span>
           </div>
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-white/10/30 hover:bg-white/10 cursor-pointer">
             <FileText className="h-4 w-4 text-violet-400" />
             <span className="text-sm">Contact Directory</span>
           </div>
-          <div className="flex items-center gap-2 p-2 rounded-lg bg-slate-700/30 hover:bg-slate-700/50 cursor-pointer">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-white/10/30 hover:bg-white/10 cursor-pointer">
             <FileText className="h-4 w-4 text-violet-400" />
             <span className="text-sm">Equipment Manuals</span>
           </div>
@@ -532,7 +532,7 @@ export default function SupervisorDashboard() {
           actions={
             <div className="flex items-center gap-2">
               <HeaderTutorialButton variant="icon" />
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-400 hover:text-white" data-testid="btn-logout">
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white/40 hover:text-white" data-testid="btn-logout">
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
@@ -558,14 +558,14 @@ export default function SupervisorDashboard() {
                 <div className="flex-1 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
                   <div className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                    <span className="text-sm text-slate-300">Open</span>
+                    <span className="text-sm text-white/70">Open</span>
                   </div>
                   <div className="text-xl font-bold text-emerald-400 mt-1">{openStands}</div>
                 </div>
                 <div className="flex-1 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-red-400" />
-                    <span className="text-sm text-slate-300">Closed</span>
+                    <span className="text-sm text-white/70">Closed</span>
                   </div>
                   <div className="text-xl font-bold text-red-400 mt-1">{closedStands}</div>
                 </div>
@@ -578,13 +578,13 @@ export default function SupervisorDashboard() {
                   placeholder="Search stands..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="bg-slate-800/50 border-white/10 text-slate-200 placeholder:text-slate-500 pl-4 pr-10 rounded-xl h-10 mb-3"
+                  className="bg-white/5 border-white/10 text-white/80 placeholder:text-white/30 pl-4 pr-10 rounded-xl h-10 mb-3"
                   data-testid="input-search-stands"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-2.5 text-slate-500 hover:text-slate-300"
+                    className="absolute right-3 top-2.5 text-white/30 hover:text-white/70"
                     data-testid="btn-clear-search"
                   >
                     ×
@@ -594,7 +594,7 @@ export default function SupervisorDashboard() {
               {standCarouselItems.length > 0 ? (
                 <CarouselRail items={standCarouselItems} showDots />
               ) : (
-                <div className="text-center py-6 text-slate-500">
+                <div className="text-center py-6 text-white/30">
                   <ClipboardList className="h-10 w-10 mx-auto mb-2 opacity-30" />
                   <p className="text-sm">No stands found</p>
                 </div>
@@ -620,7 +620,7 @@ export default function SupervisorDashboard() {
         </main>
 
         <Dialog open={showWarehouseRequest} onOpenChange={setShowWarehouseRequest}>
-          <DialogContent className="max-w-md max-h-[90vh] flex flex-col bg-slate-900/95 backdrop-blur-xl border-white/10 text-slate-200">
+          <DialogContent className="max-w-md max-h-[90vh] flex flex-col bg-[rgba(12,18,36,0.95)] backdrop-blur-xl border-white/10 text-white/80">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-amber-400">
                 <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600">
@@ -643,15 +643,15 @@ export default function SupervisorDashboard() {
             <div className="flex-1 overflow-hidden flex flex-col space-y-4">
               {stands.length > 1 && (
                 <div>
-                  <Label className="text-slate-300">For Stand</Label>
+                  <Label className="text-white/70">For Stand</Label>
                   <Select 
                     value={selectedStandForRequest || stands[0]?.id} 
                     onValueChange={setSelectedStandForRequest}
                   >
-                    <SelectTrigger className="bg-slate-800/50 border-white/10 mt-1.5" data-testid="select-stand-for-request">
+                    <SelectTrigger className="bg-white/5 border-white/10 mt-1.5" data-testid="select-stand-for-request">
                       <SelectValue placeholder="Select stand..." />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700">
+                    <SelectContent className="bg-white/5 border-white/[0.08]">
                       {stands.map(stand => (
                         <SelectItem key={stand.id} value={stand.id}>{stand.name}</SelectItem>
                       ))}
@@ -661,12 +661,12 @@ export default function SupervisorDashboard() {
               )}
 
               <div>
-                <Label className="text-slate-300">Priority</Label>
+                <Label className="text-white/70">Priority</Label>
                 <Select value={requestPriority} onValueChange={(v) => setRequestPriority(v as typeof requestPriority)}>
-                  <SelectTrigger className="bg-slate-800/50 border-white/10 mt-1.5" data-testid="select-request-priority">
+                  <SelectTrigger className="bg-white/5 border-white/10 mt-1.5" data-testid="select-request-priority">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-slate-800 border-slate-700">
+                  <SelectContent className="bg-white/5 border-white/[0.08]">
                     <SelectItem value="Normal">
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-blue-500"></span>
@@ -690,21 +690,21 @@ export default function SupervisorDashboard() {
               </div>
 
               <div className="flex-1 overflow-hidden">
-                <Label className="text-slate-300 mb-2 block">Items ({getTotalItemsInRequest()} selected)</Label>
+                <Label className="text-white/70 mb-2 block">Items ({getTotalItemsInRequest()} selected)</Label>
                 {warehouseProducts.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500">
+                  <div className="text-center py-8 text-white/30">
                     <Package className="h-10 w-10 mx-auto mb-2 opacity-50" />
                     <p className="text-sm">No products available</p>
                   </div>
                 ) : (
-                  <ScrollArea className="h-[200px] border border-white/10 rounded-xl p-2 bg-slate-800/30">
+                  <ScrollArea className="h-[200px] border border-white/10 rounded-xl p-2 bg-white/[0.03]">
                     <div className="space-y-2">
                       {warehouseCategories.map(category => {
                         const categoryProducts = warehouseProducts.filter(p => p.categoryId === category.id);
                         if (categoryProducts.length === 0) return null;
                         return (
                           <div key={category.id}>
-                            <div className="text-xs font-semibold text-slate-400 uppercase mb-1 sticky top-0 bg-slate-800 py-1 px-2 rounded">
+                            <div className="text-xs font-semibold text-white/40 uppercase mb-1 sticky top-0 bg-white/5 py-1 px-2 rounded">
                               {category.name}
                             </div>
                             {categoryProducts.map(product => (
@@ -714,8 +714,8 @@ export default function SupervisorDashboard() {
                                 data-testid={`warehouse-product-${product.id}`}
                               >
                                 <div className="flex-1 min-w-0">
-                                  <span className="text-sm text-slate-200 truncate block">{product.name}</span>
-                                  <span className="text-xs text-slate-500">{product.unit}</span>
+                                  <span className="text-sm text-white/80 truncate block">{product.name}</span>
+                                  <span className="text-xs text-white/30">{product.unit}</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   <Button
@@ -731,7 +731,7 @@ export default function SupervisorDashboard() {
                                   >
                                     <Minus className="h-3 w-3" />
                                   </Button>
-                                  <span className="w-8 text-center font-mono text-sm text-slate-200">
+                                  <span className="w-8 text-center font-mono text-sm text-white/80">
                                     {requestItems[product.id] || 0}
                                   </span>
                                   <Button
@@ -758,20 +758,20 @@ export default function SupervisorDashboard() {
               </div>
 
               <div>
-                <Label className="text-slate-300">Notes</Label>
+                <Label className="text-white/70">Notes</Label>
                 <Textarea
                   placeholder="Special instructions..."
                   value={requestNotes}
                   onChange={(e) => setRequestNotes(e.target.value)}
                   rows={2}
-                  className="bg-slate-800/50 border-white/10 text-slate-200 mt-1.5"
+                  className="bg-white/5 border-white/10 text-white/80 mt-1.5"
                   data-testid="input-request-notes"
                 />
               </div>
             </div>
 
             <DialogFooter className="gap-2 mt-4">
-              <Button variant="ghost" onClick={() => setShowWarehouseRequest(false)} className="text-slate-400" data-testid="btn-cancel-request">
+              <Button variant="ghost" onClick={() => setShowWarehouseRequest(false)} className="text-white/40" data-testid="btn-cancel-request">
                 Cancel
               </Button>
               <GlowButton 
@@ -792,7 +792,7 @@ export default function SupervisorDashboard() {
         </Dialog>
 
         {showMap && (
-          <div className="fixed inset-0 z-50 bg-slate-950">
+          <div className="fixed inset-0 z-50 bg-[#050508]">
             <InteractiveMap 
               onClose={() => setShowMap(false)} 
               showNavigation={true}
@@ -801,7 +801,7 @@ export default function SupervisorDashboard() {
         )}
 
         {showSupervisorPack && (
-          <div className="fixed inset-0 z-50 bg-slate-950">
+          <div className="fixed inset-0 z-50 bg-[#050508]">
             <SupervisorPack 
               onClose={() => setShowSupervisorPack(false)}
               supervisorName={currentUser?.name}
@@ -850,7 +850,7 @@ export default function SupervisorDashboard() {
                 </div>
              </div>
              <div className="p-6 bg-black flex justify-between items-center">
-               <Button variant="secondary" onClick={() => setShowScanner(false)} className="bg-slate-800" data-testid="btn-cancel-scanner">Cancel</Button>
+               <Button variant="secondary" onClick={() => setShowScanner(false)} className="bg-white/5" data-testid="btn-cancel-scanner">Cancel</Button>
                <GlowButton variant="cyan" onClick={() => setShowScanner(false)} data-testid="btn-capture-scanner">Capture</GlowButton>
              </div>
            </div>
@@ -860,7 +860,7 @@ export default function SupervisorDashboard() {
           <BentoCard span={12} data-testid="stand-tabs-card">
             <Tabs defaultValue="inventory" className="w-full" onValueChange={(tab) => { setActiveTab(tab); updateTab(tab); }}>
               <div className="flex items-center justify-between mb-4">
-                <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 rounded-2xl p-1">
+                <TabsList className="grid w-full grid-cols-3 bg-white/5 rounded-2xl p-1">
                   <TabsTrigger value="inventory" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400 rounded-xl" data-testid="tab-inventory">
                     Inventory
                   </TabsTrigger>
@@ -888,12 +888,12 @@ export default function SupervisorDashboard() {
                 <motion.button
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
-                  className="w-full py-3 px-4 rounded-xl border border-white/10 bg-slate-800/50 flex items-center justify-center gap-2 hover:bg-slate-700/50 transition-colors"
+                  className="w-full py-3 px-4 rounded-xl border border-white/10 bg-white/5 flex items-center justify-center gap-2 hover:bg-white/10 transition-colors"
                   onClick={() => setShowScanner(true)}
                   data-testid="btn-scan-item"
                 >
                   <QrCode className="h-4 w-4 text-cyan-400" /> 
-                  <span className="text-slate-200 font-medium">Scan Item</span>
+                  <span className="text-white/80 font-medium">Scan Item</span>
                 </motion.button>
 
                 <Accordion type="single" collapsible className="w-full space-y-2">
@@ -902,7 +902,7 @@ export default function SupervisorDashboard() {
                      const count = standCounts[item.id] || { startCount: 0, adds: 0, endCount: 0, spoilage: 0, sold: 0 };
                      
                      return (
-                      <AccordionItem key={item.id} value={item.id} className="bg-slate-800/40 border border-white/10 rounded-xl px-4" data-testid={`inventory-item-${item.id}`}>
+                      <AccordionItem key={item.id} value={item.id} className="bg-white/5 border border-white/10 rounded-xl px-4" data-testid={`inventory-item-${item.id}`}>
                         <AccordionTrigger className="hover:no-underline py-3">
                           <div className="flex items-center gap-3 w-full text-left">
                             <div className={cn(
@@ -914,18 +914,18 @@ export default function SupervisorDashboard() {
                               {item.category === 'Beverage' ? <Beer className="h-4 w-4 text-white" /> : <UtensilsCrossed className="h-4 w-4 text-white" />}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="font-bold text-sm text-slate-200 truncate">{item.name}</div>
-                              <div className="text-xs text-slate-500">Sold: <span className="font-mono font-bold text-cyan-400">{count.sold}</span></div>
+                              <div className="font-bold text-sm text-white/80 truncate">{item.name}</div>
+                              <div className="text-xs text-white/30">Sold: <span className="font-mono font-bold text-cyan-400">{count.sold}</span></div>
                             </div>
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="pb-4">
                           <div className="grid grid-cols-2 gap-4 pt-2">
                             <div className="space-y-1.5">
-                              <label className="text-xs font-medium text-slate-400 uppercase">Start</label>
+                              <label className="text-xs font-medium text-white/40 uppercase">Start</label>
                               <Input 
                                 type="number" 
-                                className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-slate-200 rounded-xl" 
+                                className="text-center font-mono text-lg bg-white/5 border-white/10 text-white/80 rounded-xl" 
                                 value={count.startCount}
                                 onChange={(e) => updateCount(activeStandId!, item.id, 'startCount', parseInt(e.target.value) || 0)}
                                 data-testid={`input-start-${item.id}`}
@@ -935,7 +935,7 @@ export default function SupervisorDashboard() {
                               <label className="text-xs font-medium text-emerald-400 uppercase">Adds</label>
                               <Input 
                                 type="number" 
-                                className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-emerald-400 rounded-xl" 
+                                className="text-center font-mono text-lg bg-white/5 border-white/10 text-emerald-400 rounded-xl" 
                                 value={count.adds}
                                 onChange={(e) => updateCount(activeStandId!, item.id, 'adds', parseInt(e.target.value) || 0)}
                                 data-testid={`input-adds-${item.id}`}
@@ -945,7 +945,7 @@ export default function SupervisorDashboard() {
                               <label className="text-xs font-medium text-blue-400 uppercase">End</label>
                               <Input 
                                 type="number" 
-                                className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-blue-400 rounded-xl" 
+                                className="text-center font-mono text-lg bg-white/5 border-white/10 text-blue-400 rounded-xl" 
                                 value={count.endCount}
                                 onChange={(e) => updateCount(activeStandId!, item.id, 'endCount', parseInt(e.target.value) || 0)}
                                 data-testid={`input-end-${item.id}`}
@@ -955,7 +955,7 @@ export default function SupervisorDashboard() {
                               <label className="text-xs font-medium text-red-400 uppercase">Spoilage</label>
                               <Input 
                                 type="number" 
-                                className="text-center font-mono text-lg bg-slate-800/50 border-white/10 text-red-400 rounded-xl" 
+                                className="text-center font-mono text-lg bg-white/5 border-white/10 text-red-400 rounded-xl" 
                                 value={count.spoilage}
                                 onChange={(e) => updateCount(activeStandId!, item.id, 'spoilage', parseInt(e.target.value) || 0)}
                                 data-testid={`input-spoilage-${item.id}`}
@@ -981,7 +981,7 @@ export default function SupervisorDashboard() {
                        <motion.div 
                          key={doc.id} 
                          whileHover={{ x: 4 }}
-                         className="border border-white/10 rounded-xl p-4 bg-slate-800/40 flex items-center justify-between"
+                         className="border border-white/10 rounded-xl p-4 bg-white/5 flex items-center justify-between"
                          data-testid={`compliance-doc-${doc.id}`}
                        >
                          <div className="flex items-center gap-3">
@@ -995,8 +995,8 @@ export default function SupervisorDashboard() {
                               <FileText className="text-blue-400 w-4 h-4" />}
                            </div>
                            <div>
-                             <div className="font-bold text-sm text-slate-200">{doc.title}</div>
-                             <div className="text-xs text-slate-500">{doc.category}</div>
+                             <div className="font-bold text-sm text-white/80">{doc.title}</div>
+                             <div className="text-xs text-white/30">{doc.category}</div>
                            </div>
                          </div>
                          {doc.requiresSignature ? (
@@ -1004,7 +1004,7 @@ export default function SupervisorDashboard() {
                              <PenTool className="w-3.5 h-3.5" /> Sign
                            </Button>
                          ) : (
-                           <Button size="sm" variant="ghost" className="text-slate-400" data-testid={`btn-view-doc-${doc.id}`}>View</Button>
+                           <Button size="sm" variant="ghost" className="text-white/40" data-testid={`btn-view-doc-${doc.id}`}>View</Button>
                          )}
                        </motion.div>
                      ))}
@@ -1019,8 +1019,8 @@ export default function SupervisorDashboard() {
 
                   <div className="space-y-2 pt-4 border-t border-white/10 mt-4">
                       <div className="flex items-center justify-between">
-                        <label className="text-sm font-medium text-slate-300">Supervisor Signature</label>
-                        <Button variant="ghost" size="sm" onClick={clearSignature} disabled={complianceSubmitted} className="text-slate-400" data-testid="btn-clear-signature">
+                        <label className="text-sm font-medium text-white/70">Supervisor Signature</label>
+                        <Button variant="ghost" size="sm" onClick={clearSignature} disabled={complianceSubmitted} className="text-white/40" data-testid="btn-clear-signature">
                           Clear
                         </Button>
                       </div>

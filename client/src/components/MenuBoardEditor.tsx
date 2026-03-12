@@ -306,14 +306,14 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
   }
 
   return (
-    <div className="h-full flex flex-col bg-slate-900">
+    <div className="h-full flex flex-col bg-[#0c1224]">
       {/* Toolbar */}
-      <div className="bg-slate-800 border-b border-slate-700 p-3 flex items-center gap-3 flex-wrap">
+      <div className="bg-white/5 border-b border-white/[0.08] p-3 flex items-center gap-3 flex-wrap">
         <Button variant="ghost" size="sm" onClick={onBack} data-testid="menu-editor-back">
           <ChevronLeft className="h-4 w-4 mr-1" /> Back
         </Button>
-        <div className="h-6 w-px bg-slate-600" />
-        <span className="font-semibold text-slate-300">{boardName}</span>
+        <div className="h-6 w-px bg-white/10" />
+        <span className="font-semibold text-white/70">{boardName}</span>
         <div className="flex-1" />
         
         <Button 
@@ -378,7 +378,7 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
                     {slide.title}
                   </div>
                 </div>
-                <div className="text-gray-400 text-xs mt-1 truncate">
+                <div className="text-white/40 text-xs mt-1 truncate">
                   {slide.title}
                 </div>
               </div>
@@ -490,7 +490,7 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
         </div>
 
         {/* Right Panel - Properties */}
-        <div className="w-72 bg-slate-800 border-l border-slate-700 p-4 overflow-auto">
+        <div className="w-72 bg-white/5 border-l border-white/[0.08] p-4 overflow-auto">
           <Tabs defaultValue="slide" className="w-full">
             <TabsList className="w-full">
               <TabsTrigger value="slide" className="flex-1">Slide</TabsTrigger>
@@ -519,7 +519,7 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
                       className={`w-8 h-8 rounded border-2 ${
                         currentSlide?.backgroundColor === color 
                           ? 'border-blue-500 ring-2 ring-blue-500/30' 
-                          : 'border-slate-600'
+                          : 'border-white/10'
                       }`}
                       style={{ backgroundColor: color }}
                       onClick={() => updateSlide({ backgroundColor: color })}
@@ -535,7 +535,7 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
                   {TEMPLATES.map((template) => (
                     <button
                       key={template.name}
-                      className="w-full p-2 rounded border border-slate-600 text-left text-sm hover:bg-slate-700 flex items-center gap-2"
+                      className="w-full p-2 rounded border border-white/10 text-left text-sm hover:bg-white/10 flex items-center gap-2"
                       onClick={() => applyTemplate(template)}
                       data-testid={`template-${template.name}`}
                     >
@@ -633,7 +633,7 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
                           className={`w-8 h-8 rounded border-2 ${
                             selectedElement.color === color 
                               ? 'border-blue-500 ring-2 ring-blue-500/30' 
-                              : 'border-slate-600'
+                              : 'border-white/10'
                           }`}
                           style={{ backgroundColor: color }}
                           onClick={() => updateElement(selectedElement.id, { color })}
@@ -683,7 +683,7 @@ export function MenuBoardEditor({ boardId, boardName, initialSlides, onSave, onB
                 </>
               )}
               {!selectedElement && (
-                <div className="text-gray-500 text-sm text-center py-8">
+                <div className="text-white/30 text-sm text-center py-8">
                   Select an element to edit its properties
                 </div>
               )}

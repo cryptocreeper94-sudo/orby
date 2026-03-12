@@ -33,7 +33,7 @@ const AccordionStack = React.forwardRef<HTMLDivElement, AccordionStackProps>(
             data-testid={`accordion-stack-item-${index}`}
             className={cn(
               "rounded-lg overflow-hidden",
-              "bg-slate-800/40 border border-white/5",
+              "bg-white/5 border border-white/5",
               "data-[state=open]:border-cyan-400/30",
               "transition-colors duration-200"
             )}
@@ -44,14 +44,14 @@ const AccordionStack = React.forwardRef<HTMLDivElement, AccordionStackProps>(
                 className={cn(
                   "flex flex-1 items-center justify-between",
                   "px-3 py-2.5 text-sm font-medium text-left",
-                  "text-slate-300 hover:text-white",
+                  "text-white/70 hover:text-white",
                   "transition-colors duration-150",
                   "[&[data-state=open]]:text-cyan-400",
                   "[&[data-state=open]>svg]:rotate-180"
                 )}
               >
                 {item.title}
-                <ChevronDown className="h-4 w-4 shrink-0 text-slate-500 transition-transform duration-200" />
+                <ChevronDown className="h-4 w-4 shrink-0 text-white/30 transition-transform duration-200" />
               </AccordionPrimitive.Trigger>
             </AccordionPrimitive.Header>
             <AccordionPrimitive.Content
@@ -62,7 +62,7 @@ const AccordionStack = React.forwardRef<HTMLDivElement, AccordionStackProps>(
                 "data-[state=open]:animate-accordion-down"
               )}
             >
-              <div className="px-3 pb-3 pt-0 text-slate-400">{item.content}</div>
+              <div className="px-3 pb-3 pt-0 text-white/40">{item.content}</div>
             </AccordionPrimitive.Content>
           </AccordionPrimitive.Item>
         ))}

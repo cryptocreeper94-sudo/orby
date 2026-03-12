@@ -138,17 +138,17 @@ export default function MenuBoardCreator() {
   }
 
   const metricsItems = [
-    <div key="total" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-total-boards">
+    <div key="total" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-total-boards">
       <LayoutGrid className="h-5 w-5 text-cyan-400 mb-1" />
       <span className="text-xl font-bold text-white">{menuBoards.length}</span>
       <span className="text-[10px] text-white/50">Total Boards</span>
     </div>,
-    <div key="templates" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-templates">
+    <div key="templates" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-templates">
       <FileText className="h-5 w-5 text-purple-400 mb-1" />
       <span className="text-xl font-bold text-white">{menuBoards.filter((b: MenuBoard) => b.isTemplate).length}</span>
       <span className="text-[10px] text-white/50">Templates</span>
     </div>,
-    <div key="recent" className="flex flex-col items-center p-3 bg-slate-800/60 rounded-lg min-w-[100px]" data-testid="metric-recent">
+    <div key="recent" className="flex flex-col items-center p-3 bg-white/[0.06] rounded-lg min-w-[100px]" data-testid="metric-recent">
       <Calendar className="h-5 w-5 text-emerald-400 mb-1" />
       <span className="text-xl font-bold text-white">
         {menuBoards.filter((b: MenuBoard) => {
@@ -165,12 +165,12 @@ export default function MenuBoardCreator() {
   const boardCarouselItems = menuBoards.map((board: MenuBoard) => (
     <div 
       key={board.id}
-      className="flex flex-col p-3 bg-slate-800/60 rounded-lg min-w-[200px] max-w-[200px] border border-white/10 hover:border-cyan-400/50 transition-colors cursor-pointer group"
+      className="flex flex-col p-3 bg-white/[0.06] rounded-lg min-w-[200px] max-w-[200px] border border-white/10 hover:border-cyan-400/50 transition-colors cursor-pointer group"
       onClick={() => loadBoard(board)}
       data-testid={`menu-board-card-${board.id}`}
     >
-      <div className="aspect-video bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
-        <LayoutGrid className="h-6 w-6 text-slate-500" />
+      <div className="aspect-video bg-white/10 rounded-lg mb-2 flex items-center justify-center">
+        <LayoutGrid className="h-6 w-6 text-white/30" />
       </div>
       <div className="flex-1">
         <h3 className="text-sm font-medium text-white truncate" data-testid={`board-name-${board.id}`}>{board.name}</h3>
@@ -233,7 +233,7 @@ export default function MenuBoardCreator() {
           <Button
             size="sm"
             variant="outline"
-            className="border-white/20 text-slate-300"
+            className="border-white/20 text-white/70"
             onClick={() => setIsCreateDialogOpen(true)}
             data-testid="quick-create-board"
           >
@@ -245,19 +245,19 @@ export default function MenuBoardCreator() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" data-testid="menu-board-creator-page">
-      <div className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-xl border-b border-white/10 px-4 py-3">
+    <div className="min-h-screen bg-gradient-to-b from-[#050508] via-[#0c1224] to-[#050508]" data-testid="menu-board-creator-page">
+      <div className="sticky top-0 z-50 bg-[rgba(12,18,36,0.9)] backdrop-blur-xl border-b border-white/10 px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => setLocation('/manager')} data-testid="back-to-manager" className="text-slate-300 hover:text-slate-100">
+            <Button variant="ghost" onClick={() => setLocation('/manager')} data-testid="back-to-manager" className="text-white/70 hover:text-white">
               <ChevronLeft className="h-4 w-4 mr-1" /> Back
             </Button>
             <div>
-              <h1 className="text-lg font-bold text-slate-200 flex items-center gap-2" data-testid="text-page-title">
+              <h1 className="text-lg font-bold text-white/80 flex items-center gap-2" data-testid="text-page-title">
                 <LayoutGrid className="h-5 w-5 text-cyan-400" />
                 Menu Board Creator
               </h1>
-              <p className="text-xs text-slate-400">Create and manage digital menu displays</p>
+              <p className="text-xs text-white/40">Create and manage digital menu displays</p>
             </div>
           </div>
           
@@ -326,9 +326,9 @@ export default function MenuBoardCreator() {
               </div>
             ) : menuBoards.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8" data-testid="empty-boards-state">
-                <LayoutGrid className="h-10 w-10 text-slate-500 mb-3" />
-                <h3 className="text-sm font-medium text-slate-300 mb-1">No Menu Boards Yet</h3>
-                <p className="text-xs text-slate-400 text-center mb-3">
+                <LayoutGrid className="h-10 w-10 text-white/30 mb-3" />
+                <h3 className="text-sm font-medium text-white/70 mb-1">No Menu Boards Yet</h3>
+                <p className="text-xs text-white/40 text-center mb-3">
                   Create your first menu board to display on your digital screens
                 </p>
                 <Button onClick={() => setIsCreateDialogOpen(true)} data-testid="create-first-board" className="bg-cyan-600 hover:bg-cyan-700">

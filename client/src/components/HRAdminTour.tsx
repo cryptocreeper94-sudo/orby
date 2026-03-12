@@ -132,8 +132,8 @@ export function HRAdminTour() {
           animate={{ opacity: 1, y: 0 }}
           className="absolute left-1/2 bottom-8 -translate-x-1/2 w-full max-w-md px-4"
         >
-          <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-purple-500/40 shadow-2xl shadow-purple-500/20">
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-700 rounded-t-lg overflow-hidden">
+          <Card className="bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] border-purple-500/40 shadow-2xl shadow-purple-500/20">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/10 rounded-t-lg overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-purple-400 via-pink-500 to-purple-400"
                 initial={{ width: 0 }}
@@ -147,7 +147,7 @@ export function HRAdminTour() {
                 variant="ghost"
                 size="icon"
                 onClick={handleSkip}
-                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-700"
+                className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10"
                 data-testid="button-skip-hr-tour"
               >
                 <X className="h-4 w-4" />
@@ -165,7 +165,7 @@ export function HRAdminTour() {
                   </p>
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3 w-3 text-pink-400" />
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-white/30">
                       Step {completedSteps + 1} of {totalSteps}
                     </span>
                   </div>
@@ -175,7 +175,7 @@ export function HRAdminTour() {
               <h3 className="text-lg font-bold text-white mb-2">
                 {currentStep?.title}
               </h3>
-              <p className="text-sm text-slate-300 leading-relaxed">
+              <p className="text-sm text-white/70 leading-relaxed">
                 {currentStep?.description}
               </p>
             </CardContent>
@@ -186,7 +186,7 @@ export function HRAdminTour() {
                 size="sm"
                 onClick={handlePrev}
                 disabled={isFirst}
-                className="text-slate-400 hover:text-white disabled:opacity-30"
+                className="text-white/40 hover:text-white disabled:opacity-30"
               >
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Previous

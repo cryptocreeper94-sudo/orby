@@ -308,8 +308,8 @@ export function UniversalDocumentScanner({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" data-testid="universal-document-scanner">
-      <Card className="w-full max-w-2xl max-h-[95vh] overflow-y-auto bg-slate-900 border-cyan-500/30">
-        <CardHeader className="pb-3 border-b border-slate-700 sticky top-0 bg-slate-900 z-10">
+      <Card className="w-full max-w-2xl max-h-[95vh] overflow-y-auto bg-[#0c1224] border-cyan-500/30">
+        <CardHeader className="pb-3 border-b border-white/[0.08] sticky top-0 bg-[#0c1224] z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
@@ -317,7 +317,7 @@ export function UniversalDocumentScanner({
               </div>
               <div>
                 <CardTitle className="text-lg text-white">Universal Document Scanner</CardTitle>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-white/40">
                   {isSandbox ? '🧪 Sandbox Mode' : 'Scan any document - AI auto-classifies'}
                 </p>
               </div>
@@ -326,7 +326,7 @@ export function UniversalDocumentScanner({
               variant="ghost" 
               size="icon" 
               onClick={onClose}
-              className="text-slate-400 hover:text-white"
+              className="text-white/40 hover:text-white"
               data-testid="close-scanner"
             >
               <X className="h-5 w-5" />
@@ -357,7 +357,7 @@ export function UniversalDocumentScanner({
                 <Button
                   onClick={toggleCamera}
                   variant="outline"
-                  className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                  className="flex-1 border-white/10 text-white/70 hover:bg-white/5"
                   data-testid="button-toggle-camera"
                 >
                   <SwitchCamera className="h-4 w-4 mr-2" />
@@ -373,8 +373,8 @@ export function UniversalDocumentScanner({
                 </Button>
               </div>
 
-              <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700">
-                <p className="text-xs text-slate-400 text-center">
+              <div className="bg-white/5 rounded-lg p-3 border border-white/[0.08]">
+                <p className="text-xs text-white/40 text-center">
                   Position your document within the frame. The AI will automatically detect the document type.
                 </p>
               </div>
@@ -401,7 +401,7 @@ export function UniversalDocumentScanner({
                   <Button
                     onClick={retakePhoto}
                     variant="outline"
-                    className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                    className="flex-1 border-white/10 text-white/70 hover:bg-white/5"
                     data-testid="button-retake"
                   >
                     <RotateCcw className="h-4 w-4 mr-2" />
@@ -422,8 +422,8 @@ export function UniversalDocumentScanner({
                 <div className="flex items-center justify-center py-8">
                   <div className="text-center">
                     <Loader2 className="h-8 w-8 animate-spin text-cyan-400 mx-auto mb-3" />
-                    <p className="text-slate-300">Analyzing document...</p>
-                    <p className="text-xs text-slate-500 mt-1">AI is detecting document type and extracting data</p>
+                    <p className="text-white/70">Analyzing document...</p>
+                    <p className="text-xs text-white/30 mt-1">AI is detecting document type and extracting data</p>
                   </div>
                 </div>
               )}
@@ -443,18 +443,18 @@ export function UniversalDocumentScanner({
                         {DOCUMENT_TYPE_ICONS[classificationResult.documentType]}
                       </div>
                       <div>
-                        <p className="text-sm text-slate-400">Detected Document Type</p>
+                        <p className="text-sm text-white/40">Detected Document Type</p>
                         <p className="text-white font-medium">{getDocumentTypeLabel(classificationResult.documentType)}</p>
                       </div>
                     </div>
                     {classificationResult.extractedData && Object.keys(classificationResult.extractedData).length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-slate-700">
-                        <p className="text-xs text-slate-400 mb-2">Extracted Data:</p>
+                      <div className="mt-3 pt-3 border-t border-white/[0.08]">
+                        <p className="text-xs text-white/40 mb-2">Extracted Data:</p>
                         <div className="grid grid-cols-2 gap-2">
                           {Object.entries(classificationResult.extractedData).slice(0, 6).map(([key, value]) => (
                             <div key={key} className="text-xs">
-                              <span className="text-slate-500">{key}:</span>
-                              <span className="text-slate-300 ml-1">{String(value)}</span>
+                              <span className="text-white/30">{key}:</span>
+                              <span className="text-white/70 ml-1">{String(value)}</span>
                             </div>
                           ))}
                         </div>
@@ -469,11 +469,11 @@ export function UniversalDocumentScanner({
                           <Truck className="h-5 w-5 text-emerald-400" />
                         </div>
                         <div>
-                          <p className="text-sm text-slate-400">Suggested Routing</p>
+                          <p className="text-sm text-white/40">Suggested Routing</p>
                           <p className="text-white font-medium">{suggestedRouting.destination}</p>
                         </div>
                       </div>
-                      <p className="text-sm text-slate-300 mb-4">
+                      <p className="text-sm text-white/70 mb-4">
                         This document is scheduled to be delivered to <span className="text-emerald-400 font-medium">{suggestedRouting.destination}</span>. Is this correct?
                       </p>
                       <div className="flex gap-3">
@@ -488,7 +488,7 @@ export function UniversalDocumentScanner({
                         <Button
                           onClick={() => setRoutingStep('change')}
                           variant="outline"
-                          className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                          className="flex-1 border-white/10 text-white/70 hover:bg-white/5"
                           data-testid="button-change-routing"
                         >
                           Send Elsewhere
@@ -504,7 +504,7 @@ export function UniversalDocumentScanner({
                           <Users className="h-5 w-5 text-purple-400" />
                         </div>
                         <div>
-                          <p className="text-sm text-slate-400">Select Destination</p>
+                          <p className="text-sm text-white/40">Select Destination</p>
                           <p className="text-white font-medium">Where would you like to send this?</p>
                         </div>
                       </div>
@@ -519,13 +519,13 @@ export function UniversalDocumentScanner({
                             className={`w-full text-left p-3 rounded-lg border transition-all ${
                               selectedRouting === dest.label
                                 ? 'bg-purple-500/20 border-purple-500/50 text-white'
-                                : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:border-slate-600'
+                                : 'bg-white/5 border-white/[0.08] text-white/70 hover:border-white/10'
                             }`}
                             data-testid={`routing-option-${dest.id}`}
                           >
                             <div className="flex items-center justify-between">
                               <span className="font-medium">{dest.label}</span>
-                              <span className="text-xs text-slate-500">{dest.department}</span>
+                              <span className="text-xs text-white/30">{dest.department}</span>
                             </div>
                           </button>
                         ))}
@@ -534,7 +534,7 @@ export function UniversalDocumentScanner({
                         <Button
                           onClick={() => setRoutingStep('confirm')}
                           variant="outline"
-                          className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                          className="flex-1 border-white/10 text-white/70 hover:bg-white/5"
                         >
                           Back
                         </Button>
@@ -552,22 +552,22 @@ export function UniversalDocumentScanner({
 
                   {routingStep === 'ready' && (
                   <div className="space-y-3">
-                    <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700 mb-3">
+                    <div className="bg-white/5 rounded-lg p-3 border border-white/[0.08] mb-3">
                       <div className="flex items-center gap-2 text-sm">
                         <CheckCircle className="h-4 w-4 text-emerald-400" />
-                        <span className="text-slate-300">Routing to: </span>
+                        <span className="text-white/70">Routing to: </span>
                         <span className="text-emerald-400 font-medium">{selectedRouting}</span>
                       </div>
                     </div>
                     <div>
-                      <Label className="text-slate-300">Document Type</Label>
+                      <Label className="text-white/70">Document Type</Label>
                       <Select value={documentType} onValueChange={setDocumentType}>
-                        <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                        <SelectTrigger className="bg-white/5 border-white/10 text-white">
                           <SelectValue placeholder="Select document type" />
                         </SelectTrigger>
-                        <SelectContent className="bg-slate-800 border-slate-600">
+                        <SelectContent className="bg-white/5 border-white/10">
                           {Object.entries(DOCUMENT_TYPE_CONFIG).map(([key, config]) => (
-                            <SelectItem key={key} value={key} className="text-white hover:bg-slate-700">
+                            <SelectItem key={key} value={key} className="text-white hover:bg-white/10">
                               <div className="flex items-center gap-2">
                                 {DOCUMENT_TYPE_ICONS[key]}
                                 {config.name}
@@ -579,27 +579,27 @@ export function UniversalDocumentScanner({
                     </div>
 
                     <div>
-                      <Label className="text-slate-300">Title</Label>
+                      <Label className="text-white/70">Title</Label>
                       <Input
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Document title"
-                        className="bg-slate-800 border-slate-600 text-white"
+                        className="bg-white/5 border-white/10 text-white"
                         data-testid="input-title"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <Label className="text-slate-300">Stand (optional)</Label>
+                        <Label className="text-white/70">Stand (optional)</Label>
                         <Select value={standId} onValueChange={setStandId}>
-                          <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                          <SelectTrigger className="bg-white/5 border-white/10 text-white">
                             <SelectValue placeholder="Select stand" />
                           </SelectTrigger>
-                          <SelectContent className="bg-slate-800 border-slate-600 max-h-48">
-                            <SelectItem value="" className="text-slate-400">No stand</SelectItem>
+                          <SelectContent className="bg-white/5 border-white/10 max-h-48">
+                            <SelectItem value="" className="text-white/40">No stand</SelectItem>
                             {(stands as any[] | undefined)?.map((stand: any) => (
-                              <SelectItem key={stand.id} value={stand.id} className="text-white hover:bg-slate-700">
+                              <SelectItem key={stand.id} value={stand.id} className="text-white hover:bg-white/10">
                                 {stand.id} - {stand.name}
                               </SelectItem>
                             ))}
@@ -608,24 +608,24 @@ export function UniversalDocumentScanner({
                       </div>
 
                       <div>
-                        <Label className="text-slate-300">Event Date</Label>
+                        <Label className="text-white/70">Event Date</Label>
                         <Input
                           type="date"
                           value={eventDate}
                           onChange={(e) => setEventDate(e.target.value)}
-                          className="bg-slate-800 border-slate-600 text-white"
+                          className="bg-white/5 border-white/10 text-white"
                           data-testid="input-event-date"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <Label className="text-slate-300">Notes (optional)</Label>
+                      <Label className="text-white/70">Notes (optional)</Label>
                       <Textarea
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Additional notes..."
-                        className="bg-slate-800 border-slate-600 text-white resize-none"
+                        className="bg-white/5 border-white/10 text-white resize-none"
                         rows={2}
                         data-testid="input-notes"
                       />
@@ -635,7 +635,7 @@ export function UniversalDocumentScanner({
                       <Button
                         onClick={retakePhoto}
                         variant="outline"
-                        className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
+                        className="flex-1 border-white/10 text-white/70 hover:bg-white/5"
                         disabled={isSaving}
                         data-testid="button-retake-2"
                       >

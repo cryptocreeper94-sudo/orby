@@ -66,7 +66,7 @@ const CarouselRail = React.forwardRef<HTMLDivElement, CarouselRailProps>(
         {title && (
           <div
             data-testid="carousel-rail-title"
-            className="text-sm font-medium text-slate-300 mb-2"
+            className="text-sm font-medium text-white/70 mb-2"
           >
             {title}
           </div>
@@ -96,8 +96,8 @@ const CarouselRail = React.forwardRef<HTMLDivElement, CarouselRailProps>(
             className={cn(
               "absolute left-0 top-1/2 -translate-y-1/2 z-10",
               "h-8 w-8 rounded-full",
-              "bg-slate-800/80 backdrop-blur-sm border border-white/10",
-              "text-slate-300 hover:text-cyan-400 hover:border-cyan-400/50",
+              "bg-white/10 backdrop-blur-sm border border-white/10",
+              "text-white/70 hover:text-cyan-400 hover:border-cyan-400/50",
               "opacity-0 group-hover:opacity-100 transition-opacity",
               "disabled:opacity-0"
             )}
@@ -115,8 +115,8 @@ const CarouselRail = React.forwardRef<HTMLDivElement, CarouselRailProps>(
             className={cn(
               "absolute right-0 top-1/2 -translate-y-1/2 z-10",
               "h-8 w-8 rounded-full",
-              "bg-slate-800/80 backdrop-blur-sm border border-white/10",
-              "text-slate-300 hover:text-cyan-400 hover:border-cyan-400/50",
+              "bg-white/10 backdrop-blur-sm border border-white/10",
+              "text-white/70 hover:text-cyan-400 hover:border-cyan-400/50",
               "opacity-0 group-hover:opacity-100 transition-opacity",
               "disabled:opacity-0"
             )}
@@ -140,7 +140,7 @@ const CarouselRail = React.forwardRef<HTMLDivElement, CarouselRailProps>(
                   "w-1.5 h-1.5 rounded-full transition-all duration-200",
                   selectedIndex === index
                     ? "bg-cyan-400 w-4"
-                    : "bg-slate-600 hover:bg-slate-500"
+                    : "bg-white/10 hover:bg-white/10"
                 )}
               >
                 <span className="sr-only">Go to slide {index + 1}</span>

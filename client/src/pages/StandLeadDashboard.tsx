@@ -68,9 +68,9 @@ const ISSUE_CATEGORIES = [
   { id: 'AV', label: 'TV/Audio/Visual', icon: Tv, color: 'text-purple-600' },
   { id: 'Menu', label: 'Menu Boards', icon: ClipboardList, color: 'text-orange-600' },
   { id: 'FoodSafety', label: 'Food Safety', icon: UtensilsCrossed, color: 'text-red-600' },
-  { id: 'Equipment', label: 'Equipment', icon: Wrench, color: 'text-gray-600' },
+  { id: 'Equipment', label: 'Equipment', icon: Wrench, color: 'text-white/20' },
   { id: 'Staffing', label: 'Staffing', icon: Users, color: 'text-indigo-600' },
-  { id: 'Other', label: 'Other', icon: HelpCircle, color: 'text-slate-600' },
+  { id: 'Other', label: 'Other', icon: HelpCircle, color: 'text-white/20' },
 ];
 
 export default function StandLeadDashboard() {
@@ -251,10 +251,10 @@ export default function StandLeadDashboard() {
     <div 
       key={idx}
       data-testid={`stand-metric-${metric.label.toLowerCase()}`}
-      className={`p-4 rounded-xl bg-slate-800/60 border border-white/10 w-[120px] h-[80px] hover:border-${metric.color}-400/50 transition-colors`}
+      className={`p-4 rounded-xl bg-white/[0.06] border border-white/10 w-[120px] h-[80px] hover:border-${metric.color}-400/50 transition-colors`}
     >
-      <p className="text-[10px] text-slate-500 uppercase tracking-wider">{metric.label}</p>
-      <p className="font-bold text-lg text-slate-200">{metric.value}</p>
+      <p className="text-[10px] text-white/30 uppercase tracking-wider">{metric.label}</p>
+      <p className="font-bold text-lg text-white/80">{metric.value}</p>
     </div>
   ));
 
@@ -345,7 +345,7 @@ export default function StandLeadDashboard() {
           icon={<Building2 className="h-5 w-5" />}
           iconColor="amber"
           actions={
-            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-300 hover:bg-white/10" data-testid="button-logout">
+            <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white/70 hover:bg-white/10" data-testid="button-logout">
               <LogOut className="h-5 w-5" />
             </Button>
           }
@@ -497,9 +497,9 @@ export default function StandLeadDashboard() {
                 />
               </div>
 
-              <div className="bg-slate-800 p-3 rounded-lg text-sm border border-slate-700">
-                <p className="font-medium text-slate-200">Auto-Routing</p>
-                <p className="text-slate-400 text-xs mt-1">
+              <div className="bg-white/5 p-3 rounded-lg text-sm border border-white/[0.08]">
+                <p className="font-medium text-white/80">Auto-Routing</p>
+                <p className="text-white/40 text-xs mt-1">
                   {issueCategory === 'Cooling' || issueCategory === 'Beverage' 
                     ? '→ Warehouse Manager'
                     : issueCategory === 'Power' || issueCategory === 'AV' || issueCategory === 'Menu'
@@ -549,7 +549,7 @@ export default function StandLeadDashboard() {
                 <div className="p-1.5 rounded-lg bg-amber-500/20">
                   <Building2 className="h-4 w-4 text-amber-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Stand Information</span>
+                <span className="font-bold text-sm text-white/80">Stand Information</span>
               </div>
               <CarouselRail 
                 items={metricsCarouselItems} 
@@ -586,7 +586,7 @@ export default function StandLeadDashboard() {
                 <div className="p-1.5 rounded-lg bg-emerald-500/20">
                   <ClipboardList className="h-4 w-4 text-emerald-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Quick Actions</span>
+                <span className="font-bold text-sm text-white/80">Quick Actions</span>
               </div>
               <CarouselRail 
                 items={inventoryCarouselItems}
@@ -599,7 +599,7 @@ export default function StandLeadDashboard() {
                 <div className="p-1.5 rounded-lg bg-violet-500/20">
                   <BookOpen className="h-4 w-4 text-violet-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Procedures</span>
+                <span className="font-bold text-sm text-white/80">Procedures</span>
               </div>
               <AccordionStack 
                 items={procedureAccordionItems} 
@@ -613,7 +613,7 @@ export default function StandLeadDashboard() {
                 <div className="p-1.5 rounded-lg bg-blue-500/20">
                   <Map className="h-4 w-4 text-blue-400" />
                 </div>
-                <span className="font-bold text-sm text-slate-200">Navigation</span>
+                <span className="font-bold text-sm text-white/80">Navigation</span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 {staffGridItems.map((item) => (
@@ -621,14 +621,14 @@ export default function StandLeadDashboard() {
                     key={item.testId}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className={`p-4 rounded-xl bg-slate-800/40 border border-white/10 cursor-pointer text-center hover:border-${item.color}-500/30 transition-colors`}
+                    className={`p-4 rounded-xl bg-white/5 border border-white/10 cursor-pointer text-center hover:border-${item.color}-500/30 transition-colors`}
                     onClick={item.onClick}
                     data-testid={item.testId}
                   >
                     <div className={`p-3 rounded-xl bg-${item.color}-500/20 w-fit mx-auto mb-2`}>
                       <div className={`text-${item.color}-400`}>{item.icon}</div>
                     </div>
-                    <div className="font-bold text-xs text-slate-200">{item.label}</div>
+                    <div className="font-bold text-xs text-white/80">{item.label}</div>
                   </motion.div>
                 ))}
               </div>

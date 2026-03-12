@@ -563,7 +563,7 @@ export function PersonalizedWelcomeTour() {
             maxWidth: 'calc(100vw - 40px)'
           }}
         >
-          <Card className={`bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border ${themeColors.border} shadow-2xl ${themeColors.glow}`}>
+          <Card className={`bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] border ${themeColors.border} shadow-2xl ${themeColors.glow}`}>
             <CardContent className="p-0">
               <div className={`h-1 bg-gradient-to-r ${themeColors.primary} rounded-t-lg`} 
                    style={{ width: `${progress}%` }} />
@@ -582,7 +582,7 @@ export function PersonalizedWelcomeTour() {
                       <span className={`text-xs font-bold bg-gradient-to-r ${themeColors.primary} bg-clip-text text-transparent uppercase tracking-wider`}>
                         Hey {userName}!
                       </span>
-                      <p className="text-[10px] text-slate-400">{config.greeting}</p>
+                      <p className="text-[10px] text-white/40">{config.greeting}</p>
                     </div>
                   </motion.div>
                 )}
@@ -590,7 +590,7 @@ export function PersonalizedWelcomeTour() {
                 <h3 className="text-lg font-bold text-white mb-2">
                   {currentStep?.title}
                 </h3>
-                <p className="text-sm text-slate-300 leading-relaxed mb-4">
+                <p className="text-sm text-white/70 leading-relaxed mb-4">
                   {currentStep?.description}
                 </p>
 
@@ -601,8 +601,8 @@ export function PersonalizedWelcomeTour() {
                     className={`${themeColors.secondary} rounded-lg p-3 mb-4 border ${themeColors.border}`}
                   >
                     <div className="flex items-start gap-2">
-                      <MessageCircle className="h-4 w-4 text-slate-300 mt-0.5 flex-shrink-0" />
-                      <p className="text-xs text-slate-300">
+                      <MessageCircle className="h-4 w-4 text-white/70 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-white/70">
                         <span className="font-semibold">A note from Jason:</span> This was built based on what we understood about your role. If anything needs adjusting or you want to add features, just let us know!
                       </p>
                     </div>
@@ -619,7 +619,7 @@ export function PersonalizedWelcomeTour() {
                             ? `w-6 bg-gradient-to-r ${themeColors.primary}` 
                             : idx < currentStepIndex 
                               ? `w-1.5 ${themeColors.secondary}` 
-                              : 'w-1.5 bg-slate-700'
+                              : 'w-1.5 bg-white/10'
                         }`}
                       />
                     ))}
@@ -631,7 +631,7 @@ export function PersonalizedWelcomeTour() {
                         variant="ghost"
                         size="sm"
                         onClick={handlePrev}
-                        className="text-slate-400 hover:text-white h-8"
+                        className="text-white/40 hover:text-white h-8"
                       >
                         <ChevronLeft className="h-4 w-4" />
                       </Button>
@@ -658,7 +658,7 @@ export function PersonalizedWelcomeTour() {
 
                 <button
                   onClick={handleSkip}
-                  className="absolute top-3 right-3 text-slate-500 hover:text-white transition-colors"
+                  className="absolute top-3 right-3 text-white/30 hover:text-white transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>

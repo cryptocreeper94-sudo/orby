@@ -44,7 +44,7 @@ const DEPARTMENT_COLORS: Record<string, string> = {
   Kitchen: 'text-orange-400',
   Warehouse: 'text-emerald-400',
   Operations: 'text-cyan-400',
-  All: 'text-slate-400',
+  All: 'text-white/40',
   HR: 'text-pink-400',
   Bar: 'text-purple-400'
 };
@@ -88,11 +88,11 @@ function EventRow({ event, isExpanded, onToggle }: {
 
   return (
     <div 
-      className="bg-slate-800/40 border border-slate-700/50 rounded-lg overflow-hidden"
+      className="bg-white/5 border border-white/[0.08]/50 rounded-lg overflow-hidden"
       data-testid={`event-row-${event.id}`}
     >
       <div 
-        className={`p-4 flex items-center justify-between cursor-pointer hover:bg-slate-700/30 transition-colors ${hasNotes ? '' : 'cursor-default'}`}
+        className={`p-4 flex items-center justify-between cursor-pointer hover:bg-white/10/30 transition-colors ${hasNotes ? '' : 'cursor-default'}`}
         onClick={hasNotes ? onToggle : undefined}
         data-testid={`event-row-toggle-${event.id}`}
       >
@@ -101,37 +101,37 @@ function EventRow({ event, isExpanded, onToggle }: {
             <Calendar className="w-4 h-4 text-cyan-400 flex-shrink-0" />
             <div>
               <div className="text-sm font-medium text-white" data-testid={`event-name-${event.id}`}>{event.eventName}</div>
-              <div className="text-xs text-slate-400" data-testid={`event-date-${event.id}`}>{formatDate(event.eventDate)}</div>
+              <div className="text-xs text-white/40" data-testid={`event-date-${event.id}`}>{formatDate(event.eventDate)}</div>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-amber-400 flex-shrink-0" />
             <div>
-              <div className="text-sm text-slate-300" data-testid={`event-attendance-${event.id}`}>
+              <div className="text-sm text-white/70" data-testid={`event-attendance-${event.id}`}>
                 {event.expectedAttendance?.toLocaleString() || 'N/A'}
               </div>
-              <div className="text-xs text-slate-500">Expected</div>
+              <div className="text-xs text-white/30">Expected</div>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
             <Building2 className="w-4 h-4 text-violet-400 flex-shrink-0" />
             <div>
-              <div className="text-sm text-slate-300" data-testid={`event-activated-by-${event.id}`}>
+              <div className="text-sm text-white/70" data-testid={`event-activated-by-${event.id}`}>
                 {event.activatedByName || 'System'}
               </div>
-              <div className="text-xs text-slate-500">Activated By</div>
+              <div className="text-xs text-white/30">Activated By</div>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-emerald-400 flex-shrink-0" />
             <div>
-              <div className="text-sm text-slate-300" data-testid={`event-activation-time-${event.id}`}>
+              <div className="text-sm text-white/70" data-testid={`event-activation-time-${event.id}`}>
                 {formatTime(event.activatedAt)}
               </div>
-              <div className="text-xs text-slate-500">Activation Time</div>
+              <div className="text-xs text-white/30">Activation Time</div>
             </div>
           </div>
           
@@ -147,7 +147,7 @@ function EventRow({ event, isExpanded, onToggle }: {
         </div>
         
         {hasNotes && (
-          <div className="ml-3 text-slate-400">
+          <div className="ml-3 text-white/40">
             {isExpanded ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
           </div>
         )}
@@ -160,25 +160,25 @@ function EventRow({ event, isExpanded, onToggle }: {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="border-t border-slate-700/50"
+            className="border-t border-white/[0.08]/50"
             data-testid={`event-notes-${event.id}`}
           >
-            <div className="p-4 bg-slate-900/50">
+            <div className="p-4 bg-[rgba(12,18,36,0.65)]">
               <div className="flex items-center gap-2 mb-3">
                 <MessageSquare className="w-4 h-4 text-cyan-400" />
-                <span className="text-sm font-medium text-slate-300">Department Notes</span>
+                <span className="text-sm font-medium text-white/70">Department Notes</span>
               </div>
               <div className="space-y-2">
                 {departmentNotes.map((note, idx) => (
                   <div 
                     key={idx} 
-                    className="flex items-start gap-3 p-2 rounded bg-slate-800/60"
+                    className="flex items-start gap-3 p-2 rounded bg-white/[0.06]"
                     data-testid={`department-note-${event.id}-${idx}`}
                   >
-                    <Badge className={`${DEPARTMENT_COLORS[note.department] || 'text-slate-400'} bg-slate-700/50 border-none text-xs`}>
+                    <Badge className={`${DEPARTMENT_COLORS[note.department] || 'text-white/40'} bg-white/10 border-none text-xs`}>
                       {note.department}
                     </Badge>
-                    <span className="text-sm text-slate-300">{note.note}</span>
+                    <span className="text-sm text-white/70">{note.note}</span>
                   </div>
                 ))}
               </div>
@@ -250,10 +250,10 @@ export default function EventHistory() {
               icon={<BarChart3 className="w-4 h-4" />}
             />
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3 mt-4">
-              <div className="p-3 rounded-lg bg-slate-700/40 border border-slate-600/30" data-testid="metric-total-events">
+              <div className="p-3 rounded-lg bg-white/10/40 border border-white/10/30" data-testid="metric-total-events">
                 <div className="flex items-center gap-2 mb-1">
                   <ClipboardList className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xs text-slate-400">Total Events</span>
+                  <span className="text-xs text-white/40">Total Events</span>
                 </div>
                 <div className="text-2xl font-bold text-white">{metrics.total}</div>
               </div>
@@ -300,11 +300,11 @@ export default function EventHistory() {
             />
             <div className="mt-4 space-y-2">
               {isLoading ? (
-                <div className="text-center py-8 text-slate-400" data-testid="loading-indicator">
+                <div className="text-center py-8 text-white/40" data-testid="loading-indicator">
                   Loading events...
                 </div>
               ) : sortedEvents.length === 0 ? (
-                <div className="text-center py-8 text-slate-400" data-testid="no-events">
+                <div className="text-center py-8 text-white/40" data-testid="no-events">
                   No events found
                 </div>
               ) : (

@@ -28,7 +28,7 @@ export function EventHeader({ compact = false, showDepartmentNotes }: EventHeade
 
   if (isLoading) {
     return (
-      <div className="h-12 bg-slate-800/50 rounded-lg animate-pulse" data-testid="event-header-loading" />
+      <div className="h-12 bg-white/5 rounded-lg animate-pulse" data-testid="event-header-loading" />
     );
   }
 
@@ -43,7 +43,7 @@ export function EventHeader({ compact = false, showDepartmentNotes }: EventHeade
         <div className="flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-amber-400" />
           <span className="text-sm text-amber-300 font-medium">Sandbox Mode</span>
-          <span className="text-xs text-slate-400 ml-2">No active event - data will not be saved</span>
+          <span className="text-xs text-white/40 ml-2">No active event - data will not be saved</span>
         </div>
       </motion.div>
     );
@@ -68,7 +68,7 @@ export function EventHeader({ compact = false, showDepartmentNotes }: EventHeade
             <span className="text-sm font-semibold text-white">{activeEvent.eventName}</span>
             <Badge className="bg-emerald-500/20 text-emerald-400 border-0 text-[10px]">LIVE</Badge>
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-400">
+          <div className="flex items-center gap-3 text-xs text-white/40">
             <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
               {new Date(activeEvent.eventDate).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
@@ -105,7 +105,7 @@ export function EventHeader({ compact = false, showDepartmentNotes }: EventHeade
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-r from-cyan-500/10 via-slate-800/50 to-purple-500/10 border border-cyan-500/30 rounded-xl p-4 mb-4 backdrop-blur-sm"
+      className="bg-gradient-to-r from-cyan-500/10 via-[#0c1224]/50 to-purple-500/10 border border-cyan-500/30 rounded-xl p-4 mb-4 backdrop-blur-sm"
       data-testid="event-header"
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -118,7 +118,7 @@ export function EventHeader({ compact = false, showDepartmentNotes }: EventHeade
               <h3 className="text-lg font-bold text-white">{activeEvent.eventName}</h3>
               <Badge className="bg-emerald-500/20 text-emerald-400 border-0">LIVE</Badge>
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-white/40">
               {new Date(activeEvent.eventDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
             </p>
           </div>
@@ -126,25 +126,25 @@ export function EventHeader({ compact = false, showDepartmentNotes }: EventHeade
 
         <div className="flex flex-wrap items-center gap-4 text-sm">
           {activeEvent.doorsOpenTime && (
-            <div className="flex items-center gap-1.5 text-slate-300">
+            <div className="flex items-center gap-1.5 text-white/70">
               <Clock className="w-4 h-4 text-cyan-400" />
               <span>Doors: {activeEvent.doorsOpenTime}</span>
             </div>
           )}
           {activeEvent.eventStartTime && (
-            <div className="flex items-center gap-1.5 text-slate-300">
+            <div className="flex items-center gap-1.5 text-white/70">
               <Clock className="w-4 h-4 text-emerald-400" />
               <span>Start: {activeEvent.eventStartTime}</span>
             </div>
           )}
           {activeEvent.expectedAttendance && (
-            <div className="flex items-center gap-1.5 text-slate-300">
+            <div className="flex items-center gap-1.5 text-white/70">
               <Users className="w-4 h-4 text-purple-400" />
               <span>{activeEvent.expectedAttendance.toLocaleString()} expected</span>
             </div>
           )}
           {activeEvent.geofenceMode && (
-            <div className="flex items-center gap-1.5 text-slate-300">
+            <div className="flex items-center gap-1.5 text-white/70">
               <MapPin className="w-4 h-4 text-amber-400" />
               <span className="capitalize">{activeEvent.geofenceMode}</span>
             </div>
@@ -158,12 +158,12 @@ export function EventHeader({ compact = false, showDepartmentNotes }: EventHeade
             {relevantNotes.map((note, idx) => (
               <div
                 key={idx}
-                className="flex items-start gap-2 px-3 py-2 rounded-lg bg-slate-800/50 border border-white/5"
+                className="flex items-start gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/5"
               >
                 <AlertCircle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <span className="text-xs text-slate-500 uppercase">{note.department}</span>
-                  <p className="text-sm text-slate-300">{note.note}</p>
+                  <span className="text-xs text-white/30 uppercase">{note.department}</span>
+                  <p className="text-sm text-white/70">{note.note}</p>
                 </div>
               </div>
             ))}

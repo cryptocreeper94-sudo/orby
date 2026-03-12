@@ -144,7 +144,7 @@ function MetricCard({ icon: Icon, label, value, color, subValue }: {
 }) {
   return (
     <div 
-      className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-white/5 min-w-[130px]"
+      className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 min-w-[130px]"
       data-testid={`metric-${label.toLowerCase().replace(/\s+/g, '-')}`}
     >
       <div className={`p-2 rounded-lg bg-${color}-500/20`}>
@@ -152,8 +152,8 @@ function MetricCard({ icon: Icon, label, value, color, subValue }: {
       </div>
       <div>
         <div className="text-lg font-bold text-white">{value}</div>
-        <div className="text-xs text-slate-400">{label}</div>
-        {subValue && <div className="text-xs text-slate-500">{subValue}</div>}
+        <div className="text-xs text-white/40">{label}</div>
+        {subValue && <div className="text-xs text-white/30">{subValue}</div>}
       </div>
     </div>
   );
@@ -166,7 +166,7 @@ function StationCard({ stand, checkIns }: { stand: any; checkIns: CheckIn[] }) {
   
   return (
     <div 
-      className="p-3 rounded-xl bg-slate-800/40 border border-white/5 min-w-[160px]"
+      className="p-3 rounded-xl bg-white/5 border border-white/5 min-w-[160px]"
       data-testid={`station-card-${stand.id}`}
     >
       <div className="flex items-center gap-2 mb-2">
@@ -175,7 +175,7 @@ function StationCard({ stand, checkIns }: { stand: any; checkIns: CheckIn[] }) {
       </div>
       <div className="flex items-center gap-2 text-xs">
         <Badge className="bg-green-500/20 text-green-400">{activeCount} active</Badge>
-        <Badge className="bg-slate-500/20 text-slate-400">{scheduledCount} waiting</Badge>
+        <Badge className="bg-white/10 text-white/40">{scheduledCount} waiting</Badge>
       </div>
     </div>
   );
@@ -198,13 +198,13 @@ function CheckInCard({ checkIn, onCheckIn, onCheckOut, onNoShow }: {
       case 'NoShow':
         return <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs">No Show</Badge>;
       default:
-        return <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30 text-xs">Scheduled</Badge>;
+        return <Badge className="bg-gray-500/20 text-white/40 border-gray-500/30 text-xs">Scheduled</Badge>;
     }
   };
   
   return (
     <div 
-      className="p-3 rounded-lg bg-slate-800/40 border border-white/5"
+      className="p-3 rounded-lg bg-white/5 border border-white/5"
       data-testid={`checkin-card-${checkIn.id}`}
     >
       <div className="flex items-center justify-between">
@@ -475,7 +475,7 @@ export default function CulinaryDirectorDashboard() {
             <BentoCard span={8} title="Stations Overview" data-testid="stations-section">
               <div className="flex items-center gap-2 mb-3">
                 <Utensils className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs text-slate-400">Active kitchen stations</span>
+                <span className="text-xs text-white/40">Active kitchen stations</span>
               </div>
               <CarouselRail items={stationItems} data-testid="stations-carousel" />
             </BentoCard>
@@ -483,7 +483,7 @@ export default function CulinaryDirectorDashboard() {
             <BentoCard span={4} title="Kitchen Protocols" data-testid="protocols-section">
               <div className="flex items-center gap-2 mb-3">
                 <BookOpen className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs text-slate-400">Reference Guide</span>
+                <span className="text-xs text-white/40">Reference Guide</span>
               </div>
               <AccordionStack 
                 items={KITCHEN_PROTOCOLS}
@@ -496,7 +496,7 @@ export default function CulinaryDirectorDashboard() {
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <ClipboardList className="w-4 h-4 text-green-400" />
-                  <span className="text-sm font-medium text-slate-300">Team Check-Ins</span>
+                  <span className="text-sm font-medium text-white/70">Team Check-Ins</span>
                   <Badge className="bg-cyan-500/20 text-cyan-400 text-xs">{format(new Date(), 'MMM d')}</Badge>
                 </div>
                 <div className="flex items-center gap-2">
@@ -543,7 +543,7 @@ export default function CulinaryDirectorDashboard() {
         </main>
 
         <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
-          <DialogContent className="bg-slate-900 border-white/10 text-white">
+          <DialogContent className="bg-[#0c1224] border-white/10 text-white">
             <DialogHeader>
               <DialogTitle>Add Assignment</DialogTitle>
               <DialogDescription className="text-white/60">

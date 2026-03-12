@@ -133,7 +133,7 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
         {showSalesContent && (
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <Label htmlFor="demo-mode" className="text-xs text-slate-400">Beta</Label>
+              <Label htmlFor="demo-mode" className="text-xs text-white/40">Beta</Label>
               <Switch
                 id="demo-mode"
                 checked={showSalesDemo}
@@ -141,7 +141,7 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
                 className="data-[state=checked]:bg-cyan-500"
                 data-testid="switch-demo-mode"
               />
-              <Label htmlFor="demo-mode" className="text-xs text-slate-400">Sales Demo</Label>
+              <Label htmlFor="demo-mode" className="text-xs text-white/40">Sales Demo</Label>
             </div>
             {showSalesDemo && (
               <Badge className="bg-gradient-to-r from-cyan-500/20 to-purple-500/20 text-cyan-300 border-cyan-500/40">
@@ -153,7 +153,7 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
         )}
       </div>
 
-      <div className="bg-slate-800/30 rounded-xl p-4 border border-cyan-500/20">
+      <div className="bg-white/[0.03] rounded-xl p-4 border border-cyan-500/20">
         <div className="flex items-center gap-2 mb-2">
           <Database className="w-4 h-4 text-cyan-400" />
           <span className="text-sm font-medium text-white">Unified Data View</span>
@@ -161,7 +161,7 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
             Read-Only Preview
           </Badge>
         </div>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-white/40">
           All systems connected to one Orby dashboard — sales, inventory, and staffing in a single view.
           No need to check 4-5 different screens.
         </p>
@@ -196,7 +196,7 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
                           {status.label}
                         </Badge>
                       </div>
-                      <p className="text-sm text-slate-400">{integration.description}</p>
+                      <p className="text-sm text-white/40">{integration.description}</p>
                       <div className="flex items-center gap-1 mt-2 text-xs text-cyan-300/70">
                         <ArrowRight className="w-3 h-3" />
                         <span>{integration.dataFlow}</span>
@@ -204,7 +204,7 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
                     </div>
                     <motion.div
                       animate={{ rotate: isExpanded ? 90 : 0 }}
-                      className="text-slate-400"
+                      className="text-white/40"
                     >
                       <ArrowRight className="w-5 h-5" />
                     </motion.div>
@@ -223,7 +223,7 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
                       <div className="p-4 space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {integration.features.map((feature, i) => (
-                            <div key={i} className="flex items-center gap-2 text-sm text-slate-300">
+                            <div key={i} className="flex items-center gap-2 text-sm text-white/70">
                               <Check className="w-4 h-4 text-emerald-400" />
                               <span>{feature}</span>
                             </div>
@@ -231,26 +231,26 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
                         </div>
 
                         {integration.id === 'pax' && (
-                          <div className="bg-slate-900/50 rounded-lg p-3 space-y-3">
+                          <div className="bg-[rgba(12,18,36,0.65)] rounded-lg p-3 space-y-3">
                             <div className="flex items-center justify-between text-sm">
-                              <span className="text-slate-400">Demo: Today's Sales</span>
+                              <span className="text-white/40">Demo: Today's Sales</span>
                               <span className="font-bold text-emerald-400">${mockSalesData.todayTotal.toLocaleString()}</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
-                              <div className="text-center p-2 bg-slate-800/50 rounded">
+                              <div className="text-center p-2 bg-white/5 rounded">
                                 <div className="text-lg font-bold text-violet-400">{mockSalesData.posMix.a930}</div>
-                                <div className="text-[10px] text-slate-500">A930s</div>
+                                <div className="text-[10px] text-white/30">A930s</div>
                               </div>
-                              <div className="text-center p-2 bg-slate-800/50 rounded">
+                              <div className="text-center p-2 bg-white/5 rounded">
                                 <div className="text-lg font-bold text-purple-400">{mockSalesData.posMix.a700}</div>
-                                <div className="text-[10px] text-slate-500">A700s</div>
+                                <div className="text-[10px] text-white/30">A700s</div>
                               </div>
-                              <div className="text-center p-2 bg-slate-800/50 rounded">
+                              <div className="text-center p-2 bg-white/5 rounded">
                                 <div className="text-lg font-bold text-cyan-400">{mockSalesData.posMix.pax}</div>
-                                <div className="text-[10px] text-slate-500">PAX</div>
+                                <div className="text-[10px] text-white/30">PAX</div>
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <div className="flex items-center gap-2 text-xs text-white/30">
                               <Clock className="w-3 h-3" />
                               <span>Last batch: {mockSalesData.lastBatchTime}</span>
                             </div>
@@ -258,27 +258,27 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
                         )}
 
                         {integration.id === 'yellowdog' && (
-                          <div className="bg-slate-900/50 rounded-lg p-3 space-y-3">
+                          <div className="bg-[rgba(12,18,36,0.65)] rounded-lg p-3 space-y-3">
                             <div className="flex items-center justify-between text-sm">
-                              <span className="text-slate-400">Demo: Inventory Status</span>
+                              <span className="text-white/40">Demo: Inventory Status</span>
                               <span className="font-bold text-amber-400">{mockInventoryData.onHandItems} items</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
-                              <div className="text-center p-2 bg-slate-800/50 rounded">
+                              <div className="text-center p-2 bg-white/5 rounded">
                                 <div className="text-lg font-bold text-amber-400">{mockInventoryData.categories.beverages}</div>
-                                <div className="text-[10px] text-slate-500">Beverages</div>
+                                <div className="text-[10px] text-white/30">Beverages</div>
                               </div>
-                              <div className="text-center p-2 bg-slate-800/50 rounded">
+                              <div className="text-center p-2 bg-white/5 rounded">
                                 <div className="text-lg font-bold text-orange-400">{mockInventoryData.categories.food}</div>
-                                <div className="text-[10px] text-slate-500">Food</div>
+                                <div className="text-[10px] text-white/30">Food</div>
                               </div>
-                              <div className="text-center p-2 bg-slate-800/50 rounded">
+                              <div className="text-center p-2 bg-white/5 rounded">
                                 <div className="text-lg font-bold text-yellow-400">{mockInventoryData.categories.supplies}</div>
-                                <div className="text-[10px] text-slate-500">Supplies</div>
+                                <div className="text-[10px] text-white/30">Supplies</div>
                               </div>
                             </div>
                             <div className="flex items-center justify-between text-xs">
-                              <div className="flex items-center gap-2 text-slate-500">
+                              <div className="flex items-center gap-2 text-white/30">
                                 <Clock className="w-3 h-3" />
                                 <span>Last EOD: {mockInventoryData.lastEodImport}</span>
                               </div>
@@ -290,27 +290,27 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
                         )}
 
                         {integration.id === 'orbitstaffing' && (
-                          <div className="bg-slate-900/50 rounded-lg p-3 space-y-3">
+                          <div className="bg-[rgba(12,18,36,0.65)] rounded-lg p-3 space-y-3">
                             <div className="flex items-center justify-between text-sm">
-                              <span className="text-slate-400">Demo: Staff Status</span>
+                              <span className="text-white/40">Demo: Staff Status</span>
                               <span className="font-bold text-cyan-400">{mockStaffingData.onDuty} on duty</span>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
-                              <div className="text-center p-2 bg-slate-800/50 rounded">
+                              <div className="text-center p-2 bg-white/5 rounded">
                                 <div className="text-lg font-bold text-cyan-400">{mockStaffingData.shifts.stands}</div>
-                                <div className="text-[10px] text-slate-500">Stands</div>
+                                <div className="text-[10px] text-white/30">Stands</div>
                               </div>
-                              <div className="text-center p-2 bg-slate-800/50 rounded">
+                              <div className="text-center p-2 bg-white/5 rounded">
                                 <div className="text-lg font-bold text-teal-400">{mockStaffingData.shifts.warehouse}</div>
-                                <div className="text-[10px] text-slate-500">Warehouse</div>
+                                <div className="text-[10px] text-white/30">Warehouse</div>
                               </div>
-                              <div className="text-center p-2 bg-slate-800/50 rounded">
+                              <div className="text-center p-2 bg-white/5 rounded">
                                 <div className="text-lg font-bold text-emerald-400">{mockStaffingData.shifts.kitchen}</div>
-                                <div className="text-[10px] text-slate-500">Kitchen</div>
+                                <div className="text-[10px] text-white/30">Kitchen</div>
                               </div>
                             </div>
                             <div className="flex items-center justify-between text-xs">
-                              <div className="text-slate-500">
+                              <div className="text-white/30">
                                 Sections filled: <span className="text-emerald-400">{mockStaffingData.sectionsFilled}</span>
                               </div>
                               <Badge className="bg-amber-500/20 text-amber-400 text-[10px]">
@@ -335,7 +335,7 @@ export function IntegrationHub({ onClose }: IntegrationHubProps) {
       </ScrollArea>
 
       <div className="flex items-center justify-between pt-4 border-t border-white/10">
-        <div className="text-xs text-slate-500 flex items-center gap-2">
+        <div className="text-xs text-white/30 flex items-center gap-2">
           <RefreshCw className="w-3 h-3" />
           <span>Visual preview only • Not live yet</span>
         </div>

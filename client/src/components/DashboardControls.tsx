@@ -75,7 +75,7 @@ const SectionHeader = ({ icon: Icon, title, color, expanded, onToggle, badge }: 
 }) => (
   <button
     onClick={onToggle}
-    className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/50 hover:bg-slate-800/70 transition-colors"
+    className="w-full px-4 py-3 flex items-center justify-between bg-white/5 hover:bg-white/5/70 transition-colors"
   >
     <div className="flex items-center gap-3">
       <div className={`p-1.5 rounded-lg ${color.replace('text-', 'bg-').replace('400', '500/20')}`}>
@@ -89,9 +89,9 @@ const SectionHeader = ({ icon: Icon, title, color, expanded, onToggle, badge }: 
       )}
     </div>
     {expanded ? (
-      <ChevronUp className="w-4 h-4 text-slate-400" />
+      <ChevronUp className="w-4 h-4 text-white/40" />
     ) : (
-      <ChevronDown className="w-4 h-4 text-slate-400" />
+      <ChevronDown className="w-4 h-4 text-white/40" />
     )}
   </button>
 );
@@ -244,7 +244,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="w-full max-w-lg max-h-[90vh] overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20"
+          className="w-full max-w-lg max-h-[90vh] overflow-hidden rounded-2xl bg-gradient-to-br from-[#0c1224]/95 via-[#0c1224]/95 to-[#0c1224]/95 border border-cyan-500/30 shadow-2xl shadow-cyan-500/20"
         >
           {/* Header */}
           <div className="relative px-6 py-4 border-b border-cyan-500/20 bg-gradient-to-r from-cyan-600/20 via-transparent to-purple-600/20">
@@ -270,21 +270,21 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                       SUPERPOWER
                     </motion.span>
                   </h2>
-                  <p className="text-xs text-slate-400">Control what other users see</p>
+                  <p className="text-xs text-white/40">Control what other users see</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowHelp(true)}
-                  className="p-2 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-400 hover:text-cyan-400 transition-colors"
+                  className="p-2 rounded-lg bg-white/10 hover:bg-white/10 text-white/40 hover:text-cyan-400 transition-colors"
                   data-testid="dashboard-controls-help"
                 >
                   <HelpCircle className="w-4 h-4" />
                 </button>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-lg bg-slate-700/50 hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors"
+                  className="p-2 rounded-lg bg-white/10 hover:bg-red-500/20 text-white/40 hover:text-red-400 transition-colors"
                   data-testid="dashboard-controls-close"
                 >
                   <X className="w-4 h-4" />
@@ -294,10 +294,10 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
           </div>
 
           {/* Role Selector - Bento Grid Layout */}
-          <div className="px-4 py-4 border-b border-slate-700/50 bg-slate-800/30">
+          <div className="px-4 py-4 border-b border-white/[0.08]/50 bg-white/[0.03]">
             <div className="flex items-center gap-2 mb-3">
               <Users className="w-4 h-4 text-cyan-400" />
-              <label className="text-xs font-medium text-slate-300">Configure Dashboard For:</label>
+              <label className="text-xs font-medium text-white/70">Configure Dashboard For:</label>
             </div>
             <div className="grid grid-cols-3 gap-2">
               {CONFIGURABLE_ROLES.map((role) => (
@@ -310,7 +310,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                   className={`h-10 px-2 text-xs rounded-lg transition-all flex items-center justify-center text-center ${
                     selectedRole === role
                       ? "bg-cyan-500/30 text-cyan-300 border border-cyan-400/50 font-medium"
-                      : "bg-slate-700/50 text-slate-400 border border-slate-700/50 hover:border-slate-600 hover:bg-slate-700/70"
+                      : "bg-white/10 text-white/40 border border-white/[0.08]/50 hover:border-white/10 hover:bg-white/10/70"
                   }`}
                   data-testid={`role-select-${role}`}
                 >
@@ -334,7 +334,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
             ) : (
               <>
                 {/* Widget Visibility Section */}
-                <div className="rounded-xl border border-slate-700/50 overflow-hidden">
+                <div className="rounded-xl border border-white/[0.08]/50 overflow-hidden">
                   <SectionHeader
                     icon={LayoutGrid}
                     title="Widget Visibility"
@@ -350,7 +350,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="border-t border-slate-700/50"
+                        className="border-t border-white/[0.08]/50"
                       >
                         <div className="p-3 grid grid-cols-2 gap-2">
                           {WIDGET_OPTIONS.map((widget) => {
@@ -362,21 +362,21 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                                 onClick={() => handleChange(widget.key as keyof DashboardConfig, !isVisible)}
                                 className={`h-14 flex items-center gap-3 px-3 rounded-lg transition-all ${
                                   isVisible
-                                    ? "bg-slate-700/50 border border-cyan-500/30"
-                                    : "bg-slate-800/30 border border-slate-700/30 opacity-60"
+                                    ? "bg-white/10 border border-cyan-500/30"
+                                    : "bg-white/[0.03] border border-white/[0.08]/30 opacity-60"
                                 }`}
                                 data-testid={`toggle-${widget.key}`}
                               >
-                                <div className={`p-1.5 rounded-md ${isVisible ? widget.color.replace('text-', 'bg-').replace('400', '500/20') : 'bg-slate-700/50'}`}>
-                                  <Icon className={`w-4 h-4 ${isVisible ? widget.color : "text-slate-500"}`} />
+                                <div className={`p-1.5 rounded-md ${isVisible ? widget.color.replace('text-', 'bg-').replace('400', '500/20') : 'bg-white/10'}`}>
+                                  <Icon className={`w-4 h-4 ${isVisible ? widget.color : "text-white/30"}`} />
                                 </div>
-                                <span className={`text-xs flex-1 text-left ${isVisible ? "text-white" : "text-slate-500"}`}>
+                                <span className={`text-xs flex-1 text-left ${isVisible ? "text-white" : "text-white/30"}`}>
                                   {widget.label}
                                 </span>
                                 {isVisible ? (
                                   <Eye className="w-3.5 h-3.5 text-green-400 shrink-0" />
                                 ) : (
-                                  <EyeOff className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                                  <EyeOff className="w-3.5 h-3.5 text-white/30 shrink-0" />
                                 )}
                               </button>
                             );
@@ -388,7 +388,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                 </div>
 
                 {/* Alert Settings Section */}
-                <div className="rounded-xl border border-slate-700/50 overflow-hidden">
+                <div className="rounded-xl border border-white/[0.08]/50 overflow-hidden">
                   <SectionHeader
                     icon={Bell}
                     title="Alert Settings"
@@ -404,7 +404,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="border-t border-slate-700/50"
+                        className="border-t border-white/[0.08]/50"
                       >
                         <div className="p-3 grid grid-cols-3 gap-2">
                           {ALERT_LEVELS.map((level) => {
@@ -417,15 +417,15 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                                 className={`h-20 flex flex-col items-center justify-center gap-2 p-2 rounded-lg transition-all ${
                                   isSelected
                                     ? "bg-amber-500/20 border border-amber-500/40"
-                                    : "bg-slate-800/30 border border-slate-700/30 hover:border-slate-600"
+                                    : "bg-white/[0.03] border border-white/[0.08]/30 hover:border-white/10"
                                 }`}
                                 data-testid={`alert-level-${level.value}`}
                               >
-                                <div className={`p-2 rounded-lg ${isSelected ? 'bg-amber-500/20' : 'bg-slate-700/50'}`}>
-                                  <Icon className={`w-4 h-4 ${isSelected ? "text-amber-400" : "text-slate-400"}`} />
+                                <div className={`p-2 rounded-lg ${isSelected ? 'bg-amber-500/20' : 'bg-white/10'}`}>
+                                  <Icon className={`w-4 h-4 ${isSelected ? "text-amber-400" : "text-white/40"}`} />
                                 </div>
                                 <div className="text-center">
-                                  <div className={`text-xs font-medium ${isSelected ? "text-amber-300" : "text-slate-300"}`}>
+                                  <div className={`text-xs font-medium ${isSelected ? "text-amber-300" : "text-white/70"}`}>
                                     {level.label}
                                   </div>
                                 </div>
@@ -444,7 +444,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                 </div>
 
                 {/* Data Scope Section */}
-                <div className="rounded-xl border border-slate-700/50 overflow-hidden">
+                <div className="rounded-xl border border-white/[0.08]/50 overflow-hidden">
                   <SectionHeader
                     icon={Users}
                     title="Data Scope"
@@ -460,7 +460,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="border-t border-slate-700/50"
+                        className="border-t border-white/[0.08]/50"
                       >
                         <div className="p-3 space-y-3">
                           <div className="grid grid-cols-2 gap-2">
@@ -469,11 +469,11 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                               className={`h-16 flex flex-col items-center justify-center gap-1.5 rounded-lg transition-all ${
                                 getConfigValue("dataScope") === "assigned"
                                   ? "bg-green-500/20 border border-green-500/40 text-green-300"
-                                  : "bg-slate-800/30 border border-slate-700/30 text-slate-400 hover:border-slate-600"
+                                  : "bg-white/[0.03] border border-white/[0.08]/30 text-white/40 hover:border-white/10"
                               }`}
                               data-testid="scope-assigned"
                             >
-                              <div className={`p-1.5 rounded-lg ${getConfigValue("dataScope") === "assigned" ? 'bg-green-500/20' : 'bg-slate-700/50'}`}>
+                              <div className={`p-1.5 rounded-lg ${getConfigValue("dataScope") === "assigned" ? 'bg-green-500/20' : 'bg-white/10'}`}>
                                 <Lock className="w-4 h-4" />
                               </div>
                               <span className="text-xs font-medium">Assigned Only</span>
@@ -483,11 +483,11 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                               className={`h-16 flex flex-col items-center justify-center gap-1.5 rounded-lg transition-all ${
                                 getConfigValue("dataScope") === "all"
                                   ? "bg-green-500/20 border border-green-500/40 text-green-300"
-                                  : "bg-slate-800/30 border border-slate-700/30 text-slate-400 hover:border-slate-600"
+                                  : "bg-white/[0.03] border border-white/[0.08]/30 text-white/40 hover:border-white/10"
                               }`}
                               data-testid="scope-all"
                             >
-                              <div className={`p-1.5 rounded-lg ${getConfigValue("dataScope") === "all" ? 'bg-green-500/20' : 'bg-slate-700/50'}`}>
+                              <div className={`p-1.5 rounded-lg ${getConfigValue("dataScope") === "all" ? 'bg-green-500/20' : 'bg-white/10'}`}>
                                 <Radio className="w-4 h-4" />
                               </div>
                               <span className="text-xs font-medium">All Stands</span>
@@ -499,18 +499,18 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                             className={`w-full h-14 flex items-center justify-between px-4 rounded-lg transition-all ${
                               getConfigValue("showSensitiveMetrics")
                                 ? "bg-purple-500/20 border border-purple-500/40"
-                                : "bg-slate-800/30 border border-slate-700/30"
+                                : "bg-white/[0.03] border border-white/[0.08]/30"
                             }`}
                             data-testid="toggle-sensitive-metrics"
                           >
                             <div className="flex items-center gap-3">
-                              <div className={`p-1.5 rounded-lg ${getConfigValue("showSensitiveMetrics") ? 'bg-purple-500/20' : 'bg-slate-700/50'}`}>
+                              <div className={`p-1.5 rounded-lg ${getConfigValue("showSensitiveMetrics") ? 'bg-purple-500/20' : 'bg-white/10'}`}>
                                 <Shield className="w-4 h-4 text-purple-400" />
                               </div>
-                              <span className="text-sm text-slate-300">Show Sensitive Metrics</span>
+                              <span className="text-sm text-white/70">Show Sensitive Metrics</span>
                             </div>
                             <div className={`w-10 h-5 rounded-full transition-all ${
-                              getConfigValue("showSensitiveMetrics") ? "bg-purple-500" : "bg-slate-600"
+                              getConfigValue("showSensitiveMetrics") ? "bg-purple-500" : "bg-white/10"
                             }`}>
                               <motion.div
                                 animate={{ x: getConfigValue("showSensitiveMetrics") ? 20 : 2 }}
@@ -525,7 +525,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                 </div>
 
                 {/* Layout Presets Section */}
-                <div className="rounded-xl border border-slate-700/50 overflow-hidden">
+                <div className="rounded-xl border border-white/[0.08]/50 overflow-hidden">
                   <SectionHeader
                     icon={Sparkles}
                     title="Layout Presets"
@@ -541,7 +541,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                         animate={{ height: "auto", opacity: 1 }}
                         exit={{ height: 0, opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="border-t border-slate-700/50"
+                        className="border-t border-white/[0.08]/50"
                       >
                         <div className="p-3 grid grid-cols-3 gap-2">
                           {LAYOUT_PRESETS.map((preset) => {
@@ -554,14 +554,14 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                                 className={`h-20 flex flex-col items-center justify-center gap-2 p-2 rounded-lg transition-all relative ${
                                   isSelected
                                     ? "bg-purple-500/20 border border-purple-500/40"
-                                    : "bg-slate-800/30 border border-slate-700/30 hover:border-slate-600"
+                                    : "bg-white/[0.03] border border-white/[0.08]/30 hover:border-white/10"
                                 }`}
                                 data-testid={`layout-${preset.value}`}
                               >
-                                <div className={`p-2 rounded-lg ${isSelected ? 'bg-purple-500/20' : 'bg-slate-700/50'}`}>
-                                  <Icon className={`w-4 h-4 ${isSelected ? "text-purple-400" : "text-slate-400"}`} />
+                                <div className={`p-2 rounded-lg ${isSelected ? 'bg-purple-500/20' : 'bg-white/10'}`}>
+                                  <Icon className={`w-4 h-4 ${isSelected ? "text-purple-400" : "text-white/40"}`} />
                                 </div>
-                                <div className={`text-xs font-medium text-center ${isSelected ? "text-purple-300" : "text-slate-300"}`}>
+                                <div className={`text-xs font-medium text-center ${isSelected ? "text-purple-300" : "text-white/70"}`}>
                                   {preset.label}
                                 </div>
                                 {isSelected && (
@@ -599,7 +599,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                         className="border-t border-cyan-500/20"
                       >
                         <div className="p-3 space-y-3">
-                          <p className="text-xs text-slate-400">
+                          <p className="text-xs text-white/40">
                             Configure geofence radius for different event types. Larger events like CMA Fest need extended coverage.
                           </p>
                           
@@ -614,18 +614,18 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                                   className={`h-20 flex items-center gap-3 p-3 rounded-lg transition-all ${
                                     isSelected
                                       ? "bg-cyan-500/20 border border-cyan-500/40"
-                                      : "bg-slate-800/30 border border-slate-700/30 hover:border-cyan-500/30"
+                                      : "bg-white/[0.03] border border-white/[0.08]/30 hover:border-cyan-500/30"
                                   }`}
                                   data-testid={`geofence-${preset.value}`}
                                 >
-                                  <div className={`p-2 rounded-lg ${isSelected ? 'bg-cyan-500/20' : 'bg-slate-700/50'}`}>
-                                    <Maximize2 className={`w-4 h-4 ${isSelected ? "text-cyan-400" : "text-slate-400"}`} />
+                                  <div className={`p-2 rounded-lg ${isSelected ? 'bg-cyan-500/20' : 'bg-white/10'}`}>
+                                    <Maximize2 className={`w-4 h-4 ${isSelected ? "text-cyan-400" : "text-white/40"}`} />
                                   </div>
                                   <div className="text-left flex-1">
-                                    <div className={`text-sm font-medium ${isSelected ? "text-cyan-300" : "text-slate-300"}`}>
+                                    <div className={`text-sm font-medium ${isSelected ? "text-cyan-300" : "text-white/70"}`}>
                                       {preset.label}
                                     </div>
-                                    <div className="text-xs text-slate-500">{preset.description}</div>
+                                    <div className="text-xs text-white/30">{preset.description}</div>
                                     <div className="flex gap-3 mt-1">
                                       <span className="text-xs text-cyan-400/70">
                                         {formatRadius(preset.radiusFeet)} radius
@@ -642,15 +642,15 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                           </div>
                           
                           {geofenceConfig && (
-                            <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/30">
+                            <div className="p-3 rounded-lg bg-white/5 border border-white/[0.08]/30">
                               <div className="flex items-center justify-between text-xs">
-                                <span className="text-slate-400">Current Setting:</span>
+                                <span className="text-white/40">Current Setting:</span>
                                 <span className="text-cyan-300 font-medium">
                                   {formatRadius(geofenceConfig.radiusFeet || 100)}
                                 </span>
                               </div>
                               {geofenceConfig.updatedByName && (
-                                <div className="text-xs text-slate-500 mt-1">
+                                <div className="text-xs text-white/30 mt-1">
                                   Last updated by {geofenceConfig.updatedByName}
                                 </div>
                               )}
@@ -666,11 +666,11 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
           </div>
 
           {/* Footer Actions */}
-          <div className="px-4 py-3 border-t border-slate-700/50 bg-slate-800/30">
+          <div className="px-4 py-3 border-t border-white/[0.08]/50 bg-white/[0.03]">
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={handleReset}
-                className="h-10 flex items-center justify-center gap-2 rounded-lg bg-slate-700/50 text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all text-sm"
+                className="h-10 flex items-center justify-center gap-2 rounded-lg bg-white/10 text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-all text-sm"
                 data-testid="reset-config"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -678,7 +678,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
               </button>
               <button
                 onClick={onClose}
-                className="h-10 rounded-lg bg-slate-700/50 text-slate-300 hover:bg-slate-700 transition-all text-sm"
+                className="h-10 rounded-lg bg-white/10 text-white/70 hover:bg-white/10 transition-all text-sm"
                 data-testid="cancel-config"
               >
                 Cancel
@@ -689,7 +689,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                 className={`h-10 flex items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all ${
                   Object.keys(pendingChanges).length > 0
                     ? "bg-gradient-to-r from-cyan-500 to-cyan-600 text-white hover:from-cyan-400 hover:to-cyan-500 shadow-lg shadow-cyan-500/30"
-                    : "bg-slate-700/50 text-slate-500 cursor-not-allowed"
+                    : "bg-white/10 text-white/30 cursor-not-allowed"
                 }`}
                 data-testid="save-config"
               >
@@ -720,7 +720,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
               exit={{ opacity: 0, scale: 0.9 }}
               className="absolute inset-0 flex items-center justify-center p-4 z-10"
             >
-              <div className="w-full max-w-md rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 border border-cyan-500/30 p-6 shadow-2xl">
+              <div className="w-full max-w-md rounded-2xl bg-gradient-to-br from-[#0c1224] to-[#0c1224] border border-cyan-500/30 p-6 shadow-2xl">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 rounded-xl bg-cyan-500/20 border border-cyan-400/40">
                     <Crown className="w-5 h-5 text-cyan-400" />
@@ -731,7 +731,7 @@ export function DashboardControls({ isOpen, onClose }: DashboardControlsProps) {
                   </div>
                 </div>
                 
-                <div className="space-y-3 text-sm text-slate-300">
+                <div className="space-y-3 text-sm text-white/70">
                   <p>
                     <span className="text-cyan-400 font-medium">Dashboard Controls</span> gives you the power to customize what every role sees on their dashboard.
                   </p>

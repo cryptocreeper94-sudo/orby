@@ -221,7 +221,7 @@ export default function WarehouseDashboard() {
       case 'Delivered': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
       case 'Confirmed': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
       case 'Cancelled': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default: return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+      default: return 'bg-white/10 text-white/40 border-white/10';
     }
   };
 
@@ -229,7 +229,7 @@ export default function WarehouseDashboard() {
     switch (priority) {
       case 'Emergency': return 'bg-red-500/30 text-red-300 border-red-500/40';
       case 'Rush': return 'bg-orange-500/30 text-orange-300 border-orange-500/40';
-      default: return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+      default: return 'bg-white/10 text-white/40 border-white/10';
     }
   };
 
@@ -239,28 +239,28 @@ export default function WarehouseDashboard() {
     <div key="products" className="w-[140px] h-[90px] p-4 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/20" data-testid="metric-products">
       <div className="flex items-center gap-2 mb-2">
         <Package className="h-5 w-5 text-amber-400" />
-        <span className="text-xs text-slate-400">Products</span>
+        <span className="text-xs text-white/40">Products</span>
       </div>
       <div className="text-2xl font-bold text-amber-300">{stats?.totalProducts ?? 0}</div>
     </div>,
     <div key="categories" className="w-[140px] h-[90px] p-4 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 border border-blue-500/20" data-testid="metric-categories">
       <div className="flex items-center gap-2 mb-2">
         <Layers className="h-5 w-5 text-blue-400" />
-        <span className="text-xs text-slate-400">Categories</span>
+        <span className="text-xs text-white/40">Categories</span>
       </div>
       <div className="text-2xl font-bold text-blue-300">{stats?.totalCategories ?? 0}</div>
     </div>,
     <div key="pending" className="w-[140px] h-[90px] p-4 rounded-xl bg-gradient-to-br from-purple-500/20 to-purple-600/10 border border-purple-500/20" data-testid="metric-pending">
       <div className="flex items-center gap-2 mb-2">
         <Clock className="h-5 w-5 text-purple-400" />
-        <span className="text-xs text-slate-400">Pending</span>
+        <span className="text-xs text-white/40">Pending</span>
       </div>
       <div className="text-2xl font-bold text-purple-300">{stats?.pendingRequestCount ?? 0}</div>
     </div>,
     <div key="lowstock" className="w-[140px] h-[90px] p-4 rounded-xl bg-gradient-to-br from-red-500/20 to-red-600/10 border border-red-500/20" data-testid="metric-low-stock">
       <div className="flex items-center gap-2 mb-2">
         <AlertTriangle className="h-5 w-5 text-red-400" />
-        <span className="text-xs text-slate-400">Low Stock</span>
+        <span className="text-xs text-white/40">Low Stock</span>
       </div>
       <div className="text-2xl font-bold text-red-300">{stats?.lowStockCount ?? 0}</div>
     </div>,
@@ -279,17 +279,17 @@ export default function WarehouseDashboard() {
         return (
           <div key={req.id} className="min-w-[280px] p-4 rounded-xl bg-white/5 border border-white/10" data-testid={`carousel-request-${req.id}`}>
             <div className="flex items-start justify-between mb-2">
-              <div className="font-semibold text-slate-200 text-sm">{stand?.name ?? 'Unknown Stand'}</div>
+              <div className="font-semibold text-white/80 text-sm">{stand?.name ?? 'Unknown Stand'}</div>
               <div className="flex gap-1">
                 <Badge className={`text-[10px] border ${getStatusColor(req.status)}`}>{req.status}</Badge>
                 <Badge className={`text-[10px] border ${getPriorityColor(req.priority)}`}>{req.priority}</Badge>
               </div>
             </div>
-            <div className="text-xs text-slate-500 mb-3">
+            <div className="text-xs text-white/30 mb-3">
               {req.createdAt ? new Date(req.createdAt).toLocaleString() : 'Unknown time'}
             </div>
             {req.notes && (
-              <p className="text-xs text-slate-400 mb-3 italic bg-white/5 rounded-lg p-2 line-clamp-2">"{req.notes}"</p>
+              <p className="text-xs text-white/40 mb-3 italic bg-white/5 rounded-lg p-2 line-clamp-2">"{req.notes}"</p>
             )}
             <div className="flex gap-2">
               {nextStatus[req.status] && (
@@ -321,8 +321,8 @@ export default function WarehouseDashboard() {
       })
     : [
         <div key="no-requests" className="min-w-[280px] p-6 rounded-xl bg-white/5 border border-white/10 text-center" data-testid="no-pending-requests">
-          <Truck className="h-10 w-10 text-slate-500 mx-auto mb-2" />
-          <p className="text-sm text-slate-400">No pending requests</p>
+          <Truck className="h-10 w-10 text-white/30 mx-auto mb-2" />
+          <p className="text-sm text-white/40">No pending requests</p>
         </div>
       ];
 
@@ -338,16 +338,16 @@ export default function WarehouseDashboard() {
                 className="w-3 h-3 rounded-full" 
                 style={{ backgroundColor: category.color ?? '#F59E0B' }}
               />
-              <span className="font-medium text-sm text-slate-200">{category.name}</span>
+              <span className="font-medium text-sm text-white/80">{category.name}</span>
             </div>
             <div className="grid grid-cols-2 gap-2 text-center">
               <div className="p-2 rounded-lg bg-white/5">
-                <div className="text-lg font-bold text-slate-200">{categoryProducts.length}</div>
-                <div className="text-[10px] text-slate-500">Products</div>
+                <div className="text-lg font-bold text-white/80">{categoryProducts.length}</div>
+                <div className="text-[10px] text-white/30">Products</div>
               </div>
               <div className="p-2 rounded-lg bg-white/5">
-                <div className="text-lg font-bold text-slate-200">{totalStock}</div>
-                <div className="text-[10px] text-slate-500">Units</div>
+                <div className="text-lg font-bold text-white/80">{totalStock}</div>
+                <div className="text-[10px] text-white/30">Units</div>
               </div>
             </div>
             {lowCount > 0 && (
@@ -361,8 +361,8 @@ export default function WarehouseDashboard() {
       })
     : [
         <div key="no-stock" className="w-[180px] h-[130px] p-6 rounded-xl bg-white/5 border border-white/10 text-center" data-testid="no-stock-data">
-          <Package className="h-10 w-10 text-slate-500 mx-auto mb-2" />
-          <p className="text-sm text-slate-400">No inventory data</p>
+          <Package className="h-10 w-10 text-white/30 mx-auto mb-2" />
+          <p className="text-sm text-white/40">No inventory data</p>
           <GlowButton 
             size="sm" 
             className="mt-2"
@@ -382,16 +382,16 @@ export default function WarehouseDashboard() {
       content: (
         <div className="space-y-2" data-testid="accordion-procedures">
           <div className="p-2 rounded-lg bg-white/5 text-xs">
-            <div className="font-medium text-slate-300">Receiving Shipments</div>
-            <div className="text-slate-500">1. Verify PO number • 2. Count items • 3. Log in system</div>
+            <div className="font-medium text-white/70">Receiving Shipments</div>
+            <div className="text-white/30">1. Verify PO number • 2. Count items • 3. Log in system</div>
           </div>
           <div className="p-2 rounded-lg bg-white/5 text-xs">
-            <div className="font-medium text-slate-300">Order Picking</div>
-            <div className="text-slate-500">1. Print pick list • 2. Verify quantities • 3. Update status</div>
+            <div className="font-medium text-white/70">Order Picking</div>
+            <div className="text-white/30">1. Print pick list • 2. Verify quantities • 3. Update status</div>
           </div>
           <div className="p-2 rounded-lg bg-white/5 text-xs">
-            <div className="font-medium text-slate-300">Inventory Counts</div>
-            <div className="text-slate-500">1. Print count sheets • 2. Physical count • 3. Reconcile</div>
+            <div className="font-medium text-white/70">Inventory Counts</div>
+            <div className="text-white/30">1. Print count sheets • 2. Physical count • 3. Reconcile</div>
           </div>
         </div>
       )
@@ -402,24 +402,24 @@ export default function WarehouseDashboard() {
         <div className="space-y-2" data-testid="accordion-receiving-logs">
           <div className="p-2 rounded-lg bg-white/5 text-xs flex items-center justify-between">
             <div>
-              <div className="font-medium text-slate-300">Beverage Restock</div>
-              <div className="text-slate-500">12 cases received</div>
+              <div className="font-medium text-white/70">Beverage Restock</div>
+              <div className="text-white/30">12 cases received</div>
             </div>
-            <div className="text-slate-500">2h ago</div>
+            <div className="text-white/30">2h ago</div>
           </div>
           <div className="p-2 rounded-lg bg-white/5 text-xs flex items-center justify-between">
             <div>
-              <div className="font-medium text-slate-300">Paper Goods</div>
-              <div className="text-slate-500">50 units received</div>
+              <div className="font-medium text-white/70">Paper Goods</div>
+              <div className="text-white/30">50 units received</div>
             </div>
-            <div className="text-slate-500">5h ago</div>
+            <div className="text-white/30">5h ago</div>
           </div>
           <div className="p-2 rounded-lg bg-white/5 text-xs flex items-center justify-between">
             <div>
-              <div className="font-medium text-slate-300">Condiments</div>
-              <div className="text-slate-500">24 units received</div>
+              <div className="font-medium text-white/70">Condiments</div>
+              <div className="text-white/30">24 units received</div>
             </div>
-            <div className="text-slate-500">1d ago</div>
+            <div className="text-white/30">1d ago</div>
           </div>
         </div>
       )
@@ -447,7 +447,7 @@ export default function WarehouseDashboard() {
           actions={
             <div className="flex items-center gap-2">
               <Link href="/messages">
-                <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-white/10 relative" data-testid="button-messages">
+                <Button variant="ghost" size="icon" className="text-white/70 hover:bg-white/10 relative" data-testid="button-messages">
                   <MessageSquare className="h-5 w-5" />
                   {urgentMessages.length > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse">
@@ -456,7 +456,7 @@ export default function WarehouseDashboard() {
                   )}
                 </Button>
               </Link>
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-300 hover:bg-white/10" data-testid="button-logout">
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white/70 hover:bg-white/10" data-testid="button-logout">
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
@@ -530,7 +530,7 @@ export default function WarehouseDashboard() {
                 className={`px-4 py-2 rounded-xl text-sm font-medium capitalize transition-all ${
                   activeTab === tab 
                     ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/25' 
-                    : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
+                    : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
                 }`}
                 data-testid={`tab-${tab}`}
               >
@@ -548,7 +548,7 @@ export default function WarehouseDashboard() {
                 exit={{ opacity: 0, x: 20 }}
               >
                 {showMap && (
-                  <div className="fixed inset-0 z-50 bg-slate-950">
+                  <div className="fixed inset-0 z-50 bg-[#050508]">
                     <InteractiveMap 
                       onClose={() => setShowMap(false)} 
                       showNavigation={true}
@@ -569,7 +569,7 @@ export default function WarehouseDashboard() {
                   <BentoCard span={8} className="col-span-4 md:col-span-4 lg:col-span-8" data-testid="bento-pending-orders">
                     <div className="flex items-center gap-2 mb-2">
                       <Clock className="h-4 w-4 text-orange-400" />
-                      <span className="text-sm font-medium text-slate-300">Pending Orders ({pendingRequests.length})</span>
+                      <span className="text-sm font-medium text-white/70">Pending Orders ({pendingRequests.length})</span>
                     </div>
                     <CarouselRail 
                       items={pendingOrderItems}
@@ -580,7 +580,7 @@ export default function WarehouseDashboard() {
                   <BentoCard span={4} className="col-span-4 md:col-span-2 lg:col-span-4" data-testid="bento-alerts">
                     <div className="flex items-center gap-2 mb-2">
                       <AlertTriangle className="h-4 w-4 text-red-400" />
-                      <span className="text-sm font-medium text-slate-300">Low Stock Alerts</span>
+                      <span className="text-sm font-medium text-white/70">Low Stock Alerts</span>
                     </div>
                     {lowStockProducts.length > 0 ? (
                       <div className="space-y-2 max-h-[200px] overflow-y-auto" data-testid="low-stock-list">
@@ -590,14 +590,14 @@ export default function WarehouseDashboard() {
                             <div key={product.id} className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center justify-between" data-testid={`low-stock-${product.id}`}>
                               <div className="flex items-center gap-2">
                                 <AlertCircle className="h-3 w-3 text-red-400" />
-                                <span className="text-xs text-slate-300 truncate max-w-[100px]">{product.name}</span>
+                                <span className="text-xs text-white/70 truncate max-w-[100px]">{product.name}</span>
                               </div>
                               <span className="text-xs font-bold text-red-400">{qty}</span>
                             </div>
                           );
                         })}
                         {lowStockProducts.length > 5 && (
-                          <div className="text-xs text-slate-500 text-center pt-1">
+                          <div className="text-xs text-white/30 text-center pt-1">
                             +{lowStockProducts.length - 5} more items
                           </div>
                         )}
@@ -605,7 +605,7 @@ export default function WarehouseDashboard() {
                     ) : (
                       <div className="p-4 text-center" data-testid="no-low-stock">
                         <Check className="h-8 w-8 text-emerald-400 mx-auto mb-2" />
-                        <p className="text-xs text-slate-400">All stock levels OK</p>
+                        <p className="text-xs text-white/40">All stock levels OK</p>
                       </div>
                     )}
                   </BentoCard>
@@ -613,7 +613,7 @@ export default function WarehouseDashboard() {
                   <BentoCard span={6} className="col-span-4 md:col-span-3 lg:col-span-6" data-testid="bento-stock-levels">
                     <div className="flex items-center gap-2 mb-2">
                       <Package className="h-4 w-4 text-amber-400" />
-                      <span className="text-sm font-medium text-slate-300">Stock by Category</span>
+                      <span className="text-sm font-medium text-white/70">Stock by Category</span>
                     </div>
                     <CarouselRail 
                       items={stockLevelItems}
@@ -624,7 +624,7 @@ export default function WarehouseDashboard() {
                   <BentoCard span={6} className="col-span-4 md:col-span-3 lg:col-span-6" data-testid="bento-quick-actions">
                     <div className="flex items-center gap-2 mb-2">
                       <Map className="h-4 w-4 text-blue-400" />
-                      <span className="text-sm font-medium text-slate-300">Quick Actions</span>
+                      <span className="text-sm font-medium text-white/70">Quick Actions</span>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <motion.button
@@ -635,7 +635,7 @@ export default function WarehouseDashboard() {
                         data-testid="quick-action-map"
                       >
                         <Map className="h-6 w-6 text-blue-400 mx-auto mb-1" />
-                        <span className="text-xs text-slate-300">Stadium Map</span>
+                        <span className="text-xs text-white/70">Stadium Map</span>
                       </motion.button>
                       <motion.button
                         whileHover={{ scale: 1.02 }}
@@ -645,7 +645,7 @@ export default function WarehouseDashboard() {
                         data-testid="quick-action-inventory"
                       >
                         <Package className="h-6 w-6 text-amber-400 mx-auto mb-1" />
-                        <span className="text-xs text-slate-300">Inventory</span>
+                        <span className="text-xs text-white/70">Inventory</span>
                       </motion.button>
                     </div>
                   </BentoCard>
@@ -676,20 +676,20 @@ export default function WarehouseDashboard() {
                   <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-inventory-search">
                     <div className="flex gap-2">
                       <div className="relative flex-1">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
                         <Input
                           placeholder="Search products..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="pl-9 bg-white/5 border-white/10 text-slate-200 placeholder:text-slate-500"
+                          className="pl-9 bg-white/5 border-white/10 text-white/80 placeholder:text-white/30"
                           data-testid="input-search-products"
                         />
                       </div>
                       <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="w-[140px] bg-white/5 border-white/10 text-slate-200" data-testid="select-category">
+                        <SelectTrigger className="w-[140px] bg-white/5 border-white/10 text-white/80" data-testid="select-category">
                           <SelectValue placeholder="Category" />
                         </SelectTrigger>
-                        <SelectContent className="bg-slate-900 border-white/10">
+                        <SelectContent className="bg-[#0c1224] border-white/10">
                           <SelectItem value="all">All Categories</SelectItem>
                           {categories.map(cat => (
                             <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
@@ -705,8 +705,8 @@ export default function WarehouseDashboard() {
                         <div className="p-4 rounded-2xl bg-amber-500/10 w-fit mx-auto mb-4">
                           <Package className="h-12 w-12 text-amber-400" />
                         </div>
-                        <h3 className="font-semibold text-lg mb-2 text-slate-200">No Inventory Data</h3>
-                        <p className="text-sm text-slate-400 mb-4">
+                        <h3 className="font-semibold text-lg mb-2 text-white/80">No Inventory Data</h3>
+                        <p className="text-sm text-white/40 mb-4">
                           Load example data to see how the warehouse inventory system works.
                         </p>
                         <GlowButton 
@@ -749,8 +749,8 @@ export default function WarehouseDashboard() {
                                     boxShadow: `0 0 10px ${category.color ?? '#F59E0B'}50`
                                   }}
                                 />
-                                <span className="font-semibold text-sm text-slate-200">{category.name}</span>
-                                <Badge variant="secondary" className="text-[10px] bg-white/10 text-slate-300">
+                                <span className="font-semibold text-sm text-white/80">{category.name}</span>
+                                <Badge variant="secondary" className="text-[10px] bg-white/10 text-white/70">
                                   {categoryProducts.length}
                                 </Badge>
                               </div>
@@ -758,7 +758,7 @@ export default function WarehouseDashboard() {
                                 animate={{ rotate: isExpanded ? 90 : 0 }}
                                 transition={{ duration: 0.2 }}
                               >
-                                <ChevronRight className="h-4 w-4 text-slate-400" />
+                                <ChevronRight className="h-4 w-4 text-white/40" />
                               </motion.div>
                             </button>
                             
@@ -773,7 +773,7 @@ export default function WarehouseDashboard() {
                                 >
                                   <div className="px-4 pb-4 space-y-2 border-t border-white/5 pt-3">
                                     {categoryProducts.length === 0 ? (
-                                      <p className="text-sm text-slate-500 text-center py-4">
+                                      <p className="text-sm text-white/30 text-center py-4">
                                         No products in this category
                                       </p>
                                     ) : (
@@ -795,12 +795,12 @@ export default function WarehouseDashboard() {
                                           >
                                             <div className="flex-1">
                                               <div className="flex items-center gap-2">
-                                                <span className="font-medium text-sm text-slate-200">{product.name}</span>
+                                                <span className="font-medium text-sm text-white/80">{product.name}</span>
                                                 {isLowStock && (
                                                   <AlertCircle className="h-3 w-3 text-red-400" />
                                                 )}
                                               </div>
-                                              <div className="text-xs text-slate-500">
+                                              <div className="text-xs text-white/30">
                                                 SKU: {product.sku ?? 'N/A'} | Unit: {product.unit ?? 'each'}
                                                 {product.isPerishable && ' | Perishable'}
                                               </div>
@@ -808,19 +808,19 @@ export default function WarehouseDashboard() {
                                             <div className="flex items-center gap-2">
                                               <motion.button
                                                 whileTap={{ scale: 0.9 }}
-                                                className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center border border-white/10 text-slate-300"
+                                                className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center border border-white/10 text-white/70"
                                                 onClick={() => updateStockMutation.mutate({ productId: product.id, quantity: Math.max(0, qty - 1) })}
                                                 disabled={updateStockMutation.isPending}
                                                 data-testid={`button-decrement-${product.id}`}
                                               >
                                                 <Minus className="h-3 w-3" />
                                               </motion.button>
-                                              <span className={`w-12 text-center font-bold ${isLowStock ? 'text-red-400' : 'text-slate-200'}`}>
+                                              <span className={`w-12 text-center font-bold ${isLowStock ? 'text-red-400' : 'text-white/80'}`}>
                                                 {qty}
                                               </span>
                                               <motion.button
                                                 whileTap={{ scale: 0.9 }}
-                                                className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center border border-white/10 text-slate-300"
+                                                className="h-8 w-8 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center border border-white/10 text-white/70"
                                                 onClick={() => updateStockMutation.mutate({ productId: product.id, quantity: qty + 1 })}
                                                 disabled={updateStockMutation.isPending}
                                                 data-testid={`button-increment-${product.id}`}
@@ -854,7 +854,7 @@ export default function WarehouseDashboard() {
               >
                 <LayoutShell className="gap-3" data-testid="bento-layout-requests">
                   <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-request-workflow">
-                    <div className="text-sm font-medium text-slate-300 mb-3">Request Workflow</div>
+                    <div className="text-sm font-medium text-white/70 mb-3">Request Workflow</div>
                     <div className="flex items-center justify-between text-xs">
                       {[
                         { label: 'Pending', icon: Clock, color: 'amber' },
@@ -868,10 +868,10 @@ export default function WarehouseDashboard() {
                             <div className={`w-8 h-8 rounded-full bg-${step.color}-500/20 flex items-center justify-center mb-1`}>
                               <step.icon className={`h-4 w-4 text-${step.color}-400`} />
                             </div>
-                            <span className="text-slate-400">{step.label}</span>
+                            <span className="text-white/40">{step.label}</span>
                           </div>
                           {idx < arr.length - 1 && (
-                            <ArrowRight className="h-3 w-3 mx-1 text-slate-600" />
+                            <ArrowRight className="h-3 w-3 mx-1 text-white/20" />
                           )}
                         </div>
                       ))}
@@ -881,11 +881,11 @@ export default function WarehouseDashboard() {
                   {pendingRequests.length === 0 ? (
                     <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-no-requests">
                       <div className="p-8 text-center border-2 border-dashed border-white/20 rounded-xl">
-                        <div className="p-4 rounded-2xl bg-slate-500/10 w-fit mx-auto mb-4">
-                          <Truck className="h-12 w-12 text-slate-400" />
+                        <div className="p-4 rounded-2xl bg-white/5 w-fit mx-auto mb-4">
+                          <Truck className="h-12 w-12 text-white/40" />
                         </div>
-                        <h3 className="font-semibold text-lg mb-2 text-slate-200">No Pending Requests</h3>
-                        <p className="text-sm text-slate-400">
+                        <h3 className="font-semibold text-lg mb-2 text-white/80">No Pending Requests</h3>
+                        <p className="text-sm text-white/40">
                           Stand leads can submit requests from their dashboard.
                         </p>
                       </div>
@@ -910,8 +910,8 @@ export default function WarehouseDashboard() {
                           >
                             <div className="flex items-start justify-between mb-3">
                               <div>
-                                <div className="font-semibold text-slate-200">{stand?.name ?? 'Unknown Stand'}</div>
-                                <div className="text-xs text-slate-500">
+                                <div className="font-semibold text-white/80">{stand?.name ?? 'Unknown Stand'}</div>
+                                <div className="text-xs text-white/30">
                                   {req.createdAt ? new Date(req.createdAt).toLocaleString() : 'Unknown time'}
                                 </div>
                               </div>
@@ -921,7 +921,7 @@ export default function WarehouseDashboard() {
                               </div>
                             </div>
                             {req.notes && (
-                              <p className="text-sm text-slate-400 mb-3 italic bg-white/5 rounded-lg p-2">"{req.notes}"</p>
+                              <p className="text-sm text-white/40 mb-3 italic bg-white/5 rounded-lg p-2">"{req.notes}"</p>
                             )}
                             <div className="flex gap-2">
                               {nextStatus[req.status] && (

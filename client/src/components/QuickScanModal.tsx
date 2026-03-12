@@ -210,8 +210,8 @@ export function QuickScanModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4" data-testid="quick-scan-modal">
-      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-700">
-        <CardHeader className="pb-2 border-b border-slate-700 sticky top-0 bg-slate-900 z-10">
+      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0c1224] border-white/[0.08]">
+        <CardHeader className="pb-2 border-b border-white/[0.08] sticky top-0 bg-[#0c1224] z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600">
@@ -348,7 +348,7 @@ export function QuickScanModal({
                     </div>
                     
                     {scanResult.notes && (
-                      <p className="text-xs text-cyan-400 bg-slate-800/50 p-2 rounded mb-3">
+                      <p className="text-xs text-cyan-400 bg-white/5 p-2 rounded mb-3">
                         {scanResult.notes}
                       </p>
                     )}
@@ -358,7 +358,7 @@ export function QuickScanModal({
                         <div 
                           key={index}
                           className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
-                            selectedItems.has(index) ? 'bg-slate-700/50 shadow-sm' : 'bg-slate-800/50'
+                            selectedItems.has(index) ? 'bg-white/10 shadow-sm' : 'bg-white/5'
                           }`}
                           data-testid={`scanned-product-${index}`}
                         >

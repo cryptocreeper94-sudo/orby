@@ -174,10 +174,10 @@ export default function SupervisorTutorialModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent 
-        className="max-w-2xl bg-slate-900 border border-cyan-500/30 p-0 overflow-hidden"
+        className="max-w-2xl bg-[#0c1224] border border-cyan-500/30 p-0 overflow-hidden"
         data-testid="supervisor-tutorial-modal"
       >
-        <div className="w-full h-1 bg-slate-800">
+        <div className="w-full h-1 bg-white/5">
           <motion.div 
             className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400"
             initial={{ width: 0 }}
@@ -188,7 +188,7 @@ export default function SupervisorTutorialModal({
         
         <button
           onClick={handleClose}
-          className="absolute right-4 top-4 text-slate-400 hover:text-white transition-colors z-10"
+          className="absolute right-4 top-4 text-white/40 hover:text-white transition-colors z-10"
           data-testid="button-close-tutorial"
         >
           <X className="w-5 h-5" />
@@ -205,7 +205,7 @@ export default function SupervisorTutorialModal({
                     ? 'bg-cyan-400 scale-125' 
                     : index < currentStep 
                       ? 'bg-cyan-600' 
-                      : 'bg-slate-600'
+                      : 'bg-white/10'
                 }`}
                 data-testid={`step-indicator-${index}`}
               />
@@ -228,13 +228,13 @@ export default function SupervisorTutorialModal({
                 <h2 className="text-xl font-bold text-cyan-400 mb-2" data-testid="tutorial-step-title">
                   {welcomeTitle}
                 </h2>
-                <p className="text-slate-300 text-sm leading-relaxed max-w-lg">
+                <p className="text-white/70 text-sm leading-relaxed max-w-lg">
                   {step.description}
                 </p>
               </div>
 
               {step.tips && step.tips.length > 0 && (
-                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
+                <div className="bg-white/5 rounded-lg p-4 border border-white/[0.08]/50">
                   <h3 className="text-sm font-semibold text-cyan-400 mb-3 flex items-center gap-2">
                     <CheckCircle className="w-4 h-4" />
                     Quick Tips
@@ -243,7 +243,7 @@ export default function SupervisorTutorialModal({
                     {step.tips.map((tip, index) => (
                       <li 
                         key={index}
-                        className="text-sm text-slate-400 flex items-start gap-2"
+                        className="text-sm text-white/40 flex items-start gap-2"
                       >
                         <span className="text-cyan-500 mt-1">•</span>
                         {tip}
@@ -255,19 +255,19 @@ export default function SupervisorTutorialModal({
             </motion.div>
           </AnimatePresence>
 
-          <div className="flex items-center justify-between mt-6 pt-4 border-t border-slate-700/50">
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/[0.08]/50">
             <Button
               variant="ghost"
               onClick={handlePrev}
               disabled={isFirstStep}
-              className="text-slate-400 hover:text-white hover:bg-slate-800 disabled:opacity-30"
+              className="text-white/40 hover:text-white hover:bg-white/5 disabled:opacity-30"
               data-testid="button-prev-step"
             >
               <ChevronLeft className="w-4 h-4 mr-1" />
               Previous
             </Button>
 
-            <span className="text-sm text-slate-500">
+            <span className="text-sm text-white/30">
               {currentStep + 1} of {tutorialSteps.length}
             </span>
 

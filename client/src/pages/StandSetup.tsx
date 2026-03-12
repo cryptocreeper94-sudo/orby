@@ -435,8 +435,8 @@ export default function StandSetup() {
           <GlassCard className="max-w-md w-full">
             <GlassCardContent className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-slate-200 mb-2">Access Restricted</h2>
-              <p className="text-slate-400 mb-4">Stand setup is only available for managers.</p>
+              <h2 className="text-xl font-bold text-white/80 mb-2">Access Restricted</h2>
+              <p className="text-white/40 mb-4">Stand setup is only available for managers.</p>
               <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-return-home">
                 Return Home
               </Button>
@@ -453,23 +453,23 @@ export default function StandSetup() {
   const metricsCards = [
     <div key="total" className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid="metric-total-stands">
       <Store className="h-4 w-4 text-cyan-400 mb-1" />
-      <div className="text-lg font-bold text-slate-200">{stands.length}</div>
-      <div className="text-xs text-slate-500">Total Stands</div>
+      <div className="text-lg font-bold text-white/80">{stands.length}</div>
+      <div className="text-xs text-white/30">Total Stands</div>
     </div>,
     <div key="configured" className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 min-w-[120px]" data-testid="metric-configured">
       <CheckCircle2 className="h-4 w-4 text-emerald-400 mb-1" />
       <div className="text-lg font-bold text-emerald-400">{configuredCount}</div>
-      <div className="text-xs text-slate-500">Configured</div>
+      <div className="text-xs text-white/30">Configured</div>
     </div>,
     <div key="pending" className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 min-w-[120px]" data-testid="metric-pending">
       <XCircle className="h-4 w-4 text-amber-400 mb-1" />
       <div className="text-lg font-bold text-amber-400">{unconfiguredCount}</div>
-      <div className="text-xs text-slate-500">Pending</div>
+      <div className="text-xs text-white/30">Pending</div>
     </div>,
     <div key="items" className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid="metric-items">
       <Package className="h-4 w-4 text-cyan-400 mb-1" />
-      <div className="text-lg font-bold text-slate-200">{allItems.length}</div>
-      <div className="text-xs text-slate-500">Total Items</div>
+      <div className="text-lg font-bold text-white/80">{allItems.length}</div>
+      <div className="text-xs text-white/30">Total Items</div>
     </div>
   ];
 
@@ -486,14 +486,14 @@ export default function StandSetup() {
       data-testid={`stand-card-${stand.id}`}
     >
       <div className="flex items-center justify-between mb-1">
-        <span className="font-medium text-slate-200 text-sm truncate">{stand.name}</span>
+        <span className="font-medium text-white/80 text-sm truncate">{stand.name}</span>
         {hasTemplate(stand.id) ? (
           <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
         ) : (
-          <XCircle className="h-4 w-4 text-slate-500 shrink-0" />
+          <XCircle className="h-4 w-4 text-white/30 shrink-0" />
         )}
       </div>
-      <div className="text-xs text-slate-500">{stand.id}</div>
+      <div className="text-xs text-white/30">{stand.id}</div>
     </motion.div>
   ));
 
@@ -526,7 +526,7 @@ export default function StandSetup() {
           iconColor="cyan"
           actions={
             <Link href="/manager">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-white/10" data-testid="button-back">
+              <Button variant="ghost" size="sm" className="text-white/70 hover:bg-white/10" data-testid="button-back">
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Back
               </Button>
@@ -543,12 +543,12 @@ export default function StandSetup() {
             <BentoCard span={12} className="lg:col-span-5" data-testid="stands-carousel-card">
               <div className="mb-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
                   <Input
                     placeholder="Search stands..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-white/5 border-white/10 text-slate-200"
+                    className="pl-10 bg-white/5 border-white/10 text-white/80"
                     data-testid="input-search-stands"
                   />
                 </div>
@@ -562,11 +562,11 @@ export default function StandSetup() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Settings className="h-4 w-4 text-cyan-400" />
-                      <span className="font-medium text-slate-200 text-sm">{selectedStand.name}</span>
-                      <span className="text-xs text-slate-500">({selectedStand.id})</span>
+                      <span className="font-medium text-white/80 text-sm">{selectedStand.name}</span>
+                      <span className="text-xs text-white/30">({selectedStand.id})</span>
                     </div>
                     <div className="flex gap-1">
-                      <Button size="sm" variant="outline" onClick={() => setAddItemsDialogOpen(true)} className="border-white/20 text-slate-300 h-7 text-xs" data-testid="button-add-items">
+                      <Button size="sm" variant="outline" onClick={() => setAddItemsDialogOpen(true)} className="border-white/20 text-white/70 h-7 text-xs" data-testid="button-add-items">
                         <Plus className="h-3 w-3 mr-1" />Add
                       </Button>
                       <GlowButton variant="cyan" size="sm" onClick={() => setScanDialogOpen(true)} className="h-7 text-xs" data-testid="button-scan-template">
@@ -581,9 +581,9 @@ export default function StandSetup() {
                     </div>
                   ) : standItems.length === 0 ? (
                     <div className="text-center py-8" data-testid="empty-template">
-                      <Package className="h-10 w-10 text-slate-600 mx-auto mb-2" />
-                      <p className="text-slate-400 text-sm mb-2">No template configured</p>
-                      <p className="text-xs text-slate-500">Scan a sheet or add items manually</p>
+                      <Package className="h-10 w-10 text-white/20 mx-auto mb-2" />
+                      <p className="text-white/40 text-sm mb-2">No template configured</p>
+                      <p className="text-xs text-white/30">Scan a sheet or add items manually</p>
                     </div>
                   ) : (
                     <ScrollArea className="h-[280px]" data-testid="items-scroll-area">
@@ -591,10 +591,10 @@ export default function StandSetup() {
                         {standItems.map((si, idx) => (
                           <div key={si.id} className="flex items-center justify-between p-2 bg-white/5 rounded border border-white/10" data-testid={`stand-item-${si.itemId}`}>
                             <div className="flex items-center gap-2">
-                              <span className="text-[10px] text-slate-500 w-4">{idx + 1}</span>
+                              <span className="text-[10px] text-white/30 w-4">{idx + 1}</span>
                               <div>
-                                <div className="font-medium text-slate-200 text-xs">{si.item.name}</div>
-                                <Badge variant="outline" className="text-[10px] border-white/20 text-slate-400">{si.item.category}</Badge>
+                                <div className="font-medium text-white/80 text-xs">{si.item.name}</div>
+                                <Badge variant="outline" className="text-[10px] border-white/20 text-white/40">{si.item.category}</Badge>
                               </div>
                             </div>
                             <Button size="sm" variant="ghost" className="text-red-400 hover:bg-red-500/10 h-6 w-6 p-0" onClick={() => removeStandItem(si.itemId)} data-testid={`button-remove-${si.itemId}`}>
@@ -607,7 +607,7 @@ export default function StandSetup() {
                   )}
 
                   {standItems.length > 0 && (
-                    <div className="flex items-center justify-between text-xs text-slate-400 pt-2 border-t border-white/10" data-testid="template-status">
+                    <div className="flex items-center justify-between text-xs text-white/40 pt-2 border-t border-white/10" data-testid="template-status">
                       <span>{standItems.length} items</span>
                       <Badge className="bg-emerald-500/20 text-emerald-400 text-[10px]">Active</Badge>
                     </div>
@@ -616,9 +616,9 @@ export default function StandSetup() {
               ) : (
                 <div className="flex items-center justify-center h-full min-h-[200px]" data-testid="no-stand-selected">
                   <div className="text-center">
-                    <Store className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                    <p className="text-slate-400 text-sm">Select a Stand</p>
-                    <p className="text-xs text-slate-500">Choose from the carousel above</p>
+                    <Store className="h-12 w-12 text-white/20 mx-auto mb-3" />
+                    <p className="text-white/40 text-sm">Select a Stand</p>
+                    <p className="text-xs text-white/30">Choose from the carousel above</p>
                   </div>
                 </div>
               )}
@@ -631,13 +631,13 @@ export default function StandSetup() {
         </main>
 
         <Dialog open={scanDialogOpen} onOpenChange={setScanDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-700 max-w-lg" data-testid="dialog-scan">
+          <DialogContent className="bg-[#0c1224] border-white/[0.08] max-w-lg" data-testid="dialog-scan">
             <DialogHeader>
-              <DialogTitle className="text-slate-200 flex items-center gap-2">
+              <DialogTitle className="text-white/80 flex items-center gap-2">
                 <FileText className="h-5 w-5 text-cyan-400" />
                 Scan Count Sheet for {selectedStand?.name}
               </DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogDescription className="text-white/40">
                 Scan a paper count sheet to create this stand's inventory template
               </DialogDescription>
             </DialogHeader>
@@ -659,7 +659,7 @@ export default function StandSetup() {
                     />
                   </div>
                   <div className="flex gap-2">
-                    <Button onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')} variant="outline" className="border-white/20 text-slate-300" data-testid="button-switch-camera">
+                    <Button onClick={() => setFacingMode(prev => prev === 'user' ? 'environment' : 'user')} variant="outline" className="border-white/20 text-white/70" data-testid="button-switch-camera">
                       <SwitchCamera className="h-4 w-4" />
                     </Button>
                     <Button onClick={captureImage} className="flex-1 bg-cyan-500 hover:bg-cyan-600" data-testid="button-capture">
@@ -676,7 +676,7 @@ export default function StandSetup() {
                   
                   {!scanResult && !isScanning && (
                     <div className="flex gap-2">
-                      <Button onClick={retakePhoto} variant="outline" className="border-white/20 text-slate-300" data-testid="button-retake">
+                      <Button onClick={retakePhoto} variant="outline" className="border-white/20 text-white/70" data-testid="button-retake">
                         <RotateCcw className="h-4 w-4 mr-2" />
                         Retake
                       </Button>
@@ -690,7 +690,7 @@ export default function StandSetup() {
                   {isScanning && (
                     <div className="flex items-center justify-center py-4" data-testid="scanning-indicator">
                       <Loader2 className="h-6 w-6 text-cyan-400 animate-spin mr-2" />
-                      <span className="text-slate-300">Reading count sheet...</span>
+                      <span className="text-white/70">Reading count sheet...</span>
                     </div>
                   )}
 
@@ -705,7 +705,7 @@ export default function StandSetup() {
 
                   {scanResult && (
                     <div className="space-y-3" data-testid="scan-results">
-                      <div className="text-sm text-slate-400">
+                      <div className="text-sm text-white/40">
                         Found {scanResult.length} items. Select items to include in template:
                       </div>
                       <ScrollArea className="h-[200px] pr-2">
@@ -714,8 +714,8 @@ export default function StandSetup() {
                             <div key={index} className={`flex items-center gap-3 p-2 rounded-lg border ${selectedScannedItems.has(index) ? 'bg-cyan-500/20 border-cyan-500/30' : 'bg-white/5 border-white/10'}`} data-testid={`scanned-item-${index}`}>
                               <Checkbox checked={selectedScannedItems.has(index)} onCheckedChange={() => toggleScannedItem(index)} />
                               <div className="flex-1 min-w-0">
-                                <div className="font-medium text-slate-200 text-sm truncate">{item.name}</div>
-                                <div className="text-xs text-slate-500">Category: {guessCategory(item.name)}</div>
+                                <div className="font-medium text-white/80 text-sm truncate">{item.name}</div>
+                                <div className="text-xs text-white/30">Category: {guessCategory(item.name)}</div>
                               </div>
                               <Badge className={`text-[10px] ${item.confidence === 'high' ? 'bg-emerald-500/20 text-emerald-400' : item.confidence === 'medium' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400'}`}>
                                 {item.confidence}
@@ -725,7 +725,7 @@ export default function StandSetup() {
                         </div>
                       </ScrollArea>
                       <div className="flex gap-2">
-                        <Button onClick={retakePhoto} variant="outline" className="border-white/20 text-slate-300" data-testid="button-scan-another">Scan Another</Button>
+                        <Button onClick={retakePhoto} variant="outline" className="border-white/20 text-white/70" data-testid="button-scan-another">Scan Another</Button>
                         <Button onClick={processScannedItems} className="flex-1 bg-cyan-500 hover:bg-cyan-600" disabled={selectedScannedItems.size === 0} data-testid="button-create-template">
                           <Check className="h-4 w-4 mr-2" />
                           Create Template ({selectedScannedItems.size} items)
@@ -740,18 +740,18 @@ export default function StandSetup() {
         </Dialog>
 
         <Dialog open={addItemsDialogOpen} onOpenChange={setAddItemsDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-700 max-w-lg" data-testid="dialog-add-items">
+          <DialogContent className="bg-[#0c1224] border-white/[0.08] max-w-lg" data-testid="dialog-add-items">
             <DialogHeader>
-              <DialogTitle className="text-slate-200">Add Items to {selectedStand?.name}</DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogTitle className="text-white/80">Add Items to {selectedStand?.name}</DialogTitle>
+              <DialogDescription className="text-white/40">
                 Select items to add to this stand's inventory template
               </DialogDescription>
             </DialogHeader>
             
             <div className="space-y-4 mt-4">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input placeholder="Search items..." value={itemSearchQuery} onChange={(e) => setItemSearchQuery(e.target.value)} className="pl-10 bg-white/5 border-white/10 text-slate-200" data-testid="input-search-items" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
+                <Input placeholder="Search items..." value={itemSearchQuery} onChange={(e) => setItemSearchQuery(e.target.value)} className="pl-10 bg-white/5 border-white/10 text-white/80" data-testid="input-search-items" />
               </div>
 
               <ScrollArea className="h-[300px] pr-2">
@@ -762,8 +762,8 @@ export default function StandSetup() {
                       <div key={item.id} className={`flex items-center gap-3 p-2 rounded-lg border ${isExisting ? 'bg-emerald-500/10 border-emerald-500/30' : selectedItemsToAdd.has(item.id) ? 'bg-cyan-500/20 border-cyan-500/30' : 'bg-white/5 border-white/10'}`} data-testid={`add-item-${item.id}`}>
                         <Checkbox checked={isExisting || selectedItemsToAdd.has(item.id)} disabled={isExisting} onCheckedChange={() => toggleItemToAdd(item.id)} />
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-slate-200 text-sm truncate">{item.name}</div>
-                          <Badge variant="outline" className="text-[10px] border-white/20 text-slate-400">{item.category}</Badge>
+                          <div className="font-medium text-white/80 text-sm truncate">{item.name}</div>
+                          <Badge variant="outline" className="text-[10px] border-white/20 text-white/40">{item.category}</Badge>
                         </div>
                         {isExisting && <span className="text-xs text-emerald-400">In template</span>}
                       </div>

@@ -196,7 +196,7 @@ export function HelpTooltip({ keyword, children, className }: HelpTooltipProps) 
       </button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-cyan-500/30 max-w-md">
+        <DialogContent className="bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] border-cyan-500/30 max-w-md">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
@@ -210,12 +210,12 @@ export function HelpTooltip({ keyword, children, className }: HelpTooltipProps) 
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
-            <p className="text-slate-300 leading-relaxed">{entry.definition}</p>
+            <p className="text-white/70 leading-relaxed">{entry.definition}</p>
             
             {entry.example && (
-              <div className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
-                <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Example</p>
-                <p className="text-sm text-slate-400 italic">"{entry.example}"</p>
+              <div className="p-3 rounded-lg bg-white/5 border border-white/[0.08]/50">
+                <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Example</p>
+                <p className="text-sm text-white/40 italic">"{entry.example}"</p>
               </div>
             )}
           </div>
@@ -245,21 +245,21 @@ export function SectionHelp({ title, description, tips, keywords }: SectionHelpP
         variant="ghost"
         size="icon"
         onClick={() => setIsOpen(true)}
-        className="h-6 w-6 text-slate-500 hover:text-cyan-400 hover:bg-cyan-500/10"
+        className="h-6 w-6 text-white/30 hover:text-cyan-400 hover:bg-cyan-500/10"
         data-testid={`section-help-${title.toLowerCase().replace(/\s+/g, '-')}`}
       >
         <HelpCircle className="h-4 w-4" />
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-cyan-500/30 max-w-lg">
+        <DialogContent className="bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] border-cyan-500/30 max-w-lg">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="relative">
                 <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
                   <BookOpen className="h-7 w-7 text-white" />
                 </div>
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-slate-900 border-2 border-cyan-500 flex items-center justify-center">
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-[#0c1224] border-2 border-cyan-500 flex items-center justify-center">
                   <span className="text-xs">🪐</span>
                 </div>
               </div>
@@ -271,15 +271,15 @@ export function SectionHelp({ title, description, tips, keywords }: SectionHelpP
           </DialogHeader>
 
           <div className="space-y-4 pt-2">
-            <p className="text-slate-300 leading-relaxed">{description}</p>
+            <p className="text-white/70 leading-relaxed">{description}</p>
 
             {tips && tips.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Quick Tips</p>
+                <p className="text-xs text-white/30 uppercase tracking-wider">Quick Tips</p>
                 {tips.map((tip, i) => (
-                  <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-slate-800/50 border border-slate-700/50">
+                  <div key={i} className="flex items-start gap-2 p-2 rounded-lg bg-white/5 border border-white/[0.08]/50">
                     <ChevronRight className="h-4 w-4 text-cyan-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-slate-400">{tip}</p>
+                    <p className="text-sm text-white/40">{tip}</p>
                   </div>
                 ))}
               </div>
@@ -287,7 +287,7 @@ export function SectionHelp({ title, description, tips, keywords }: SectionHelpP
 
             {keywords && keywords.length > 0 && (
               <div className="space-y-2">
-                <p className="text-xs text-slate-500 uppercase tracking-wider">Related Terms</p>
+                <p className="text-xs text-white/30 uppercase tracking-wider">Related Terms</p>
                 <div className="flex flex-wrap gap-2">
                   {keywords.map(kw => {
                     const entry = GLOSSARY[kw];
@@ -330,7 +330,7 @@ export function OrbyGlossary({ isOpen, onClose }: OrbyGlossaryProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-cyan-500/30 max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+      <DialogContent className="bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] border-cyan-500/30 max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -353,7 +353,7 @@ export function OrbyGlossary({ isOpen, onClose }: OrbyGlossaryProps) {
             onClick={() => setSelectedCategory(null)}
             className={selectedCategory === null 
               ? "bg-cyan-500 text-white" 
-              : "border-slate-600 text-slate-300"
+              : "border-white/10 text-white/70"
             }
           >
             All
@@ -368,7 +368,7 @@ export function OrbyGlossary({ isOpen, onClose }: OrbyGlossaryProps) {
                 "whitespace-nowrap",
                 selectedCategory === cat 
                   ? "bg-cyan-500 text-white" 
-                  : "border-slate-600 text-slate-300"
+                  : "border-white/10 text-white/70"
               )}
             >
               {cat}
@@ -392,18 +392,18 @@ export function OrbyGlossary({ isOpen, onClose }: OrbyGlossaryProps) {
                     "w-full text-left p-3 rounded-lg border transition-all",
                     selectedTerm === key
                       ? "bg-cyan-500/10 border-cyan-500/50"
-                      : "bg-slate-800/50 border-slate-700/50 hover:bg-slate-800"
+                      : "bg-white/5 border-white/[0.08]/50 hover:bg-white/5"
                   )}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-slate-200">{entry.term}</span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-400">
+                      <span className="font-medium text-white/80">{entry.term}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-white/10 text-white/40">
                         {entry.category}
                       </span>
                     </div>
                     <ChevronRight className={cn(
-                      "h-4 w-4 text-slate-400 transition-transform",
+                      "h-4 w-4 text-white/40 transition-transform",
                       selectedTerm === key && "rotate-90"
                     )} />
                   </div>
@@ -416,9 +416,9 @@ export function OrbyGlossary({ isOpen, onClose }: OrbyGlossaryProps) {
                         exit={{ height: 0, opacity: 0 }}
                         className="overflow-hidden"
                       >
-                        <p className="text-sm text-slate-400 mt-2">{entry.definition}</p>
+                        <p className="text-sm text-white/40 mt-2">{entry.definition}</p>
                         {entry.example && (
-                          <p className="text-xs text-slate-500 mt-2 italic">
+                          <p className="text-xs text-white/30 mt-2 italic">
                             Example: "{entry.example}"
                           </p>
                         )}

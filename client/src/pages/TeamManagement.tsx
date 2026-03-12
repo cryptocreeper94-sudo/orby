@@ -171,8 +171,8 @@ export default function TeamManagement() {
           <GlassCard className="max-w-md w-full">
             <GlassCardContent className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-slate-200 mb-2">Access Restricted</h2>
-              <p className="text-slate-400 mb-4">Team management is only available for managers.</p>
+              <h2 className="text-xl font-bold text-white/80 mb-2">Access Restricted</h2>
+              <p className="text-white/40 mb-4">Team management is only available for managers.</p>
               <Button onClick={() => setLocation('/')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-return-home">
                 Return Home
               </Button>
@@ -192,18 +192,18 @@ export default function TeamManagement() {
   const metricsCards = [
     <div key="total" className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid="metric-total-workers">
       <Users className="h-4 w-4 text-cyan-400 mb-1" />
-      <div className="text-lg font-bold text-slate-200">{workers.length}</div>
-      <div className="text-xs text-slate-500">Total Workers</div>
+      <div className="text-lg font-bold text-white/80">{workers.length}</div>
+      <div className="text-xs text-white/30">Total Workers</div>
     </div>,
     <div key="leads" className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 min-w-[120px]" data-testid="metric-team-leads">
       <Crown className="h-4 w-4 text-yellow-400 mb-1" />
       <div className="text-lg font-bold text-yellow-400">{teamLeads.length}</div>
-      <div className="text-xs text-slate-500">Team Leads</div>
+      <div className="text-xs text-white/30">Team Leads</div>
     </div>,
     ...departmentStats.map(({ dept, workers: count, leads }) => (
       <div key={dept} className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid={`metric-${dept.toLowerCase()}`}>
-        <div className="text-xs text-slate-500 mb-1">{dept}</div>
-        <div className="text-lg font-bold text-slate-200">{count}</div>
+        <div className="text-xs text-white/30 mb-1">{dept}</div>
+        <div className="text-lg font-bold text-white/80">{count}</div>
         <div className="text-xs text-cyan-400">{leads} leads</div>
       </div>
     ))
@@ -220,14 +220,14 @@ export default function TeamManagement() {
           <Crown className="h-4 w-4 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-medium text-slate-200 truncate">{lead.name}</div>
-          <div className="text-xs text-slate-400">{lead.department}</div>
+          <div className="text-sm font-medium text-white/80 truncate">{lead.name}</div>
+          <div className="text-xs text-white/40">{lead.department}</div>
         </div>
       </div>
       <Button
         size="sm"
         variant="ghost"
-        className="w-full text-slate-400 hover:text-red-400 hover:bg-red-500/10 h-7 text-xs"
+        className="w-full text-white/40 hover:text-red-400 hover:bg-red-500/10 h-7 text-xs"
         onClick={() => handleDemoteFromTeamLead(lead.id)}
         data-testid={`button-demote-${lead.id}`}
       >
@@ -266,7 +266,7 @@ export default function TeamManagement() {
           iconColor="amber"
           actions={
             <Link href="/manager">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-white/10" data-testid="button-back">
+              <Button variant="ghost" size="sm" className="text-white/70 hover:bg-white/10" data-testid="button-back">
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Back
               </Button>
@@ -281,11 +281,11 @@ export default function TeamManagement() {
             </BentoCard>
 
             <BentoCard span={12} className="lg:col-span-4" data-testid="members-carousel-card">
-              <div className="text-sm font-medium text-slate-300 mb-2">Current Team Leads</div>
+              <div className="text-sm font-medium text-white/70 mb-2">Current Team Leads</div>
               {memberCards.length > 0 ? (
                 <CarouselRail items={memberCards} showDots data-testid="members-carousel" />
               ) : (
-                <div className="text-center py-6 text-slate-500 text-sm" data-testid="no-leads">
+                <div className="text-center py-6 text-white/30 text-sm" data-testid="no-leads">
                   No team leads in this department
                 </div>
               )}
@@ -294,12 +294,12 @@ export default function TeamManagement() {
             <BentoCard span={12} rowSpan={2} className="lg:col-span-5" data-testid="roles-grid-card">
               <div className="space-y-3">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-white/40" />
                   <Input
                     placeholder="Search workers..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 bg-white/5 border-white/10 text-slate-200"
+                    className="pl-10 bg-white/5 border-white/10 text-white/80"
                     data-testid="input-search-workers"
                   />
                 </div>
@@ -321,8 +321,8 @@ export default function TeamManagement() {
                       </div>
                     ) : filteredWorkers.length === 0 ? (
                       <div className="text-center py-8" data-testid="no-workers">
-                        <Users className="h-10 w-10 text-slate-600 mx-auto mb-2" />
-                        <p className="text-slate-400 text-sm">No workers found</p>
+                        <Users className="h-10 w-10 text-white/20 mx-auto mb-2" />
+                        <p className="text-white/40 text-sm">No workers found</p>
                       </div>
                     ) : (
                       <ScrollArea className="h-[280px]" data-testid="workers-scroll-area">
@@ -336,18 +336,18 @@ export default function TeamManagement() {
                               data-testid={`worker-${worker.id}`}
                             >
                               <div className="flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center">
-                                  <Users className="h-4 w-4 text-slate-300" />
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-white/10 to-white/10 flex items-center justify-center">
+                                  <Users className="h-4 w-4 text-white/70" />
                                 </div>
                                 <div>
                                   <div className="flex items-center gap-1">
-                                    <span className="font-medium text-slate-200 text-sm">{worker.name}</span>
+                                    <span className="font-medium text-white/80 text-sm">{worker.name}</span>
                                     {worker.isTeamLead && (
                                       <Badge className="text-[10px] bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 h-4 px-1">Lead</Badge>
                                     )}
                                   </div>
                                   <div className="flex items-center gap-1 text-[10px]">
-                                    <span className="text-slate-400">{worker.department}</span>
+                                    <span className="text-white/40">{worker.department}</span>
                                     {worker.teamLeadId && (
                                       <span className="text-cyan-400">• {getTeamLeadName(worker.teamLeadId)}</span>
                                     )}
@@ -381,10 +381,10 @@ export default function TeamManagement() {
         </main>
 
         <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-700" data-testid="dialog-assign-lead">
+          <DialogContent className="bg-[#0c1224] border-white/[0.08]" data-testid="dialog-assign-lead">
             <DialogHeader>
-              <DialogTitle className="text-slate-200">Assign Team Lead</DialogTitle>
-              <DialogDescription className="text-slate-400">
+              <DialogTitle className="text-white/80">Assign Team Lead</DialogTitle>
+              <DialogDescription className="text-white/40">
                 Select a team lead for {selectedWorker?.name}
               </DialogDescription>
             </DialogHeader>
@@ -392,7 +392,7 @@ export default function TeamManagement() {
               {selectedWorker?.teamLeadId && (
                 <Button
                   variant="outline"
-                  className="w-full justify-start text-slate-300 border-slate-600 hover:bg-red-500/10 hover:border-red-500/30"
+                  className="w-full justify-start text-white/70 border-white/10 hover:bg-red-500/10 hover:border-red-500/30"
                   onClick={() => handleAssignTeamLead(selectedWorker.id, null)}
                   data-testid="button-remove-lead"
                 >
@@ -406,7 +406,7 @@ export default function TeamManagement() {
                   <Button
                     key={lead.id}
                     variant="outline"
-                    className={`w-full justify-start text-slate-300 border-slate-600 hover:bg-cyan-500/10 ${
+                    className={`w-full justify-start text-white/70 border-white/10 hover:bg-cyan-500/10 ${
                       selectedWorker?.teamLeadId === lead.id ? 'bg-cyan-500/20 border-cyan-500/30' : ''
                     }`}
                     onClick={() => handleAssignTeamLead(selectedWorker!.id, lead.id)}
@@ -421,8 +421,8 @@ export default function TeamManagement() {
                 ))}
               {teamLeads.filter(lead => lead.department === selectedWorker?.department).length === 0 && (
                 <div className="text-center py-4" data-testid="no-leads-in-dept">
-                  <p className="text-sm text-slate-500">No team leads in this department</p>
-                  <p className="text-xs text-slate-600 mt-1">Promote a worker to team lead first</p>
+                  <p className="text-sm text-white/30">No team leads in this department</p>
+                  <p className="text-xs text-white/20 mt-1">Promote a worker to team lead first</p>
                 </div>
               )}
             </div>

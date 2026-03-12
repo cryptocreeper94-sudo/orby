@@ -177,8 +177,8 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
             <div className={cn(
               "w-12 h-12 rounded-full flex items-center justify-center",
               systemStatus?.isLive 
-                ? "bg-green-500/20 ring-2 ring-green-400 ring-offset-2 ring-offset-slate-900" 
-                : "bg-orange-500/20 ring-2 ring-orange-400 ring-offset-2 ring-offset-slate-900"
+                ? "bg-green-500/20 ring-2 ring-green-400 ring-offset-2 ring-offset-[#0c1224]" 
+                : "bg-orange-500/20 ring-2 ring-orange-400 ring-offset-2 ring-offset-[#0c1224]"
             )}>
               {systemStatus?.isLive ? (
                 <Radio className="h-6 w-6 text-green-400 animate-pulse" />
@@ -193,7 +193,7 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
               )}>
                 {systemStatus?.isLive ? 'LIVE MODE' : 'SANDBOX MODE'}
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-white/40">
                 {systemStatus?.message || 'Loading...'}
               </div>
             </div>
@@ -202,7 +202,7 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
             variant="ghost" 
             size="sm" 
             onClick={() => { loadSystemStatus(); loadEvents(); }}
-            className="text-slate-400 hover:text-white"
+            className="text-white/40 hover:text-white"
             data-testid="button-refresh-status"
           >
             <RefreshCw className="h-4 w-4" />
@@ -210,11 +210,11 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
         </div>
 
         {activeEvent && (
-          <div className="mt-3 p-3 rounded-lg bg-slate-900/50 border border-green-500/20">
+          <div className="mt-3 p-3 rounded-lg bg-[rgba(12,18,36,0.65)] border border-green-500/20">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-semibold text-green-400">{activeEvent.eventName}</div>
-                <div className="text-xs text-slate-400 flex items-center gap-2 mt-1">
+                <div className="text-xs text-white/40 flex items-center gap-2 mt-1">
                   <Calendar className="h-3 w-3" /> {activeEvent.eventDate}
                   {activeEvent.eventStartTime && (
                     <><Clock className="h-3 w-3 ml-2" /> {activeEvent.eventStartTime}</>
@@ -248,7 +248,7 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <form onSubmit={handleCreateEvent} className="space-y-4 p-4 rounded-xl bg-slate-800/50 border border-cyan-500/20">
+            <form onSubmit={handleCreateEvent} className="space-y-4 p-4 rounded-xl bg-white/5 border border-cyan-500/20">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-sm font-semibold text-cyan-400">Create New Event</h3>
                 <Button 
@@ -256,7 +256,7 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
                   variant="ghost" 
                   size="sm" 
                   onClick={() => setShowCreateForm(false)}
-                  className="text-slate-400"
+                  className="text-white/40"
                 >
                   <XCircle className="h-4 w-4" />
                 </Button>
@@ -264,35 +264,35 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2">
-                  <Label className="text-xs text-slate-400">Event Name</Label>
+                  <Label className="text-xs text-white/40">Event Name</Label>
                   <Input
                     value={newEvent.eventName}
                     onChange={(e) => setNewEvent({ ...newEvent, eventName: e.target.value })}
                     placeholder="e.g., Titans vs. Bears"
-                    className="bg-slate-900/50 border-slate-700 text-white"
+                    className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white"
                     required
                     data-testid="input-event-name"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-xs text-slate-400">Event Date</Label>
+                  <Label className="text-xs text-white/40">Event Date</Label>
                   <Input
                     type="date"
                     value={newEvent.eventDate}
                     onChange={(e) => setNewEvent({ ...newEvent, eventDate: e.target.value })}
-                    className="bg-slate-900/50 border-slate-700 text-white"
+                    className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white"
                     required
                     data-testid="input-event-date"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-xs text-slate-400">Event Type</Label>
+                  <Label className="text-xs text-white/40">Event Type</Label>
                   <select
                     value={newEvent.eventType}
                     onChange={(e) => setNewEvent({ ...newEvent, eventType: e.target.value })}
-                    className="w-full h-9 rounded-md border border-slate-700 bg-slate-900/50 px-3 text-sm text-white"
+                    className="w-full h-9 rounded-md border border-white/[0.08] bg-[rgba(12,18,36,0.65)] px-3 text-sm text-white"
                     data-testid="select-event-type"
                   >
                     <option value="standard">Standard Game</option>
@@ -302,57 +302,57 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
                 </div>
 
                 <div>
-                  <Label className="text-xs text-slate-400">Doors Open</Label>
+                  <Label className="text-xs text-white/40">Doors Open</Label>
                   <Input
                     type="time"
                     value={newEvent.doorsOpenTime}
                     onChange={(e) => setNewEvent({ ...newEvent, doorsOpenTime: e.target.value })}
-                    className="bg-slate-900/50 border-slate-700 text-white"
+                    className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white"
                     data-testid="input-doors-open"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-xs text-slate-400">Event Start</Label>
+                  <Label className="text-xs text-white/40">Event Start</Label>
                   <Input
                     type="time"
                     value={newEvent.eventStartTime}
                     onChange={(e) => setNewEvent({ ...newEvent, eventStartTime: e.target.value })}
-                    className="bg-slate-900/50 border-slate-700 text-white"
+                    className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white"
                     data-testid="input-event-start"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-xs text-slate-400">Event End</Label>
+                  <Label className="text-xs text-white/40">Event End</Label>
                   <Input
                     type="time"
                     value={newEvent.eventEndTime}
                     onChange={(e) => setNewEvent({ ...newEvent, eventEndTime: e.target.value })}
-                    className="bg-slate-900/50 border-slate-700 text-white"
+                    className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white"
                     data-testid="input-event-end"
                   />
                 </div>
 
                 <div>
-                  <Label className="text-xs text-slate-400">Expected Attendance</Label>
+                  <Label className="text-xs text-white/40">Expected Attendance</Label>
                   <Input
                     type="number"
                     value={newEvent.expectedAttendance || ''}
                     onChange={(e) => setNewEvent({ ...newEvent, expectedAttendance: parseInt(e.target.value) || 0 })}
                     placeholder="65,000"
-                    className="bg-slate-900/50 border-slate-700 text-white"
+                    className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white"
                     data-testid="input-attendance"
                   />
                 </div>
 
                 <div className="col-span-2">
-                  <Label className="text-xs text-slate-400">Notes</Label>
+                  <Label className="text-xs text-white/40">Notes</Label>
                   <Input
                     value={newEvent.notes}
                     onChange={(e) => setNewEvent({ ...newEvent, notes: e.target.value })}
                     placeholder="Optional notes..."
-                    className="bg-slate-900/50 border-slate-700 text-white"
+                    className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white"
                     data-testid="input-notes"
                   />
                 </div>
@@ -390,18 +390,18 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
 
       {scheduledEvents.length > 0 && (
         <div className="space-y-2">
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Scheduled Events</h3>
+          <h3 className="text-xs font-semibold text-white/40 uppercase tracking-wider">Scheduled Events</h3>
           {scheduledEvents.map((event) => (
             <motion.div
               key={event.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-3 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-cyan-500/30 transition-colors"
+              className="p-3 rounded-lg bg-white/5 border border-white/[0.08]/50 hover:border-cyan-500/30 transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <div className="text-sm font-medium text-white">{event.eventName}</div>
-                  <div className="text-xs text-slate-400 flex items-center gap-3 mt-1">
+                  <div className="text-xs text-white/40 flex items-center gap-3 mt-1">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" /> {event.eventDate}
                     </span>
@@ -424,7 +424,7 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
                   className={cn(
                     "transition-all",
                     activeEvent 
-                      ? "bg-slate-700 text-slate-400 cursor-not-allowed"
+                      ? "bg-white/10 text-white/40 cursor-not-allowed"
                       : "bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500"
                   )}
                   data-testid={`button-activate-${event.id}`}
@@ -439,14 +439,14 @@ export function EventControlPanel({ userPin, userId, userName }: EventControlPan
       )}
 
       {!activeEvent && scheduledEvents.length === 0 && !isLoading && (
-        <div className="text-center p-6 rounded-xl bg-slate-800/30 border border-dashed border-slate-700">
-          <Calendar className="h-8 w-8 mx-auto text-slate-500 mb-2" />
-          <p className="text-sm text-slate-400">No events scheduled</p>
-          <p className="text-xs text-slate-500 mt-1">Create an event to activate live mode</p>
+        <div className="text-center p-6 rounded-xl bg-white/[0.03] border border-dashed border-white/[0.08]">
+          <Calendar className="h-8 w-8 mx-auto text-white/30 mb-2" />
+          <p className="text-sm text-white/40">No events scheduled</p>
+          <p className="text-xs text-white/30 mt-1">Create an event to activate live mode</p>
         </div>
       )}
 
-      <div className="text-[10px] text-slate-500 space-y-1 mt-4 p-3 rounded-lg bg-slate-900/30">
+      <div className="text-[10px] text-white/30 space-y-1 mt-4 p-3 rounded-lg bg-[rgba(12,18,36,0.3)]">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-green-500"></span>
           <span>LIVE MODE: All data is saved to production database</span>

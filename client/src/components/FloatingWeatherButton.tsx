@@ -89,13 +89,13 @@ function getGlowGradient(desc: string, isNight: boolean): string {
     return isNight ? 'from-indigo-600/40 to-blue-900/30' : 'from-blue-500/30 to-blue-700/20';
   }
   if (d.includes('snow') || d.includes('sleet') || d.includes('ice')) {
-    return isNight ? 'from-slate-400/40 to-slate-700/30' : 'from-slate-300/30 to-slate-500/20';
+    return isNight ? 'from-white/20 to-white/5' : 'from-white/15 to-white/5';
   }
   if (d.includes('cloud') || d.includes('overcast')) {
-    return isNight ? 'from-slate-600/40 to-slate-800/30' : 'from-slate-400/30 to-slate-600/20';
+    return isNight ? 'from-white/10 to-[#0c1224]/30' : 'from-white/15 to-white/5';
   }
   if (d.includes('fog') || d.includes('mist') || d.includes('haze')) {
-    return isNight ? 'from-slate-500/30 to-slate-700/20' : 'from-gray-400/30 to-gray-600/20';
+    return isNight ? 'from-white/10 to-white/5' : 'from-gray-400/30 to-gray-600/20';
   }
   if (d.includes('clear') || d.includes('sunny') || d.includes('mainly')) {
     return isNight ? 'from-indigo-500/40 to-violet-800/30' : 'from-yellow-400/40 to-orange-500/20';
@@ -207,7 +207,7 @@ export default function FloatingWeatherButton() {
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
               className={`w-full max-w-md bg-gradient-to-br ${
-                isNight ? 'from-slate-900 via-indigo-950 to-slate-900' : 'from-slate-900 via-cyan-950 to-slate-900'
+                isNight ? 'from-[#0c1224] via-indigo-950 to-[#0c1224]' : 'from-[#0c1224] via-cyan-950 to-[#0c1224]'
               } rounded-3xl border border-white/10 overflow-hidden ${glowClass}`}
             >
               <div className="relative p-6 pb-4">

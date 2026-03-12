@@ -42,7 +42,7 @@ export function StaffingGrid() {
       case 'Needs Power': return 'bg-cyan-500/20 text-cyan-700 dark:text-cyan-400 border-cyan-500/50';
       case 'Hot Spot': return 'bg-pink-500/20 text-pink-700 dark:text-pink-400 border-pink-500/50';
       case 'Spare': return 'bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/50';
-      default: return 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700';
+      default: return 'bg-white dark:bg-white/5 border-white/10 dark:border-white/[0.08]';
     }
   };
 
@@ -73,7 +73,7 @@ export function StaffingGrid() {
       )}
 
       {/* Grid Header / Actions */}
-      <div className="flex flex-col gap-4 bg-white dark:bg-slate-900 p-4 rounded-lg border shadow-sm">
+      <div className="flex flex-col gap-4 bg-white dark:bg-[#0c1224] p-4 rounded-lg border shadow-sm">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2 font-mono" data-testid="staffing-grid-event-name">
@@ -100,7 +100,7 @@ export function StaffingGrid() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search by Stand Name (e.g., 'Hattie B's') or ID (e.g., '121')..."
-            className="pl-9 bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 focus-visible:ring-primary"
+            className="pl-9 bg-white/5 dark:bg-white/5 border-white/10 dark:border-white/[0.08] focus-visible:ring-primary"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -126,28 +126,28 @@ export function StaffingGrid() {
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className="w-[80px] font-bold text-slate-900 dark:text-slate-100 sticky left-0 bg-white dark:bg-slate-900 z-10 border-r">Section</TableHead>
-                      <TableHead className="w-[80px] font-bold text-slate-900 dark:text-slate-100 sticky left-[80px] bg-white dark:bg-slate-900 z-10 border-r">ID</TableHead>
-                      <TableHead className="w-[200px] font-bold text-slate-900 dark:text-slate-100 sticky left-[160px] bg-blue-50 dark:bg-slate-900 z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Stand Name</TableHead>
+                      <TableHead className="w-[80px] font-bold text-white dark:text-white sticky left-0 bg-white dark:bg-[#0c1224] z-10 border-r">Section</TableHead>
+                      <TableHead className="w-[80px] font-bold text-white dark:text-white sticky left-[80px] bg-white dark:bg-[#0c1224] z-10 border-r">ID</TableHead>
+                      <TableHead className="w-[200px] font-bold text-white dark:text-white sticky left-[160px] bg-blue-50 dark:bg-[#0c1224] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">Stand Name</TableHead>
                       {/* Device Columns based on PAX models */}
-                      <TableHead className="text-center min-w-[80px] bg-blue-50/50 dark:bg-slate-800/50 text-xs font-black text-blue-900 dark:text-blue-200">E700</TableHead>
-                      <TableHead className="text-center min-w-[80px] bg-blue-50/50 dark:bg-slate-800/50 text-xs font-black text-blue-900 dark:text-blue-200">A930</TableHead>
-                      <TableHead className="text-center w-[60px] bg-blue-50/50 dark:bg-slate-800/50 text-xs font-black text-slate-500">Spare</TableHead>
-                      <TableHead className="text-center w-[60px] bg-blue-50/50 dark:bg-slate-800/50 text-xs font-black text-slate-500">Rear</TableHead>
+                      <TableHead className="text-center min-w-[80px] bg-blue-50/50 dark:bg-white/5 text-xs font-black text-blue-900 dark:text-blue-200">E700</TableHead>
+                      <TableHead className="text-center min-w-[80px] bg-blue-50/50 dark:bg-white/5 text-xs font-black text-blue-900 dark:text-blue-200">A930</TableHead>
+                      <TableHead className="text-center w-[60px] bg-blue-50/50 dark:bg-white/5 text-xs font-black text-white/30">Spare</TableHead>
+                      <TableHead className="text-center w-[60px] bg-blue-50/50 dark:bg-white/5 text-xs font-black text-white/30">Rear</TableHead>
                       <TableHead className="text-center w-[100px]">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {sectionStands.map((stand) => (
-                      <TableRow key={stand.id} className={`hover:bg-slate-50 dark:hover:bg-slate-800/50 ${stand.status === 'Closed' ? 'opacity-60 bg-red-50/50 dark:bg-red-900/10' : ''}`}>
-                        <TableCell className="font-mono font-medium sticky left-0 bg-white dark:bg-slate-900 z-10 border-r text-muted-foreground">{stand.physicalSection}</TableCell>
-                        <TableCell className="font-mono font-medium sticky left-[80px] bg-white dark:bg-slate-900 z-10 border-r">{stand.id}</TableCell>
-                        <TableCell className="font-medium sticky left-[160px] bg-white dark:bg-slate-900 z-10 border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                      <TableRow key={stand.id} className={`hover:bg-white/5 dark:hover:bg-white/5 ${stand.status === 'Closed' ? 'opacity-60 bg-red-50/50 dark:bg-red-900/10' : ''}`}>
+                        <TableCell className="font-mono font-medium sticky left-0 bg-white dark:bg-[#0c1224] z-10 border-r text-muted-foreground">{stand.physicalSection}</TableCell>
+                        <TableCell className="font-mono font-medium sticky left-[80px] bg-white dark:bg-[#0c1224] z-10 border-r">{stand.id}</TableCell>
+                        <TableCell className="font-medium sticky left-[160px] bg-white dark:bg-[#0c1224] z-10 border-r shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                           {stand.name.split(' - ')[1] || stand.name}
                         </TableCell>
                         
                         {/* Render Staffing/POS Data */}
-                        <TableCell className="text-center border-r border-blue-100 dark:border-slate-800 border-dashed p-2">
+                        <TableCell className="text-center border-r border-blue-100 dark:border-white/5 border-dashed p-2">
                            {stand.e700Ids && stand.e700Ids.length > 0 ? (
                              <div className="flex flex-wrap gap-1 justify-center">
                                {stand.e700Ids.map(id => (
@@ -156,9 +156,9 @@ export function StaffingGrid() {
                                  </span>
                                ))}
                              </div>
-                           ) : <span className="text-slate-300">-</span>}
+                           ) : <span className="text-white/70">-</span>}
                         </TableCell>
-                        <TableCell className="text-center border-r border-blue-100 dark:border-slate-800 border-dashed p-2">
+                        <TableCell className="text-center border-r border-blue-100 dark:border-white/5 border-dashed p-2">
                            {stand.a930Ids && stand.a930Ids.length > 0 ? (
                              <div className="flex flex-wrap gap-1 justify-center">
                                {stand.a930Ids.map(id => (
@@ -167,7 +167,7 @@ export function StaffingGrid() {
                                  </span>
                                ))}
                              </div>
-                           ) : <span className="text-slate-300">-</span>}
+                           ) : <span className="text-white/70">-</span>}
                         </TableCell>
                          <TableCell className="text-center border-r border-dashed p-1">
                            {/* Empty cell example */}

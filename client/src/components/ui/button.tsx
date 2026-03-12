@@ -20,7 +20,7 @@ const buttonVariants = cva(
         ghost: "border border-transparent hover:bg-white/10",
         link: "text-primary underline-offset-4 hover:underline",
         glow: "relative bg-gradient-to-r from-cyan-500 via-cyan-400 to-teal-400 text-white font-bold shadow-[0_0_20px_rgba(6,182,212,0.5)] hover:shadow-[0_0_30px_rgba(6,182,212,0.8)] hover:-translate-y-0.5 active:translate-y-0 border border-cyan-300/30",
-        premium: "relative bg-gradient-to-r from-slate-800 via-slate-700 to-slate-800 text-white border border-white/20 shadow-lg hover:shadow-[0_0_25px_rgba(148,163,184,0.3)] hover:-translate-y-0.5 active:translate-y-0 backdrop-blur-sm",
+        premium: "relative bg-gradient-to-r from-slate-800 via-slate-700 to-[#0c1224] text-white border border-white/20 shadow-lg hover:shadow-[0_0_25px_rgba(148,163,184,0.3)] hover:-translate-y-0.5 active:translate-y-0 backdrop-blur-sm",
         floating: "relative bg-white/10 backdrop-blur-md text-white border border-white/20 shadow-xl hover:bg-white/20 hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:-translate-y-1 active:translate-y-0",
       },
       size: {

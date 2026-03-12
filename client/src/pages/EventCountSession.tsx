@@ -477,8 +477,8 @@ export default function EventCountSession() {
           <GlassCard className="max-w-md w-full">
             <GlassCardContent className="text-center py-8">
               <AlertCircle className="h-12 w-12 text-amber-400 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-slate-200 mb-2">Stand Not Found</h2>
-              <p className="text-slate-400 mb-4">Could not find stand {standId}.</p>
+              <h2 className="text-xl font-bold text-white/80 mb-2">Stand Not Found</h2>
+              <p className="text-white/40 mb-4">Could not find stand {standId}.</p>
               <Button onClick={() => setLocation('/manager')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-return-dashboard">
                 Return to Dashboard
               </Button>
@@ -515,15 +515,15 @@ export default function EventCountSession() {
             stageStatus === 'verified' ? 'bg-purple-500/20 text-purple-300' :
             stageStatus === 'completed' ? 'bg-emerald-500/20 text-emerald-300' :
             stageStatus === 'in_progress' ? 'bg-cyan-500/20 text-cyan-300' :
-            'bg-slate-500/20 text-slate-400'
+            'bg-white/10 text-white/40'
           }`}>
             {stageStatus === 'verified' ? '✓✓' : 
              stageStatus === 'completed' ? '✓' : 
              stageStatus === 'in_progress' ? '●' : '○'}
           </Badge>
         </div>
-        <div className="text-sm font-medium text-slate-200">{config.label.split(' ')[0]}</div>
-        <div className="text-xs text-slate-500">
+        <div className="text-sm font-medium text-white/80">{config.label.split(' ')[0]}</div>
+        <div className="text-xs text-white/30">
           {stageSession ? `${stageCountedItems}/${standItems.length}` : 'Not started'}
         </div>
       </div>
@@ -533,8 +533,8 @@ export default function EventCountSession() {
   const itemCards = categories.map(category => (
     <div key={category} className="p-3 rounded-lg bg-white/5 border border-white/10 min-w-[120px]" data-testid={`category-card-${category}`}>
       <Package className="h-4 w-4 text-cyan-400 mb-1" />
-      <div className="text-sm font-medium text-slate-200">{category}</div>
-      <div className="text-xs text-slate-500">{itemsByCategory[category].length} items</div>
+      <div className="text-sm font-medium text-white/80">{category}</div>
+      <div className="text-xs text-white/30">{itemsByCategory[category].length} items</div>
     </div>
   ));
 
@@ -562,7 +562,7 @@ export default function EventCountSession() {
           iconColor="cyan"
           actions={
             <Link href="/manager">
-              <Button variant="ghost" size="sm" className="text-slate-300 hover:bg-white/10" data-testid="button-back">
+              <Button variant="ghost" size="sm" className="text-white/70 hover:bg-white/10" data-testid="button-back">
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 Back
               </Button>
@@ -574,9 +574,9 @@ export default function EventCountSession() {
           {standItems.length === 0 ? (
             <GlassCard data-testid="no-template-card">
               <GlassCardContent className="text-center py-12">
-                <Package className="h-12 w-12 text-slate-600 mx-auto mb-3" />
-                <p className="text-slate-400 mb-2">No inventory template configured for this stand</p>
-                <p className="text-sm text-slate-500 mb-4">Set up the stand's inventory template before counting</p>
+                <Package className="h-12 w-12 text-white/20 mx-auto mb-3" />
+                <p className="text-white/40 mb-2">No inventory template configured for this stand</p>
+                <p className="text-sm text-white/30 mb-4">Set up the stand's inventory template before counting</p>
                 <Button onClick={() => setLocation('/stand-setup')} className="bg-cyan-500 hover:bg-cyan-600" data-testid="button-configure-template">
                   Configure Stand Template
                 </Button>
@@ -595,12 +595,12 @@ export default function EventCountSession() {
               <BentoCard span={12} rowSpan={2} className="lg:col-span-5" data-testid="progress-grid-card">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-slate-300">{STAGE_CONFIG[activeStage].label}</span>
+                    <span className="text-sm font-medium text-white/70">{STAGE_CONFIG[activeStage].label}</span>
                     <Badge className={`text-[10px] ${
                       status === 'verified' ? 'bg-purple-500/20 text-purple-300' :
                       status === 'completed' ? 'bg-emerald-500/20 text-emerald-300' :
                       status === 'in_progress' ? 'bg-cyan-500/20 text-cyan-300 animate-pulse' :
-                      'bg-slate-500/20 text-slate-400'
+                      'bg-white/10 text-white/40'
                     }`} data-testid="status-badge">
                       {status.replace('_', ' ')}
                     </Badge>
@@ -618,17 +618,17 @@ export default function EventCountSession() {
                       {session && (
                         <div className="p-2 bg-white/5 rounded-lg border border-white/10 text-xs" data-testid="counter-info">
                           <div className="flex items-center gap-2">
-                            <User className="h-3 w-3 text-slate-400" />
-                            <span className="text-slate-300">{session.counterName}</span>
+                            <User className="h-3 w-3 text-white/40" />
+                            <span className="text-white/70">{session.counterName}</span>
                             <Badge variant="outline" className="text-[10px] border-white/20">{ROLE_LABELS[session.counterRole]}</Badge>
                           </div>
                           {session.assistingCounterName && (
                             <div className="flex items-center gap-2 mt-1">
-                              <Users className="h-3 w-3 text-slate-500" />
-                              <span className="text-slate-400">with {session.assistingCounterName}</span>
+                              <Users className="h-3 w-3 text-white/30" />
+                              <span className="text-white/40">with {session.assistingCounterName}</span>
                             </div>
                           )}
-                          <div className="flex items-center gap-3 mt-1 text-slate-500">
+                          <div className="flex items-center gap-3 mt-1 text-white/30">
                             <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{formatTime(session.startedAt)}</span>
                             {session.completedAt && <span className="flex items-center gap-1"><Check className="h-3 w-3 text-emerald-400" />{formatTime(session.completedAt)}</span>}
                           </div>
@@ -646,7 +646,7 @@ export default function EventCountSession() {
                             animate={{ width: `${progress}%` }}
                           />
                         </div>
-                        <span className="text-slate-400 text-xs">{countedItems}/{standItems.length}</span>
+                        <span className="text-white/40 text-xs">{countedItems}/{standItems.length}</span>
                       </div>
 
                       {status === 'in_progress' && (
@@ -654,13 +654,13 @@ export default function EventCountSession() {
                           <div className="space-y-2 pr-2">
                             {categories.map(category => (
                               <div key={category} className="space-y-1">
-                                <div className="text-[10px] font-medium text-slate-500 uppercase">{category}</div>
+                                <div className="text-[10px] font-medium text-white/30 uppercase">{category}</div>
                                 {itemsByCategory[category].map(si => {
                                   const key = `${activeStage}-${si.itemId}`;
                                   const count = stageCounts[si.itemId] || 0;
                                   return (
                                     <div key={si.id} className="flex items-center gap-2 p-1.5 bg-white/5 rounded border border-white/10" data-testid={`count-item-${si.itemId}`}>
-                                      <span className="flex-1 text-xs text-slate-200 truncate">{si.item.name}</span>
+                                      <span className="flex-1 text-xs text-white/80 truncate">{si.item.name}</span>
                                       <div className="flex items-center gap-0.5">
                                         <Button variant="outline" size="icon" className="h-6 w-6 rounded-full border-white/20" onClick={() => handleCountChange(activeStage, si.itemId, count - 1)} data-testid={`button-minus-${si.itemId}`}>
                                           <Minus className="h-2.5 w-2.5" />
@@ -688,8 +688,8 @@ export default function EventCountSession() {
                             <div className="space-y-1 pr-2">
                               {standItems.map(si => (
                                 <div key={si.id} className="flex items-center justify-between p-1.5 bg-white/5 rounded border border-white/10" data-testid={`completed-item-${si.itemId}`}>
-                                  <span className="text-xs text-slate-300">{si.item.name}</span>
-                                  <span className="font-bold text-xs text-slate-200">{stageCounts[si.itemId] || 0}</span>
+                                  <span className="text-xs text-white/70">{si.item.name}</span>
+                                  <span className="font-bold text-xs text-white/80">{stageCounts[si.itemId] || 0}</span>
                                 </div>
                               ))}
                             </div>
@@ -719,13 +719,13 @@ export default function EventCountSession() {
         </main>
 
         <Dialog open={startSessionDialogOpen} onOpenChange={setStartSessionDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-700 max-w-md" data-testid="dialog-start-session">
+          <DialogContent className="bg-[#0c1224] border-white/[0.08] max-w-md" data-testid="dialog-start-session">
             <DialogHeader>
-              <DialogTitle className="text-slate-200 flex items-center gap-2">
+              <DialogTitle className="text-white/80 flex items-center gap-2">
                 <Play className="h-5 w-5 text-cyan-400" />
                 Start {startingStage ? STAGE_CONFIG[startingStage].label : 'Count'}
               </DialogTitle>
-              <DialogDescription className="text-slate-400">Document who is performing this count</DialogDescription>
+              <DialogDescription className="text-white/40">Document who is performing this count</DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4 mt-4">
@@ -733,12 +733,12 @@ export default function EventCountSession() {
                 <h4 className="text-sm font-medium text-cyan-300 mb-3">Primary Counter</h4>
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Name</Label>
+                    <Label className="text-white/40 text-xs">Name</Label>
                     <Input value={counterName} onChange={(e) => setCounterName(e.target.value)} placeholder="Counter's full name" className="bg-white/5 border-white/10" data-testid="input-counter-name" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <Label className="text-slate-400 text-xs">Role</Label>
+                      <Label className="text-white/40 text-xs">Role</Label>
                       <Select value={counterRole} onValueChange={(v) => setCounterRole(v as CounterRole)}>
                         <SelectTrigger className="bg-white/5 border-white/10"><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -749,12 +749,12 @@ export default function EventCountSession() {
                       </Select>
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-slate-400 text-xs">Phone (last 4)</Label>
+                      <Label className="text-white/40 text-xs">Phone (last 4)</Label>
                       <Input value={counterPhone4} onChange={(e) => setCounterPhone4(e.target.value.slice(0, 4))} placeholder="1234" maxLength={4} className="bg-white/5 border-white/10" data-testid="input-counter-phone" />
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Affiliation</Label>
+                    <Label className="text-white/40 text-xs">Affiliation</Label>
                     <Select value={counterAffiliation} onValueChange={(v) => setCounterAffiliation(v as EmploymentAffiliation)}>
                       <SelectTrigger className="bg-white/5 border-white/10"><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -768,23 +768,23 @@ export default function EventCountSession() {
               </div>
 
               <div className="p-3 bg-white/5 border border-white/10 rounded-lg">
-                <h4 className="text-sm font-medium text-slate-300 mb-3 flex items-center gap-2">
+                <h4 className="text-sm font-medium text-white/70 mb-3 flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   Assisting Counter (Optional)
                 </h4>
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <Label className="text-slate-400 text-xs">Name</Label>
+                    <Label className="text-white/40 text-xs">Name</Label>
                     <Input value={assistingName} onChange={(e) => setAssistingName(e.target.value)} placeholder="Helper's full name (optional)" className="bg-white/5 border-white/10" data-testid="input-assisting-name" />
                   </div>
                   {assistingName && (
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Phone (last 4)</Label>
+                        <Label className="text-white/40 text-xs">Phone (last 4)</Label>
                         <Input value={assistingPhone4} onChange={(e) => setAssistingPhone4(e.target.value.slice(0, 4))} placeholder="1234" maxLength={4} className="bg-white/5 border-white/10" data-testid="input-assisting-phone" />
                       </div>
                       <div className="space-y-1">
-                        <Label className="text-slate-400 text-xs">Affiliation</Label>
+                        <Label className="text-white/40 text-xs">Affiliation</Label>
                         <Select value={assistingAffiliation} onValueChange={(v) => setAssistingAffiliation(v as EmploymentAffiliation)}>
                           <SelectTrigger className="bg-white/5 border-white/10"><SelectValue /></SelectTrigger>
                           <SelectContent>

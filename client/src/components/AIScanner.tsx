@@ -128,7 +128,7 @@ export function AIScanner({ onScanComplete, onClose, standName }: AIScannerProps
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-slate-900">
+      <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto bg-[#0c1224]">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <div className="flex items-center gap-2">
             <ScanLine className="w-5 h-5 text-blue-400" />
@@ -238,7 +238,7 @@ export function AIScanner({ onScanComplete, onClose, standName }: AIScannerProps
                             {scanResult.products.map((product, index) => (
                               <div 
                                 key={index}
-                                className="flex items-center justify-between bg-slate-800/50 rounded-lg p-2 shadow-sm"
+                                className="flex items-center justify-between bg-white/5 rounded-lg p-2 shadow-sm"
                                 data-testid={`product-count-${index}`}
                               >
                                 <div>

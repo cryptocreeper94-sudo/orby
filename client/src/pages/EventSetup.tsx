@@ -82,7 +82,7 @@ const DEPARTMENT_COLORS: Record<string, { bg: string; text: string; border: stri
   Kitchen: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30' },
   Warehouse: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/30' },
   Operations: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/30' },
-  All: { bg: 'bg-slate-500/20', text: 'text-slate-400', border: 'border-slate-500/30' }
+  All: { bg: 'bg-white/10', text: 'text-white/40', border: 'border-white/10' }
 };
 
 const IMPORTANT_CONTACTS = [
@@ -388,7 +388,7 @@ export default function EventSetup() {
           <GlassCard className="max-w-md w-full text-center p-6">
             <Shield className="h-12 w-12 mx-auto mb-4 text-amber-400" />
             <h2 className="text-xl font-bold text-white mb-2">Access Restricted</h2>
-            <p className="text-slate-400 mb-4">Event Setup is only available to Operations Managers and above.</p>
+            <p className="text-white/40 mb-4">Event Setup is only available to Operations Managers and above.</p>
             <Button onClick={() => setLocation('/')} variant="outline">Return to Login</Button>
           </GlassCard>
         </div>
@@ -401,36 +401,36 @@ export default function EventSetup() {
     <div key="attendance" className="p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 w-[130px] flex-shrink-0" data-testid="metric-attendance">
       <div className="text-xs text-cyan-400 mb-1">Expected</div>
       <div className="text-lg font-bold text-cyan-400">{formData.expectedAttendance.toLocaleString()}</div>
-      <div className="text-xs text-slate-500">Attendees</div>
+      <div className="text-xs text-white/30">Attendees</div>
     </div>,
     <div key="doors" className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 w-[130px] flex-shrink-0" data-testid="metric-doors">
       <div className="text-xs text-emerald-400 mb-1">Gates</div>
       <div className="text-lg font-bold text-emerald-400">{formData.doorsOpenTime}</div>
-      <div className="text-xs text-slate-500">Open Time</div>
+      <div className="text-xs text-white/30">Open Time</div>
     </div>,
     <div key="start" className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 w-[130px] flex-shrink-0" data-testid="metric-start">
       <div className="text-xs text-amber-400 mb-1">Kick Off</div>
       <div className="text-lg font-bold text-amber-400">{formData.eventStartTime}</div>
-      <div className="text-xs text-slate-500">Event Start</div>
+      <div className="text-xs text-white/30">Event Start</div>
     </div>,
     <div key="alcohol" className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 w-[130px] flex-shrink-0" data-testid="metric-alcohol">
       <div className="text-xs text-rose-400 mb-1">Alcohol Cut Off</div>
       <div className="text-sm font-bold text-rose-400 truncate">{formData.alcoholCutoffTime || 'End of 3rd Qtr'}</div>
-      <div className="text-xs text-slate-500">Last Call</div>
+      <div className="text-xs text-white/30">Last Call</div>
     </div>,
     <div key="geofence" className="p-3 rounded-lg bg-violet-500/10 border border-violet-500/30 w-[130px] flex-shrink-0" data-testid="metric-geofence">
       <div className="text-xs text-violet-400 mb-1">Geofence</div>
       <div className="text-lg font-bold text-violet-400 capitalize">{formData.geofenceMode}</div>
-      <div className="text-xs text-slate-500">{formData.geofenceMode === 'custom' ? `${formData.customGeofenceRadius}ft` : 'Default'}</div>
+      <div className="text-xs text-white/30">{formData.geofenceMode === 'custom' ? `${formData.customGeofenceRadius}ft` : 'Default'}</div>
     </div>,
   ];
 
   // Contact cards for carousel
   const contactCards = IMPORTANT_CONTACTS.map((contact, idx) => (
-    <div key={idx} className="p-3 rounded-lg bg-slate-800/80 border border-slate-700/50 min-w-[160px]" data-testid={`contact-${contact.name.toLowerCase().replace(/\s+/g, '-')}`}>
+    <div key={idx} className="p-3 rounded-lg bg-white/10 border border-white/[0.08]/50 min-w-[160px]" data-testid={`contact-${contact.name.toLowerCase().replace(/\s+/g, '-')}`}>
       <div className="flex items-center gap-2 mb-1">
         <contact.icon className="h-4 w-4 text-cyan-400" />
-        <span className="text-sm font-medium text-slate-200">{contact.name}</span>
+        <span className="text-sm font-medium text-white/80">{contact.name}</span>
       </div>
       <div className="text-xs text-cyan-400 font-mono">{contact.number}</div>
     </div>
@@ -471,29 +471,29 @@ export default function EventSetup() {
             />
             <div className="grid grid-cols-2 gap-4 mt-3">
               <div className="col-span-2">
-                <Label className="text-slate-400 text-xs">Event Name / Identifier</Label>
+                <Label className="text-white/40 text-xs">Event Name / Identifier</Label>
                 <Input
                   value={formData.eventName}
                   onChange={(e) => setFormData(prev => ({ ...prev, eventName: e.target.value }))}
                   placeholder="Titans vs Chiefs"
-                  className="bg-slate-900/50 border-slate-700 text-white mt-1"
+                  className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white mt-1"
                   data-testid="input-event-name"
                 />
               </div>
               <div>
-                <Label className="text-slate-400 text-xs">Event Date</Label>
+                <Label className="text-white/40 text-xs">Event Date</Label>
                 <Input
                   type="date"
                   value={formData.eventDate}
                   onChange={(e) => setFormData(prev => ({ ...prev, eventDate: e.target.value }))}
-                  className="bg-slate-900/50 border-slate-700 text-white mt-1"
+                  className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white mt-1"
                   data-testid="input-event-date"
                 />
               </div>
               <div>
-                <Label className="text-slate-400 text-xs">Event Type</Label>
+                <Label className="text-white/40 text-xs">Event Type</Label>
                 <Select value={formData.eventType} onValueChange={(v) => setFormData(prev => ({ ...prev, eventType: v }))}>
-                  <SelectTrigger className="bg-slate-900/50 border-slate-700 text-white mt-1" data-testid="select-event-type">
+                  <SelectTrigger className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white mt-1" data-testid="select-event-type">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -504,40 +504,40 @@ export default function EventSetup() {
                 </Select>
               </div>
               <div>
-                <Label className="text-slate-400 text-xs">Gates Open</Label>
+                <Label className="text-white/40 text-xs">Gates Open</Label>
                 <Input
                   type="time"
                   value={formData.doorsOpenTime}
                   onChange={(e) => setFormData(prev => ({ ...prev, doorsOpenTime: e.target.value }))}
-                  className="bg-slate-900/50 border-slate-700 text-white mt-1"
+                  className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white mt-1"
                   data-testid="input-doors-open"
                 />
               </div>
               <div>
-                <Label className="text-slate-400 text-xs">Kick Off / Start Time</Label>
+                <Label className="text-white/40 text-xs">Kick Off / Start Time</Label>
                 <Input
                   type="time"
                   value={formData.eventStartTime}
                   onChange={(e) => setFormData(prev => ({ ...prev, eventStartTime: e.target.value }))}
-                  className="bg-slate-900/50 border-slate-700 text-white mt-1"
+                  className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white mt-1"
                   data-testid="input-event-start"
                 />
               </div>
               <div>
-                <Label className="text-slate-400 text-xs">Expected Attendance</Label>
+                <Label className="text-white/40 text-xs">Expected Attendance</Label>
                 <Input
                   type="number"
                   value={formData.expectedAttendance}
                   onChange={(e) => setFormData(prev => ({ ...prev, expectedAttendance: parseInt(e.target.value) || 0 }))}
-                  className="bg-slate-900/50 border-slate-700 text-white mt-1"
+                  className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white mt-1"
                   data-testid="input-attendance"
                 />
               </div>
               <div>
-                <Label className="text-slate-400 text-xs">Weather</Label>
-                <div className="flex items-center gap-2 mt-1 p-2 rounded bg-slate-900/50 border border-slate-700">
+                <Label className="text-white/40 text-xs">Weather</Label>
+                <div className="flex items-center gap-2 mt-1 p-2 rounded bg-[rgba(12,18,36,0.65)] border border-white/[0.08]">
                   <CloudSun className="h-4 w-4 text-amber-400" />
-                  <span className="text-sm text-slate-300">High 45°, Showers</span>
+                  <span className="text-sm text-white/70">High 45°, Showers</span>
                 </div>
               </div>
             </div>
@@ -570,7 +570,7 @@ export default function EventSetup() {
               />
             </div>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900/50 border border-slate-700">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-[rgba(12,18,36,0.65)] border border-white/[0.08]">
                 <div className="flex items-center gap-3">
                   <div className={`p-2 rounded-lg ${formData.geofenceMode === 'stadium' ? 'bg-cyan-500/20' : 'bg-violet-500/20'}`}>
                     {formData.geofenceMode === 'stadium' ? (
@@ -583,7 +583,7 @@ export default function EventSetup() {
                     <div className="text-sm font-medium text-white">
                       {formData.geofenceMode === 'stadium' ? 'Stadium Mode' : 'Custom Mode'}
                     </div>
-                    <div className="text-xs text-slate-400">
+                    <div className="text-xs text-white/40">
                       {formData.geofenceMode === 'stadium' 
                         ? 'Default Nissan Stadium boundaries' 
                         : `Extended radius: ${formData.customGeofenceRadius}ft`}
@@ -608,7 +608,7 @@ export default function EventSetup() {
                     exit={{ opacity: 0, height: 0 }}
                     className="space-y-3"
                   >
-                    <Label className="text-slate-400 text-xs">Custom Radius (feet)</Label>
+                    <Label className="text-white/40 text-xs">Custom Radius (feet)</Label>
                     <Slider
                       value={[formData.customGeofenceRadius]}
                       onValueChange={([v]) => setFormData(prev => ({ ...prev, customGeofenceRadius: v }))}
@@ -618,7 +618,7 @@ export default function EventSetup() {
                       className="mt-2"
                       data-testid="slider-geofence-radius"
                     />
-                    <div className="flex justify-between text-xs text-slate-500">
+                    <div className="flex justify-between text-xs text-white/30">
                       <span>100ft</span>
                       <span className="text-cyan-400 font-medium">{formData.customGeofenceRadius}ft</span>
                       <span>2000ft</span>
@@ -650,7 +650,7 @@ export default function EventSetup() {
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
               placeholder="General event notes visible to all staff..."
-              className="bg-slate-900/50 border-slate-700 text-white mt-3 min-h-[120px]"
+              className="bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white mt-3 min-h-[120px]"
               data-testid="textarea-notes"
             />
           </BentoCard>
@@ -664,7 +664,7 @@ export default function EventSetup() {
             <div className="mt-3 space-y-3">
               <div className="flex gap-2">
                 <Select value={newDeptNote.department} onValueChange={(v: DepartmentNote['department']) => setNewDeptNote(prev => ({ ...prev, department: v }))}>
-                  <SelectTrigger className="w-[120px] bg-slate-900/50 border-slate-700 text-white" data-testid="select-dept">
+                  <SelectTrigger className="w-[120px] bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white" data-testid="select-dept">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -679,7 +679,7 @@ export default function EventSetup() {
                   value={newDeptNote.note}
                   onChange={(e) => setNewDeptNote(prev => ({ ...prev, note: e.target.value }))}
                   placeholder="Note for department..."
-                  className="flex-1 bg-slate-900/50 border-slate-700 text-white"
+                  className="flex-1 bg-[rgba(12,18,36,0.65)] border-white/[0.08] text-white"
                   data-testid="input-dept-note"
                 />
                 <Button onClick={addDepartmentNote} size="sm" className="bg-cyan-500 hover:bg-cyan-600" data-testid="btn-add-dept-note">
@@ -697,7 +697,7 @@ export default function EventSetup() {
                       <Badge className={`${DEPARTMENT_COLORS[note.department].text} text-xs`}>{note.department}</Badge>
                       <span className="text-sm text-white truncate">{note.note}</span>
                     </div>
-                    <Button variant="ghost" size="sm" onClick={() => removeDepartmentNote(idx)} className="text-slate-400 hover:text-white h-6 w-6 p-0">×</Button>
+                    <Button variant="ghost" size="sm" onClick={() => removeDepartmentNote(idx)} className="text-white/40 hover:text-white h-6 w-6 p-0">×</Button>
                   </div>
                 ))}
               </div>
@@ -720,14 +720,14 @@ export default function EventSetup() {
                         ? 'bg-emerald-500/10 border border-emerald-500/30'
                         : item.isRequired
                         ? 'bg-rose-500/10 border border-rose-500/30'
-                        : 'bg-slate-800/50 border border-slate-700/50'
+                        : 'bg-white/5 border border-white/[0.08]/50'
                     }`}
                     data-testid={`checklist-item-${item.id}`}
                   >
                     {item.isComplete ? (
                       <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
                     ) : (
-                      <Circle className="h-4 w-4 text-slate-500 flex-shrink-0" />
+                      <Circle className="h-4 w-4 text-white/30 flex-shrink-0" />
                     )}
                     <span
                       className={`text-sm ${
@@ -735,7 +735,7 @@ export default function EventSetup() {
                           ? 'text-emerald-400'
                           : item.isRequired
                           ? 'text-rose-400'
-                          : 'text-slate-400'
+                          : 'text-white/40'
                       }`}
                     >
                       {item.label}
@@ -743,13 +743,13 @@ export default function EventSetup() {
                         <span className="text-xs ml-1 text-rose-500">*</span>
                       )}
                       {!item.isRequired && (
-                        <span className="text-xs ml-1 text-slate-500">(optional)</span>
+                        <span className="text-xs ml-1 text-white/30">(optional)</span>
                       )}
                     </span>
                   </div>
                 ))}
               </div>
-              <div className="mt-3 text-xs text-slate-500">
+              <div className="mt-3 text-xs text-white/30">
                 {requiredFieldsComplete
                   ? '✓ All required fields complete'
                   : '* Required fields must be completed'}
@@ -784,13 +784,13 @@ export default function EventSetup() {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="absolute right-0 top-full mt-1 z-50 w-48 rounded-lg bg-slate-800 border border-slate-700 shadow-xl overflow-hidden"
+                        className="absolute right-0 top-full mt-1 z-50 w-48 rounded-lg bg-white/5 border border-white/[0.08] shadow-xl overflow-hidden"
                       >
                         {STAFFING_TEMPLATES.map((template) => (
                           <button
                             key={template.id}
                             onClick={() => handleUseTemplate(template)}
-                            className="w-full px-3 py-2 text-left text-sm text-slate-300 hover:bg-slate-700/50 hover:text-white transition-colors"
+                            className="w-full px-3 py-2 text-left text-sm text-white/70 hover:bg-white/10 hover:text-white transition-colors"
                             data-testid={`template-${template.id}`}
                           >
                             {template.name}
@@ -806,18 +806,18 @@ export default function EventSetup() {
             <div className="mt-3 overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="border-b border-slate-700">
-                    <th className="text-left py-1 px-2 text-slate-400 font-medium">Section</th>
-                    <th className="text-center py-1 px-2 text-slate-400 font-medium">Stands</th>
+                  <tr className="border-b border-white/[0.08]">
+                    <th className="text-left py-1 px-2 text-white/40 font-medium">Section</th>
+                    <th className="text-center py-1 px-2 text-white/40 font-medium">Stands</th>
                     <th className="text-center py-1 px-2 text-cyan-400 font-medium">E700</th>
                     <th className="text-center py-1 px-2 text-violet-400 font-medium">A930</th>
                   </tr>
                 </thead>
                 <tbody>
                   {Object.entries(staffingGrid.sections).map(([section, data]) => (
-                    <tr key={section} className="border-b border-slate-800">
+                    <tr key={section} className="border-b border-white/5">
                       <td className="py-1.5 px-2 text-white font-medium">{section}</td>
-                      <td className="text-center py-1.5 px-2 text-slate-300">{data.stands}</td>
+                      <td className="text-center py-1.5 px-2 text-white/70">{data.stands}</td>
                       <td className="text-center py-1.5 px-2 text-cyan-400">{data.e700}</td>
                       <td className="text-center py-1.5 px-2 text-violet-400">{data.a930}</td>
                     </tr>
@@ -828,9 +828,9 @@ export default function EventSetup() {
             
             {/* Totals row */}
             <div className="grid grid-cols-5 gap-2 mt-3">
-              <div className="p-2 rounded-lg bg-slate-900/50 border border-slate-700 text-center">
+              <div className="p-2 rounded-lg bg-[rgba(12,18,36,0.65)] border border-white/[0.08] text-center">
                 <div className="text-lg font-bold text-white">{staffingGrid.totalStands}</div>
-                <div className="text-[10px] text-slate-400">Total Stands</div>
+                <div className="text-[10px] text-white/40">Total Stands</div>
               </div>
               <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/30 text-center">
                 <div className="text-lg font-bold text-cyan-400">{staffingGrid.totalE700}</div>
@@ -850,7 +850,7 @@ export default function EventSetup() {
               </div>
             </div>
             
-            <div className="mt-2 text-xs text-slate-500 text-center">
+            <div className="mt-2 text-xs text-white/30 text-center">
               {staffingGrid.templateName !== 'Custom' ? `Template: ${staffingGrid.templateName}` : 'Custom values'}
             </div>
           </BentoCard>
@@ -892,7 +892,7 @@ export default function EventSetup() {
                 )}
               </AnimatePresence>
 
-              <div className="text-xs text-slate-500 text-center">
+              <div className="text-xs text-white/30 text-center">
                 {isSaved 
                   ? 'Event is live. All dashboards are receiving updates.'
                   : 'Activating will push event info to all worker dashboards.'}
@@ -911,7 +911,7 @@ export default function EventSetup() {
                 {
                   title: 'Alcohol Service Reminders',
                   content: (
-                    <div className="space-y-2 text-sm text-slate-300">
+                    <div className="space-y-2 text-sm text-white/70">
                       <p>• Take extra time at each meeting to discuss our alcohol policy</p>
                       <p>• ID's must be thoroughly checked each time, no exceptions</p>
                       <p>• You are responsible for all points of service, concession stands, self-service kiosks and vendors</p>
@@ -922,7 +922,7 @@ export default function EventSetup() {
                 {
                   title: 'Closing Reminders',
                   content: (
-                    <div className="space-y-2 text-sm text-slate-300">
+                    <div className="space-y-2 text-sm text-white/70">
                       <p>• Ice cannot/will not be dumped on the concourse or concourse drains at any point</p>
                       <p>• Walk off all stands and bars within your zone before allowing anyone to leave</p>
                       <p>• Please report any concerns to management</p>
@@ -933,7 +933,7 @@ export default function EventSetup() {
                 {
                   title: 'General Guidelines',
                   content: (
-                    <div className="space-y-2 text-sm text-slate-300">
+                    <div className="space-y-2 text-sm text-white/70">
                       <p>• Please be sure that all equipment is turned off at the end of the event</p>
                       <p>• Please do not use guest elevators until 1 hour post event (use freight elevators/ramp)</p>
                       <p>• Do not empty ice bins/push carts until 1 hour after event when guests are cleared</p>

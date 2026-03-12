@@ -155,7 +155,7 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
 
   return (
     <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-slate-900 border-slate-700">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col bg-[#0c1224] border-white/[0.08]">
         <CardHeader className="flex flex-row items-center justify-between pb-2 flex-shrink-0">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-600" />
@@ -245,7 +245,7 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
                       </AccordionTrigger>
                       <AccordionContent className="px-1">
                         <div className="space-y-1">
-                          <div className="grid grid-cols-6 text-xs text-muted-foreground font-medium py-1 px-2 bg-slate-700/50 rounded">
+                          <div className="grid grid-cols-6 text-xs text-muted-foreground font-medium py-1 px-2 bg-white/10 rounded">
                             <span className="col-span-2">Item</span>
                             <span className="text-center">Start</span>
                             <span className="text-center">End</span>
@@ -255,7 +255,7 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
                           {items.map((item) => (
                             <div 
                               key={item.itemId}
-                              className="grid grid-cols-6 text-sm py-2 px-2 hover:bg-slate-800/50 rounded items-center"
+                              className="grid grid-cols-6 text-sm py-2 px-2 hover:bg-white/5 rounded items-center"
                               data-testid={`variance-item-${item.itemId}`}
                             >
                               <span className="col-span-2 font-medium truncate">{item.itemName}</span>
@@ -268,14 +268,14 @@ export function VarianceReport({ standId, standName, eventDate, onClose }: Varia
                                     {item.used}
                                   </span>
                                 ) : (
-                                  <span className="text-gray-400">0</span>
+                                  <span className="text-white/40">0</span>
                                 )}
                               </span>
                               <span className="text-center">
                                 {item.spoilage > 0 ? (
                                   <span className="text-red-600">{item.spoilage}</span>
                                 ) : (
-                                  <span className="text-gray-400">-</span>
+                                  <span className="text-white/40">-</span>
                                 )}
                               </span>
                             </div>

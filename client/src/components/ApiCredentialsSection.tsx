@@ -320,14 +320,14 @@ export default function ApiCredentialsSection() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Key className="h-5 w-5 text-cyan-400" />
-          <span className="text-sm font-medium text-slate-300">API Credentials</span>
+          <span className="text-sm font-medium text-white/70">API Credentials</span>
           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">PARTNER API</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
             <button
               onClick={() => setTenantDropdownOpen(!tenantDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-sm text-slate-300 hover:bg-slate-700 transition-all"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/[0.08] text-sm text-white/70 hover:bg-white/10 transition-all"
               data-testid="tenant-toggle"
             >
               <Globe className="h-3.5 w-3.5 text-cyan-400" />
@@ -335,7 +335,7 @@ export default function ApiCredentialsSection() {
               <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", tenantDropdownOpen && "rotate-180")} />
             </button>
             {tenantDropdownOpen && (
-              <div className="absolute right-0 mt-1 z-50 min-w-[180px] rounded-lg bg-slate-800 border border-slate-700 shadow-xl overflow-hidden">
+              <div className="absolute right-0 mt-1 z-50 min-w-[180px] rounded-lg bg-white/5 border border-white/[0.08] shadow-xl overflow-hidden">
                 {tenantList.map((t) => (
                   <button
                     key={t}
@@ -344,8 +344,8 @@ export default function ApiCredentialsSection() {
                       setTenantDropdownOpen(false);
                     }}
                     className={cn(
-                      "w-full px-4 py-2 text-left text-sm hover:bg-slate-700 transition-all",
-                      tenant === t ? "text-cyan-400 bg-slate-700/50" : "text-slate-300"
+                      "w-full px-4 py-2 text-left text-sm hover:bg-white/10 transition-all",
+                      tenant === t ? "text-cyan-400 bg-white/10" : "text-white/70"
                     )}
                     data-testid={`tenant-option-${t}`}
                   >
@@ -360,7 +360,7 @@ export default function ApiCredentialsSection() {
             size="sm"
             onClick={loadData}
             disabled={loading}
-            className="text-slate-400 hover:text-white"
+            className="text-white/40 hover:text-white"
             data-testid="refresh-credentials"
           >
             <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
@@ -380,7 +380,7 @@ export default function ApiCredentialsSection() {
         <Button
           variant="outline"
           onClick={loadLogs}
-          className="border-slate-600 text-slate-300 hover:bg-slate-700"
+          className="border-white/10 text-white/70 hover:bg-white/10"
           data-testid="view-logs-btn"
         >
           <Eye className="h-4 w-4 mr-2" />
@@ -389,7 +389,7 @@ export default function ApiCredentialsSection() {
       </div>
 
       {loading && credentials.length === 0 ? (
-        <div className="flex items-center justify-center py-8 text-slate-500">
+        <div className="flex items-center justify-center py-8 text-white/30">
           <RefreshCw className="h-5 w-5 animate-spin mr-2" />
           Loading credentials...
         </div>
@@ -397,11 +397,11 @@ export default function ApiCredentialsSection() {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl bg-slate-800/50 backdrop-blur border border-cyan-500/30 overflow-hidden"
+          className="rounded-xl bg-white/5 backdrop-blur border border-cyan-500/30 overflow-hidden"
         >
           <Table>
             <TableHeader>
-              <TableRow className="border-slate-700 hover:bg-slate-800/50">
+              <TableRow className="border-white/[0.08] hover:bg-white/5">
                 <TableHead className="text-cyan-400">Name</TableHead>
                 <TableHead className="text-cyan-400">API Key</TableHead>
                 <TableHead className="text-cyan-400">Environment</TableHead>
@@ -421,10 +421,10 @@ export default function ApiCredentialsSection() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="border-slate-700/50 hover:bg-slate-700/30"
+                    className="border-white/[0.08]/50 hover:bg-white/10/30"
                     data-testid={`credential-row-${cred.id}`}
                   >
-                    <TableCell className="font-medium text-slate-200">
+                    <TableCell className="font-medium text-white/80">
                       <div className="flex items-center gap-2">
                         <Shield className="h-4 w-4 text-cyan-400" />
                         {cred.name}
@@ -432,14 +432,14 @@ export default function ApiCredentialsSection() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <code className="text-xs bg-slate-900 px-2 py-1 rounded text-slate-400 font-mono">
+                        <code className="text-xs bg-[#0c1224] px-2 py-1 rounded text-white/40 font-mono">
                           {maskApiKey(cred.apiKey)}
                         </code>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => copyToClipboard(cred.apiKey, cred.id)}
-                          className="h-7 w-7 p-0 text-slate-400 hover:text-cyan-400"
+                          className="h-7 w-7 p-0 text-white/40 hover:text-cyan-400"
                           data-testid={`copy-key-${cred.id}`}
                         >
                           {copiedField === cred.id ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
@@ -461,18 +461,18 @@ export default function ApiCredentialsSection() {
                     <TableCell>
                       <div className="flex flex-wrap gap-1 max-w-[150px]">
                         {cred.scopes.slice(0, 2).map((scope) => (
-                          <Badge key={scope} variant="outline" className="text-[10px] text-slate-400 border-slate-600">
+                          <Badge key={scope} variant="outline" className="text-[10px] text-white/40 border-white/10">
                             {scope.split(':')[1] || scope}
                           </Badge>
                         ))}
                         {cred.scopes.length > 2 && (
-                          <Badge variant="outline" className="text-[10px] text-slate-500 border-slate-600">
+                          <Badge variant="outline" className="text-[10px] text-white/30 border-white/10">
                             +{cred.scopes.length - 2}
                           </Badge>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-slate-400 text-sm">
+                    <TableCell className="text-white/40 text-sm">
                       {cred.rateLimit ? `${cred.rateLimit}/${cred.rateLimitWindow || 60}s` : '—'}
                     </TableCell>
                     <TableCell>
@@ -487,16 +487,16 @@ export default function ApiCredentialsSection() {
                         />
                         <span className={cn(
                           "text-xs",
-                          cred.isActive ? "text-green-400" : "text-slate-500"
+                          cred.isActive ? "text-green-400" : "text-white/30"
                         )}>
                           {cred.isActive ? 'Active' : 'Disabled'}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-slate-400 text-sm">
+                    <TableCell className="text-white/40 text-sm">
                       {cred.lastUsed ? formatDate(cred.lastUsed) : 'Never'}
                     </TableCell>
-                    <TableCell className="text-slate-400 text-sm">
+                    <TableCell className="text-white/40 text-sm">
                       {formatDate(cred.createdAt)}
                     </TableCell>
                     <TableCell>
@@ -507,7 +507,7 @@ export default function ApiCredentialsSection() {
                           setCredentialToDelete(cred.id);
                           setDeleteDialogOpen(true);
                         }}
-                        className="h-8 w-8 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                        className="h-8 w-8 p-0 text-white/40 hover:text-red-400 hover:bg-red-500/10"
                         data-testid={`delete-${cred.id}`}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -518,7 +518,7 @@ export default function ApiCredentialsSection() {
               </AnimatePresence>
               {credentials.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8 text-slate-500">
+                  <TableCell colSpan={9} className="text-center py-8 text-white/30">
                     No API credentials found. Create one to get started.
                   </TableCell>
                 </TableRow>
@@ -529,60 +529,60 @@ export default function ApiCredentialsSection() {
       )}
 
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 max-w-lg">
+        <DialogContent className="bg-[#0c1224] border-white/[0.08] text-white/80 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-cyan-400 flex items-center gap-2">
               <Key className="h-5 w-5" />
               Create API Credential
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-white/40">
               Generate a new API key for accessing the Partner API.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-4">
             <div>
-              <label className="text-sm text-slate-300 mb-2 block">Credential Name</label>
+              <label className="text-sm text-white/70 mb-2 block">Credential Name</label>
               <Input
                 value={newCredential.name}
                 onChange={(e) => setNewCredential(prev => ({ ...prev, name: e.target.value }))}
                 placeholder="e.g., Production API Key"
-                className="bg-slate-800 border-slate-600 text-slate-200"
+                className="bg-white/5 border-white/10 text-white/80"
                 data-testid="input-credential-name"
               />
             </div>
 
             <div>
-              <label className="text-sm text-slate-300 mb-2 block">Environment</label>
+              <label className="text-sm text-white/70 mb-2 block">Environment</label>
               <Select
                 value={newCredential.environment}
                 onValueChange={(value: 'production' | 'sandbox') => setNewCredential(prev => ({ ...prev, environment: value }))}
               >
-                <SelectTrigger className="bg-slate-800 border-slate-600 text-slate-200" data-testid="select-environment">
+                <SelectTrigger className="bg-white/5 border-white/10 text-white/80" data-testid="select-environment">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-slate-600">
-                  <SelectItem value="sandbox" className="text-slate-200 focus:bg-slate-700">Sandbox</SelectItem>
-                  <SelectItem value="production" className="text-slate-200 focus:bg-slate-700">Production</SelectItem>
+                <SelectContent className="bg-white/5 border-white/10">
+                  <SelectItem value="sandbox" className="text-white/80 focus:bg-white/10">Sandbox</SelectItem>
+                  <SelectItem value="production" className="text-white/80 focus:bg-white/10">Production</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <label className="text-sm text-slate-300 mb-2 block">Scopes</label>
-              <div className="grid grid-cols-2 gap-2 p-3 rounded-lg bg-slate-800 border border-slate-600 max-h-[180px] overflow-y-auto">
+              <label className="text-sm text-white/70 mb-2 block">Scopes</label>
+              <div className="grid grid-cols-2 gap-2 p-3 rounded-lg bg-white/5 border border-white/10 max-h-[180px] overflow-y-auto">
                 {availableScopes.map((scope) => (
                   <div key={scope.id} className="flex items-start gap-2">
                     <Checkbox
                       id={scope.id}
                       checked={newCredential.scopes.includes(scope.id)}
                       onCheckedChange={() => toggleScope(scope.id)}
-                      className="mt-0.5 border-slate-500 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
+                      className="mt-0.5 border-white/10 data-[state=checked]:bg-cyan-500 data-[state=checked]:border-cyan-500"
                       data-testid={`scope-${scope.id}`}
                     />
-                    <label htmlFor={scope.id} className="text-xs text-slate-300 cursor-pointer">
+                    <label htmlFor={scope.id} className="text-xs text-white/70 cursor-pointer">
                       <div className="font-medium">{scope.name}</div>
-                      <div className="text-slate-500">{scope.description}</div>
+                      <div className="text-white/30">{scope.description}</div>
                     </label>
                   </div>
                 ))}
@@ -591,24 +591,24 @@ export default function ApiCredentialsSection() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-sm text-slate-300 mb-2 block">Rate Limit (optional)</label>
+                <label className="text-sm text-white/70 mb-2 block">Rate Limit (optional)</label>
                 <Input
                   type="number"
                   value={newCredential.rateLimit}
                   onChange={(e) => setNewCredential(prev => ({ ...prev, rateLimit: e.target.value }))}
                   placeholder="e.g., 1000"
-                  className="bg-slate-800 border-slate-600 text-slate-200"
+                  className="bg-white/5 border-white/10 text-white/80"
                   data-testid="input-rate-limit"
                 />
               </div>
               <div>
-                <label className="text-sm text-slate-300 mb-2 block">Window (seconds)</label>
+                <label className="text-sm text-white/70 mb-2 block">Window (seconds)</label>
                 <Input
                   type="number"
                   value={newCredential.rateLimitWindow}
                   onChange={(e) => setNewCredential(prev => ({ ...prev, rateLimitWindow: e.target.value }))}
                   placeholder="e.g., 60"
-                  className="bg-slate-800 border-slate-600 text-slate-200"
+                  className="bg-white/5 border-white/10 text-white/80"
                   data-testid="input-rate-window"
                 />
               </div>
@@ -619,7 +619,7 @@ export default function ApiCredentialsSection() {
             <Button
               variant="outline"
               onClick={() => setCreateDialogOpen(false)}
-              className="border-slate-600 text-slate-300"
+              className="border-white/10 text-white/70"
             >
               Cancel
             </Button>
@@ -636,13 +636,13 @@ export default function ApiCredentialsSection() {
       </Dialog>
 
       <Dialog open={showCreatedDialog} onOpenChange={setShowCreatedDialog}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 max-w-lg">
+        <DialogContent className="bg-[#0c1224] border-white/[0.08] text-white/80 max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-green-400 flex items-center gap-2">
               <Check className="h-5 w-5" />
               Credential Created Successfully
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-white/40">
               Save these credentials now. The API Secret will only be shown once!
             </DialogDescription>
           </DialogHeader>
@@ -658,21 +658,21 @@ export default function ApiCredentialsSection() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">Credential Name</label>
-                <div className="text-slate-200 font-medium">{createdCredential.name}</div>
+                <label className="text-xs text-white/40 mb-1 block">Credential Name</label>
+                <div className="text-white/80 font-medium">{createdCredential.name}</div>
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">API Key</label>
+                <label className="text-xs text-white/40 mb-1 block">API Key</label>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 text-sm bg-slate-800 px-3 py-2 rounded border border-slate-600 text-cyan-400 font-mono overflow-x-auto">
+                  <code className="flex-1 text-sm bg-white/5 px-3 py-2 rounded border border-white/10 text-cyan-400 font-mono overflow-x-auto">
                     {createdCredential.apiKey}
                   </code>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => copyToClipboard(createdCredential.apiKey, 'created-key')}
-                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                    className="border-white/10 text-white/70 hover:bg-white/10"
                     data-testid="copy-created-key"
                   >
                     {copiedField === 'created-key' ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
@@ -681,16 +681,16 @@ export default function ApiCredentialsSection() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">API Secret</label>
+                <label className="text-xs text-white/40 mb-1 block">API Secret</label>
                 <div className="flex items-center gap-2">
-                  <code className="flex-1 text-sm bg-slate-800 px-3 py-2 rounded border border-red-500/30 text-red-400 font-mono overflow-x-auto">
+                  <code className="flex-1 text-sm bg-white/5 px-3 py-2 rounded border border-red-500/30 text-red-400 font-mono overflow-x-auto">
                     {createdCredential.apiSecret}
                   </code>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => copyToClipboard(createdCredential.apiSecret, 'created-secret')}
-                    className="border-slate-600 text-slate-300 hover:bg-slate-700"
+                    className="border-white/10 text-white/70 hover:bg-white/10"
                     data-testid="copy-created-secret"
                   >
                     {copiedField === 'created-secret' ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
@@ -700,7 +700,7 @@ export default function ApiCredentialsSection() {
 
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  <label className="text-xs text-slate-400 mb-1 block">Environment</label>
+                  <label className="text-xs text-white/40 mb-1 block">Environment</label>
                   <Badge className={cn(
                     createdCredential.environment === 'production'
                       ? "bg-red-500/20 text-red-400 border-red-500/30"
@@ -710,10 +710,10 @@ export default function ApiCredentialsSection() {
                   </Badge>
                 </div>
                 <div>
-                  <label className="text-xs text-slate-400 mb-1 block">Scopes</label>
+                  <label className="text-xs text-white/40 mb-1 block">Scopes</label>
                   <div className="flex flex-wrap gap-1">
                     {createdCredential.scopes.map((scope) => (
-                      <Badge key={scope} variant="outline" className="text-[10px] text-slate-400 border-slate-600">
+                      <Badge key={scope} variant="outline" className="text-[10px] text-white/40 border-white/10">
                         {scope}
                       </Badge>
                     ))}
@@ -739,13 +739,13 @@ export default function ApiCredentialsSection() {
       </Dialog>
 
       <Dialog open={logsDialogOpen} onOpenChange={setLogsDialogOpen}>
-        <DialogContent className="bg-slate-900 border-slate-700 text-slate-200 max-w-2xl">
+        <DialogContent className="bg-[#0c1224] border-white/[0.08] text-white/80 max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-cyan-400 flex items-center gap-2">
               <Eye className="h-5 w-5" />
               Recent API Logs
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-white/40">
               Last 10 API requests for {tenantLabels[tenant] || tenant}
             </DialogDescription>
           </DialogHeader>
@@ -753,7 +753,7 @@ export default function ApiCredentialsSection() {
           <div className="py-4 max-h-[400px] overflow-y-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-slate-700">
+                <TableRow className="border-white/[0.08]">
                   <TableHead className="text-cyan-400">Time</TableHead>
                   <TableHead className="text-cyan-400">Method</TableHead>
                   <TableHead className="text-cyan-400">Endpoint</TableHead>
@@ -763,8 +763,8 @@ export default function ApiCredentialsSection() {
               </TableHeader>
               <TableBody>
                 {apiLogs.map((log) => (
-                  <TableRow key={log.id} className="border-slate-700/50">
-                    <TableCell className="text-slate-400 text-xs">
+                  <TableRow key={log.id} className="border-white/[0.08]/50">
+                    <TableCell className="text-white/40 text-xs">
                       {formatTime(log.timestamp)}
                     </TableCell>
                     <TableCell>
@@ -778,7 +778,7 @@ export default function ApiCredentialsSection() {
                         {log.method}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-slate-300 text-sm font-mono">
+                    <TableCell className="text-white/70 text-sm font-mono">
                       {log.endpoint}
                     </TableCell>
                     <TableCell>
@@ -791,14 +791,14 @@ export default function ApiCredentialsSection() {
                         {log.statusCode}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-slate-500 text-xs">
+                    <TableCell className="text-white/30 text-xs">
                       {log.responseTime}ms
                     </TableCell>
                   </TableRow>
                 ))}
                 {apiLogs.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                    <TableCell colSpan={5} className="text-center py-8 text-white/30">
                       No API logs found.
                     </TableCell>
                   </TableRow>
@@ -811,7 +811,7 @@ export default function ApiCredentialsSection() {
             <Button
               variant="outline"
               onClick={() => setLogsDialogOpen(false)}
-              className="border-slate-600 text-slate-300"
+              className="border-white/10 text-white/70"
             >
               Close
             </Button>
@@ -820,19 +820,19 @@ export default function ApiCredentialsSection() {
       </Dialog>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="bg-slate-900 border-slate-700">
+        <AlertDialogContent className="bg-[#0c1224] border-white/[0.08]">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-red-400 flex items-center gap-2">
               <Trash2 className="h-5 w-5" />
               Delete API Credential
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-slate-400">
+            <AlertDialogDescription className="text-white/40">
               Are you sure you want to delete this API credential? 
               This action cannot be undone and any applications using this key will stop working immediately.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-slate-800 border-slate-600 text-slate-300 hover:bg-slate-700">
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white/70 hover:bg-white/10">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

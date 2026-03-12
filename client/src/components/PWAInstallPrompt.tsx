@@ -82,7 +82,7 @@ export function PWAInstallPrompt() {
         className="fixed bottom-20 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96"
         data-testid="pwa-install-prompt"
       >
-        <div className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 p-4 backdrop-blur-xl">
+        <div className="bg-gradient-to-r from-[#0c1224] via-[#0c1224] to-[#0c1224] rounded-2xl border border-cyan-500/30 shadow-2xl shadow-cyan-500/20 p-4 backdrop-blur-xl">
           <div className="flex items-start gap-4">
             <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center">
               <Smartphone className="w-6 h-6 text-cyan-400" />
@@ -92,14 +92,14 @@ export function PWAInstallPrompt() {
               <h3 className="text-white font-semibold text-base mb-1">
                 Add Orby to Home Screen
               </h3>
-              <p className="text-slate-400 text-sm leading-snug">
+              <p className="text-white/40 text-sm leading-snug">
                 Install for quick access - works offline and launches instantly like a native app.
               </p>
             </div>
 
             <button
               onClick={handleDismiss}
-              className="flex-shrink-0 text-slate-500 hover:text-white transition-colors p-1"
+              className="flex-shrink-0 text-white/30 hover:text-white transition-colors p-1"
               data-testid="button-dismiss-pwa"
             >
               <X className="w-5 h-5" />
@@ -111,7 +111,7 @@ export function PWAInstallPrompt() {
               variant="ghost"
               size="sm"
               onClick={handleDismiss}
-              className="flex-1 text-slate-400 hover:text-white hover:bg-white/10"
+              className="flex-1 text-white/40 hover:text-white hover:bg-white/10"
               data-testid="button-not-now"
             >
               Not Now

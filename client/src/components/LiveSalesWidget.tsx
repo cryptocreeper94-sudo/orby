@@ -156,7 +156,7 @@ export function LiveSalesWidget({ compact = false, className = '' }: LiveSalesWi
   }
 
   return (
-    <Card className={`bg-gradient-to-br from-slate-800 to-slate-900 border-white/10 ${className}`} data-testid="live-sales-widget">
+    <Card className={`bg-gradient-to-br from-[#0c1224] to-[#0c1224] border-white/10 ${className}`} data-testid="live-sales-widget">
       <CardHeader className="pb-2 border-b border-white/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -283,7 +283,7 @@ export function LiveSalesWidget({ compact = false, className = '' }: LiveSalesWi
                   <div className={`flex items-center gap-1 ${
                     stand.trend === 'up' ? 'text-green-400' :
                     stand.trend === 'down' ? 'text-red-400' :
-                    'text-gray-400'
+                    'text-white/40'
                   }`}>
                     {stand.trend === 'up' && <TrendingUp className="h-4 w-4" />}
                     {stand.trend === 'down' && <TrendingDown className="h-4 w-4" />}

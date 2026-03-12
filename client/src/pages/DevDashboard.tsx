@@ -62,7 +62,7 @@ function RoleButton({ name, description, pin, route, icon, color, onClick }: Rol
     <button
       onClick={() => onClick(pin, route)}
       className={cn(
-        "w-full p-3 rounded-lg border border-slate-700/50 bg-slate-800/50",
+        "w-full p-3 rounded-lg border border-white/[0.08]/50 bg-white/5",
         "flex items-center gap-3 text-left transition-all duration-200",
         colorClasses[color]
       )}
@@ -70,10 +70,10 @@ function RoleButton({ name, description, pin, route, icon, color, onClick }: Rol
     >
       <span className={textColors[color]}>{icon}</span>
       <div className="flex-1 min-w-0">
-        <div className="font-medium text-slate-200 text-sm">{name}</div>
-        <div className="text-xs text-slate-500 truncate">{description}</div>
+        <div className="font-medium text-white/80 text-sm">{name}</div>
+        <div className="text-xs text-white/30 truncate">{description}</div>
       </div>
-      <span className="text-xs text-slate-600 font-mono">{pin}</span>
+      <span className="text-xs text-white/20 font-mono">{pin}</span>
     </button>
   );
 }
@@ -118,7 +118,7 @@ interface QuickToolButtonProps {
 
 function QuickToolButton({ label, icon, onClick, variant = 'default' }: QuickToolButtonProps) {
   const variantClasses = {
-    default: "border-slate-600 text-slate-300 hover:border-cyan-500 hover:bg-cyan-500/10",
+    default: "border-white/10 text-white/70 hover:border-cyan-500 hover:bg-cyan-500/10",
     success: "border-green-700 text-green-400 hover:bg-green-500/20",
     danger: "border-red-700 text-red-400 hover:bg-red-500/20",
     warning: "border-amber-700 text-amber-400 hover:bg-amber-500/20",
@@ -306,33 +306,33 @@ export default function DevDashboard() {
   ];
 
   const orbitStatusItems = [
-    <div key="api-gateway" className="w-[120px] h-[80px] p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-api-gateway">
+    <div key="api-gateway" className="w-[120px] h-[80px] p-3 rounded-lg bg-white/5 border border-white/[0.08]/30" data-testid="orbit-api-gateway">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-        <span className="text-xs text-slate-400">API Gateway</span>
+        <span className="text-xs text-white/40">API Gateway</span>
       </div>
       <div className="text-lg font-bold text-green-400">Active</div>
     </div>,
-    <div key="database" className="w-[120px] h-[80px] p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-database">
+    <div key="database" className="w-[120px] h-[80px] p-3 rounded-lg bg-white/5 border border-white/[0.08]/30" data-testid="orbit-database">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-        <span className="text-xs text-slate-400">Database</span>
+        <span className="text-xs text-white/40">Database</span>
       </div>
       <div className="text-lg font-bold text-green-400">Online</div>
     </div>,
-    <div key="websocket" className="w-[120px] h-[80px] p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-websocket">
+    <div key="websocket" className="w-[120px] h-[80px] p-3 rounded-lg bg-white/5 border border-white/[0.08]/30" data-testid="orbit-websocket">
       <div className="flex items-center gap-2 mb-2">
         <div className={cn("w-2 h-2 rounded-full", isConnected ? "bg-green-500 animate-pulse" : "bg-red-500")} />
-        <span className="text-xs text-slate-400">WebSocket</span>
+        <span className="text-xs text-white/40">WebSocket</span>
       </div>
       <div className={cn("text-lg font-bold", isConnected ? "text-green-400" : "text-red-400")}>
         {isConnected ? "Connected" : "Offline"}
       </div>
     </div>,
-    <div key="messages" className="w-[120px] h-[80px] p-3 rounded-lg bg-slate-800/50 border border-slate-700/30" data-testid="orbit-messages">
+    <div key="messages" className="w-[120px] h-[80px] p-3 rounded-lg bg-white/5 border border-white/[0.08]/30" data-testid="orbit-messages">
       <div className="flex items-center gap-2 mb-2">
         <div className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
-        <span className="text-xs text-slate-400">Messages</span>
+        <span className="text-xs text-white/40">Messages</span>
       </div>
       <div className="text-lg font-bold text-cyan-400">
         {wsStore.messages.length > 0 ? wsStore.messages.length : "—"}
@@ -395,7 +395,7 @@ export default function DevDashboard() {
       title: "Sandbox Mode",
       content: (
         <div className="space-y-3">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-white/40">
             Train staff, demo to stakeholders, or test features safely without affecting live operations.
           </p>
           {isSandbox ? (
@@ -436,7 +436,7 @@ export default function DevDashboard() {
   ];
 
   return (
-    <LayoutShell className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 !block" data-testid="dev-dashboard">
+    <LayoutShell className="min-h-screen bg-gradient-to-b from-[#050508] via-[#0c1224] to-[#050508] !block" data-testid="dev-dashboard">
       <GlobalModeBar />
       
       <header className="sticky top-0 z-50 bg-slate-950/90 backdrop-blur-sm border-b border-cyan-500/20 px-4 py-3" data-testid="dev-dashboard-header">
@@ -446,11 +446,11 @@ export default function DevDashboard() {
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-cyan-500/30">
                 <Radio className="h-5 w-5 text-white" />
               </div>
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-slate-950 animate-pulse" />
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-white/5 animate-pulse" />
             </div>
             <div>
               <h1 className="text-lg font-bold text-cyan-400">Orby Command</h1>
-              <p className="text-xs text-slate-500">Developer Console</p>
+              <p className="text-xs text-white/30">Developer Console</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -470,7 +470,7 @@ export default function DevDashboard() {
               variant="ghost" 
               size="sm"
               onClick={() => setLocation("/")} 
-              className="text-slate-400 hover:text-white"
+              className="text-white/40 hover:text-white"
               data-testid="button-exit"
             >
               <LogOut className="h-4 w-4" />
@@ -490,7 +490,7 @@ export default function DevDashboard() {
           <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-hero-metrics">
             <div className="flex items-center gap-2 mb-3">
               <Activity className="h-4 w-4 text-cyan-400" />
-              <span className="text-sm font-medium text-slate-300">System Metrics</span>
+              <span className="text-sm font-medium text-white/70">System Metrics</span>
             </div>
             <CarouselRail items={heroMetrics} showDots autoplay />
           </BentoCard>
@@ -498,7 +498,7 @@ export default function DevDashboard() {
           <BentoCard span={6} className="col-span-4 md:col-span-6 lg:col-span-6" data-testid="bento-quick-tools">
             <div className="flex items-center gap-2 mb-3">
               <Zap className="h-4 w-4 text-amber-400" />
-              <span className="text-sm font-medium text-slate-300">Quick Tools</span>
+              <span className="text-sm font-medium text-white/70">Quick Tools</span>
             </div>
             <CarouselRail items={quickTools} />
           </BentoCard>
@@ -506,7 +506,7 @@ export default function DevDashboard() {
           <BentoCard span={6} className="col-span-4 md:col-span-6 lg:col-span-6" data-testid="bento-release-manager">
             <div className="flex items-center gap-2 mb-3">
               <Package className="h-4 w-4 text-green-400" />
-              <span className="text-sm font-medium text-slate-300">Release Manager</span>
+              <span className="text-sm font-medium text-white/70">Release Manager</span>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-500/20 text-green-400 border border-green-500/30">Solana</span>
             </div>
             <ReleaseManager />
@@ -515,14 +515,14 @@ export default function DevDashboard() {
           <BentoCard span={8} className="col-span-4 md:col-span-6 lg:col-span-8" data-testid="bento-orbit-hub">
             <div className="flex items-center gap-2 mb-3">
               <Globe className="h-4 w-4 text-violet-400" />
-              <span className="text-sm font-medium text-slate-300">ORBIT Hub Status</span>
+              <span className="text-sm font-medium text-white/70">ORBIT Hub Status</span>
             </div>
             <CarouselRail items={orbitStatusItems} />
             
-            <div className="mt-4 pt-4 border-t border-slate-700/30">
+            <div className="mt-4 pt-4 border-t border-white/[0.08]/30">
               <div className="flex items-center gap-2 mb-3">
                 <Calendar className="h-4 w-4 text-emerald-400" />
-                <span className="text-sm font-medium text-slate-300">Event Control</span>
+                <span className="text-sm font-medium text-white/70">Event Control</span>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">LIVE</span>
               </div>
               <EventControlPanel 
@@ -536,7 +536,7 @@ export default function DevDashboard() {
           <BentoCard span={4} className="col-span-4 md:col-span-6 lg:col-span-4" data-testid="bento-dashboard-picker">
             <div className="flex items-center gap-2 mb-3">
               <UserCog className="h-4 w-4 text-cyan-400" />
-              <span className="text-sm font-medium text-slate-300">Quick Dashboard Picker</span>
+              <span className="text-sm font-medium text-white/70">Quick Dashboard Picker</span>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <button 
@@ -545,7 +545,7 @@ export default function DevDashboard() {
                 data-testid="quick-dashboard-ops"
               >
                 <div className="text-sm font-medium text-cyan-400">Ops Command</div>
-                <div className="text-[10px] text-slate-500">David (2424)</div>
+                <div className="text-[10px] text-white/30">David (2424)</div>
               </button>
               <button 
                 onClick={() => handleRoleSwitch('9090', '/command-center')}
@@ -553,7 +553,7 @@ export default function DevDashboard() {
                 data-testid="quick-dashboard-gm"
               >
                 <div className="text-sm font-medium text-teal-400">GM</div>
-                <div className="text-[10px] text-slate-500">Meghann (9090)</div>
+                <div className="text-[10px] text-white/30">Meghann (9090)</div>
               </button>
               <button 
                 onClick={() => handleRoleSwitch('5555', '/alcohol-compliance')}
@@ -561,7 +561,7 @@ export default function DevDashboard() {
                 data-testid="quick-dashboard-compliance"
               >
                 <div className="text-sm font-medium text-rose-400">Compliance</div>
-                <div className="text-[10px] text-slate-500">Alcohol (5555)</div>
+                <div className="text-[10px] text-white/30">Alcohol (5555)</div>
               </button>
               <button 
                 onClick={() => handleRoleSwitch('1111', '/warehouse')}
@@ -569,10 +569,10 @@ export default function DevDashboard() {
                 data-testid="quick-dashboard-warehouse"
               >
                 <div className="text-sm font-medium text-amber-400">Warehouse</div>
-                <div className="text-[10px] text-slate-500">Staff (1111)</div>
+                <div className="text-[10px] text-white/30">Staff (1111)</div>
               </button>
             </div>
-            <div className="mt-3 pt-3 border-t border-slate-700/30">
+            <div className="mt-3 pt-3 border-t border-white/[0.08]/30">
               <button 
                 onClick={() => setLocation('/command-center')}
                 className="w-full p-2 rounded-lg bg-gradient-to-r from-cyan-600 to-teal-600 hover:from-cyan-500 hover:to-teal-500 text-white text-sm font-medium transition-all"
@@ -585,21 +585,21 @@ export default function DevDashboard() {
 
           <BentoCard span={4} className="col-span-4 md:col-span-6 lg:col-span-4" data-testid="bento-system-logs">
             <div className="flex items-center gap-2 mb-3">
-              <FileText className="h-4 w-4 text-slate-400" />
-              <span className="text-sm font-medium text-slate-300">System Logs</span>
+              <FileText className="h-4 w-4 text-white/40" />
+              <span className="text-sm font-medium text-white/70">System Logs</span>
             </div>
             <div className="space-y-2 text-xs max-h-[200px] overflow-y-auto" data-testid="system-logs-container">
-              <div className="flex items-start gap-2 p-2 rounded bg-slate-800/50" data-testid="log-entry-init">
+              <div className="flex items-start gap-2 p-2 rounded bg-white/5" data-testid="log-entry-init">
                 <span className="text-green-400 shrink-0">[OK]</span>
-                <span className="text-slate-400">System initialized successfully</span>
+                <span className="text-white/40">System initialized successfully</span>
               </div>
-              <div className="flex items-start gap-2 p-2 rounded bg-slate-800/50" data-testid="log-entry-ws">
+              <div className="flex items-start gap-2 p-2 rounded bg-white/5" data-testid="log-entry-ws">
                 <span className="text-cyan-400 shrink-0">[WS]</span>
-                <span className="text-slate-400">{isConnected ? "WebSocket connected" : "WebSocket disconnected"}</span>
+                <span className="text-white/40">{isConnected ? "WebSocket connected" : "WebSocket disconnected"}</span>
               </div>
-              <div className="flex items-start gap-2 p-2 rounded bg-slate-800/50" data-testid="log-entry-db">
+              <div className="flex items-start gap-2 p-2 rounded bg-white/5" data-testid="log-entry-db">
                 <span className="text-violet-400 shrink-0">[DB]</span>
-                <span className="text-slate-400">Database connection pool active</span>
+                <span className="text-white/40">Database connection pool active</span>
               </div>
               {systemStats.activeEmergencies > 0 && (
                 <div className="flex items-start gap-2 p-2 rounded bg-red-900/30 border border-red-500/30" data-testid="log-entry-alert">
@@ -607,13 +607,13 @@ export default function DevDashboard() {
                   <span className="text-red-300">{systemStats.activeEmergencies} active emergency alert(s)</span>
                 </div>
               )}
-              <div className="flex items-start gap-2 p-2 rounded bg-slate-800/50" data-testid="log-entry-api">
+              <div className="flex items-start gap-2 p-2 rounded bg-white/5" data-testid="log-entry-api">
                 <span className="text-amber-400 shrink-0">[API]</span>
-                <span className="text-slate-400">All endpoints responding</span>
+                <span className="text-white/40">All endpoints responding</span>
               </div>
             </div>
             
-            <div className="mt-4 pt-4 border-t border-slate-700/30">
+            <div className="mt-4 pt-4 border-t border-white/[0.08]/30">
               <div className="flex gap-2 flex-wrap">
                 <Button
                   onClick={() => setLocation('/command-center')}
@@ -653,7 +653,7 @@ export default function DevDashboard() {
           <BentoCard span={12} className="col-span-4 md:col-span-6 lg:col-span-12" data-testid="bento-support-section">
             <div className="flex items-center gap-2 mb-3">
               <BookOpen className="h-4 w-4 text-violet-400" />
-              <span className="text-sm font-medium text-slate-300">Documentation & Tools</span>
+              <span className="text-sm font-medium text-white/70">Documentation & Tools</span>
             </div>
             <AccordionStack items={supportItems} defaultOpen={[5, 8]} />
           </BentoCard>

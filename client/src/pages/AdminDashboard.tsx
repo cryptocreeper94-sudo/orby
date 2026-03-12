@@ -51,7 +51,7 @@ export default function AdminDashboard() {
     switch (status) {
       case 'Open': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
       case 'Closed': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      default: return 'bg-slate-500/20 text-slate-400 border-slate-500/30';
+      default: return 'bg-white/10 text-white/40 border-white/10';
     }
   };
 
@@ -110,23 +110,23 @@ export default function AdminDashboard() {
     <div key="system-config" className="p-3 bg-white/5 rounded-lg border border-white/10 w-[180px] h-[100px]" data-testid="setting-system-config">
       <div className="flex items-center gap-2 mb-2">
         <Settings className="h-4 w-4 text-cyan-400" />
-        <span className="text-sm font-medium text-slate-200">System Config</span>
+        <span className="text-sm font-medium text-white/80">System Config</span>
       </div>
-      <p className="text-xs text-slate-400">Configure system preferences</p>
+      <p className="text-xs text-white/40">Configure system preferences</p>
     </div>,
     <div key="notifications" className="p-3 bg-white/5 rounded-lg border border-white/10 w-[180px] h-[100px]" data-testid="setting-notifications">
       <div className="flex items-center gap-2 mb-2">
         <Bell className="h-4 w-4 text-amber-400" />
-        <span className="text-sm font-medium text-slate-200">Notifications</span>
+        <span className="text-sm font-medium text-white/80">Notifications</span>
       </div>
-      <p className="text-xs text-slate-400">Manage alert settings</p>
+      <p className="text-xs text-white/40">Manage alert settings</p>
     </div>,
     <div key="security" className="p-3 bg-white/5 rounded-lg border border-white/10 w-[180px] h-[100px]" data-testid="setting-security">
       <div className="flex items-center gap-2 mb-2">
         <Shield className="h-4 w-4 text-emerald-400" />
-        <span className="text-sm font-medium text-slate-200">Security</span>
+        <span className="text-sm font-medium text-white/80">Security</span>
       </div>
-      <p className="text-xs text-slate-400">Access control settings</p>
+      <p className="text-xs text-white/40">Access control settings</p>
     </div>,
   ];
 
@@ -135,10 +135,10 @@ export default function AdminDashboard() {
       title: "System Diagnostics",
       content: (
         <div className="space-y-2" data-testid="admin-tool-diagnostics">
-          <Button variant="ghost" size="sm" className="w-full justify-start text-slate-300 hover:text-white">
+          <Button variant="ghost" size="sm" className="w-full justify-start text-white/70 hover:text-white">
             <Wrench className="h-4 w-4 mr-2" /> Run Health Check
           </Button>
-          <Button variant="ghost" size="sm" className="w-full justify-start text-slate-300 hover:text-white">
+          <Button variant="ghost" size="sm" className="w-full justify-start text-white/70 hover:text-white">
             <Database className="h-4 w-4 mr-2" /> Database Status
           </Button>
         </div>
@@ -148,10 +148,10 @@ export default function AdminDashboard() {
       title: "Documentation",
       content: (
         <div className="space-y-2" data-testid="admin-tool-docs">
-          <Button variant="ghost" size="sm" className="w-full justify-start text-slate-300 hover:text-white">
+          <Button variant="ghost" size="sm" className="w-full justify-start text-white/70 hover:text-white">
             <BookOpen className="h-4 w-4 mr-2" /> Admin Guide
           </Button>
-          <Button variant="ghost" size="sm" className="w-full justify-start text-slate-300 hover:text-white">
+          <Button variant="ghost" size="sm" className="w-full justify-start text-white/70 hover:text-white">
             <HelpCircle className="h-4 w-4 mr-2" /> FAQ
           </Button>
         </div>
@@ -162,11 +162,11 @@ export default function AdminDashboard() {
       content: (
         <div className="space-y-2" data-testid="admin-tool-actions">
           <Link href="/roster-builder">
-            <Button variant="ghost" size="sm" className="w-full justify-start text-slate-300 hover:text-white">
+            <Button variant="ghost" size="sm" className="w-full justify-start text-white/70 hover:text-white">
               <Users className="h-4 w-4 mr-2" /> Roster Builder
             </Button>
           </Link>
-          <Button variant="ghost" size="sm" className="w-full justify-start text-slate-300 hover:text-white">
+          <Button variant="ghost" size="sm" className="w-full justify-start text-white/70 hover:text-white">
             <FileBarChart className="h-4 w-4 mr-2" /> Export Reports
           </Button>
         </div>
@@ -196,11 +196,11 @@ export default function AdminDashboard() {
             <div className="flex items-center gap-2">
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button size="icon" variant="ghost" className="md:hidden text-slate-300 hover:bg-white/10" data-testid="button-mobile-menu">
+                  <Button size="icon" variant="ghost" className="md:hidden text-white/70 hover:bg-white/10" data-testid="button-mobile-menu">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="bg-slate-900 border-slate-700">
+                <SheetContent side="left" className="bg-[#0c1224] border-white/[0.08]">
                   <nav className="grid gap-6 text-lg font-medium pt-8">
                     <div className="flex items-center gap-2 text-lg font-semibold text-cyan-400">
                       <Package className="h-6 w-6" />
@@ -210,11 +210,11 @@ export default function AdminDashboard() {
                       <LayoutDashboard className="h-5 w-5" />
                       Dashboard
                     </Link>
-                    <Link href="/roster-builder" className="flex items-center gap-4 px-2.5 text-slate-400 hover:text-white">
+                    <Link href="/roster-builder" className="flex items-center gap-4 px-2.5 text-white/40 hover:text-white">
                       <Users className="h-5 w-5" />
                       Roster
                     </Link>
-                    <Link href="/messages" className="flex items-center gap-4 px-2.5 text-slate-400 hover:text-white">
+                    <Link href="/messages" className="flex items-center gap-4 px-2.5 text-white/40 hover:text-white">
                       <MessageSquare className="h-5 w-5" />
                       Messages
                     </Link>
@@ -222,11 +222,11 @@ export default function AdminDashboard() {
                 </SheetContent>
               </Sheet>
               <Link href="/messages">
-                <Button variant="ghost" size="icon" className="text-slate-300 hover:bg-white/10" data-testid="button-messages">
+                <Button variant="ghost" size="icon" className="text-white/70 hover:bg-white/10" data-testid="button-messages">
                   <MessageSquare className="h-5 w-5" />
                 </Button>
               </Link>
-              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-slate-300 hover:bg-white/10" data-testid="button-logout">
+              <Button variant="ghost" size="icon" onClick={handleLogout} className="text-white/70 hover:bg-white/10" data-testid="button-logout">
                 <LogOut className="h-5 w-5" />
               </Button>
             </div>
@@ -266,7 +266,7 @@ export default function AdminDashboard() {
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all whitespace-nowrap ${
                         activeTab === tab.id 
                           ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/25' 
-                          : 'bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10'
+                          : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'
                       }`}
                       data-testid={`tab-${tab.id}`}
                     >
@@ -309,8 +309,8 @@ export default function AdminDashboard() {
                           data-testid={`stand-row-${stand.id}`}
                         >
                           <div className="flex flex-col">
-                            <span className="font-medium text-xs text-slate-200">{stand.name}</span>
-                            <span className="text-[10px] text-slate-500">
+                            <span className="font-medium text-xs text-white/80">{stand.name}</span>
+                            <span className="text-[10px] text-white/30">
                               Supervisor: {stand.supervisorId ? 'Assigned' : 'Unassigned'}
                             </span>
                           </div>
@@ -335,14 +335,14 @@ export default function AdminDashboard() {
                         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                           <div className="cursor-pointer hover:border-cyan-500/30 transition-colors h-full p-3 bg-white/5 rounded-lg border border-white/10 flex flex-col items-center justify-center gap-1">
                             <Users className="h-5 w-5 text-cyan-400" />
-                            <span className="text-xs font-medium text-slate-200">Roster Builder</span>
+                            <span className="text-xs font-medium text-white/80">Roster Builder</span>
                           </div>
                         </motion.div>
                       </Link>
                       <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                         <div className="cursor-pointer hover:border-cyan-500/30 transition-colors h-full p-3 bg-white/5 rounded-lg border border-white/10 flex flex-col items-center justify-center gap-1">
                           <FileBarChart className="h-5 w-5 text-cyan-400" />
-                          <span className="text-xs font-medium text-slate-200">Export CSV</span>
+                          <span className="text-xs font-medium text-white/80">Export CSV</span>
                         </div>
                       </motion.div>
                     </motion.div>
@@ -376,36 +376,36 @@ export default function AdminDashboard() {
                       <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                       <span className="text-xs text-emerald-400 font-medium">API</span>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-1">Response: 45ms</p>
+                    <p className="text-[10px] text-white/40 mt-1">Response: 45ms</p>
                   </div>
                   <div className="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20" data-testid="status-database">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                       <span className="text-xs text-emerald-400 font-medium">Database</span>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-1">24 connections</p>
+                    <p className="text-[10px] text-white/40 mt-1">24 connections</p>
                   </div>
                   <div className="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20" data-testid="status-cache">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                       <span className="text-xs text-emerald-400 font-medium">Cache</span>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-1">Hit rate: 94%</p>
+                    <p className="text-[10px] text-white/40 mt-1">Hit rate: 94%</p>
                   </div>
                   <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20" data-testid="status-storage">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-amber-400" />
                       <span className="text-xs text-amber-400 font-medium">Storage</span>
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-1">78% used</p>
+                    <p className="text-[10px] text-white/40 mt-1">78% used</p>
                   </div>
                 </div>
                 <div className="p-2 bg-white/5 rounded-lg border border-white/10" data-testid="status-uptime">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-300">System Uptime</span>
+                    <span className="text-xs text-white/70">System Uptime</span>
                     <span className="text-xs font-mono text-emerald-400">99.97%</span>
                   </div>
-                  <div className="mt-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                  <div className="mt-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full w-[99.97%] bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full" />
                   </div>
                 </div>
@@ -427,10 +427,10 @@ export default function AdminDashboard() {
                     className="flex items-start gap-2 text-[10px] p-1.5 bg-white/5 rounded border border-white/5"
                     data-testid={`log-entry-${idx}`}
                   >
-                    <span className="text-slate-500 font-mono shrink-0">{log.time}</span>
+                    <span className="text-white/30 font-mono shrink-0">{log.time}</span>
                     <span className={`${
                       log.type === 'success' ? 'text-emerald-400' : 
-                      log.type === 'warning' ? 'text-amber-400' : 'text-slate-400'
+                      log.type === 'warning' ? 'text-amber-400' : 'text-white/40'
                     }`}>
                       {log.message}
                     </span>

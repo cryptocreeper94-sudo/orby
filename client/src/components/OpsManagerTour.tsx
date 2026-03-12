@@ -132,8 +132,8 @@ export function OpsManagerTour() {
           animate={{ opacity: 1, y: 0 }}
           className="absolute left-1/2 bottom-8 -translate-x-1/2 w-full max-w-md px-4"
         >
-          <Card className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-cyan-500/40 shadow-2xl shadow-cyan-500/20">
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-slate-700 rounded-t-lg overflow-hidden">
+          <Card className="bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] border-cyan-500/40 shadow-2xl shadow-cyan-500/20">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/10 rounded-t-lg overflow-hidden">
               <motion.div
                 className="h-full bg-gradient-to-r from-cyan-400 via-purple-500 to-cyan-400"
                 initial={{ width: 0 }}
@@ -147,7 +147,7 @@ export function OpsManagerTour() {
                 variant="ghost"
                 size="icon"
                 onClick={handleSkip}
-                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-700"
+                className="h-8 w-8 text-white/40 hover:text-white hover:bg-white/10"
                 data-testid="button-skip-tour"
               >
                 <X className="h-4 w-4" />
@@ -164,7 +164,7 @@ export function OpsManagerTour() {
                     <span className="text-xs text-cyan-400/70 font-medium uppercase tracking-wider">
                       {currentPage.title}
                     </span>
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-white/30">
                       {completedSteps + 1}/{totalSteps}
                     </span>
                   </div>
@@ -172,7 +172,7 @@ export function OpsManagerTour() {
                 </div>
               </div>
 
-              <p className="text-sm text-slate-300 leading-relaxed mb-6">
+              <p className="text-sm text-white/70 leading-relaxed mb-6">
                 {currentStep.description}
               </p>
 
@@ -182,7 +182,7 @@ export function OpsManagerTour() {
                   size="sm"
                   onClick={handlePrev}
                   disabled={isFirst}
-                  className="text-slate-400 hover:text-white disabled:opacity-30"
+                  className="text-white/40 hover:text-white disabled:opacity-30"
                   data-testid="button-tour-prev"
                 >
                   <ChevronLeft className="h-4 w-4 mr-1" />
@@ -198,7 +198,7 @@ export function OpsManagerTour() {
                           ? 'bg-cyan-400' 
                           : idx === currentPageIndex 
                             ? 'bg-cyan-400/50' 
-                            : 'bg-slate-600'
+                            : 'bg-white/10'
                       }`}
                     />
                   ))}

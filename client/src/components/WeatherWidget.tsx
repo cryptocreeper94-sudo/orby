@@ -61,10 +61,10 @@ const NISSAN_STADIUM_COORDS = { lat: 36.1665, lng: -86.7713 };
 const WEATHER_CODES: Record<number, { label: string; icon: React.ReactNode; color: string }> = {
   0: { label: 'Clear', icon: <Sun className="h-6 w-6" />, color: 'text-yellow-500' },
   1: { label: 'Mainly Clear', icon: <Sun className="h-6 w-6" />, color: 'text-yellow-400' },
-  2: { label: 'Partly Cloudy', icon: <Cloud className="h-6 w-6" />, color: 'text-gray-400' },
-  3: { label: 'Overcast', icon: <Cloud className="h-6 w-6" />, color: 'text-gray-500' },
-  45: { label: 'Foggy', icon: <CloudFog className="h-6 w-6" />, color: 'text-gray-400' },
-  48: { label: 'Rime Fog', icon: <CloudFog className="h-6 w-6" />, color: 'text-gray-300' },
+  2: { label: 'Partly Cloudy', icon: <Cloud className="h-6 w-6" />, color: 'text-white/40' },
+  3: { label: 'Overcast', icon: <Cloud className="h-6 w-6" />, color: 'text-white/30' },
+  45: { label: 'Foggy', icon: <CloudFog className="h-6 w-6" />, color: 'text-white/40' },
+  48: { label: 'Rime Fog', icon: <CloudFog className="h-6 w-6" />, color: 'text-white/70' },
   51: { label: 'Light Drizzle', icon: <CloudDrizzle className="h-6 w-6" />, color: 'text-blue-300' },
   53: { label: 'Drizzle', icon: <CloudDrizzle className="h-6 w-6" />, color: 'text-blue-400' },
   55: { label: 'Heavy Drizzle', icon: <CloudDrizzle className="h-6 w-6" />, color: 'text-blue-500' },
@@ -88,7 +88,7 @@ const WEATHER_CODES: Record<number, { label: string; icon: React.ReactNode; colo
 };
 
 function getWeatherInfo(code: number) {
-  return WEATHER_CODES[code] || { label: 'Unknown', icon: <Cloud className="h-6 w-6" />, color: 'text-gray-400' };
+  return WEATHER_CODES[code] || { label: 'Unknown', icon: <Cloud className="h-6 w-6" />, color: 'text-white/40' };
 }
 
 function getWindDirection(degrees: number): string {
@@ -228,7 +228,7 @@ export function WeatherWidget({ compact = false, className = '' }: WeatherWidget
 
   if (compact) {
     return (
-      <Card className={`${className} bg-gradient-to-br from-cyan-900/30 to-slate-900/50 border-cyan-500/30`} data-testid="weather-widget-compact">
+      <Card className={`${className} bg-gradient-to-br from-cyan-900/30 to-[#0c1224]/50 border-cyan-500/30`} data-testid="weather-widget-compact">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -267,7 +267,7 @@ export function WeatherWidget({ compact = false, className = '' }: WeatherWidget
   }
 
   return (
-    <Card className={`${className} bg-gradient-to-br from-slate-900 to-slate-800 border-cyan-500/30 text-white`} data-testid="weather-widget-full">
+    <Card className={`${className} bg-gradient-to-br from-[#0c1224] to-[#0c1224] border-cyan-500/30 text-white`} data-testid="weather-widget-full">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-cyan-400">

@@ -42,7 +42,7 @@ export default function NotFound() {
                 Page Not Found
               </h2>
               
-              <p className="text-slate-400 mb-8">
+              <p className="text-white/40 mb-8">
                 Looks like you've ventured into uncharted territory. The page you're looking for doesn't exist or has been moved.
               </p>
 
@@ -60,7 +60,7 @@ export default function NotFound() {
         </motion.div>
 
         <footer className="mt-8 text-center">
-          <div className="text-xs text-slate-600">
+          <div className="text-xs text-white/20">
             Powered by <span className="font-bold text-cyan-500">DarkWave Studios, LLC</span>
           </div>
         </footer>

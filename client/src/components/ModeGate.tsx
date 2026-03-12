@@ -30,7 +30,7 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-cyan-900 to-slate-800 z-50 overflow-y-auto">
+    <div className="fixed inset-0 bg-gradient-to-br from-[#0c1224] via-cyan-900 to-[#0c1224] z-50 overflow-y-auto">
       <div className="min-h-full flex flex-col">
         {/* Header with Theme Palette and Verified Badge */}
         <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
@@ -47,7 +47,7 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
                   <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
                 </button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80 sm:w-96 bg-slate-950 border-gray-700 p-0">
+              <SheetContent side="right" className="w-80 sm:w-96 bg-[#050508] border-gray-700 p-0">
                 <ThemeGallery />
               </SheetContent>
             </Sheet>
@@ -78,7 +78,7 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
                 {/* Very subtle color tint */}
                 <div className="absolute inset-0 bg-cyan-200/5" />
                 {/* Minimal bottom gradient only for text readability */}
-                <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-slate-900/30 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-[#0c1224]/30 to-transparent" />
                 
                 {/* Orby Commander - Balanced size in front of stadium */}
                 <div className="absolute bottom-[-16px] sm:bottom-[-20px] left-1/2 -translate-x-1/2 z-20">
@@ -104,7 +104,7 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
                 "bg-gradient-to-br from-emerald-950/80 to-emerald-900/60",
                 "border-2 border-emerald-500/30 hover:border-emerald-400",
                 "hover:shadow-[0_0_40px_rgba(16,185,129,0.3)]",
-                "focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+                "focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-[#0c1224]"
               )}
               data-testid="button-live-mode"
             >
@@ -156,7 +156,7 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
                 "bg-gradient-to-br from-cyan-950/80 to-teal-900/60",
                 "border-2 border-cyan-500/30 hover:border-cyan-400",
                 "hover:shadow-[0_0_40px_rgba(6,182,212,0.3)]",
-                "focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+                "focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2 focus:ring-offset-[#0c1224]"
               )}
               data-testid="button-sandbox-mode"
             >
@@ -233,14 +233,14 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
           onClick={() => setShowQRModal(false)}
         >
           <div 
-            className="relative w-full max-w-md bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-emerald-500/30 shadow-[0_0_60px_rgba(16,185,129,0.3)] overflow-hidden"
+            className="relative w-full max-w-md bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] rounded-2xl border border-emerald-500/30 shadow-[0_0_60px_rgba(16,185,129,0.3)] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
             data-testid="modal-genesis-qr"
           >
             {/* Close Button */}
             <button
               onClick={() => setShowQRModal(false)}
-              className="absolute top-3 right-3 z-10 p-2 rounded-full bg-slate-800/80 border border-white/10 hover:bg-slate-700 transition-colors"
+              className="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/10 border border-white/10 hover:bg-white/10 transition-colors"
               data-testid="button-close-qr-modal"
             >
               <X className="h-4 w-4 text-white/70" />
@@ -287,8 +287,8 @@ export function ModeGate({ onModeSelected }: ModeGateProps) {
               </div>
 
               {/* Info */}
-              <div className="mt-6 p-3 rounded-lg bg-slate-800/50 border border-white/10">
-                <p className="text-xs text-slate-400 text-center">
+              <div className="mt-6 p-3 rounded-lg bg-white/5 border border-white/10">
+                <p className="text-xs text-white/40 text-center">
                   This QR code links to the blockchain transaction permanently anchoring Orby Platform on Solana mainnet.
                 </p>
               </div>

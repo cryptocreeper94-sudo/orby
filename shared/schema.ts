@@ -1,5 +1,5 @@
 import { sql, relations } from "drizzle-orm";
-import { pgTable, text, varchar, integer, boolean, timestamp, jsonb, pgEnum, index } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, serial, boolean, timestamp, jsonb, pgEnum, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -99,6 +99,7 @@ export const users = pgTable("users", {
   hasDualRole: boolean("has_dual_role").default(false), // For users like Brooke with dual roles
   secondaryRole: userRoleEnum("secondary_role"), // Alternate role (e.g., StandSupervisor for event days)
   activeRole: userRoleEnum("active_role"), // Currently active role (for dual-role users)
+  uniqueHash: varchar("unique_hash", { length: 64 }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1444,6 +1445,113 @@ export type InsertAssetStamp = z.infer<typeof insertAssetStampSchema>;
 export type BlockchainVerification = typeof blockchainVerifications.$inferSelect;
 export type InsertBlockchainVerification = z.infer<typeof insertBlockchainVerificationSchema>;
 
+// ============ TRUST LAYER ECOSYSTEM HALLMARK SYSTEM ============
+// Orby Commander prefix: OC (App #20 in 32-app ecosystem)
+export const TRUST_LAYER_APP_PREFIX = 'OC';
+export const TRUST_LAYER_APP_NAME = 'Orby Commander';
+export const TRUST_LAYER_DOMAIN = 'orby.tlid.io';
+export const TRUST_LAYER_PARENT_GENESIS = 'TH-00000001';
+
+export const hallmarks = pgTable("hallmarks", {
+  id: serial("id").primaryKey(),
+  thId: text("th_id").unique().notNull(),
+  userId: integer("user_id"),
+  appId: text("app_id"),
+  appName: text("app_name"),
+  productName: text("product_name"),
+  releaseType: text("release_type"),
+  metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+  dataHash: text("data_hash").notNull(),
+  txHash: text("tx_hash"),
+  blockHeight: text("block_height"),
+  qrCodeSvg: text("qr_code_svg"),
+  verificationUrl: text("verification_url"),
+  hallmarkId: integer("hallmark_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("IDX_hallmark_th_id").on(table.thId),
+  index("IDX_hallmark_user").on(table.userId),
+  index("IDX_hallmark_release_type").on(table.releaseType),
+]);
+
+export const trustStamps = pgTable("trust_stamps", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id"),
+  category: text("category").notNull(),
+  data: jsonb("data").$type<Record<string, unknown>>(),
+  dataHash: text("data_hash").notNull(),
+  txHash: text("tx_hash"),
+  blockHeight: text("block_height"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("IDX_trust_stamp_user").on(table.userId),
+  index("IDX_trust_stamp_category").on(table.category),
+]);
+
+export const hallmarkCounter = pgTable("hallmark_counter", {
+  id: text("id").primaryKey(),
+  currentSequence: text("current_sequence").notNull().default('0'),
+});
+
+export const insertHallmarkSchema = createInsertSchema(hallmarks).omit({ id: true, createdAt: true });
+export const insertTrustStampSchema = createInsertSchema(trustStamps).omit({ id: true, createdAt: true });
+
+export type Hallmark = typeof hallmarks.$inferSelect;
+export type InsertHallmark = z.infer<typeof insertHallmarkSchema>;
+export type TrustStamp = typeof trustStamps.$inferSelect;
+export type InsertTrustStamp = z.infer<typeof insertTrustStampSchema>;
+
+// ============ AFFILIATE & REFERRAL SYSTEM ============
+export const affiliateReferralStatusEnum = pgEnum('affiliate_referral_status', ['pending', 'converted', 'expired']);
+export const affiliateCommissionStatusEnum = pgEnum('affiliate_commission_status', ['pending', 'processing', 'paid']);
+export const affiliateTierEnum = pgEnum('affiliate_tier', ['base', 'silver', 'gold', 'platinum', 'diamond']);
+
+export const affiliateReferrals = pgTable("affiliate_referrals", {
+  id: serial("id").primaryKey(),
+  referrerId: integer("referrer_id").notNull(),
+  referredUserId: integer("referred_user_id"),
+  referralHash: text("referral_hash").notNull(),
+  platform: text("platform").notNull().default('orby-commander'),
+  status: affiliateReferralStatusEnum("status").notNull().default('pending'),
+  convertedAt: timestamp("converted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("IDX_affiliate_referrer").on(table.referrerId),
+  index("IDX_affiliate_hash").on(table.referralHash),
+  index("IDX_affiliate_status").on(table.status),
+]);
+
+export const affiliateCommissions = pgTable("affiliate_commissions", {
+  id: serial("id").primaryKey(),
+  referrerId: integer("referrer_id").notNull(),
+  referralId: integer("referral_id"),
+  amount: text("amount").notNull(),
+  currency: text("currency").default('SIG'),
+  tier: affiliateTierEnum("tier").default('base'),
+  status: affiliateCommissionStatusEnum("status").default('pending'),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("IDX_commission_referrer").on(table.referrerId),
+  index("IDX_commission_status").on(table.status),
+]);
+
+export const insertAffiliateReferralSchema = createInsertSchema(affiliateReferrals).omit({ id: true, createdAt: true });
+export const insertAffiliateCommissionSchema = createInsertSchema(affiliateCommissions).omit({ id: true, createdAt: true });
+
+export type AffiliateReferral = typeof affiliateReferrals.$inferSelect;
+export type InsertAffiliateReferral = z.infer<typeof insertAffiliateReferralSchema>;
+export type AffiliateCommission = typeof affiliateCommissions.$inferSelect;
+export type InsertAffiliateCommission = z.infer<typeof insertAffiliateCommissionSchema>;
+
+export const AFFILIATE_TIERS = [
+  { tier: 'base' as const, minReferrals: 0, rate: 0.10 },
+  { tier: 'silver' as const, minReferrals: 5, rate: 0.125 },
+  { tier: 'gold' as const, minReferrals: 15, rate: 0.15 },
+  { tier: 'platinum' as const, minReferrals: 30, rate: 0.175 },
+  { tier: 'diamond' as const, minReferrals: 50, rate: 0.20 },
+] as const;
+
 // ============ MULTI-TENANT PLATFORM ARCHITECTURE ============
 // Tenant types: beta (Nissan Stadium), business (paying customers), franchise (child locations)
 export const tenantTypeEnum = pgEnum('tenant_type', ['beta', 'business', 'franchise']);
@@ -1569,12 +1677,12 @@ export const NISSAN_STADIUM_BETA_CONFIG = {
   showCommercialFeatures: false,
   showSalesContent: false,
   showInvestorContent: false,
-  hallmarkPrefix: 'ORB',
+  hallmarkPrefix: 'OC',
   metadata: {
     venueName: 'Nissan Stadium',
     operator: 'Legends Hospitality',
-    genesisHallmark: 'ORB-000000000013',
-    betaVersion: 'v1.0.7',
+    genesisHallmark: 'OC-00000001',
+    betaVersion: 'v1.0.17',
   }
 };
 

@@ -79,7 +79,7 @@ export function SandboxWelcome({ userName, userRole }: SandboxWelcomeProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="bg-gradient-to-br from-slate-900 via-slate-900 to-cyan-950 border-cyan-500/30 max-w-md" data-testid="sandbox-welcome-dialog">
+      <DialogContent className="bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-cyan-950 border-cyan-500/30 max-w-md" data-testid="sandbox-welcome-dialog">
         <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
           {[...Array(20)].map((_, i) => (
             <div
@@ -108,29 +108,29 @@ export function SandboxWelcome({ userName, userRole }: SandboxWelcomeProps) {
             {greeting.title}
             {userName && <span className="block text-cyan-400 text-lg mt-1">{userName}</span>}
           </DialogTitle>
-          <DialogDescription className="text-center text-slate-400 mt-2">
+          <DialogDescription className="text-center text-white/40 mt-2">
             {greeting.description}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3 py-4">
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/[0.08]/50">
             <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
               <span className="text-emerald-400 text-sm">✓</span>
             </div>
             <div>
-              <div className="text-sm font-medium text-slate-200">Safe to Experiment</div>
-              <div className="text-xs text-slate-500">All actions are simulated - nothing affects live data</div>
+              <div className="text-sm font-medium text-white/80">Safe to Experiment</div>
+              <div className="text-xs text-white/30">All actions are simulated - nothing affects live data</div>
             </div>
           </div>
           
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50 border border-slate-700/50">
+          <div className="flex items-start gap-3 p-3 rounded-lg bg-white/5 border border-white/[0.08]/50">
             <div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
               <FlaskConical className="h-4 w-4 text-cyan-400" />
             </div>
             <div>
-              <div className="text-sm font-medium text-slate-200">Demo Data Loaded</div>
-              <div className="text-xs text-slate-500">Sample stands, deliveries, and alerts to explore</div>
+              <div className="text-sm font-medium text-white/80">Demo Data Loaded</div>
+              <div className="text-xs text-white/30">Sample stands, deliveries, and alerts to explore</div>
             </div>
           </div>
         </div>
@@ -139,7 +139,7 @@ export function SandboxWelcome({ userName, userRole }: SandboxWelcomeProps) {
           <Button
             variant="outline"
             onClick={handleClose}
-            className="flex-1 border-slate-600 text-slate-300"
+            className="flex-1 border-white/10 text-white/70"
             data-testid="button-explore-sandbox"
           >
             Explore

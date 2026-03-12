@@ -196,7 +196,7 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
                       {getAlertIcon(alert.alertType)}
                       {alert.title}
                     </h3>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-white/40">
                       Triggered by {alert.triggeredByName || 'System'} at {new Date(alert.createdAt).toLocaleTimeString()}
                     </p>
                   </div>
@@ -215,7 +215,7 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
                   </Button>
                 )}
               </div>
-              <div className="bg-black/30 rounded-lg p-3 whitespace-pre-line text-sm text-slate-200 leading-relaxed">
+              <div className="bg-black/30 rounded-lg p-3 whitespace-pre-line text-sm text-white/80 leading-relaxed">
                 {alert.message}
               </div>
             </div>
@@ -224,7 +224,7 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
       </AnimatePresence>
 
       {isManager && (
-        <Card className="bg-slate-900/80 border-slate-700/50 backdrop-blur-sm">
+        <Card className="bg-[rgba(12,18,36,0.8)] border-white/[0.08]/50 backdrop-blur-sm">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg flex items-center gap-2 text-cyan-400">
               <Shield className="h-5 w-5" />
@@ -233,12 +233,12 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-slate-400" />
+              <MapPin className="h-4 w-4 text-white/40" />
               <Input
                 placeholder="Location (optional, e.g., Section 112)"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="bg-slate-800/50 border-slate-600"
+                className="bg-white/5 border-white/10"
                 data-testid="input-alert-location"
               />
             </div>
@@ -270,7 +270,7 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
         </Card>
       )}
 
-      <Card className="bg-slate-900/80 border-slate-700/50 backdrop-blur-sm overflow-hidden">
+      <Card className="bg-[rgba(12,18,36,0.8)] border-white/[0.08]/50 backdrop-blur-sm overflow-hidden">
         <CardHeader className="pb-2">
           <button
             onClick={() => setShowABCChecklist(!showABCChecklist)}
@@ -305,10 +305,10 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
                     </div>
                     <div>
                       <h4 className="font-semibold text-cyan-300">Sandbox Mode</h4>
-                      <p className="text-sm text-slate-400 mt-1">
+                      <p className="text-sm text-white/40 mt-1">
                         Practice area - no data loaded.
                       </p>
-                      <p className="text-xs text-slate-500 mt-2">
+                      <p className="text-xs text-white/30 mt-2">
                         During live events, this shows the TN ABC Board<br />
                         alcohol compliance checklist.
                       </p>
@@ -318,7 +318,7 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
                   <>
                     {Object.entries(groupChecklistByCategory(abcChecklist)).map(([category, items]) => (
                       <div key={category}>
-                        <h4 className="text-sm font-semibold text-slate-400 mb-2">{category}</h4>
+                        <h4 className="text-sm font-semibold text-white/40 mb-2">{category}</h4>
                         <div className="space-y-2">
                           {items.map((item) => (
                             <label
@@ -326,7 +326,7 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
                               className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
                                 checkedItems.has(`abc-${item.id}`) 
                                   ? 'bg-green-500/20 border border-green-500/30' 
-                                  : 'bg-slate-800/50 hover:bg-slate-800/80'
+                                  : 'bg-white/5 hover:bg-white/5/80'
                               }`}
                               data-testid={`abc-checklist-item-${item.id}`}
                             >
@@ -334,10 +334,10 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
                                 type="checkbox"
                                 checked={checkedItems.has(`abc-${item.id}`)}
                                 onChange={() => toggleCheckItem(`abc-${item.id}`)}
-                                className="mt-0.5 h-4 w-4 rounded border-slate-500 bg-slate-700 text-purple-500 focus:ring-purple-500"
+                                className="mt-0.5 h-4 w-4 rounded border-white/10 bg-white/10 text-purple-500 focus:ring-purple-500"
                               />
                               <div className="flex-1">
-                                <span className={`text-sm ${checkedItems.has(`abc-${item.id}`) ? 'text-green-300 line-through' : 'text-slate-200'}`}>
+                                <span className={`text-sm ${checkedItems.has(`abc-${item.id}`) ? 'text-green-300 line-through' : 'text-white/80'}`}>
                                   {item.item}
                                 </span>
                                 {item.critical && (
@@ -359,7 +359,7 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
         </AnimatePresence>
       </Card>
 
-      <Card className="bg-slate-900/80 border-slate-700/50 backdrop-blur-sm overflow-hidden">
+      <Card className="bg-[rgba(12,18,36,0.8)] border-white/[0.08]/50 backdrop-blur-sm overflow-hidden">
         <CardHeader className="pb-2">
           <button
             onClick={() => setShowHealthChecklist(!showHealthChecklist)}
@@ -398,10 +398,10 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
                     </div>
                     <div>
                       <h4 className="font-semibold text-cyan-300">Sandbox Mode</h4>
-                      <p className="text-sm text-slate-400 mt-1">
+                      <p className="text-sm text-white/40 mt-1">
                         Practice area - no data loaded.
                       </p>
-                      <p className="text-xs text-slate-500 mt-2">
+                      <p className="text-xs text-white/30 mt-2">
                         During live events, this shows the TN Health Department<br />
                         inspection checklist scored 0-100.
                       </p>
@@ -420,7 +420,7 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
                     </div>
                     {Object.entries(groupChecklistByCategory(healthChecklist)).map(([category, items]) => (
                       <div key={category}>
-                        <h4 className="text-sm font-semibold text-slate-400 mb-2">{category}</h4>
+                        <h4 className="text-sm font-semibold text-white/40 mb-2">{category}</h4>
                         <div className="space-y-2">
                           {items.map((item) => (
                             <label
@@ -428,7 +428,7 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
                               className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer transition-colors ${
                                 checkedItems.has(`health-${item.id}`) 
                                   ? 'bg-green-500/20 border border-green-500/30' 
-                                  : 'bg-slate-800/50 hover:bg-slate-800/80'
+                                  : 'bg-white/5 hover:bg-white/5/80'
                               }`}
                               data-testid={`health-checklist-item-${item.id}`}
                             >
@@ -436,15 +436,15 @@ export default function ComplianceAlertPanel({ userId, userName, isManager = fal
                                 type="checkbox"
                                 checked={checkedItems.has(`health-${item.id}`)}
                                 onChange={() => toggleCheckItem(`health-${item.id}`)}
-                                className="mt-0.5 h-4 w-4 rounded border-slate-500 bg-slate-700 text-emerald-500 focus:ring-emerald-500"
+                                className="mt-0.5 h-4 w-4 rounded border-white/10 bg-white/10 text-emerald-500 focus:ring-emerald-500"
                               />
                               <div className="flex-1">
-                                <span className={`text-sm ${checkedItems.has(`health-${item.id}`) ? 'text-green-300 line-through' : 'text-slate-200'}`}>
+                                <span className={`text-sm ${checkedItems.has(`health-${item.id}`) ? 'text-green-300 line-through' : 'text-white/80'}`}>
                                   {item.item}
                                 </span>
                                 <div className="flex items-center gap-2 mt-0.5">
                                   {item.points && (
-                                    <Badge className="bg-slate-700 text-slate-300 text-[10px] px-1.5 py-0">
+                                    <Badge className="bg-white/10 text-white/70 text-[10px] px-1.5 py-0">
                                       {item.points} pts
                                     </Badge>
                                   )}

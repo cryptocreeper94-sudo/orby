@@ -168,7 +168,7 @@ export default function MessagesPage() {
       case 'Supervisor': return 'bg-blue-100 text-blue-700 border-blue-200';
       case 'Warehouse': return 'bg-amber-100 text-amber-700 border-amber-200';
       case 'Kitchen': return 'bg-rose-100 text-rose-700 border-rose-200';
-      default: return 'bg-slate-100 text-slate-700 border-slate-200';
+      default: return 'bg-white/5 text-white/40 border-white/10';
     }
   };
 
@@ -228,8 +228,8 @@ export default function MessagesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex flex-col" data-testid="messages-page">
-      <header className="sticky top-0 z-10 bg-slate-950/95 backdrop-blur-sm border-b border-cyan-500/20 px-4 h-14 flex items-center gap-3 shadow-sm shrink-0">
+    <div className="min-h-screen bg-gradient-to-b from-[#050508] via-[#0c1224] to-[#050508] flex flex-col" data-testid="messages-page">
+      <header className="sticky top-0 z-10 bg-[#050508]/95 backdrop-blur-sm border-b border-cyan-500/20 px-4 h-14 flex items-center gap-3 shadow-sm shrink-0">
         <Button 
           variant="ghost" 
           size="icon" 
@@ -239,7 +239,7 @@ export default function MessagesPage() {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div className="font-bold text-lg flex-1 text-slate-200" data-testid="text-title">Team Communication</div>
+        <div className="font-bold text-lg flex-1 text-white/80" data-testid="text-title">Team Communication</div>
         
         {canQuickCall && (
           <Dialog open={isQuickCallOpen} onOpenChange={setIsQuickCallOpen}>
@@ -254,13 +254,13 @@ export default function MessagesPage() {
                 Quick Call
               </Button>
             </DialogTrigger>
-            <DialogContent className="bg-slate-900 border-cyan-500/30">
+            <DialogContent className="bg-[#0c1224] border-cyan-500/30">
               <DialogHeader>
-                <DialogTitle className="text-slate-100 flex items-center gap-2">
+                <DialogTitle className="text-white flex items-center gap-2">
                   <PhoneCall className="h-5 w-5 text-cyan-400" />
                   Call Department
                 </DialogTitle>
-                <DialogDescription className="text-slate-400">
+                <DialogDescription className="text-white/40">
                   Select a department to call directly
                 </DialogDescription>
               </DialogHeader>
@@ -268,7 +268,7 @@ export default function MessagesPage() {
                 {departmentContacts.map((contact) => (
                   <div 
                     key={contact.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-slate-800/50 border border-slate-700"
+                    className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/[0.08]"
                     data-testid={`contact-${contact.department.toLowerCase()}`}
                   >
                     <div className="flex items-center gap-3">
@@ -276,8 +276,8 @@ export default function MessagesPage() {
                         {getDepartmentIcon(contact.department)}
                       </div>
                       <div>
-                        <p className="font-medium text-slate-200">{contact.department}</p>
-                        <p className="text-sm text-slate-400">{contact.contactName}</p>
+                        <p className="font-medium text-white/80">{contact.department}</p>
+                        <p className="text-sm text-white/40">{contact.contactName}</p>
                       </div>
                     </div>
                     <Button 
@@ -292,7 +292,7 @@ export default function MessagesPage() {
                   </div>
                 ))}
                 {departmentContacts.length === 0 && (
-                  <p className="text-center text-slate-400 py-4">No department contacts configured</p>
+                  <p className="text-center text-white/40 py-4">No department contacts configured</p>
                 )}
               </div>
             </DialogContent>
@@ -301,17 +301,17 @@ export default function MessagesPage() {
         
         <div className="flex -space-x-2 overflow-hidden">
           {onlineUsers.slice(0, 5).map(u => (
-            <div key={u.id} className="relative inline-block border-2 border-slate-900 rounded-full" title={`${u.name} (${u.role})`}>
+            <div key={u.id} className="relative inline-block border-2 border-white/5 rounded-full" title={`${u.name} (${u.role})`}>
               <Avatar className="h-8 w-8">
                 <AvatarFallback className={`text-[10px] font-bold ${getRoleColor(u.role)}`}>
                   {u.name.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-1 ring-slate-900" />
+              <span className="absolute bottom-0 right-0 block h-2 w-2 rounded-full bg-green-500 ring-1 ring-[#0c1224]" />
             </div>
           ))}
           {onlineUsers.length > 5 && (
-            <div className="w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-900 flex items-center justify-center text-[10px] text-slate-400">
+            <div className="w-8 h-8 rounded-full bg-white/5 border-2 border-white/5 flex items-center justify-center text-[10px] text-white/40">
               +{onlineUsers.length - 5}
             </div>
           )}
@@ -323,12 +323,12 @@ export default function MessagesPage() {
           <BentoCard span={12} title="Message Metrics" data-testid="card-metrics">
             <CarouselRail
               items={messageMetrics.map((metric, idx) => (
-                <div key={idx} className="w-32 p-3 bg-slate-800/50 rounded-lg border border-slate-700/50" data-testid={`metric-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}>
+                <div key={idx} className="w-32 p-3 bg-white/5 rounded-lg border border-white/[0.08]/50" data-testid={`metric-${metric.label.toLowerCase().replace(/\s+/g, '-')}`}>
                   <div className="flex items-center gap-2 mb-1">
                     {metric.icon}
                   </div>
                   <p className="text-lg font-bold text-white">{metric.value}</p>
-                  <p className="text-[10px] text-slate-400">{metric.label}</p>
+                  <p className="text-[10px] text-white/40">{metric.label}</p>
                 </div>
               ))}
               showDots
@@ -345,10 +345,10 @@ export default function MessagesPage() {
                 items={unansweredMessages.map((msg) => {
                   const contact = msg.targetDepartment ? departmentContacts.find(c => c.department === msg.targetDepartment) : null;
                   return (
-                    <div key={msg.id} className="w-56 p-2 rounded-lg bg-slate-800/50 border border-slate-700/50" data-testid={`unanswered-${msg.id}`}>
-                      <p className="text-xs text-slate-300 truncate mb-1">{msg.content}</p>
+                    <div key={msg.id} className="w-56 p-2 rounded-lg bg-white/5 border border-white/[0.08]/50" data-testid={`unanswered-${msg.id}`}>
+                      <p className="text-xs text-white/70 truncate mb-1">{msg.content}</p>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-[10px] text-slate-500">
+                        <div className="flex items-center gap-1 text-[10px] text-white/30">
                           <Clock className="h-3 w-3" />
                           <span>{msg.elapsedMinutes}m ago</span>
                           {msg.targetDepartment && (
@@ -390,12 +390,12 @@ export default function MessagesPage() {
                       </Avatar>
                       <div className={`flex flex-col max-w-[75%] ${isMe ? 'items-end' : 'items-start'}`}>
                         <div className="flex items-center gap-1 mb-0.5">
-                          <span className="text-[10px] font-medium text-slate-400">{senderName}</span>
+                          <span className="text-[10px] font-medium text-white/40">{senderName}</span>
                           <Badge variant="outline" className={cn("h-4 px-1 text-[8px] gap-0.5", getRoleColor(senderRole))}>
                             {getRoleIcon(senderRole)}
                             {senderRole}
                           </Badge>
-                          <span className="text-[9px] text-slate-600">
+                          <span className="text-[9px] text-white/20">
                             {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                           </span>
                         </div>
@@ -403,7 +403,7 @@ export default function MessagesPage() {
                           "p-2 rounded-xl text-xs",
                           isMe 
                             ? 'bg-cyan-600 text-white rounded-tr-none' 
-                            : 'bg-slate-800/80 border border-slate-700 text-slate-200 rounded-tl-none'
+                            : 'bg-white/10 border border-white/[0.08] text-white/80 rounded-tl-none'
                         )}>
                           {msg.content}
                         </div>
@@ -413,12 +413,12 @@ export default function MessagesPage() {
                 })}
               </div>
             </ScrollArea>
-            <form onSubmit={handleSend} className="flex gap-2 mt-3 pt-3 border-t border-slate-700/50">
+            <form onSubmit={handleSend} className="flex gap-2 mt-3 pt-3 border-t border-white/[0.08]/50">
               <Input 
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type your message..." 
-                className="flex-1 bg-slate-800/80 border-slate-700 h-9 text-sm"
+                className="flex-1 bg-white/10 border-white/[0.08] h-9 text-sm"
                 data-testid="input-message"
               />
               <Button type="submit" size="icon" disabled={!newMessage.trim()} className="h-9 w-9" data-testid="button-send">
@@ -432,7 +432,7 @@ export default function MessagesPage() {
               {departmentContacts.slice(0, 6).map((contact) => (
                 <div 
                   key={contact.id}
-                  className="p-2 rounded-lg bg-slate-800/50 border border-slate-700/50 hover:border-cyan-400/30 cursor-pointer transition-all"
+                  className="p-2 rounded-lg bg-white/5 border border-white/[0.08]/50 hover:border-cyan-400/30 cursor-pointer transition-all"
                   onClick={() => handleQuickCall(contact.phoneNumber)}
                   data-testid={`contact-grid-${contact.department.toLowerCase()}`}
                 >
@@ -441,12 +441,12 @@ export default function MessagesPage() {
                       {getDepartmentIcon(contact.department)}
                     </div>
                   </div>
-                  <p className="text-xs font-medium text-slate-200 truncate">{contact.department}</p>
-                  <p className="text-[10px] text-slate-500 truncate">{contact.contactName}</p>
+                  <p className="text-xs font-medium text-white/80 truncate">{contact.department}</p>
+                  <p className="text-[10px] text-white/30 truncate">{contact.contactName}</p>
                 </div>
               ))}
               {departmentContacts.length === 0 && (
-                <div className="col-span-2 text-center py-4 text-slate-500 text-xs">
+                <div className="col-span-2 text-center py-4 text-white/30 text-xs">
                   No contacts configured
                 </div>
               )}

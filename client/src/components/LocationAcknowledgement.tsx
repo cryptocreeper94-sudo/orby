@@ -51,13 +51,13 @@ export function LocationAcknowledgement({
 
   return (
     <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-lg bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border-cyan-500/30" data-testid="location-acknowledgement">
+      <DialogContent className="sm:max-w-lg bg-gradient-to-br from-[#0c1224] via-[#0c1224] to-[#0c1224] border-cyan-500/30" data-testid="location-acknowledgement">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl text-white">
             <MapPin className="h-6 w-6 text-cyan-400" />
             Location Services Required
           </DialogTitle>
-          <DialogDescription className="text-base pt-2 text-slate-400">
+          <DialogDescription className="text-base pt-2 text-white/40">
             This app uses your device's GPS location to provide the following features:
           </DialogDescription>
         </DialogHeader>
@@ -118,7 +118,7 @@ export function LocationAcknowledgement({
             />
             <label 
               htmlFor="understand" 
-              className="text-sm font-medium leading-none cursor-pointer text-slate-300"
+              className="text-sm font-medium leading-none cursor-pointer text-white/70"
             >
               I understand and agree to allow location access for these features
             </label>

@@ -4,9 +4,25 @@
 Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designed to unify venue operations, replacing fragmented communication with a digital platform. It offers an Emergency Command Center, delivery lifecycle tracking, three-phase inventory counting, alcohol compliance monitoring, GPS-guided navigation, and real-time team communications. Orby aims to provide a complete operational solution for venues, from emergency response to inventory and team management, improving efficiency and compliance for event venues.
 
 ## Current Version
-**v1.0.16** - Partner API & Tenant Credentials (December 2025)
+**v1.0.17** - Trust Layer Hallmark System & Affiliate Program (March 2026)
 
 ### Recent Changelog
+- **v1.0.17**: Trust Layer Hallmark System & Affiliate Program
+  - Full Trust Layer ecosystem integration with OC prefix (App #20)
+  - Genesis hallmark OC-00000001 auto-created on server boot with parentGenesis TH-00000001
+  - Hallmark generation with SHA-256 hashing, simulated tx hashes, block heights
+  - Trust stamps on auth events (login, logout) with standardized categories
+  - Public verification endpoint: GET /api/hallmark/:id/verify
+  - Genesis hallmark detail page with blockchain record, ecosystem details, verification section
+  - Affiliate & Referral system with 5-tier commission structure (Base 10% to Diamond 20%)
+  - Affiliate dashboard with referral link, tier progress, stats, recent referrals/commissions
+  - Cross-app referral links (works across all 32 Trust Layer ecosystem apps)
+  - Referral tracking via /ref/:hash URL and POST /api/affiliate/track
+  - Payout request system (min 10 SIG) with trust stamp audit trail
+  - Footer: Genesis Hallmark badge (OC-00000001), Share & Earn link
+  - Users table: unique_hash column for ecosystem-wide affiliate IDs
+  - Database tables: hallmarks, trust_stamps, hallmark_counter, affiliate_referrals, affiliate_commissions
+  - Server files: server/hallmark.ts, server/affiliate.ts
 - **v1.0.16**: Partner API & Tenant Credentials
   - Secure API credentials system for tenant integrations
   - API key generation with orb_live_/orb_test_ prefixes
@@ -66,7 +82,20 @@ Orby Commander (getorby.io) is a comprehensive Progressive Web App (PWA) designe
 - Domain: getorby.io
 - Strict bento grid styling with horizontal carousels
 - Minimal white space with accordions
-- Dark theme throughout
+- Dark theme throughout (Trust Layer Canonical UI Protocol enforced)
+
+## UI Protocol Alignment (Trust Layer Canonical UI)
+- **Theme**: Dark-only, no light mode. Background: `#050508` (Deep Space Blue)
+- **Colors**: Primary `#00ffff` (Cyan Neon), Secondary `#9333ea` (Electric Purple)
+- **GlassCard**: `bg-[rgba(12,18,36,0.65)]`, `backdrop-blur-2xl`, `border-white/[0.08]`, spring hover animation
+- **Typography**: Inter font for headings (font-weight: 900), JetBrains Mono for code
+- **Gradient Text**: `from-cyan-400 via-blue-400 to-purple-400` (primary), `from-white to-white/70` (section titles)
+- **Text Hierarchy**: `text-white` (primary), `text-white/70` (secondary), `text-white/40` (tertiary), `text-white/30` (muted), `text-white/20` (disabled)
+- **Nav Bar**: Fixed top, `h-14`, `bg-slate-950/90 backdrop-blur-xl`, `border-b border-white/5`
+- **Backgrounds**: Glow orbs (cyan/purple/pink), dot grid overlay, stars
+- **Buttons**: Gradient CTAs with glow shadows, 44px min touch targets
+- **Skeleton Loaders**: Full library in `loading-skeleton.tsx` (Card, Table, Stats, Chart, Profile, Transaction, NftCard, Page)
+- **Protocol Doc**: `attached_assets/CANONICAL-UI-PROTOCOL_1772510712193.md`
 
 ## PIN Access Structure
 | PIN | User | Role | Dashboard |

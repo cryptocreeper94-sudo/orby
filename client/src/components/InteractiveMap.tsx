@@ -429,7 +429,7 @@ export function InteractiveMap({
   const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#000000', '#ffffff'];
 
   return (
-    <Card className="h-full flex flex-col bg-slate-900/90 border-white/10" data-testid="interactive-map">
+    <Card className="h-full flex flex-col bg-[rgba(12,18,36,0.9)] border-white/10" data-testid="interactive-map">
       <CardHeader className="pb-2 flex-shrink-0 border-b border-white/5">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2 text-white">
@@ -437,7 +437,7 @@ export function InteractiveMap({
             Stadium Map
           </CardTitle>
           {onClose && (
-            <Button variant="ghost" size="icon" onClick={onClose} data-testid="close-map" aria-label="Close map" className="text-slate-400 hover:text-white hover:bg-white/10">
+            <Button variant="ghost" size="icon" onClick={onClose} data-testid="close-map" aria-label="Close map" className="text-white/40 hover:text-white hover:bg-white/10">
               <X className="h-4 w-4" />
             </Button>
           )}
@@ -546,10 +546,10 @@ export function InteractiveMap({
         )}
       </CardHeader>
 
-      <CardContent className="flex-1 p-2 overflow-hidden bg-slate-800/50" ref={containerRef}>
+      <CardContent className="flex-1 p-2 overflow-hidden bg-white/5" ref={containerRef}>
         <canvas
           ref={canvasRef}
-          className="w-full h-full cursor-crosshair touch-none rounded-lg bg-slate-700/50"
+          className="w-full h-full cursor-crosshair touch-none rounded-lg bg-white/10"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -609,7 +609,7 @@ export function InteractiveMap({
                                   className={`
                                     p-2 text-xs font-medium rounded border transition-all
                                     ${isAssigned 
-                                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-200' 
+                                      ? 'bg-gray-100 text-white/40 cursor-not-allowed border-gray-200' 
                                       : isSelected
                                         ? 'border-2 border-purple-500 bg-purple-50 text-purple-700'
                                         : 'hover:bg-gray-50 border-gray-200'
