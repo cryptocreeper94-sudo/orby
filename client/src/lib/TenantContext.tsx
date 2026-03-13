@@ -60,19 +60,21 @@ const TenantContext = createContext<TenantContextType | undefined>(undefined);
 function detectTenantFromDomain(): TenantId {
   const hostname = window.location.hostname.toLowerCase();
   
+  // Nissan Stadium production tenant
   if (hostname.includes('orbycommander.com') || 
       hostname.includes('nissan') ||
-      hostname.includes('localhost') ||
-      hostname.includes('.replit.dev') ||
-      hostname.includes('.replit.app')) {
+      hostname.includes('.onrender.com') ||
+      hostname.includes('localhost')) {
     return 'nissan_beta';
   }
   
+  // Sales demo tenant
   if (hostname.includes('getorby.io') || 
       hostname.includes('demo')) {
     return 'demo';
   }
   
+  // Default to production tenant
   return 'nissan_beta';
 }
 
